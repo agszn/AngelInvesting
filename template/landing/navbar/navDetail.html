@@ -1,0 +1,69 @@
+{% load static %}
+
+<style>
+    /* Main container for left and right images */
+    .unique-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 600px; /* Fixed height */
+        padding: 0 10%;
+        background: radial-gradient(
+            64.54% 23.63% at 69.24% 61.54%,
+            #271b3f 0%,
+            #271b3f 43.09%,
+            #341a47 68.59%,
+            #0e213f 100%
+        );
+    }
+
+    .unique-div {
+        width: 900px; /* Adjusted size */
+        height: 100%; /* Takes full height of the container */
+        display: flex;
+        align-items: center;
+    }
+
+    .left-div {
+        justify-content: flex-start;
+    }
+
+    .right-div {
+        justify-content: flex-end;
+    }
+
+    .unique-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    /* Centered Image Below */
+    .center-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white; /* White background */
+        height: 400px; /* Adjust as needed */
+    }
+
+    .center-image {
+        max-width: 70%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+</style>
+
+<div class="unique-container">
+    <div class="unique-div left-div">
+        <img class="unique-image" src="{% static 'images/headleft.png' %}" alt="Left Image">
+    </div>
+    <div class="unique-div right-div">
+        <img class="unique-image" src="{% static 'images/headright.png' %}" alt="Right Image">
+    </div>
+</div>
+
+<!-- Centered Image Below -->
+<div class="center-container">
+    <img class="center-image" src="{% static 'images/headvelow.png' %}" alt="Center Image">
+</div>

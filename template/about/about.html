@@ -1,0 +1,626 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<style>
+        
+.stock-page-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 75px;
+    background-color: #f8f9fa; /* Light gray background */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 2em;
+    color: aliceblue;
+    background: radial-gradient(
+    64.54% 23.63% at 69.24% 61.54%,
+    #271b3f 0%,
+    #271b3f 43.09%,
+    #341a47 68.59%,
+    #0e213f 100%
+  );
+} 
+  
+.intro-section {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 1232px;
+  
+
+  
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  position: relative;
+  min-height: 440px;
+  padding-left: 80px;
+  padding-right: 80px;
+  padding-top: 103px;
+  align-items: start;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  color: rgba(54, 54, 54, 1);
+
+  
+}
+
+@media (max-width: 991px) {
+  .intro-section {
+    max-width: 100%;
+  }
+}
+
+.intro-content {
+  gap: 20px;
+  display: flex;
+}
+
+@media (max-width: 991px) {
+  .intro-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0px;
+  }
+}
+
+.intro-image-column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  line-height: normal;
+  width: 50%;
+  margin-left: 0px;
+}
+
+@media (max-width: 991px) {
+  .intro-image-column {
+    width: 100%;
+  }
+}
+
+.intro-image {
+  aspect-ratio: 1.11;
+  object-fit: contain;
+  object-position: center;
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  flex-grow: 1;
+}
+
+@media (max-width: 991px) {
+  .intro-image {
+    max-width: 100%;
+    margin-top: 40px;
+  }
+}
+
+.intro-text-column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  line-height: normal;
+  width: 50%;
+  margin-left: 20px;
+}
+
+@media (max-width: 991px) {
+  .intro-text-column {
+    width: 100%;
+  }
+}
+
+.intro-text-wrapper {
+  display: flex;
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-direction: column;
+  align-self: stretch;
+  align-items: stretch;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 1);
+  font-weight: 300;
+}
+
+@media (max-width: 991px) {
+  .intro-text-wrapper {
+    max-width: 100%;
+    margin-top: 40px;
+  }
+}
+
+.intro-heading {
+  color: rgba(54, 54, 54, 1);
+  font-size: 40px;
+  font-weight: 700;
+  align-self: start;
+  margin: 0;
+}
+
+@media (max-width: 991px) {
+  .intro-heading {
+    max-width: 100%;
+  }
+}
+
+.intro-paragraph {
+  margin-top: 22px;
+}
+
+@media (max-width: 991px) {
+  .intro-paragraph {
+    max-width: 100%;
+  }
+}
+
+.intro-paragraph:nth-child(3) {
+  margin-top: 10px;
+}
+
+@media (max-width: 991px) {
+  .intro-paragraph:nth-child(3) {
+    max-width: 100%;
+  }
+}
+
+.intro-paragraph-bold {
+  font-weight: 500;
+  margin-top: 20px;
+}
+
+@media (max-width: 991px) {
+  .intro-paragraph-bold {
+    max-width: 100%;
+  }
+}
+/* mission */
+
+.mission-statement {
+
+  width: 100%;
+  
+  min-height: 40px;
+  width: 100%;
+  padding-left: 180px;
+  padding-right: 180px;
+}
+
+.mission-text {
+  color: rgba(0, 0, 0, 1);
+  font-size: 18px;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 300;
+  margin-top: 20px;
+}
+
+@media (max-width: 991px) {
+  .mission-text {
+    max-width: 100%;
+  }
+}
+
+/* story */
+.story-section {
+  width: 100%;
+  max-width: 1232px;
+  text-align: center;
+  margin: 0 auto; /* Ensures centering */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers content horizontally */
+  justify-content: center; /* Centers content vertically if needed */
+}
+
+.story-heading {
+  color: rgba(0, 0, 0, 1);
+  font-size: 40px;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 700;
+  margin-top: 101px;
+}
+
+@media (max-width: 991px) {
+  .story-heading {
+    margin-top: 40px;
+  }
+}
+
+.story-text {
+  color: rgba(0, 0, 0, 1);
+  font-size: 18px;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 300;
+  line-height: 25px;
+  text-align: center;
+  margin-top: 22px;
+  max-width: 80%; /* Prevents text from stretching too wide */
+}
+
+@media (max-width: 991px) {
+  .story-text {
+    max-width: 100%;
+  }
+}
+
+.values-section {
+  /* margin-top: 30px;
+  width: 100%;
+  max-width: 1242px; */
+
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  position: relative;
+  min-height: 440px;
+  margin-top: 50px;
+  width: 100%;
+  padding-left: 80px;
+  padding-right: 80px;
+  padding-top: 103px;
+  padding-bottom: 168px;
+  align-items: start;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  color: rgba(54, 54, 54, 1);
+
+}
+
+@media (max-width: 991px) {
+  .values-section {
+    max-width: 100%;
+  }
+}
+
+.values-container {
+  gap: 20px;
+  display: flex;
+}
+
+@media (max-width: 991px) {
+  .values-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0px;
+  }
+}
+
+.value-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  line-height: normal;
+  width: 33%;
+  margin-left: 0px;
+}
+
+@media (max-width: 991px) {
+  .value-card {
+    width: 100%;
+  }
+}
+
+.value-card:nth-child(2),
+.value-card:nth-child(3) {
+  margin-left: 20px;
+}
+
+@media (max-width: 991px) {
+  .value-card:nth-child(2),
+  .value-card:nth-child(3) {
+    margin-left: 0;
+  }
+}
+
+.value-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+@media (max-width: 991px) {
+  .value-card-inner {
+    margin-top: 33px;
+  }
+}
+
+.value-icon-container {
+  border-radius: 10px;
+  background-color: rgba(12, 29, 49, 1);
+  display: flex;
+  padding-left: 66px;
+  padding-right: 66px;
+  padding-top: 49px;
+  padding-bottom: 49px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+}
+
+@media (max-width: 991px) {
+  .value-icon-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+.value-icon {
+  aspect-ratio: 1.04;
+  object-fit: contain;
+  object-position: center;
+  width: 100%;
+  border-radius: 50%;
+}
+
+.value-title {
+  color: rgba(0, 0, 0, 1);
+  font-size: 30px;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 700;
+  align-self: center;
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+
+.value-description {
+  color: rgba(0, 0, 0, 1);
+  font-size: 18px;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 300;
+  text-align: center;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+@media (max-width: 991px) {
+  .value-description {
+    margin-left: 9px;
+  }
+}
+.value-card:nth-child(2) .value-description {
+  margin-right: 0;
+}
+
+@media (max-width: 991px) {
+  .value-card:nth-child(2) .value-description {
+    margin-right: 8px;
+    margin-left: 7px;
+  }
+}
+/* contact */
+
+
+.contact-section {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  position: relative;
+  min-height: 440px;
+  margin-top: 50px;
+  width: 100%;
+  padding-left: 80px;
+  padding-right: 80px;
+  padding-top: 90px;
+  padding-bottom: 168px;
+  align-items: start;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  color: rgba(54, 54, 54, 1);
+}
+
+@media (max-width: 991px) {
+  .contact-section {
+    max-width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 100px;
+    padding-bottom: 100px;
+    margin-top: 40px;
+  }
+}
+
+.contact-bg {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.contact-heading {
+  position: relative;
+  font-size: 40px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.contact-description {
+  position: relative;
+  font-size: 18px;
+  font-weight: 300;
+  width: 765px;
+  margin-top: 10px;
+}
+
+@media (max-width: 991px) {
+  .contact-description {
+    max-width: 100%;
+  }
+}
+
+.contact-info {
+  position: relative;
+  display: flex;
+  margin-top: 10px;
+  align-items: stretch;
+  gap: 4px;
+  font-size: 20px;
+  flex-wrap: wrap;
+}
+
+.contact-label {
+  font-weight: 300;
+  margin: 0;
+}
+
+.contact-details {
+  font-weight: 600;
+  flex-basis: auto;
+  flex-grow: 1;
+  flex-shrink: 1;
+  margin: 0;
+}
+
+@media (max-width: 991px) {
+  .contact-details {
+    max-width: 100%;
+  }
+}
+
+.contact-note {
+  position: relative;
+  font-size: 22px;
+  font-weight: 300;
+  margin-bottom: -34px;
+  margin-top: 10px;
+}
+
+@media (max-width: 991px) {
+  .contact-note {
+    max-width: 100%;
+    margin-bottom: 10px;
+  }
+}
+
+
+</style>
+
+<div class="stock-page-header">
+    <h2>About Us</h2>
+</div>
+
+<main>
+    <section class="intro-section">
+        <div class="intro-content">
+            <div class="intro-image-column">
+                <img src="https://cdn.builder.io/api/v1/image/assets/15e6bfa895024e90a8a8c0f45bf25099/62f50b86676baadd1c37c8fb3d98b74f559acb99?placeholderIfAbsent=true" class="intro-image" alt="Company image">
+            </div>
+            <div class="intro-text-column">
+                <div class="intro-text-wrapper">
+                    <h2 class="intro-heading">Simple. Quick. Hassle-Free.</h2>
+                    <p class="intro-paragraph">Welcome to Angel Wise Investors, a leading platform dedicated to providing exceptional opportunities in early-stage investments.</p>
+                    <p class="intro-paragraph">Specializing in Pre-IPO shares and angel investing, we connect investors with high-potential startups and growth-stage companies that are poised to make a significant impact.</p>
+                    <p class="intro-paragraph-bold">Join us as we pave the way for groundbreaking investments in tomorrow’s leading companies.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mission-statement">
+        <p class="mission-text">At Angel Wise Investors, we believe in empowering both investors and entrepreneurs by facilitating access to transformative opportunities. We strive to build long-term relationships based on trust, integrity, and mutual growth. Our mission is to be a bridge for forward-thinking investors seeking early access to the most promising businesses, and to provide visionary startups with the capital they need to scale and succeed.</p>
+    </section>
+
+    <section class="story-section">
+        <h2 class="story-heading">Our Story and Vision</h2>
+        <p class="story-text">Founded in 2007, [Company Name] began its journey with a vision to make exclusive investment opportunities accessible to retail investors. Our mission is to navigate the unlisted share market, unveiling its potential and helping investors craft strategies that align with their financial goals. Through expert guidance and a commitment to transparency, we empower investors to explore new avenues with confidence.</p>
+    </section>
+
+    <section class="values-section">
+        <div class="values-container">
+            <div class="value-card">
+                <div class="value-card-inner">
+                    <div class="value-icon-container">
+                        <img src="https://cdn.builder.io/api/v1/image/assets/15e6bfa895024e90a8a8c0f45bf25099/c457ebae98bdb60607bc0242b1727196c5f95f31?placeholderIfAbsent=true" class="value-icon" alt="Vision icon">
+                    </div>
+                    <h3 class="value-title">Vision</h3>
+                    <p class="value-description">Providing investors access to unique opportunities in the niche private market space.</p>
+                </div>
+            </div>
+            <div class="value-card">
+                <div class="value-card-inner">
+                    <div class="value-icon-container">
+                        <img src="https://cdn.builder.io/api/v1/image/assets/15e6bfa895024e90a8a8c0f45bf25099/9c07e97bd9a3dcb4be4520f78da8658bbc0fb4e1?placeholderIfAbsent=true" class="value-icon" alt="Mission icon">
+                    </div>
+                    <h3 class="value-title">Mission</h3>
+                    <p class="value-description">Delivering an exceptional investing experience through transparency, efficiency, and reliability.</p>
+                </div>
+            </div>
+            <div class="value-card">
+                <div class="value-card-inner">
+                    <div class="value-icon-container">
+                        <img src="https://cdn.builder.io/api/v1/image/assets/15e6bfa895024e90a8a8c0f45bf25099/efb54278ccd23331e63369d18e36964e34179902?placeholderIfAbsent=true" class="value-icon" alt="Work Environment icon">
+                    </div>
+                    <h3 class="value-title">Work Environment</h3>
+                    <p class="value-description">Fostering a space where investors and startups thrive together.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-section">
+        <img src="https://cdn.builder.io/api/v1/image/assets/15e6bfa895024e90a8a8c0f45bf25099/48c4ef868b272cee06edd7d62dfcce60abe3cf1f?placeholderIfAbsent=true" class="contact-bg" alt="Contact background">
+        <div class="contact-content">
+            <h1 class="contact-heading">Contact Us</h1>
+        <p class="contact-description">
+          If you'd like to learn more about [Company Name] and how we can assist
+          you in navigating your unlisted share investment journey, please get
+          in touch with us.
+        </p>
+        <div class="contact-info">
+          <p class="contact-info-label">Reach out to us</p>
+          <p class="contact-info-details">
+            @0731-4025544, 0731-4025545, +91-9669999444, +91-7999252591
+          </p>
+        </div>
+        <p class="contact-assistance">
+          Our expert would be happy to provide you personal assistance for your
+          queries.
+        </p>
+        </div>
+    </section>
+</main>
+{% endblock %}

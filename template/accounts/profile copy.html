@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<style>
+    
+.stock-page-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 75px;
+    background-color: #f8f9fa; /* Light gray background */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 2em;
+    color: aliceblue;
+    background: radial-gradient(
+    64.54% 23.63% at 69.24% 61.54%,
+    #271b3f 0%,
+    #271b3f 43.09%,
+    #341a47 68.59%,
+    #0e213f 100%
+  );
+} 
+
+    .profile-container {
+        max-width: 600px;
+        margin: 50px auto;
+        background-color: #fff;
+        border: 1px solid black;
+        padding: 30px;
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .profile-title {
+        font-size: 28px;
+        font-weight: bold;
+        color: black;
+        margin-bottom: 20px;
+    }
+
+    .profile-info {
+        font-size: 18px;
+        margin: 15px 0;
+        color: black;
+        text-align: left;
+    }
+
+    .profile-info strong {
+        font-weight: bold;
+    }
+
+    .profile-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        text-decoration: none;
+        color: black;
+        background-color: white;
+        border: 1px solid black;
+        cursor: pointer;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .profile-button:hover {
+        background-color: #f0f0f0;
+    }
+</style>
+
+<div class="stock-page-header">
+    <h2>Profile</h2>
+</div>
+
+<div class="profile-container">
+    <!-- <h1 class="profile-title">Your Profile</h1> -->
+    <!-- <hr> -->
+    <p class="profile-info"><strong>Username:</strong> {{ user.username }}</p>
+    <p class="profile-info"><strong>Firstname:</strong> {{ user.first_name }}</p>
+    <p class="profile-info"><strong>Lastname:</strong> {{ user.last_name }}</p>
+
+    {% if user.email %}
+    <p class="profile-info"><strong>Email:</strong> {{ user.email }}</p>
+    {% else %}
+    <p class="profile-info"><em>Email not provided</em></p>
+    {% endif %}
+    {% if user.phone_number %}
+    <p class="profile-info"><strong>Phone Number:</strong> {{ user.phone_number }}</p>
+    {% else %}
+    <p class="profile-info"><em>Phone number not provided</em></p>
+    {% endif %}
+
+    {% if user.profile.pan_number %}
+        <p class="profile-info"><strong>PAN Number:</strong> {{ user.profile.pan_number }}</p>
+    {% else %}
+        <p class="profile-info"><em>PAN Number not provided</em></p>
+    {% endif %}
+
+    {% if user.profile.pan_card_photo %}
+        <p class="profile-info"><strong>PAN Card:</strong></p>
+        <img src="{{ user.profile.pan_card_photo.url }}" alt="PAN Card" width="200">
+    {% endif %}
+
+    {% if user.profile.adhar_number %}
+        <p class="profile-info"><strong>Aadhaar Number:</strong> {{ user.profile.adhar_number }}</p>
+    {% else %}
+        <p class="profile-info"><em>Aadhaar Number not provided</em></p>
+    {% endif %}
+
+    {% if user.profile.adhar_card_photo %}
+        <p class="profile-info"><strong>Aadhaar Card:</strong></p>
+        <img src="{{ user.profile.adhar_card_photo.url }}" alt="Aadhaar Card" width="200">
+    {% endif %}
+    <br>
+    <a href="{% url 'edit_profile' %}" class="profile-button">Edit Profile</a>
+</div>
+{% endblock %}

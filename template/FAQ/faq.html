@@ -1,0 +1,507 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<style>
+        
+.stock-page-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 75px;
+    background-color: #f8f9fa; /* Light gray background */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 2em;
+    color: aliceblue;
+    background: radial-gradient(
+    64.54% 23.63% at 69.24% 61.54%,
+    #271b3f 0%,
+    #271b3f 43.09%,
+    #341a47 68.59%,
+    #0e213f 100%
+  );
+} 
+  
+
+.blog-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 2rem 1rem;
+      }
+
+      .content-wrapper {
+        max-width: 1240px;
+        width: 100%;
+      }
+
+      .blog-title {
+        font-size: 45px;
+        color: #363636;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .blog-intro {
+        font-size: 18px;
+        color: #000;
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        font-size: 22px;
+        color: #000;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .section-text {
+        font-size: 18px;
+        color: #000;
+        margin-bottom: 2rem;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 4rem;
+      }
+
+      .primary-button {
+        background-color: #0e213f;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 18px;
+        padding: 14px 41px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .faq-title {
+        font-size: 45px;
+        color: #363636;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .faq-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 4rem;
+      }
+
+      @media (max-width: 991px) {
+        .faq-grid {
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+      }
+
+      .faq-item {
+        border: 1px solid #000;
+        border-radius: 5px;
+      }
+
+      .faq-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+      }
+
+      .faq-question {
+        font-size: 18px;
+        color: #363636;
+        font-weight: 700;
+      }
+
+      .testimonials-title {
+        font-size: 45px;
+        color: #363636;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+      }
+
+      @media (max-width: 991px) {
+        .testimonials-grid {
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+      }
+
+      .testimonial-card {
+        border: 1px solid #0e213f;
+        border-radius: 20px;
+        padding: 1.5rem;
+      }
+
+      .testimonial-text {
+        font-size: 18px;
+        color: #000;
+        margin-bottom: 1rem;
+      }
+
+      .testimonial-name {
+        font-size: 20px;
+        color: #000;
+      }
+
+      .testimonial-role {
+        font-size: 14px;
+        color: #000;
+      }
+
+      .cta-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cta-title {
+        font-size: 45px;
+        color: #363636;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .cta-text {
+        font-size: 18px;
+        color: #000;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .cta-button {
+        background-color: #0e213f;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 16px;
+        padding: 0.75rem 43px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .rating-image {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 1rem;
+      }
+</style>
+
+<div class="stock-page-header">
+    <h2>Frequently Asked Questions</h2>
+
+</div>
+
+<main class="blog-container">
+    <article class="content-wrapper">
+      <header>
+        <h1 class="blog-title">Blogs</h1>
+        <p class="blog-intro">
+          Welcome to wwipl.com, your one-stop destination for all Pre-IPO
+          shares in India. Here's everything you need to know about Pre-IPO
+          shares, how to invest in them, and the top Pre-IPO shares available
+          in India.
+        </p>
+      </header>
+
+      <section>
+        <h2 class="section-title">What are Pre-IPO Shares?</h2>
+        <p class="section-text">
+          Pre-IPO shares are stocks of a company that are available for
+          purchase before the company goes public and lists its shares on a
+          stock exchange. Companies may offer Pre-IPO shares to investors,
+          such as venture capitalists, angel investors, and high net worth
+          individuals, in order to raise capital before going public.
+          Investing in Pre-IPO shares can offer high potential returns, but
+          also comes with high risk.
+        </p>
+        <p class="section-text">
+          At wwipl.com, we provide a comprehensive list of Pre-IPO shares
+          available in India, including information on the company, sector,
+          valuation, and investment amount. Our easy-to-use table allows you
+          to filter and sort the list based on your preferences and investment
+          criteria.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="section-title">How to Invest in Pre-IPO Shares?</h2>
+        <p class="section-text">
+          Investing in Pre-IPO shares requires a thorough understanding of the
+          company's financials, business model, and growth potential. At
+          wwipl.com, our team of experts conducts extensive due diligence on
+          each Pre-IPO share listed on our platform, providing you with all
+          the information you need to make an informed investment decision.
+          Our platform also makes it easy for you to invest in Pre-IPO shares
+          with just a few clicks.
+        </p>
+        <div class="button-container">
+          <button class="primary-button">Read More</button>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="faq-title">Frequently Asked Questions</h2>
+        <div class="faq-grid">
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">What is unlisted Share?</h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">Can unlisted shares be sold?</h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">What is pre ipo?</h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">How do ESOP shares work?</h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">What is delisted stocks?</h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">What are Illiquid Shares?</h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">Is it legal to buy pre ipo shares?</h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">
+                What happens if a stock gets delisted?
+              </h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <div class="faq-header">
+              <h3 class="faq-question">Can i buy and sell Share?</h3>
+              <div>
+                <svg
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.5 -0.0078125C4.71046 -0.0078125 0 4.70265 0 10.4922C0 16.2817 4.71046 20.9922 10.5 20.9922C16.2895 20.9922 21 16.2817 21 10.4922C21 4.70265 16.2895 -0.0078125 10.5 -0.0078125ZM10.5 1.60757C15.4164 1.60757 19.3846 5.57576 19.3846 10.4922C19.3846 15.4086 15.4164 19.3768 10.5 19.3768C5.58358 19.3768 1.61538 15.4086 1.61538 10.4922C1.61538 5.57576 5.58358 1.60757 10.5 1.60757ZM9.69231 5.64603V9.68449H5.65385V11.2999H9.69231V15.3383H11.3077V11.2999H15.3462V9.68449H11.3077V5.64603H9.69231Z"
+                    fill="#363636"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="testimonials-title">Trusted By Investors</h2>
+        <div class="testimonials-grid">
+          <figure class="testimonial-card">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/77acb85bedbcde48d5fa1b312da499aebc02e7ad"
+              alt="Rating"
+              class="rating-image"
+            />
+            <figcaption>
+              <p class="testimonial-text">
+                Seamless and trustworthy experience! The process was smooth,
+                and the team provided excellent support throughout.
+              </p>
+              <p class="testimonial-name">Pradip</p>
+              <p class="testimonial-role">Investors</p>
+            </figcaption>
+          </figure>
+
+          <figure class="testimonial-card">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/77acb85bedbcde48d5fa1b312da499aebc02e7ad"
+              alt="Rating"
+              class="rating-image"
+            />
+            <figcaption>
+              <p class="testimonial-text">
+                Reliable platform with fair pricing. I felt confident trading
+                unlisted shares with their expert guidance.
+              </p>
+              <p class="testimonial-name">kiran</p>
+              <p class="testimonial-role">Investors</p>
+            </figcaption>
+          </figure>
+
+          <figure class="testimonial-card">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/77acb85bedbcde48d5fa1b312da499aebc02e7ad"
+              alt="Rating"
+              class="rating-image"
+            />
+            <figcaption>
+              <p class="testimonial-text">
+                Great service and transparency! They ensured a hassle-free
+                transaction with prompt responses and secure dealings
+              </p>
+              <p class="testimonial-name">Omkar</p>
+              <p class="testimonial-role">Investors</p>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <footer class="cta-section">
+        <h2 class="cta-title">Lets Get You Started</h2>
+        <p class="cta-text">
+          Excellent plateform and very easy and takes less than few minutes to
+          "Sell" and "Buy" Unlisted Shares
+        </p>
+        <button class="cta-button">Join Our Platform</button>
+      </footer>
+    </article>
+  </main>
+{% endblock %}

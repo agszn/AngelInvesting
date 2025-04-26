@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .otp-verify-container {
+        margin-top: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+    }
+    .otp-verify-card {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        max-width: 450px;
+        width: 100%;
+    }
+    .otp-verify-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        text-align: center;
+        padding: 20px;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    .otp-verify-body {
+        padding: 30px;
+        background-color: #fff;
+    }
+    .otp-verify-footer {
+        text-align: center;
+        padding: 15px;
+        background-color: #f8f9fa;
+        font-size: 14px;
+    }
+    .otp-verify-form-group {
+        margin-bottom: 18px;
+    }
+    .otp-verify-form-group label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 6px;
+    }
+    .otp-verify-form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: 0.3s ease-in-out;
+    }
+    .otp-verify-form-group input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    }
+    .otp-verify-btn {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        padding: 12px;
+        font-size: 18px;
+        border-radius: 6px;
+        width: 100%;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .otp-verify-btn:hover {
+        background: linear-gradient(135deg, #0056b3, #003f7f);
+    }
+    .otp-resend-link {
+        color: #007bff;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .otp-resend-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container otp-verify-container">
+    <div class="card otp-verify-card">
+        <div class="otp-verify-header">
+            <i class="bi bi-shield-lock-fill"></i> Email Verification
+        </div>
+        <div class="otp-verify-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} font-weight-bold text-danger">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <p>We have sent an OTP to your registered email. Please enter it below to verify your account.</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="otp-verify-form-group">
+                    <label for="otp">
+                        <i class="bi bi-key-fill"></i> OTP Code
+                    </label>
+                    <input type="text" name="otp" id="otp" placeholder="Enter OTP">
+                </div>
+                <button type="submit" class="otp-verify-btn">
+                    <i class="bi bi-check-circle-fill"></i> Verify Account
+                </button>
+            </form>
+        </div>
+        <div class="otp-verify-footer">
+            Didn't get the OTP?
+            <a href="{% url 'resend_otp' user_id=user.id %}" class="otp-resend-link">
+                <i class="bi bi-arrow-repeat"></i> Resend OTP
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

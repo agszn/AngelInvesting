@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+{% block title %}Stock List{% endblock %}
+
+{% block content %}
+<style>
+    body{
+        background: #0E213F;
+    }
+    .stock-container {
+        padding: 20px;
+    }
+    .stock-header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .stock-search-filter {
+        margin-bottom: 20px;
+    }
+    .stock-search-input, .stock-sector-select {
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    .stock-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        color: white;
+    }
+    .stock-table th, .stock-table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+    }
+    .stock-table th {
+        background-color: #0E213F;
+    }
+    .company-logo {
+        max-width: 100px;
+        height: auto;
+        margin-bottom: 10px;
+    }
+    .chart-container {
+        width: 90%;
+        height: 50px;
+    }
+    /* button */
+    .search-button {
+    max-width: 68px;
+    border-radius: 10px;
+
+    padding: 5px 5px;
+    font-family:
+      Outfit,
+      -apple-system,
+      Roboto,
+      Helvetica,
+      sans-serif;
+    font-size: 16px;
+    color: rgb(0, 0, 0);
+    font-weight: 600;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: rgba(8, 150, 193, 1);
+}
+
+/* search form */
+.stock-search-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px; /* Adjust width as needed */
+}
+
+.stock-search-input {
+    flex: 1; /* Takes remaining space */
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: auto; /* Pushes everything else to the right */
+}
+
+.search-right {
+    display: flex;
+    align-items: right;
+    gap: 10px; /* Space between select and button */
+}
+
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Spacing between elements */
+    
+}
+
+.stock-sector-select,
+.search-button {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+
+</style>
+
+<main class="stock-container" >
+    <section>
+        <h2 class="stock-header" style="color: white;"></h2>
+
+        <form method="GET" id="filter-form" class="stock-search-filter">
+            <!-- Input on the left -->
+            <input type="text" name="search" placeholder="Search by name" value="{{ search_query }}" class="stock-search-input">
+        
+            <!-- Dropdown and Button on the right -->
+            <div class="search-right">
+                <select name="sector" class="stock-sector-select" onchange="document.getElementById('filter-form').submit();" style="margin-left: 220%;">
+                    <option value="">All Sectors</option>
+                    {% for sector in sectors %}
+                        <option value="{{ sector }}" {% if sector == selected_sector %}selected{% endif %}>{{ sector }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="search-button">Search</button>
+            </div>
+        </form>
+        
+
+        <table class="stock-table">
+            <thead>
+                <tr>
+                    <th>Sl.No</th>
+                    <th></th>
+                    <th>Company Name</th>
+                    <th>Sector</th>
+                    <th>Price (₹)</th>
+                    <th>Market Cap (₹ Crores)</th>
+                    <th>Lifetime High (₹)</th>
+                    <th>Lifetime Low (₹)</th>
+                    <th>Price Trend</th>
+                    <th>Options</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in page_obj %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                      {% if stock.logo %}
+                          <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo">
+                      {% endif %}
+                    </td>
+                    <td>{{ stock.company_name }}</td>
+                    <td>{{ stock.sector }}</td>
+                    <td>{{ stock.formatted_share_price }}</td>
+                    <td>{{ stock.market_capitalization|floatformat:2 }}</td>
+                    <td>{{ stock.lifetime_high|floatformat:2 }}</td>
+                    <td>{{ stock.lifetime_low|floatformat:2 }}</td>
+                    <td>
+                        <div class="chart-container">
+                            <canvas id="chart-{{ stock.id }}"></canvas>
+                        </div>
+                    </td>
+                    <td>
+                        <section
+      class="action-container"
+      style="
+        max-width: none;
+        margin-left: auto;
+        margin-right: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        width: 138px;
+      "
+    >
+      <div class="button-group" style="display: flex; gap: 10px">
+        <button
+          class="action-button"
+          style="
+            width: 63px;
+            height: 28px;
+            border: 2px solid #09a7d7;
+            border-radius: 4px;
+            background-color: white;
+            color: #363636;
+            font-family: &quot;Outfit&quot;, sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          Buy
+        </button>
+        <button
+          class="action-button"
+          style="
+            width: 63px;
+            height: 28px;
+            border: 2px solid #09a7d7;
+            border-radius: 4px;
+            background-color: white;
+            color: #363636;
+            font-family: &quot;Outfit&quot;, sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          Sell
+        </button>
+      </div>
+      <button
+        class="wishlist-button"
+        style="
+          width: 136px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          border: 2px solid #09a7d7;
+          border-radius: 4px;
+          background-color: white;
+          padding: 0 12px;
+          color: #0e213f;
+          font-family: &quot;Outfit&quot;, sans-serif;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+        "
+      >
+        <i
+          class="ti ti-shopping-cart cart-icon"
+          style="color: #0e213f; font-size: 16px"
+        ></i>
+        <span>Add to Wishlist</span>
+      </button>
+    </section>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">No stock data available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var stockHistoryData = JSON.parse('{{ stock_history_data|safe }}');
+    var stockCharts = {}; 
+
+    function createChart(stockId, labels, data) {
+        const ctx = document.getElementById(`chart-${stockId}`).getContext('2d');
+        stockCharts[stockId] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Stock Price',
+                    data: data,
+                    borderColor: 'yellow',
+                    backgroundColor: 'rgba(255, 255, 0, 0.2)',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: 'yellow'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    Object.keys(stockHistoryData).forEach(stockId => {
+        let history = stockHistoryData[stockId];
+        let labels = history.map(entry => entry.timestamp);
+        let data = history.map(entry => parseFloat(entry.price));
+        createChart(stockId, labels, data);
+    });
+});
+</script>
+<div class="pagination" style="color: white;">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_sector %}&sector={{ selected_sector }}{% endif %}">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_sector %}&sector={{ selected_sector }}{% endif %}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_sector %}&sector={{ selected_sector }}{% endif %}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_sector %}&sector={{ selected_sector }}{% endif %}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+{% endblock %}

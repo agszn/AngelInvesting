@@ -1,0 +1,32 @@
+<h4>{{ field_definitions.first.model_type }}: {{ selected_stock.company_name }}</h4>
+
+<h5>Balance Sheet: Supermarket Grocery</h5>
+<hr>
+
+<table style="border-collapse: collapse; width: 100%;">
+  <thead>
+    <tr>
+      <th style="border: 1px solid black;">PARTICULARS</th>
+      {% for header in headers %}
+        <th style="border: 1px solid black;">{{ header }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for definition in field_definitions %}
+    
+      <tr>
+        <td style="border: 1px solid black;">{{ definition.name }} </td>
+        {% for header in headers %}
+          <td style="border: 1px solid black;padding: 8px; border: 1px solid #090909;" >
+            {% for value in all_values %}
+              {% if value.field_definition.id == definition.id and value.table_header.id == header.id %}
+                {{ value.dec_value }}
+              {% endif %}
+            {% endfor %}
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

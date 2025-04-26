@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<style>
+    .profile-wrapper {
+        display: flex;
+        margin: 30px;
+    }
+
+    .profile-sidebar {
+        width: 30%;
+        padding: 20px;
+        background-color: #f8f9fa;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .custom-profile-main {
+        width: 70%;
+        padding: 30px;
+        background-color: #e6f2ff;
+        border-radius: 8px;
+    }
+
+    .custom-section {
+        margin-bottom: 40px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #f6e3e3;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        text-align: center;
+        color: #0e213f;
+    }
+
+    .custom-section-header:hover {
+        background-color: #f5f5f5;
+    }
+
+    .custom-section-header span {
+        transition: transform 0.3s ease;
+    }
+
+    .custom-section-header.open span {
+        transform: rotate(180deg);
+    }
+
+    .custom-section-body {
+        margin-top: 15px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .custom-profile-left {
+        grid-column: span 3;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .custom-profile-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .custom-profile-btn {
+        padding: 6px 10px;
+        background: #d0e8ff;
+        border: 1px solid #8ab6d6;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #000;
+    }
+
+    .custom-profile-btn:hover {
+        background: #b3dbff;
+    }
+
+    .stock-page-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 75px;
+        font-size: 2em;
+        color: aliceblue;
+        background: radial-gradient(
+            64.54% 23.63% at 69.24% 61.54%,
+            #271b3f 0%,
+            #271b3f 43.09%,
+            #341a47 68.59%,
+            #0e213f 100%
+        );
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-label-block {
+        margin-bottom: 12px;
+    }
+
+    .custom-label-block .custom-label {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="stock-page-header">
+    <h2>Profile</h2>
+</div>
+
+<div class="profile-wrapper">
+    <div class="profile-sidebar">
+        <h4>Shares Bought</h4>
+        <p>Coming soon...</p>
+    </div>
+
+    <div class="custom-profile-main">
+
+        <!-- Account Summary -->
+        <div class="custom-section">
+            <div class="custom-section-header">
+                <h4>Account Summary</h4>
+            </div>
+            <div class="custom-section-body">
+                <div class="custom-profile-left">
+                    <div class="custom-label-block">
+                        <div class="custom-label">Username:</div>
+                        <div>{{ user.username }}</div>
+                    </div>
+                    <div class="custom-label-block">
+                        <div class="custom-label">Email:</div>
+                        <div>{{ user.email }}</div>
+                    </div>
+                </div>
+                <div class="custom-profile-buttons">
+                    <a href="{% url 'edit_profile' %}" class="custom-profile-btn">✏️ Edit Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Info -->
+        <div class="custom-section">
+            <div class="custom-section-header" onclick="toggleSection('personal-info')">
+                <h4>Personal Info</h4>
+                <span>▼</span>
+            </div>
+            <div id="personal-info" class="custom-section-body">
+                <div class="custom-profile-left">
+                    <div class="custom-label-block">
+                        <div class="custom-label">First Name:</div>
+                        <div>{{ user.first_name }}</div>
+                    </div>
+                    <div class="custom-label-block">
+                        <div class="custom-label">Last Name:</div>
+                        <div>{{ user.last_name }}</div>
+                    </div>
+                    <div class="custom-label-block">
+                        <div class="custom-label">WhatsApp:</div>
+                        <div>{{ profile.whatsapp_number }}</div>
+                    </div>
+                    <div class="custom-label-block">
+                        <div class="custom-label">Mobile:</div>
+                        <div>{{ user.phone_number }}</div>
+                    </div>
+                </div>
+                <div class="custom-profile-buttons">
+                    <a href="{% url 'edit_profile' %}" class="custom-profile-btn">✏️ Edit</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- KYC Info -->
+        <div class="custom-section">
+            <div class="custom-section-header" onclick="toggleSection('kyc-info')">
+                <h4>KYC / Identity Info</h4>
+                <span>▼</span>
+            </div>
+            <div id="kyc-info" class="custom-section-body">
+                <div class="custom-profile-left">
+                    {% if user.profile.pan_number %}
+                        <div class="custom-label-block">
+                            <div class="custom-label">PAN Number:</div>
+                            <div>{{ user.profile.pan_number }}</div>
+                        </div>
+                        {% if user.profile.pan_card_photo %}
+                            <img src="{{ user.profile.pan_card_photo.url }}" width="200">
+                        {% endif %}
+                    {% endif %}
+                    {% if user.profile.adhar_number %}
+                        <div class="custom-label-block">
+                            <div class="custom-label">Aadhaar Number:</div>
+                            <div>{{ user.profile.adhar_number }}</div>
+                        </div>
+                        {% if user.profile.adhar_card_photo %}
+                            <img src="{{ user.profile.adhar_card_photo.url }}" width="200">
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="custom-profile-buttons">
+                    <a href="{% url 'edit_profile' %}" class="custom-profile-btn">🛠️ Edit</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bank Info -->
+        <div class="custom-section">
+            <div class="custom-section-header" onclick="toggleSection('bank-info')">
+                <h4>Bank Account Details</h4>
+                <span>▼</span>
+            </div>
+            <div id="bank-info" class="custom-section-body">
+                <div class="custom-profile-left">
+                    {% for account in bank_accounts %}
+                        <div class="custom-label-block">
+                            <div class="custom-label">Holder Name:</div>
+                            <div>{{ account.account_holder_name }}</div>
+                        </div>
+                        <div class="custom-label-block">
+                            <div class="custom-label">Bank:</div>
+                            <div>{{ account.bank_name }} - {{ account.account_number }} ({{ account.account_type }})</div>
+                        </div>
+                        <div class="custom-label-block">
+                            <div class="custom-label">Status:</div>
+                            <div>{{ account.status }}</div>
+                        </div>
+                        <div class="custom-label-block">
+                            <div class="custom-label">Linked Mobile:</div>
+                            <div>{{ account.linked_mobile_number }}</div>
+                        </div>
+                        <hr>
+                    {% empty %}
+                        <p>No bank accounts added.</p>
+                    {% endfor %}
+                </div>
+                <div class="custom-profile-buttons">
+                    <a href="{% url 'edit_profile' %}" class="custom-profile-btn">➕ Add Bank</a>
+                    <a href="{% url 'edit_profile' %}" class="custom-profile-btn">✏️ Edit</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CMR Info -->
+        <div class="custom-section">
+            <div class="custom-section-header" onclick="toggleSection('cmr-info')">
+                <h4>CMR Details</h4>
+                <span>▼</span>
+            </div>
+            <div id="cmr-info" class="custom-section-body">
+                <div class="custom-profile-left">
+                    {% for cmr in cmr_copies %}
+                        <div class="custom-label-block">
+                            <div class="custom-label">Client Name:</div>
+                            <div>{{ cmr.client_name }}</div>
+                        </div>
+                        <div class="custom-label-block">
+                            <div class="custom-label">Client ID:</div>
+                            <div>{{ cmr.client_id }}</div>
+                        </div>
+                        <div class="custom-label-block">
+                            <div class="custom-label">Broker ID:</div>
+                            <div>{{ cmr.broker.broker_id }}</div>
+                        </div>
+                        <div class="custom-label-block">
+                            <div class="custom-label">Broker Name:</div>
+                            <div>{{ cmr.broker.name }}</div>
+                        </div>
+                        <hr>
+                    {% empty %}
+                        <p>No CMR records found.</p>
+                    {% endfor %}
+                </div>
+                <div class="custom-profile-buttons">
+                    <a href="{% url 'edit_profile' %}" class="custom-profile-btn">➕ Add Broker</a>
+                    <a href="{% url 'edit_profile' %}" class="custom-profile-btn">📥 Download</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function toggleSection(id) {
+        const section = document.getElementById(id);
+        const header = section.previousElementSibling;
+        const isVisible = section.style.display === 'none';
+
+        if (isVisible) {
+            section.style.display = 'grid';
+            header.classList.add('open');
+        } else {
+            section.style.display = 'none';
+            header.classList.remove('open');
+        }
+    }
+
+    // Ensure all sections are visible on initial load
+    document.querySelectorAll('.custom-section-body').forEach(sec => {
+        sec.style.display = 'grid';
+    });
+    document.querySelectorAll('.custom-section-header').forEach(head => {
+        head.classList.add('open');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,242 @@
+<style>
+    /* Footer Styles */
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inknut+Antiqua&display=swap");
+
+.footer {
+  background-color: rgba(14, 33, 63, 1);
+  display: flex;
+  width: 100%;
+  padding: 87px 70px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family:
+    Outfit,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  color: rgba(255, 255, 255, 1);
+
+  
+}
+
+.footer-container {
+  width: 100%;
+  max-width: 1023px;
+}
+
+.footer-content {
+  display: flex;
+  gap: 20px;
+}
+
+/* Logo Column */
+.logo-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 33%;
+  font-size: 16px;
+}
+
+.logo {
+  font-size: 40px;
+  font-family:
+    "Inknut Antiqua",
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 400;
+  margin: 0;
+}
+
+.copyright {
+  font-weight: 300;
+  align-self: stretch;
+  margin-top: 32px;
+  margin-bottom: 0;
+}
+
+.contact-info {
+  display: flex;
+  margin-top: 82px;
+  align-items: stretch;
+  gap: 1px;
+  font-style: normal;
+}
+
+.contact-label {
+  font-weight: 600;
+}
+
+.contact-number {
+  font-weight: 300;
+}
+
+/* Quick Links Column */
+.quick-links-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 17%;
+  margin-left: 20px;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+.column-title {
+  font-size: 20px;
+  font-weight: 600;
+  align-self: stretch;
+  margin: 0 0 37px 0;
+}
+
+.footer-nav {
+  width: 100%;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 16px;
+}
+
+.footer-links li:last-child {
+  margin-bottom: 0;
+}
+
+.footer-link {
+  color: rgba(255, 255, 255, 1);
+  text-decoration: none;
+  font-weight: 300;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+/* Company Column */
+.company-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 34%;
+  margin-left: 20px;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+/* Legal Column */
+.legal-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 16%;
+  margin-left: 20px;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+/* Responsive Styles */
+@media (max-width: 991px) {
+  .footer {
+    max-width: 100%;
+    padding: 87px 20px;
+  }
+
+  .footer-container {
+    max-width: 100%;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .logo-column,
+  .quick-links-column,
+  .company-column,
+  .legal-column {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 40px;
+  }
+
+  .logo-column {
+    margin-top: 0;
+  }
+
+  .contact-info {
+    margin-top: 40px;
+  }
+
+  .termsof-use {
+    margin-right: 6px;
+  }
+}
+
+</style>
+<footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <section class="footer-column logo-column">
+          <h2 class="logo">LOGO</h2>
+          <p class="copyright">
+            2020-2024, Unlisted Assets
+            <br>
+            All rights reserved.
+          </p>
+          <address class="contact-info">
+            <span class="contact-label">Call Us:</span>
+            <span class="contact-number">+91 9658458955</span>
+          </address>
+        </section>
+  
+        <section class="footer-column quick-links-column">
+          <h3 class="column-title">Quick Links</h3>
+          <nav class="footer-nav">
+            <ul class="footer-links">
+              <li><a href="#" class="footer-link">Home</a></li>
+              <li><a href="#" class="footer-link">Companies</a></li>
+              <li><a href="#" class="footer-link">Blog</a></li>
+              <li><a href="#" class="footer-link">Services</a></li>
+              <li><a href="#" class="footer-link">Contact us</a></li>
+            </ul>
+          </nav>
+        </section>
+  
+        <section class="footer-column company-column">
+          <h3 class="column-title">Company</h3>
+          <nav class="footer-nav">
+            <ul class="footer-links">
+              <li><a href="#" class="footer-link">About</a></li>
+              <li><a href="#" class="footer-link">Types of Unlisted Companies</a></li>
+              <li><a href="#" class="footer-link">Solutions</a></li>
+              <li><a href="#" class="footer-link">Why Us</a></li>
+              <li><a href="#" class="footer-link">FAQ</a></li>
+              <li><a href="#" class="footer-link">Refund and Cancellation</a></li>
+            </ul>
+          </nav>
+        </section>
+  
+        <section class="footer-column legal-column">
+          <h3 class="column-title">Legal</h3>
+          <nav class="footer-nav">
+            <ul class="footer-links">
+              <li><a href="#" class="footer-link">Disclamer</a></li>
+              <li><a href="#" class="footer-link">Terms of Use</a></li>
+              <li><a href="#" class="footer-link">Privacy Policy</a></li>
+            </ul>
+          </nav>
+        </section>
+      </div>
+    </div>
+  </footer>
+  

@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Welcome | Admin Login{% endblock %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <img src="{% static 'images/admin-logo.png' %}" alt="Logo" class="logo">
+            <h2>Welcome Back! </h2>
+        </div>
+        <form method="post" action="{% url 'admin:login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username"><i class="fas fa-user"></i> Username</label>
+                <input type="text" name="username" id="id_username" class="form-control" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label for="id_password"><i class="fas fa-lock"></i> Password</label>
+                <input type="password" name="password" id="id_password" class="form-control" placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn-login"> Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

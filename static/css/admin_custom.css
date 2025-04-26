@@ -1,0 +1,119 @@
+/* General Admin Panel Theme */
+:root {
+    --primary-color: navy;
+    --secondary-color: purple;
+    --background-light: white;
+    --text-light: black;
+    --background-dark: #1e1e2e;
+    --text-dark: #ffffff;
+    --card-light: #ffffff;
+    --card-dark: #2e2e3e;
+    --border-light: #ccc;
+    --border-dark: #444;
+}
+
+/* Light Mode Styles */
+body {
+    background: var(--background-light);
+    color: var(--text-light);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: var(--background-dark);
+        color: var(--text-dark);
+    }
+
+    .module {
+        background: var(--card-dark);
+        color: var(--text-dark);
+        border: 1px solid var(--border-dark);
+    }
+
+    input, textarea, select {
+        background: #3b3b4f;
+        color: #ffffff;
+        border: 1px solid var(--border-dark);
+    }
+
+    fieldset.module h2 {
+        color: #ffcc00; /* Yellow highlight for dark mode */
+        border-bottom: 2px solid #ffcc00;
+    }
+
+    /* Navigation Bar */
+    #header {
+        background-color: var(--primary-color) !important;
+        color: white;
+    }
+
+    /* Buttons */
+    input[type="submit"], button {
+        background: var(--secondary-color);
+        color: white;
+    }
+    input[type="submit"]:hover, button:hover {
+        background: #ffcc00;
+    }
+}
+
+/* Common Module Styling */
+.module {
+    background: var(--card-light);
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Input Fields: Same Width & Height */
+input[type="text"], input[type="number"], input[type="email"], textarea, select {
+    width: 100% !important;
+    height: 40px;
+    border-radius: 5px;
+    border: 1px solid var(--border-light);
+    padding: 5px 10px;
+}
+
+/* Highlight Required Fields in Red */
+.required label::after {
+    content: " *";
+    color: red;
+}
+
+/* Navigation Bar */
+#header {
+    background-color: var(--primary-color) !important;
+}
+
+/* Field Icons */
+fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+fieldset div {
+    flex: 1 1 calc(50% - 10px);
+}
+
+fieldset.module h2 {
+    font-weight: bold;
+    color: navy;
+    margin-bottom: 15px;
+    border-bottom: 2px solid purple;
+    padding-bottom: 5px;
+}
+
+/* Customize Button */
+input[type="submit"], button {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+input[type="submit"]:hover, button:hover {
+    background: navy;
+}

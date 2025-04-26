@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<main
+      style="display: flex; align-items: stretch; gap: 24px; flex-wrap: wrap;">
+    <section
+      style="background-color: rgba(14, 33, 63, 1); padding: 55px 64px; flex-grow: 1; flex-shrink: 0; flex-basis: 0; width: fit-content; max-width: 100%;">
+        <header style="display: flex; margin-left: 38px; width: 100%; max-width: 1274px; align-items: stretch; gap: 20px; font-family: Outfit, -apple-system, Roboto, Helvetica, sans-serif; color: rgba(255, 255, 255, 1); flex-wrap: wrap; justify-content: space-between;">
+            <div style="display: flex; margin-top: auto; margin-bottom: auto; align-items: stretch; gap: 14px; font-size: 16px; font-weight: 300; white-space: nowrap;">
+                <p style="font-size: 18px; margin-top: auto; margin-bottom: auto; flex-grow: 1;">Show</p>
+                <div style="border-radius: 10px; background-color: rgba(217, 217, 217, 0); border: 1px solid rgba(255, 255, 255, 1); display: flex; padding: 5px 12px; align-items: stretch; gap: 6px;">
+                    <p style="margin: 0">15</p>
+                    <img src="https://cdn.builder.io/api/v1/image/assets/15e6bfa895024e90a8a8c0f45bf25099/c822afec801ce026d5459dbd5a8dff15a8384b29?placeholderIfAbsent=true" style="aspect-ratio: 1.45; object-fit: contain; object-position: center; width: 13px; margin-top: auto; margin-bottom: auto; flex-shrink: 0;" alt="Dropdown arrow"/>
+                </div>
+                <button style="border-radius: 10px; background-color: rgba(9, 167, 215, 1); padding: 5px 15px; font-weight: 600; color: white; border: none; cursor: pointer;">Filter</button>
+            </div>
+        </header>
+
+        <section style="display: flex; margin-top: 70px; margin-left: 14px; width: 100%; max-width: 1248px; align-items: stretch; gap: 40px 76px;">
+            <div style="display: flex; align-items: stretch">
+                <p style="color: rgba(255, 255, 255, 1); font-size: 18px; font-family: Outfit, -apple-system, Roboto, Helvetica, sans-serif; font-weight: 600; margin: 0;">Sl.No</p>
+                <div style="margin-top: auto; margin-bottom: auto;">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/15e6bfa895024e90a8a8c0f45bf25099/3049e98f870663311151601de2889433ca83869a?placeholderIfAbsent=true" style="aspect-ratio: 1.6; object-fit: contain; object-position: center; width: 8px;" alt="Sort ascending"/>
+                    <img src="https://cdn.builder.io/api/v1/image/assets/15e6bfa895024e90a8a8c0f45bf25099/9ca61d6e53540c479ee372364ef6a2ebc354bc39?placeholderIfAbsent=true" style="aspect-ratio: 1.6; object-fit: contain; object-position: center; width: 8px; margin-top: 6px;" alt="Sort descending"/>
+                </div>
+            </div>
+            <p style="color: rgba(255, 255, 255, 1); font-size: 18px; font-family: Outfit, -apple-system, Roboto, Helvetica, sans-serif; font-weight: 600; margin: 0;">Share Name</p>
+            <div style="display: flex; align-items: stretch; gap: 40px 50px; font-family: Outfit, -apple-system, Roboto, Helvetica, sans-serif; font-size: 18px; color: rgba(255, 255, 255, 1);">
+                <p style="font-weight: 600; margin-top: auto; margin-bottom: auto; flex-grow: 1; margin: 0;">Sector</p>
+                <div style="align-self: start; display: flex; flex-direction: column; align-items: stretch;">
+                    <p style="font-weight: 600; align-self: start; margin: 0;">Price</p>
+                    <p style="font-weight: 300; margin-top: 4px; margin: 4px 0 0 0;">In ₹ Per Share</p>
+                </div>
+                <div style="align-self: start; display: flex; flex-direction: column; align-items: stretch;">
+                    <p style="font-weight: 600; margin: 0;">Market Cap</p>
+                    <p style="font-weight: 300; align-self: start; margin-top: 4px; margin: 4px 0 0 0;">In ₹ Crores</p>
+                </div>
+                <p style="font-weight: 600; margin: 0;">Lifetime High</p>
+                <p style="font-weight: 600; margin: 0;">Lifetime Low</p>
+                <p style="font-weight: 600; margin-top: auto; margin-bottom: auto; margin: 0;">Chart</p>
+                <p style="font-weight: 600; margin-top: auto; margin-bottom: auto; margin: 0;">Options</p>
+            </div>
+        </section>
+
+        <hr style="border: 1px solid rgba(255, 255, 255, 1); margin-top: 11px; flex-shrink: 0; height: 1px; border-width: 0 0 1px 0; width: 100%;" />
+
+        <!-- Table of Stock Data -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Sl.No</th>
+                    <th>Company Name</th>
+                    <th>Share Name</th>
+                    <th>Sector</th>
+                    <th>Price (₹)</th>
+                    <th>Market Cap (₹ Crores)</th>
+                    <th>Lifetime High (₹)</th>
+                    <th>Lifetime Low (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ stock.company_name }}</td>
+                    <td>{{ stock.scrip_name }}</td>
+                    <td>{{ stock.sector }}</td>
+                    <td>{{ stock.formatted_share_price }}</td>
+                    <td>{{ stock.market_capitalization|floatformat:2 }}</td>
+                    <td>{{ stock.lifetime_high|floatformat:2 }}</td>
+                    <td>{{ stock.lifetime_low|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">No stock data available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Angel Investing Shares{% endblock %}</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="{% static 'css/style.css' %}"> -->
+    
+
+    <link href="https://fonts.googleapis.com/css2?family=Inknut+Antiqua&family=Bitter:wght@400;500;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css">
+    <!-- icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    {% block style %}
+        <style>
+            /* cointainer content block */
+                /* .main_class {
+                        width: 90%;
+                        max-width: 1200px;
+                        margin: 20px auto;
+                        padding: 20px;
+                        background-color: #f8f9fa;
+                        border-radius: 10px;
+                        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                    }   */
+
+            .bold { font-weight: bold; }
+            .italic { font-style: italic; }
+            .underline { text-decoration: underline; }
+            .bold_italic { font-weight: bold; font-style: italic; }
+            .bold_underline { font-weight: bold; text-decoration: underline; }
+            .italic_underline { font-style: italic; text-decoration: underline; }
+            .all { font-weight: bold; font-style: italic; text-decoration: underline; }
+
+        </style>
+    {% endblock %}
+</head>
+
+<body>
+
+    <div class="unlisted-landing-page">
+        
+        {% include 'landing/navbar/navbar.html' %}
+
+        <main class="main_class">
+            {% block content %}
+                {% include 'landing/navbar/navDetail.html' %}
+                {% include 'landing/index/index.html' %}
+
+        <main >
+            {% include 'landing/index/index2.html' %}
+            {% include 'landing/footer/footer1.html' %}
+            {% include 'landing/footer/footer.html' %}
+            {% endblock %}
+            {% block stat %}
+            {% endblock %}
+        </main>
+
+        
+    </div>
+
+</body>
+
+
+</html>

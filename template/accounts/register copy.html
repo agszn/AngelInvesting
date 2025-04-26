@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .register-container {
+        margin-top: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+    }
+    .register-card {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        max-width: 450px;
+        width: 100%;
+    }
+    .register-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        text-align: center;
+        padding: 20px;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    .register-body {
+        padding: 30px;
+        background-color: #fff;
+    }
+    .register-footer {
+        text-align: center;
+        padding: 15px;
+        background-color: #f8f9fa;
+        font-size: 14px;
+    }
+    .register-form-group {
+        margin-bottom: 18px;
+    }
+    .register-form-group label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 6px;
+    }
+    .register-form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: 0.3s ease-in-out;
+    }
+    .register-form-group input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    }
+    .register-btn {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        padding: 12px;
+        font-size: 18px;
+        border-radius: 6px;
+        width: 100%;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .register-btn:hover {
+        background: linear-gradient(135deg, #0056b3, #003f7f);
+    }
+    .register-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .register-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container register-container">
+    <div class="card register-card">
+        <div class="register-header">
+            <i class="bi bi-person-plus-fill"></i> Create an Account
+        </div>
+        <div class="register-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="register-form-group">
+                    <label for="id_username">
+                        <i class="bi bi-person-fill"></i> {{ form.username.label }}
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="text-danger">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="register-form-group">
+                    <label for="id_email">
+                        <i class="bi bi-envelope-fill"></i> {{ form.email.label }}
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="text-danger">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="register-form-group">
+                    <label for="id_phone_number">
+                        <i class="bi bi-telephone-fill"></i> {{ form.phone_number.label }}
+                    </label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                        <div class="text-danger">{{ form.phone_number.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="register-form-group">
+                    <label for="id_password1">
+                        <i class="bi bi-lock-fill"></i> {{ form.password1.label }}
+                    </label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <div class="text-danger">{{ form.password1.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="register-form-group">
+                    <label for="id_password2">
+                        <i class="bi bi-lock-fill"></i> {{ form.password2.label }}
+                    </label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div class="text-danger">{{ form.password2.errors }}</div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="register-btn">
+                    <i class="bi bi-person-plus"></i> Register
+                </button>
+            </form>
+        </div>
+        <div class="register-footer">
+            <p class="mb-0">Already have an account?  
+                <a href="{% url 'login' %}" class="register-link">
+                    <i class="bi bi-box-arrow-in-right"></i> Login here
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
