@@ -1,0 +1,56 @@
+{% extends "accounts/profile.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block profile_content %}
+<div class="container mt-5">
+            <div style="margin: auto; background: white; border-radius: 10px; max-width: 600px; overflow: hidden;">
+                <!-- Existing Sell Modal Content Here -->
+                <!-- Header -->
+                <div style="background-color: #454a6d; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-weight: bold;">NSE LTD</span>
+                    <span style="color: #4cd964; margin-left: 10px;">₹1,965.62</span>
+                    <span style="font-size: 12px; margin-left: 5px;">- (115.62 | 6.25%)</span>
+                </div>
+                <div style="font-weight: bold;">SELL</div>
+                </div>
+
+                <!-- Form Section -->
+                <div style="background-color: #eaf3ff; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+
+                    <!-- Advisor -->
+                    <div style="flex: 1; margin-right: 10px;">
+                    <label style="display: block; margin-bottom: 5px;">Advisor</label>
+                    <select style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                        <option>Other Advisor</option>
+                    </select>
+                    </div>
+
+                    <!-- Broker -->
+                    <div style="flex: 1; margin-right: 10px;">
+                    <label style="display: block; margin-bottom: 5px;">Broker</label>
+                    <select style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                        <option>Zerodha LTD</option>
+                    </select>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px;">Quantity</label>
+                    <input type="number" value="250" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                    </div>
+                </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="background-color: #454a6d; padding: 15px 20px; display: flex; justify-content: flex-end;">
+                <button style="background-color: white; color: black; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; display: flex; align-items: center; cursor: pointer;">
+                    <span style="font-size: 20px; color: #28a745; margin-right: 8px;">✔️</span> Place Order
+                </button>
+                </div>
+            </div>
+</div>
+
+
+{% endblock %}

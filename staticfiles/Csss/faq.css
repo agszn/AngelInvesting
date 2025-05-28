@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&display=swap');
+
+.fullpage{
+    margin: 0px 100px;
+}
+.hero-section {
+    background-image: url('../Media/images/faq-banner.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 447px;
+    width: 100%;
+    position: relative;
+    z-index: 0;
+    margin-top: -100px;
+    margin-bottom: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-section-title {
+    font-family: "Outfit", sans-serif;
+    color: white;
+    font-size: 45px;
+    font-weight: 700;
+    
+}
+.paragraph1{
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 18px;
+    font-weight: 300;
+    margin-bottom: 20px;
+}
+
+.title{
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.paragraph{
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 16px;
+    font-weight: 300; 
+    margin-bottom: 30px;
+}
+.paragraph1{
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 16px;
+    font-weight: 300;
+    margin-bottom: 0px;
+}
+.paragraph2{
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 16px;
+    font-weight: 300;
+    margin-bottom: 10px;
+}
+
+.accordion-overall{
+    display: flex;
+    margin: 0px 0px 50px;
+    gap: 30px;
+}
+.accordion-button {
+    font-size: 16px !important;
+    font-weight: 600;
+    border: 1px solid black;
+    height: 60px;
+    width: 570px;
+}
+
+.accordion-item {
+    width: 570px;
+}
+.accordion-button.collapsed {
+    margin: -2px 0px 0px;
+    border: 1px solid black;
+    padding: 30px 20px;
+}
+.accordion-body {
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+}
+/* .accordion-button:not(.collapsed) {
+    color: #363636;
+    background-color: #fff;
+    box-shadow: inset 0 calc(-1 * var(--bs-accordion-border-width)) 0 #ddd;
+  } */
+   .reach-out{
+    text-align: center;
+    margin-bottom: 50px;
+   }
+   .reach-out-para{
+    font-family: "Outfit", sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+    margin: 0px;
+   }
+.reach-out-title{
+    font-family: "Outfit", sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0px;
+}

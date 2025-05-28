@@ -21,4 +21,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('user_auth.urls')),
     path('marketplace/',include('unlisted_stock_marketplace.urls')),
+    path('portfolio/',include('user_portfolio.urls')),
+    
+    path('Acc_User/',include('Acc_User.urls')),
+    path('RM_User/',include('RM_User.urls')),
+    path('ST_User/',include('Share_Transfer.urls')),
+    path('SM_User/',include('site_Manager.urls')),
 ]

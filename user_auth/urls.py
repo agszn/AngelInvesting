@@ -18,9 +18,8 @@ urlpatterns = [
 
     # profile
     path('profile/', view_profile, name='profile'),
-    path('profile/', view_profile, name='view_profile'),
     path('profile/edit/', edit_profile, name='edit_profile'),
-
+    path('download/cmr/<int:cmr_id>/', download_cmr_file, name='download_cmr_file'),
     # contact
     path('contact/', contact, name='contact'),
     path('contactView/', contact_view, name='contactView'),
@@ -30,6 +29,11 @@ urlpatterns = [
 
     # faq
     path('faq/',faq,name='faq'),
+    
+    # blog
+    path('blog/',blog,name='blog'),
+    
+    path('manage-users/', manage_user_types, name='manage_user_types'),
 ]
 
 if settings.DEBUG:

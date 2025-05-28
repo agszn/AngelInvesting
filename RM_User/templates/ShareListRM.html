@@ -1,0 +1,41 @@
+{% extends "baseStructureRM.html" %}
+{% block title %}Shares List{% endblock %}
+
+{% block RMprofile_content %}
+    <div class="RMtable-head">
+        <div class="RMheading">
+            <h3>Angel Invest Share List</h3>
+            <div class="RMsearch-bar">
+                <input type="text" placeholder="Search or type command...">
+                <span style="font-size: 18px; cursor: pointer;">⚙️</span>
+                <span style="font-size: 18px; cursor: pointer;">⬇️</span>
+            </div>
+        </div>
+        <div class="RMtable-scroll-container">
+        <table class="RMbuyorder-table">
+            <thead>
+                <tr>
+                    <th>Sl.no</th>
+                    <th>Company Name</th>
+                    <th>Industry</th>
+                    <th>Conviction Level</th>
+                    <th>Today's Price</th>
+                    <th>Yesterda's Price</th>
+                    <th>Lot_size</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>NSC LTD</td>
+                    <td>Equity Market-Exchange</td>
+                    <td>Very High</td>
+                    <td>1850</td>
+                    <td>1850</td>
+                    <td>250</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+{% endblock %}

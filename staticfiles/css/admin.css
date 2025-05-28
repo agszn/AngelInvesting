@@ -1,0 +1,77 @@
+/* admin.css */
+body {
+    background-color: #f3f0ff; /* Soft pastel lavender background */
+    font-family: 'Poppins', sans-serif;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ensure full height */
+    padding-top: 0; /* Remove extra top padding */
+    margin-top: -50px; /* Moves the login box up */
+}
+
+.login-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 400px;
+    margin-top: 10px;
+}
+
+.login-header img.logo {
+    width: 100px;
+    margin-bottom: 10px;
+}
+
+.login-header h2 {
+    color: #6a5acd; /* Medium Slate Blue header */
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    outline: none;
+    background: #f9f9f9;
+}
+
+.btn-login {
+    background-color: #6a5acd; /* Medium Slate Blue */
+    color: white;
+    font-size: 16px;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-login:hover {
+    background-color: #483d8b; /* Darker Purple */
+}
+
+/* Hide sidebar on login page */
+.login-page .main.shifted {
+    margin-left: 0 !important;
+}
+.login-page .sidebar {
+    display: none !important;
+}

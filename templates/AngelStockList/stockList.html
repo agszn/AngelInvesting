@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% block title %}Stock List{% endblock %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'Csss/listingview.css' %}" />
+<main class="stock-container" >
+    <div class="controls">
+        <div class="show-entries">
+            Show
+            <select id="entries-select">
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+            </select>
+            entries
+        </div>
+        <div class="search-filter">
+            <input type="text" placeholder="Search here..." id="search-input">
+            <button id="filter-btn">Filter</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="stock-table">
+            <thead>
+                <tr>
+                    <th>Sl No</th>
+                    <th class="logo">Logo</th>
+                    <th>Share Name</th>
+                    <th>Sector</th>
+                    <th>Price <br><span class="inline">In ₹ Per Share</span></th>
+                    <th>Market Cap <br><span class="inline">In ₹ Crores</span></th>
+                    <th>Lifetime High</th>
+                    <th>Lifetime Low</th>
+                    <th class="chart">Chart</th>
+                    <th class="options">Options</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Stock 1 -->
+                <tr>
+                    <td>1</td>
+                    <td class="clogo"><img src="{% static 'Media/images/1.png' %}" alt=""></td>
+                    <td>HDB Financial Services Limited</td>
+                    <td>Financial Service</td>
+                    <td>₹ 110.00</td>
+                    <td>88,129,953</td>
+                    <td>₹ 1,525.00</td>
+                    <td>₹ 570.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/hdb-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <!-- Stock 2 -->
+                <tr>
+                    <td>2</td>
+                    <td class="clogo"><img src="{% static 'Media/images/2.png' %}" alt=""></td>
+                    <td>Hexaware Technologies Limited</td>
+                    <td>IT, Software</td>
+                    <td>₹ 980.00</td>
+                    <td>59,401,065</td>
+                    <td>₹ 1,100.00</td>
+                    <td>₹ 237.50</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/hexaware-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+                <!-- Stock 3 -->
+                <tr>
+                    <td>3</td>
+                    <td class="clogo"><img src="{% static 'Media/images/3.png' %}" alt=""></td>
+                    <td>Oravel Shaya Limited</td>
+                    <td>eCommerce</td>
+                    <td>₹ 54.00</td>
+                    <td>37,449,468</td>
+                    <td>₹ 140.00</td>
+                    <td>₹ 33.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/oyo-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+                <!-- Stock 4 -->
+                <tr>
+                    <td>4</td>
+                    <td class="clogo"><img src="{% static 'Media/images/4.png' %}" alt=""></td>
+                    <td>Imagine Marketing Limited</td>
+                    <td>Consumer Durable</td>
+                    <td>₹ 1,675.00</td>
+                    <td>23,859,050</td>
+                    <td>₹ 1,710.00</td>
+                    <td>₹ 630.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/boat-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+                <!-- Stock 5 -->
+                <tr>
+                    <td>5</td>
+                    <td class="clogo"><img src="{% static 'Media/images/5.png' %}" alt=""></td>
+                    <td>National Securities Depository Limited</td>
+                    <td>Financial Service</td>
+                    <td>₹ 1,150.00</td>
+                    <td>23,000.000</td>
+                    <td>₹ 1,150.00</td>
+                    <td>₹ 700.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/nsdl-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <!-- Stock 6 -->
+                <tr>
+                    <td>6</td>
+                    <td class="clogo"><img src="{% static 'Media/images/6.png' %}" alt=""></td>
+                    <td>Vikram Solar Limited</td>
+                    <td>Renewable Energy</td>
+                    <td>₹ 435.00</td>
+                    <td>13,867,147</td>
+                    <td>₹ 475.00</td>
+                    <td>₹ 170.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/vikram-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <!-- Stock 7 -->
+                <tr>
+                    <td>7</td>
+                    <td class="clogo"><img src="{% static 'Media/images/7.png' %}" alt=""></td>
+                    <td>Manjushree Technopack Limited</td>
+                    <td>Packaging</td>
+                    <td>₹ 825.00</td>
+                    <td>7,785,597</td>
+                    <td>₹ 950.00</td>
+                    <td>₹ 180.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/manjushree-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <!-- Stock 8 -->
+                <tr>
+                    <td>8</td>
+                    <td class="clogo"><img src="{% static 'Media/images/8.png' %}" alt=""></td>
+                    <td>API Holdings Ltd</td>
+                    <td>eCommerce</td>
+                    <td>₹ 8.00</td>
+                    <td>4,992,348</td>
+                    <td>₹ 135.00</td>
+                    <td>₹ 8.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/api-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <!-- Stock 9 -->
+                <tr>
+                    <td>9</td>
+                    <td class="clogo"><img src="{% static 'Media/images/9.png' %}" alt=""></td>
+                    <td>ESDS Software Solution Limited</td>
+                    <td>IT, Software</td>
+                    <td>₹ 440.00</td>
+                    <td>4,087,344</td>
+                    <td>₹ 480.00</td>
+                    <td>₹ 190.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/esds-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <!-- Stock 10 -->
+                <tr>
+                    <td>10</td>
+                    <td class="clogo"><img src="{% static 'Media/images/10.png' %}" alt=""></td>
+                    <td>Laval International Limited</td>
+                    <td>Consumer Durable</td>
+                    <td>₹ 40.00</td>
+                    <td>2,164,505</td>
+                    <td>₹ 240.00</td>
+                    <td>₹ 40.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/lava-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <!-- Stocks 11-14 (hidden by default, shown via JS) -->
+                <tr class="extra-row" style="display: none;">
+                    <td>11</td>
+                    <td class="clogo"><img src="{% static 'Media/images/11.png' %}" alt=""></td>
+                    <td>Spray Engineering Devices Limited</td>
+                    <td>Chemical</td>
+                    <td>₹ 540.00</td>
+                    <td>1,219,686</td>
+                    <td>₹ 705.00</td>
+                    <td>₹ 540.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/spray-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <tr class="extra-row" style="display: none;">
+                    <td>12</td>
+                    <td class="clogo"><img src="{% static 'Media/images/12.png' %}" alt=""></td>
+                    <td>India Exposition Merit Limited</td>
+                    <td>Other</td>
+                    <td>₹ 125.00</td>
+                    <td>925,000</td>
+                    <td>₹ 150.00</td>
+                    <td>₹ 120.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/lava-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <tr class="extra-row" style="display: none;">
+                    <td>13</td>
+                    <td class="clogo"><img src="{% static 'Media/images/13.png' %}" alt=""></td>
+                    <td>Lords Mark Industries Limited</td>
+                    <td>Other</td>
+                    <td>₹ 150.00</td>
+                    <td>848,732</td>
+                    <td>₹ 175.00</td>
+                    <td>₹ 150.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/lords-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+
+                <tr class="extra-row" style="display: none;">
+                    <td>14</td>
+                    <td class="clogo"><img src="{% static 'Media/images/14.png' %}" alt=""></td>
+                    <td>KLM Asiva Finvest Limited</td>
+                    <td>Financial Service</td>
+                    <td>₹ 16.00</td>
+                    <td>328,641</td>
+                    <td>₹ 18.00</td>
+                    <td>₹ 10.00</td>
+                    <td>
+                        <div class="chart-img"><img src="{% static 'Media/images/klm-chart.png' %}" alt=""></div>
+                    </td>
+                    <td class="btns">
+                        <div class="buy-sell-btn">
+                            <button class="buy-btn">Buy</button>
+                            <button class="sell-btn">Sell</button>
+                        </div>
+                        <button class="wishlist-btn"><span class="cart-icon"><img src="{% static 'Media/images/cart-list.svg' %}" alt=""></span>Add to Wishlist</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <div class="pagination-info">
+            Showing 1 to 10 of 14 entries
+        </div>
+        <div class="page-numbers">
+            <a href="#" class="active">1 </a>
+            <a href="#"> 2</a>
+            <a href="#">Next</a>
+        </div>
+    </div>
+
+    
+
+</main>
+
+
+
+{% endblock %}

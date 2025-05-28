@@ -1,0 +1,175 @@
+{% extends "baseStructureAcc.html" %}
+{% block title %}Shares List{% endblock %}
+
+
+{% block subtitle %}Sell Order Summary{% endblock %}
+
+{% block Accprofile_content %}
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>Sl.no</th>
+                            <th>Order_Id</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Client Name</th>
+                            <th>Client Id</th>
+                            <th>RM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Ord_01</td>
+                            <td>11-04-2025</td>
+                            <td>11.30am</td>
+                            <td>Suraj Deshpande</td>
+                            <td>102457</td>
+                            <td>Vishnu</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>Customer_name</th>
+                            <th>Customer_Id</th>
+                            <th>Pan Number</th>
+                            <th>Email_id</th>
+                            <th>MObile Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Nikhil Chavan</td>
+                            <td>thangiv_01</td>
+                            <td>GHTHD2523M</td>
+                            <td>nikhilc@gmail.com</td>
+                            <td>7676801529</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>Broker Name</th>
+                            <th>Broker Id</th>
+                            <th>Client Id</th>
+                            <th>Broker Pan Number</th>
+                            <th>Broker Email Id</th>
+                            <th>Broker Contact Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Zeroda Brokering Limited</td>
+                            <td>12081600</td>
+                            <td>72264491</td>
+                            <td>-</td>
+                            <td>zeroda@gmail.com</td>
+                            <td>58965742</td>
+                        </tr>
+                        <tr>
+                            <td>Groww Brokering Limited</td>
+                            <td>12081600</td>
+                            <td>72264491</td>
+                            <td>-</td>
+                            <td>groww@gmail.com</td>
+                            <td>58965742</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>Bank Name</th>
+                            <th>Bank A/c Details</th>
+                            <th>IFS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Bank Of Baroda</td>
+                            <td>521452663258</td>
+                            <td>BARB0BELGAU</td>
+                        </tr>
+                        <tr>
+                            <td>Kotak Mahindra Bank</td>
+                            <td>521452663258</td>
+                            <td>KKBK0008227</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="Accorder-details-transaction">
+                        <table class="Accbuyorder-table">
+                        <thead>
+                                <tr>
+                                <th>SLNO</th>
+                                <th>Broker</th>
+                                <th>ISIN Number</th>
+                                <th>Stock</th>
+                                <th>Order Type</th>
+                                <th>Avg Buy Price</th>
+                                <th>Selling Price</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                </tr>
+                        </thead>
+                        <tbody>
+                                <tr>
+                                <td>1</td>
+                                <td>zeroda Brokering limited</td>
+                                <td>INE012L01014</td>
+                                <td>NNS LTD</td>
+                                <td>Limit</td>
+                                <td>1850</td>
+                                <td><input type="number" class="form-control" value="250" readonly></td>
+                                <td>250</td>
+                                <td>462500.00</td>
+                                <td>Successful</td>
+                                </tr>
+                                <tr>
+                                <td>1</td>
+                                <td>zeroda Brokering limited</td>
+                                <td>INE012L01015</td>
+                                <td>PHILIPS LIGHTING</td>
+                                <td>Market</td>
+                                <td>1375</td>
+                                <td><input type="number" class="form-control" value="250" readonly></td>
+                                <td>100</td>
+                                <td>137500.00</td>
+                                <td>Successful</td>
+                                </tr>
+                                <tr>
+                                <td>1</td>
+                                <td>zeroda Brokering limited</td>
+                                <td>INE012L01016</td>
+                                <td>TATA CAPITAL LTD</td>
+                                <td>Market</td>
+                                <td>925</td>
+                                <td><input type="number" class="form-control" value="250" readonly></td>
+                                <td>400</td>
+                                <td>370000.00</td>
+                                <td>Successful</td>
+                                </tr>
+                                <tr>
+                                <td>1</td>
+                                <td>Groww Brokering limited</td>
+                                <td>INE012L01017</td>
+                                <td>TATA REFRACTERIES LTD</td>
+                                <td>Market</td>
+                                <td>1695</td>
+                                <td><input type="number" class="form-control" value="250" readonly></td>
+                                <td>100</td>
+                                <td>169500.00</td>
+                                <td>Successful</td>
+                                </tr>
+                        </tbody>
+                        </table>
+                        <div class="Accpayment-process">
+                        <h4><Big>Total: </Big>1139500.00</h4>
+                        <button class="Accpayment-button">Process To Account Department</button>
+                        </div>
+                </div>
+{% endblock %}

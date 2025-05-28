@@ -1,0 +1,707 @@
+@import url('https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&display=swap');
+
+.overall {
+    font-family: "Outfit", sans-serif;
+    margin: 0;
+    padding: 0;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+.hero-section1 {
+    background-image: url('../Media/images/banner.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 650px;
+    width: 100%;
+    display: flex;
+
+    /* Remove overlapping issues */
+    margin-top: 0; /* Was -93px, causing overlap */
+    margin-bottom: 50px;
+
+    position: relative;
+    z-index: 1;
+}
+
+.hero-section1-container1 {
+    padding: 50px 80px 0 0;
+}
+
+.hero-section-head {
+    color: white;
+    font-size: 50px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+
+}
+
+.hero-section-para {
+    color: white;
+    font-size: 18px;
+    font-weight: 300;
+    font-family: "Outfit", sans-serif;
+
+}
+
+.hero-button {
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #363636;
+    background-color: white;
+    padding: 10px 50px;
+    border: none;
+    border-radius: 5px;
+}
+
+.hero-section2 {
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 100px;
+    margin-bottom: 50px;
+
+}
+
+.hero-section2-containers {
+    text-align: center;
+    padding: 0px 50px;
+}
+
+.number {
+    font-family: "Outfit", sans-serif;
+    font-size: 50px;
+    font-weight: 600;
+}
+
+.content {
+    font-family: "Outfit", sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: #363636;
+}
+
+.hero-headers {
+    text-align: center;
+}
+
+.heading {
+    font-size: 45px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 40px;
+}
+
+.search-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    margin: 0px 100px;
+    margin-bottom: 50px;
+}
+
+.search-bar {
+    position: relative;
+    width: 300px;
+}
+
+.search-bar input {
+    width: 979px;
+    padding: 8px 15px 8px 40px;
+    border: 1px solid #363636;
+    border-radius: 5px;
+    outline: none;
+    font-size: 20px;
+}
+
+.search-bar .fa-magnifying-glass {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #363636;
+    font-size: 20px;
+
+
+}
+
+.search-bar-button {
+    font-size: 20px;
+    font-weight: 600;
+    padding: 8px 50px;
+    background-color: transparent;
+    border: none;
+    border: solid 1px #0E213F;
+    border-radius: 5px;
+
+
+
+}
+
+.search-bar-button:hover {
+    background-color: #e67e22;
+    color: white;
+}
+
+
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 0px 100px 50px;
+
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo {
+    width: 100px;
+    height: auto;
+
+}
+
+.info-first {
+    display: flex;
+    margin-bottom: 20px;
+    justify-content: space-between;
+
+}
+
+.info-second {
+    display: flex;
+    margin-bottom: 20px;
+    justify-content: space-between;
+}
+
+.spantext {
+    font-size: 16px;
+}
+
+.conviction {
+    display: block;
+    text-align: center;
+    font-size: 14px;
+}
+
+.info-third {
+    display: flex;
+    margin-bottom: 10px;
+    justify-content: space-between;
+}
+
+.price {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.actions button {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #0E213F;
+    background: white;
+    color: #0E213F;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.actions button:hover {
+    color: #007BFF;
+}
+
+.wishlist {
+    text-align: center;
+    font-size: 16px;
+    color: #0E213F;
+    border: 1px solid #0E213F;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 10px;
+}
+
+.wishlist:hover {
+    color: #007BFF;
+}
+
+@media (max-width: 1024px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.viewall1 {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.viewallbtn1 {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background-color: #0E213F;
+    padding: 10px 60px;
+    border: none;
+    border-radius: 5px;
+}
+
+.angelshares {
+    background-color: #F2F2F2;
+    width: 100%;
+    height: 100%;
+    padding: 50px 0px;
+}
+
+.viewall2 {
+    text-align: center;
+}
+
+.viewallbtn2 {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background-color: #0E213F;
+    padding: 10px 60px;
+    border: none;
+    border-radius: 5px;
+}
+
+.why-trade-overall {
+    display: flex;
+    justify-content: space-between;
+}
+
+.why-trade-section {
+    background-color: #0E213F;
+    height: 600px;
+    width: 100%;
+    padding: 50px 100px;
+    margin-bottom: 50px;
+}
+
+.section-title {
+    color: white;
+    font-size: 45px;
+    font-family: "Outfit", sans-serif;
+    font-weight: 800;
+    text-align: center;
+
+}
+
+.section-description {
+    text-align: center;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    font-family: "Outfit", sans-serif;
+    font-weight: 300;
+    padding: 0px 170px;
+    margin-bottom: 50px;
+}
+
+.trade-card {
+    background-color: white;
+    height: 113px;
+    width: 300px;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 60px;
+}
+
+.trade-card-header {
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+
+}
+
+.trade-card-content {
+    margin: 0px;
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 20px;
+    width: 100%;
+}
+
+.listed {
+    margin: 0px 100px 50px;
+}
+
+.listed-row1 {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.listed-row2 {
+    text-align: center;
+    margin-bottom: 40px;
+
+
+}
+
+.listed-row3 {
+    text-align: center;
+    margin-bottom: 40px;
+
+}
+
+.listed-row1 a img {
+    padding: 0px 15px;
+}
+
+.listed-row2 a img {
+    padding: 0px 15px;
+}
+
+.listed-row3 a img {
+    padding: 0px 15px;
+}
+
+.viewall3 {
+    text-align: center;
+}
+
+.viewallbtn3 {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background-color: #0E213F;
+    padding: 10px 60px;
+    border: none;
+    border-radius: 5px;
+}
+
+.investing-steps {
+    background-color: #0E213F;
+    height: 515px;
+    width: 100%;
+    padding: 50px 100px;
+    margin-bottom: 50px;
+
+}
+
+.investing-title {
+    color: white;
+    font-size: 45px;
+    font-family: "Outfit", sans-serif;
+    font-weight: 800;
+    text-align: center;
+    padding: 0px 150px;
+    margin-bottom: 40px;
+}
+
+.investing-cards {
+    display: flex;
+    justify-content: space-between;
+}
+
+.investing-card {
+    height: 265px;
+    width: 186px;
+    background-color: #2D384C;
+    padding: 20px 15px;
+    color: white;
+    border-radius: 5px;
+}
+
+.investing-card-heading {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 8px 0px 5px 0px;
+
+}
+
+.investing-card-paragraph {
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    margin: 0px;
+}
+
+
+.faq-title {
+    font-size: 45px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 40px;
+}
+
+.faq-paragraph {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    margin-bottom: 10px;
+}
+
+.faq-heading {
+    font-family: "Outfit", sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.read-more {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.read-btn {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background-color: #0E213F;
+    padding: 10px 60px;
+    border: none;
+    border-radius: 5px;
+}
+
+.faq-section {
+    margin: 0px 100px 50px;
+}
+
+.faq-title {
+    text-align: center;
+    font-size: 45px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 40px;
+}
+
+.accordion-overall {
+    display: flex;
+    margin: 0px 100px 50px;
+    gap: 30px;
+}
+
+.accordion-button {
+    height: 50px;
+    width: 570px;
+}
+
+.accordion-item {
+    width: 570px;
+}
+
+.accordion-button.collapsed {
+    margin: -2px 0px 0px;
+    border: 1px solid black;
+}
+
+.accordion-body {
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+.blogs {
+    margin: 0px 100px 50px;
+}
+
+.blog-title-section {
+    text-align: center;
+}
+
+.blog-title {
+    font-size: 45px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 40px;
+}
+
+.all-blogs {
+    display: flex;
+}
+
+.blog-container {
+    background-color: #0E213F;
+    color: white;
+    padding: 25px 25px;
+    border-radius: 10px;
+    margin: 0px 20px;
+    height: 400px;
+    width: 100%;
+  }
+.blog-head {
+    font-family: "Outfit", sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.blog-para {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    margin-bottom: 20px;
+}
+
+.read-more-heading, a {
+    width: 40%;
+    display: contents;
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    margin: 0px;
+    
+}
+
+.arrow {
+    font-size: 20px;
+}
+
+.carasoul {
+    margin: 0px 100px 60px;
+}
+
+.carasoul-title-section {
+    text-align: center;
+}
+
+.carasoul-title {
+    font-size: 45px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 40px;
+}
+
+.carousel-container {
+    width: 100%;
+    max-width: 1166px;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 20px;
+    width: max-content;
+}
+
+.testimonial-card {
+    width: calc(100vw - 40px);
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #0E213F;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    align-items: flex-start;
+    gap: 20px;
+    flex-shrink: 0;
+    margin: 1px 0px;
+}
+
+.testimonial-icon {
+    font-size: 40px;
+    color: #4a6cf7;
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+
+.testimonial-content {
+    flex: 1;
+}
+
+.testimonial-text {
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.testimonial-author {
+    display: flex;
+    flex-direction: column;
+}
+
+.author-name {
+    font-family: "Outfit", sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 3px;
+}
+
+.author-profession {
+    font-family: "Outfit", sans-serif;
+    font-size: 14px;
+    color: #777;
+}
+
+@media (min-width: 768px) {
+    .testimonial-card {
+        width: calc(33.33vw - 30px);
+        max-width: 380px;
+    }
+
+    .testimonial-icon {
+        font-size: 50px;
+    }
+
+    .testimonial-text {
+        font-size: 17px;
+    }
+}
+
+.started {
+    margin: 0px 100px 60px;
+}
+
+.started-title-section {
+    text-align: center;
+}
+
+.started-title {
+    font-size: 45px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 10px;
+}
+
+.started-paragraph {
+    font-size: 18px;
+    font-weight: 300;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 20px;
+}
+
+.started-btn {
+    text-align: center;
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background-color: #0E213F;
+    padding: 10px 50px;
+    border: none;
+    border-radius: 5px;
+}

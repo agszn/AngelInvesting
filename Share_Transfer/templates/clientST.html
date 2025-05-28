@@ -1,0 +1,32 @@
+{% extends "baseStructureST.html" %}
+{% block title %}Client{% endblock %}
+
+
+{% block STsubtitle %}Client 
+                    <button class="view btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClient">Add New Client</button>
+{% endblock %}
+
+{% block STprofile_content %}
+            <table class="STbuyorder-table">
+                <thead>
+                    <tr>
+                        <th>Sl.no</th>
+                        <th>Joining Date</th>
+                        <th>Customer Id</th>
+                        <th>Customer Name</th>
+                        <th>User Name</th>
+                        <th>Password</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>11-04-2025</td>
+                        <td>1554528</td>
+                        <td>Suraj Deshpande</td>
+                        <td>Suraj</td>
+                        <td>2526841</td>
+                    </tr>
+                </tbody>
+            </table>
+{% endblock %}

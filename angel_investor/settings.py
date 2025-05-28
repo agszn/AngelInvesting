@@ -30,6 +30,8 @@ ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'user_auth.CustomUser'
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 50000  # Or higher, depending on your needs
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,6 +46,12 @@ INSTALLED_APPS = [
 
     'user_auth',
     'unlisted_stock_marketplace',
+    
+    'user_portfolio',
+    'Acc_User',
+    'RM_User',
+    'Share_Transfer',
+    'site_Manager',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +77,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'user_auth.context_processors.profile_context',
+                'user_auth.context_processors.marquee_stocks',
             ],
         },
     },
@@ -106,27 +116,62 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+from django.conf.locale.en import formats as en_formats
+
+en_formats.DATE_INPUT_FORMATS = ['%d-%m-%Y']
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata' 
 
 USE_I18N = True
 
 USE_TZ = True
 
 
+# ATE_FORMAT = ( ( 'd-m-Y' ))
+# DATE_INPUT_FORMATS = ( ('%d-%m-%Y'),)
+# DATETIME_FORMAT = (( 'd-m-Y H:i' ))
+# DATETIME_INPUT_FORMATS = (('%d-%m-%Y %H:%i'),)
+
+# LANGUAGE_CODE = 'en-us'
+
+# TIME_ZONE = 'Asia/Kolkata'
+
+# USE_I18N = True
+
+# USE_L10N = False
+
+# USE_TZ = False
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 
+# STATICFILES_DIRS = [
+#     BASE_DIR / 'static'
+# ]
+# STATIC_URL = 'static/'
+# STATIC_ROOT = BASE_DIR / 'staticfiles' 
+
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+from pathlib import Path
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [
-    BASE_DIR / 'static'
+    BASE_DIR / 'static',
 ]
-STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # <<<<<< Add this line
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -135,7 +180,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
-LOGIN_REDIRECT_URL = 'base'
+# LOGIN_REDIRECT_URL = 'base'
+LOGIN_REDIRECT_URL = '/admin/'
+
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = 'login'
@@ -147,10 +194,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'sznvws@gmail.com'
-EMAIL_HOST_PASSWORD = 'qmib ecqd egdf xaxl'
-DEFAULT_FROM_EMAIL = 'sznvws@gmail.com'
-ADMIN_EMAIL = 'sznvws@gmail.com'
+EMAIL_HOST_USER = '@gmail.com'
+EMAIL_HOST_PASSWORD = '   '
+DEFAULT_FROM_EMAIL = '@gmail.com'
+ADMIN_EMAIL = '@gmail.com'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

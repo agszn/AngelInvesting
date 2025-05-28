@@ -1,0 +1,31 @@
+{% extends "baseStructureRM.html" %}
+{% block title %}Shares List{% endblock %}
+
+{% block SubTitleRM %}Sell Orders List{% endblock %}S
+
+{% block RMprofile_content %}
+            <table class="RMbuyorder-table">
+                <thead>
+                    <tr>
+                        <th>Sl.no</th>
+                        <th>Order_Id</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Customer Name</th>
+                        <th>Customer Id</th>
+                        <th>Stock Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Ord_01</td>
+                        <td>11-04-2025</td>
+                        <td>11.30am</td>
+                        <td>Suraj Deshpande</td>
+                        <td>10255465</td>
+                        <td><a class="view" href="{% url 'RM_User:selldersummery' %}">view</a></td>
+                    </tr>
+                </tbody>
+            </table>
+{% endblock %}

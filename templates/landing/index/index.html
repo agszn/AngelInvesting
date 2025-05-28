@@ -1,0 +1,128 @@
+{% load static %}  
+<style>
+          .stock-card-image {
+              max-width: 50px;
+          }
+                    .stock-card-info {
+              display: flex;
+              align-items: center;
+              position: relative;
+              flex-direction: column;
+              gap: 5px;
+          }
+          
+          .stock-card-info i {
+              cursor: pointer;
+              font-size: 18px;
+              color: black;
+              background: #fff;
+              border-radius: 50%;
+              padding: 5px;
+              width: 24px;
+              height: 24px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+          }
+          
+          .stock-tooltip {
+              display: none;
+              position: absolute;
+              top: 30px;
+              right: 0;
+              width: 300px;
+              background: white;
+              border: 1px solid #ccc;
+              padding: 10px;
+              border-radius: 5px;
+              box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+              font-size: 14px;
+              z-index: 10;
+          }
+          
+          .stock-card-info:hover .stock-tooltip {
+              display: block;
+          }
+</style>  
+<div class="hero-section3">
+      <div class="hero-headers">
+        <h1 class="heading">Explore Unlisted Shares</h1>
+      </div>
+
+      <!-- <div class="search-wrapper">
+        <div class="search-bar">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Search here..." />
+        </div>
+        <div>
+          <button class="search-bar-button">Search</button>
+        </div>
+      </div> 
+
+    </div>-->
+
+    <div class="grid-container">
+      {% for stock in stocks|slice:":6" %}
+        <div class="card">
+          <div class="info-first">
+            <span>
+              {% if stock.logo %}
+                <!-- <a href="{{ stock.description }}">
+                  <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
+                </a> -->
+
+                  <!-- <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="padding-left: 2%;"><img src="{%  static 'Media/images/circle-info.svg' %}" alt=""></a> -->
+
+                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">
+                  <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
+                </a>
+
+            </span>
+
+                <p style="font-size: 16px; font-weight: 600;">
+                  <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">
+                  <div class="stock-card-info">
+                      <!-- {{ stock.company_name }} -->
+                      <div class="stock-tooltip">
+                          <p>{{ stock.description }}</p>
+                      </div>
+                  </div>
+                  </a>
+                </p>
+              {% endif %}
+          </div>
+
+          <div class="info-second">
+            <span class="spantext"><strong>{{ stock.sector }} </strong></span>
+            <div>
+              <span class="spantext">Conviction level</span>
+              <strong class="conviction">{{ stock.conviction_level }}</strong>
+            </div>
+
+          </div>
+          <div class="info-third">
+            <span class="spantext">Lot:<strong> {{ stock.lot }}</strong></span>
+            <span class="spantext">Qty:<strong>{{ stock.quantity }}</strong></span>
+            <span class="spantext">Share Price:<strong> ₹{{ stock.share_price }}</strong></span>
+          </div>
+          <div class="actions">
+            <button>Buy Now</button>
+            <button>Sell Now</button>
+          </div>
+          <button class="wishlist">Add to Wishlist 🛒</button>
+        </div>
+      {% endfor %}
+
+
+        <div style="text-align: center;">
+                <button class="">
+                  <a style="color: white;" href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="custom-btnM"></a>
+                </button>
+        </div>
+        <div class="viewall3">
+                <button class="viewallbtn3">
+                  <a style="color: white;" href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="custom-btnM">View All Listings</a>
+                </button>
+        </div>
+                
+    </div>

@@ -1,0 +1,6 @@
+/* admin/customfieldvalue.css */
+.highlighted-field {
+    border: 2px solid #007bff;
+    background-color: #eaf4ff;
+    font-weight: bold;
+}

@@ -25,3 +25,11 @@ def percentage_change(ltp, share_price):
 def get_item(dictionary, key):
     return dictionary.get(key)
 
+
+from django import template
+
+register = template.Library()
+
+@register.filter
+def dict_key(d, key):
+    return d.get(key)

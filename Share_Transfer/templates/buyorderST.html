@@ -1,0 +1,36 @@
+{% extends "baseStructureST.html" %}
+{% block title %}Buy Orders{% endblock %}
+
+
+{% block STsubtitle %}Buy Orders{% endblock %}
+
+{% block STprofile_content %}
+            <table class="STbuyorder-table">
+                <thead>
+                    <tr>
+                        <th>Sl.no</th>
+                        <th>Order_Id</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Accounts</th>
+                        <th>RM</th>
+                        <th>Customer_Name</th>
+                        <th>Customer_ID</th>
+                        <th>Stock Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Ord_01</td>
+                        <td>11-04-2025</td>
+                        <td>11.30am</td>
+                        <td>Sagar</td>
+                        <td>Vishnu</td>
+                        <td>Suraj Deshpande</td>
+                        <td>10255465</td>
+                        <td><a class="view" href="{% url 'ST_User:buyOrderSummaryST' %}">view</a></td>
+                    </tr>
+                </tbody>
+            </table>
+{% endblock %}

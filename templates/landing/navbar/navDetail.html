@@ -1,0 +1,48 @@
+{% load static %} 
+ <section class="overall">
+   
+    <!-- <div class="hero-section1">
+        <img src="{% static 'images/banner.png' %}" alt="" style="height: 100%;width: 100%;">
+    </div> -->
+
+    <div class="hero-section1">
+      {% if banner %}
+        <img src="{{ banner.image.url }}" alt="Banner" style="height: 100%; width: 100%;">
+      {% else %}
+        <img src="{% static 'images/banner.png' %}" alt="Default Banner" style="height: 100%; width: 100%;">
+      {% endif %}
+    </div>
+
+    <div class="hero-section2">
+      <div class="hero-section2-containers">
+        <h1 class="number">50L+</h1>
+        <p class="content">Transaction Value</p>
+      </div>
+      <div class="hero-section2-containers">
+        <h1 class="number">250+</h1>
+        <p class="content">Companies Listed</p>
+      </div>
+      <div class="hero-section2-containers">
+        <h1 class="number">100+</h1>
+        <p class="content">Partner Network</p>
+      </div>
+    </div>
+   
+ <!-- <div class="hero-section1">
+      <div class="hero-section1-container1">
+        <h1 class="hero-section-head">Buy or Sell Unlisted Shares / ESOP’s</h1>
+        <p class="hero-section-para">Unlisted shares and ESOPs provide early investment opportunities and liquidity
+          before an IPO. They can be
+          traded through private deals, intermediaries, or specialized platforms. While potentially profitable,
+          investors should assess risks like liquidity, valuation fluctuations, and regulatory compliance.</p>
+
+        {% if user.is_authenticated %}
+          <button class="hero-button"><a href="{% url 'login' %}" style="color: black;">Our Platform</a></button>
+        {% else %}
+          <button class="hero-button"><a href="{% url 'profile' %}" style="color: black;">Our Platform</a></button>
+        {% endif %}
+      </div>
+      <div class="hero-section1-container2">
+        <img src="{% static 'Media/images/cards.png' %}" alt="">
+      </div>
+    </div> -->

@@ -1,0 +1,164 @@
+.fullpage {
+    margin: 0px 100px;
+}
+
+.hero-section {
+    background-image: url('../Media/images/faq-banner.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 447px;
+    width: 100%;
+    position: relative;
+    z-index: 0;
+    margin-top: -100px;
+    margin-bottom: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-section-title {
+    font-family: "Outfit", sans-serif;
+    color: white;
+    font-size: 45px;
+    font-weight: 700;
+
+}
+
+.hero-section1 {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.hero-section1-ctn {
+    margin: 30px 0px 0px 30px;
+}
+
+.hero-section1-img img {
+    height: 525px;
+}
+
+.hero-section1-head {
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 40px;
+    font-weight: 700;
+}
+
+.hero-section1-para {
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 16px;
+    font-weight: 300;
+    margin: 10px 0px 10px;
+}
+
+.hero-section1-para strong {
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.hero-section-para1 {
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 16px;
+    font-weight: 300;
+    margin: 0px 0px 50px;
+}
+
+.hero-section2-head {
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 40px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.hero-section2-para {
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 16px;
+    font-weight: 300;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.hero-section3 {
+    display: flex;
+    margin-bottom: 50px;
+}
+
+.hero-section3-head {
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 30px;
+    font-weight: 700;
+    margin: 20px 0px 10px;
+}
+
+.hero-section3-para {
+    font-family: "Outfit", sans-serif;
+    color: #363636;
+    font-size: 18px;
+    font-weight: 300;
+    margin: 0px;
+}
+
+.hero-section3-img img {
+    height: 320px;
+}
+
+.hero-section3-row {
+    text-align: center;
+}
+
+.hero-section4 {
+    background-image: url('../Media/images/hero-section4-img.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 417px;
+    padding: 100px 100px;
+}
+
+.hero-section4-title{
+    font-family: "Outfit", sans-serif;
+    font-size: 40px;
+    font-weight: 600;
+    margin: 0px;
+}
+.hero-section4-para{
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    margin-bottom: 10px;
+    padding-right: 410px;
+}
+
+.reach-out-title{
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0px;
+}
+
+.reach-out-para{
+    font-family: "Outfit", sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+    margin: 0px;
+   }
+   .reach-out-para1{
+    font-family: "Outfit", sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+    margin-bottom: 20px;
+   }
+.social-icons{
+    display: flex;
+    gap: 20px;
+}

@@ -1,6 +1,40 @@
 from django.contrib import admin
 from .models import Contact
 
+# admin.py
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django import forms
+from .models import CustomUser
+
+class CustomUserChangeForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Restrict editing of user_type to superusers
+        if not self.current_user.is_superuser:
+            self.fields['user_type'].disabled = True
+
+class CustomUserAdmin(UserAdmin):
+    form = CustomUserChangeForm
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.current_user = request.user  # pass the request user to form
+        return form
+
+    fieldsets = UserAdmin.fieldsets + (
+        ('Additional Info', {
+            'fields': ('phone_number', 'otp', 'user_type'),
+        }),
+    )
+
+admin.site.register(CustomUser, CustomUserAdmin)
+
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
     list_display = ('name', 'email')  # Displays these fields in the admin list view

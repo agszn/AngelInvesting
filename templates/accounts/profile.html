@@ -1,0 +1,787 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% load static %}
+{% block content %}
+  <style>
+.profile-wrapper {
+        display: flex;
+        margin: 30px;
+    }
+
+    .profile-sidebar {
+        width: 30%;
+        padding: 20px;
+        background-color: #f8f9fa;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .custom-profile-main {
+        width: 70%;
+        padding: 30px;
+        background-color: #e6f2ff;
+        border-radius: 8px;
+    }
+
+    .custom-section {
+        margin-bottom: 40px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #FDFAFA;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-section-block {
+        margin-bottom: 40px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #FDFAFA;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        text-align: center;
+        color: #0e213f;
+    }
+
+    .custom-section-header:hover {
+        background-color: #f5f5f5;
+    }
+
+    .custom-section-header span {
+        transition: transform 0.3s ease;
+    }
+
+    .custom-section-header.open span {
+        transform: rotate(180deg);
+    }
+
+    .custom-section-body {
+        margin-top: 15px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .custom-profile-left {
+        grid-column: span 3;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .custom-profile-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .custom-profile-btn {
+        padding: 6px 10px;
+        background: #d0e8ff;
+        border: 1px solid #8ab6d6;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #000;
+    }
+
+    .custom-profile-btn:hover {
+        background: #b3dbff;
+    }
+
+    .stock-page-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 75px;
+        font-size: 2em;
+        color: aliceblue;
+        background: radial-gradient(
+            64.54% 23.63% at 69.24% 61.54%,
+            #271b3f 0%,
+            #271b3f 43.09%,
+            #341a47 68.59%,
+            #0e213f 100%
+        );
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-label-block {
+        margin-bottom: 12px;
+    }
+
+    .custom-label-block .custom-label {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    /* subnav */
+    .custom-profile-subnav {
+        background-color: #f9f9f9;
+        border-bottom: 2px solid #e0e0e0;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+    }
+
+    .custom-subnav-list {
+        list-style: none;
+        display: flex;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .custom-subnav-list li button {
+        background-color: transparent;
+        border: none;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .custom-subnav-list li button:hover {
+        background-color: #e0e0e0;
+    }
+
+    .custom-subnav-list li button.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* left */
+.profile-sidebar {
+        background-color: #f0f8ff;
+        border: 1px solid #cce0ff;
+        border-radius: 12px;
+        padding: 25px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+    }
+
+    .profile-sidebar h4 {
+        color: #003366;
+        border-bottom: 2px solid #99ccff;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+        font-size: 1.6rem;
+    }
+
+    .filter-form-inline {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+
+    .filter-form-inline .form-control,
+    .filter-form-inline .form-select {
+        width: 200px;
+        border-radius: 8px;
+        border: 1px solid #99ccff;
+        padding: 8px 12px;
+    }
+
+    .filter-form-inline .btn-primary {
+        background-color: #004080;
+        border-color: #004080;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: bold;
+    }
+
+    .filter-form-inline .btn-primary:hover {
+        background-color: #0059b3;
+        border-color: #0059b3;
+    }
+
+    .list-group-item {
+        background-color: #ffffff;
+        border-left: 4px solid #004080;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: left;
+    }
+
+    .list-group-item .fw-bold {
+        font-size: 1.1rem;
+    }
+
+    .text-primary {
+        color: #004080 !important;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+    .stock-page-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 75px;
+        font-size: 2em;
+        color: aliceblue;
+        background: radial-gradient(
+            64.54% 23.63% at 69.24% 61.54%,
+            #271b3f 0%,
+            #271b3f 43.09%,
+            #341a47 68.59%,
+            #0e213f 100%
+        );
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .custom-subnav-list {
+        list-style: none;
+        display: flex;
+        background-color: #ECF3FF;
+        padding: 15px;
+    }
+
+    .custom-subnav-list li a {
+        display: block; /* Ensures padding + background work fully */
+        text-decoration: none;
+        background-color: transparent;
+        border: none;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #000000;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: background-color 0.3s, color 0.3s;
+        width: 100%; /* Optional: make entire <li> clickable if needed */
+    }
+
+    .custom-subnav-list li a:hover {
+        background-color: #e0e0e0;
+    }
+
+    .custom-subnav-list li a.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+  </style>
+
+<div class="stock-page-header">
+    <h2>{% block headerContent %}Profile{% endblock %}</h2>
+</div>
+
+<div class="profile-wrapper">
+    <!-- left start -->
+        {% include 'accounts/profileSidebar.html' %}
+
+    <!-- <div class="profile-sidebar mb-3" style="font-family: Arial, sans-serif; background-color: #f5f7fa; padding: 10px; border-radius: 6px;">
+    </div> -->
+    <!-- left end -->
+
+    <!-- right start-->
+    <div class="custom-profile-main">
+        <!-- Sub-navigation for profile pages -->
+        <div class="custom-profile-subnav">
+            <ul class="custom-subnav-list">
+                <li><a href="{% url 'user_portfolio:profile_overview' %}" id="overview-btn">Overview</a></li>
+                <li><a href="{% url 'user_portfolio:unlisted_view' %}" id="unlisted-btn">Unlisted</a></li>
+                <li><a href="{% url 'user_portfolio:angel_invest' %}" id="angel-btn">Angel Invest</a></li>
+                <li><a href="{% url 'user_portfolio:portfolio_view' %}" id="portfolio-btn">Portfolio</a></li>
+                <li><a href="{% url 'user_portfolio:buy_orders' %}" id="buyorders-btn">Buy Orders</a></li>
+                <li><a href="{% url 'user_portfolio:sell_orders' %}" id="sellorders-btn">Sell Orders</a></li>
+            </ul>
+        </div>
+
+
+        <div class="custom-section-block">
+            {% block profile_content %}
+
+
+                <!-- Profile Section -->
+                <div style="padding:20px;">
+
+                    <div style="background:#fff; border-radius:10px; padding:20px; margin-bottom:10px;">
+                        <div style="display:flex; align-items:center;">
+                            <div style="width:70px; height:70px; border-radius:50%; background:#ccc; margin-right:15px;"></div>
+                            <div>
+                                <div style="font-weight:bold; font-size:16px; color:#2c3e50;">Nikhil Suresh Chouhsan</div>
+                                <div style="color:#777;">Customer ID : thangiv_01</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background:#fff; border-radius:10px; padding:20px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="font-weight:600; color:#2c3e50;">Personal Information</div>
+
+                                    <!-- Edit Button -->
+                                    <button onclick="openModalEditProfile()" 
+                                            style="border:1px solid #ccc; background:transparent; padding:5px 15px; border-radius:20px; cursor:pointer;">
+                                        ✏️ Edit
+                                    </button>
+
+                                    <!-- Modal Structure -->
+                                    <div id="edit-profile-modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; 
+                                        background-color: rgba(0,0,0,0.5);">
+                                        <div style="background: white; margin: 5% auto; padding: 20px; border-radius: 10px; width: 80%; max-width: 800px; position: relative;">
+                                            
+                                            <!-- Modal Header -->
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <h3 style="margin: 0; color: #333;">Personal Information</h3>
+                                                <div>
+                                                    <button onclick="saveEditProfileForm()" 
+                                                            style="background-color: #e5f9e7; color: green; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-right: 8px;">
+                                                        Save ✔
+                                                    </button>
+                                                    <button onclick="closeModalEditProfile()" 
+                                                            style="background-color: #ffe5e5; color: red; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer;">
+                                                        Close ❌
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Modal Body -->
+                                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px;">
+                                                <div>
+                                                    <label style="font-weight: bold;">First Name (As Per PAN)</label><br>
+                                                    <input type="text" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 5px;">
+                                                </div>
+                                                <div>
+                                                    <label style="font-weight: bold;">Middle Name (As Per PAN)</label><br>
+                                                    <input type="text" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 5px;">
+                                                </div>
+                                                <div>
+                                                    <label style="font-weight: bold;">Last Name (As Per PAN)</label><br>
+                                                    <input type="text" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 5px;">
+                                                </div>
+                                                <div>
+                                                    <label style="font-weight: bold;">Email</label><br>
+                                                    <input type="email" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 5px;">
+                                                </div>
+                                                <div>
+                                                    <label style="font-weight: bold;">Whatsapp Number</label><br>
+                                                    <input type="text" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 5px;">
+                                                </div>
+                                                <div>
+                                                    <label style="font-weight: bold;">Mobile Number</label><br>
+                                                    <input type="text" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 5px;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- JavaScript -->
+                                    <script>
+                                        function openModalEditProfile() {
+                                            document.getElementById('edit-profile-modal').style.display = 'block';
+                                        }
+                                        function closeModalEditProfile() {
+                                            document.getElementById('edit-profile-modal').style.display = 'none';
+                                        }
+                                        function saveEditProfileForm() {
+                                            alert("Profile information saved!");
+                                            closeModalEditProfile();
+                                        }
+                                    </script>
+
+                            </div>
+
+                            <div style="margin-top:20px; display:grid; grid-template-columns:repeat(3, 1fr); gap:15px;">
+                                <div><strong style="color:#2c3e50;">First Name</strong><br>Nikhil</div>
+                                <div><strong style="color:#2c3e50;">Middle Name</strong><br>suresh</div>
+                                <div><strong style="color:#2c3e50;">Last Name</strong><br>Chouhan</div>
+                                <div><strong style="color:#2c3e50;">Email</strong><br>nikhilchouhan41@gmail.com</div>
+                                <div><strong style="color:#2c3e50;">Whatsapp Number</strong><br>+91 9654585698</div>
+                                <div><strong style="color:#2c3e50;">Mobile Number</strong><br>+91 9654585698</div>
+                            </div>
+                        </div>
+                </div>
+                <!-- profile section end -->
+
+                <!-- KYC Section -->
+                <div style="padding: 20px;">
+                    <div style="background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-weight: 600; color: #2c3e50;">Identity Information</div>
+                            <button onclick="openModalKYCProfile()" style="border: 1px solid #ccc; background: transparent; padding: 5px 15px; border-radius: 20px; cursor: pointer;">
+                                ✏️ Edit
+                            </button>
+                        </div>
+
+                        <!-- Identity Modal -->
+                        <div id="edit_adhar_modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+                            <div style="max-width: 750px; margin: 50px auto; background-color: white; border-radius: 10px; padding: 20px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="margin: 0; color: #333;">Identity Information</h3>
+                                    <div>
+                                        <button onclick="saveKYCForm()" style="background-color: #e5f9e7; color: green; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-right: 8px;">
+                                            Save ✔
+                                        </button>
+                                        <button onclick="closeModalKYC()" style="background-color: #ffe5e5; color: red; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer;">
+                                            Close ❌
+                                        </button>
+                                    </div>
+                                </div>
+                                <br>
+                                <!-- Form Fields -->
+                                <div style="display: flex; gap: 40px; align-items: flex-start;">
+                                    <!-- Aadhar -->
+                                    <div style="flex: 1;">
+                                        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Aadhar Card</label>
+                                        <input type="text" value="252562545856" style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px; margin-bottom: 10px;">
+                                        <button style="padding: 6px 20px; border: 1px solid #7d8fa0; background-color: white; border-radius: 20px; font-weight: bold; cursor: pointer;">⬆ Upload</button>
+                                    </div>
+
+                                    <!-- PAN -->
+                                    <div style="flex: 1;">
+                                        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Pan Card</label>
+                                        <input type="text" value="252562545856" style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px; margin-bottom: 10px;">
+                                        <button style="padding: 6px 20px; border: 1px solid #7d8fa0; background-color: white; border-radius: 20px; font-weight: bold; cursor: pointer;">⬆ Upload</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Display KYC Info -->
+                        <div style="margin-top: 20px; display: flex; gap: 40px;">
+                            <div>
+                                <strong style="color: #2c3e50;">Aadhar Card</strong>
+                                <span onclick="showImage('https://www.dialabank.com/wp-content/uploads/2020/11/Aadhaar-card.png')" style="cursor: pointer; color: #2c3e50;" title="View Aadhar">👁</span><br>
+                                252562545856
+                            </div>
+                            <div>
+                                <strong style="color: #2c3e50;">Pan Card</strong>
+                                <span onclick="showImage('https://okcredit-blog-images-prod.storage.googleapis.com/2021/10/PANcard2-1.jpg')" style="cursor: pointer; color: #2c3e50;" title="View PAN">👁</span><br>
+                                252562545856
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Popup Modal -->
+                <div id="image_modal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;">
+                    <div onclick="closeImage()" style="cursor: pointer; position: absolute; top: 20px; right: 30px; font-size: 28px; color: white;">❌</div>
+                    <img id="popup_image" src="" style="max-width: 90%; max-height: 80%; border-radius: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.2);">
+                </div>
+
+                <!-- JavaScript -->
+                <script>
+                    function openModalKYCProfile() {
+                        document.getElementById('edit_adhar_modal').style.display = 'block';
+                    }
+
+                    function closeModalKYC() {
+                        document.getElementById('edit_adhar_modal').style.display = 'none';
+                    }
+
+                    function saveKYCForm() {
+                        alert("KYC information saved!");
+                        closeModalKYC();
+                    }
+
+                    function showImage(url) {
+                        document.getElementById('popup_image').src = url;
+                        document.getElementById('image_modal').style.display = 'flex';
+                    }
+
+                    function closeImage() {
+                        document.getElementById('image_modal').style.display = 'none';
+                        document.getElementById('popup_image').src = "";
+                    }
+                </script>
+                <!-- kyc end -->
+
+                <!-- bank form start-->
+                <div style="background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 10px;">
+                    <!-- Bank Account Section -->
+                    <div style="background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-weight: 600; color: #2c3e50;font-size:16px; ">Bank Account Details</div>
+                            <div>
+                                <button onclick="openBankModal('add')" style="border: 1px solid #ccc; background: transparent; padding: 5px 15px; border-radius: 20px; cursor: pointer;">➕ Add Bank</button>
+                                <button onclick="openBankModal('edit')" style="border: 1px solid #ccc; background: transparent; padding: 5px 15px; border-radius: 20px; cursor: pointer;">✏️ Edit</button>
+                            </div>
+                        </div>
+
+                        <!-- Display Bank Info -->
+                        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <div><strong style="color: #2c3e50;">Account Holder Name</strong><br>Nikhil Chouhan</div>
+                            <div><strong style="color: #2c3e50;">Bank Name</strong><br>Kotak</div>
+                            <div><strong style="color: #2c3e50;">Account Type</strong><br>Savings</div>
+                            <div><strong style="color: #2c3e50;">Account Number</strong><br>1254125845685</div>
+                            <div><strong style="color: #2c3e50;">IFSC Code</strong><br>582147</div>
+                        </div>
+                    </div>
+
+                    <!-- Bank Modal -->
+                    <div id="bank_modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);  justify-content: center;">
+                        <div style="width: 750px; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;">
+                            <!-- Modal Header -->
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 id="modal_title" style="margin: 0; color: #2c3e50;">Bank Account Details</h3>
+                                <div>
+                                    <button onclick="saveBankForm()" style="background-color: #e5f9e7; color: green; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-right: 8px;">✔ Save</button>
+                                    <button onclick="closeBankModal()" style="background-color: #ffe5e5; color: red; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer;">❌ Close</button>
+                                </div>
+                            </div>
+
+                            <!-- Bank Form Fields -->
+                            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Account Holder Name</label>
+                                    <input id="holder_name" type="text" placeholder="Enter name" style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                </div>
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Bank Name</label>
+                                    <input id="bank_name" type="text" placeholder="Enter bank name" style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                </div>
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Account Type</label>
+                                    <input id="account_type" type="text" placeholder="Savings / Current" style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                </div>
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Account Number</label>
+                                    <input id="account_number" type="text" placeholder="Enter account number" style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                </div>
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">IFSC Code</label>
+                                    <input id="ifsc_code" type="text" placeholder="Enter IFSC" style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- JavaScript -->
+                    <script>
+                        function openBankModal(mode) {
+                            document.getElementById('bank_modal').style.display = 'flex';
+                            document.getElementById('modal_title').textContent = mode === 'add' ? 'Add Bank Account' : 'Edit Bank Account';
+
+                            if (mode === 'add') {
+                                document.getElementById('holder_name').value = '';
+                                document.getElementById('bank_name').value = '';
+                                document.getElementById('account_type').value = '';
+                                document.getElementById('account_number').value = '';
+                                document.getElementById('ifsc_code').value = '';
+                            } else {
+                                document.getElementById('holder_name').value = 'Nikhil Chouhan';
+                                document.getElementById('bank_name').value = 'Kotak';
+                                document.getElementById('account_type').value = 'Savings';
+                                document.getElementById('account_number').value = '1254125845685';
+                                document.getElementById('ifsc_code').value = '582147';
+                            }
+                        }
+
+                        function closeBankModal() {
+                            document.getElementById('bank_modal').style.display = 'none';
+                        }
+
+                        function saveBankForm() {
+                            alert("Bank details saved successfully.");
+                            closeBankModal();
+                            // TODO: Submit form via AJAX or POST
+                        }
+                    </script>
+                </div>
+                <!-- bank form end -->
+
+                <!-- CMR Form Start -->
+                <div style="background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 10px;">
+                    <div style="background-color:#ffffff; padding:20px; border-radius:12px; max-width:900px; margin:auto; box-shadow:0 0 5px rgba(0,0,0,0.05);">
+
+                        <!-- Header and Add Broker Button -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <div style="font-weight:600; font-size:16px; color:#344767;">CMR Copy</div>
+                            <button onclick="openModalCMR()" style="padding:6px 15px; border:1px solid #b0b8c1; border-radius:24px; background-color:white; color:#344767; font-weight:500; cursor:pointer;">
+                                &#43; Add Broker
+                            </button>
+                        </div>
+
+                        <!-- Broker Display Section -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <div style="display:grid; grid-template-columns:auto auto auto; gap:40px; color:#344767;">
+                                <div>
+                                    <div style="font-weight:600;">Broker Name</div>
+                                    <div>Zerodha Brokering Limited</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;">Broker Id</div>
+                                    <div>12081600</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;">Client Id</div>
+                                    <div>72264491</div>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button style="display:flex; align-items:center; gap:5px; padding:6px 12px; border:1px solid #b0b8c1; border-radius:24px; background:white; color:#344767; cursor:pointer;">
+                                    ⬇ Download
+                                </button>
+                                <button onclick="openModalCMR()" style="display:flex; align-items:center; gap:5px; padding:6px 12px; border:1px solid #b0b8c1; border-radius:24px; background:white; color:#344767; cursor:pointer;">
+                                    ✏️ Edit
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:grid; grid-template-columns:auto auto auto; gap:40px; color:#344767;">
+                                <div>
+                                    <div style="font-weight:600;">Broker Name</div>
+                                    <div>Groww Brokering Limited</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;">Broker Id</div>
+                                    <div>11073300</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;">Client Id</div>
+                                    <div>72264491</div>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button style="display:flex; align-items:center; gap:5px; padding:6px 12px; border:1px solid #b0b8c1; border-radius:24px; background:white; color:#344767; cursor:pointer;">
+                                    ⬇ Download
+                                </button>
+                                <button onclick="openModalCMR()" style="display:flex; align-items:center; gap:5px; padding:6px 12px; border:1px solid #b0b8c1; border-radius:24px; background:white; color:#344767; cursor:pointer;">
+                                    ✏️ Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal -->
+                    <div id="edit_cmr_modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
+                        <div style="background-color:white; border-radius:12px; padding:24px; max-width:900px; margin:auto; margin-top:50px; box-shadow:0 2px 10px rgba(0,0,0,0.05); position:relative;">
+
+                            <!-- Modal Buttons -->
+                            <div style="position:absolute; top:24px; right:24px; display:flex; gap:10px;">
+                                <button onclick="openModalCMR()" style="padding:8px 20px; border-radius:24px; border:1px solid #ccc; background:white; cursor:pointer;">
+                                    ➕ Add Broker
+                                </button>
+                                <button onclick="saveCMRForm()" style="padding:8px 20px; border-radius:24px; border:1px solid #ccc; background:white; cursor:pointer;">
+                                    Save ✔️
+                                </button>
+                                <button onclick="closeModalCMR()" style="background-color:#ffe5e5; color:red; border:none; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer;">
+                                    Close ❌
+                                </button>
+                            </div>
+
+                            <h3 style="margin-top:0; margin-bottom:20px;">CMR Copy</h3>
+
+                            <!-- Broker Input Row -->
+                            <div style="display:flex; align-items:center; margin-bottom:20px;">
+                                <div style="margin-right:20px;">
+                                    <label>Broker Name</label><br>
+                                    <select style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                                        <option>Zerodha Brokering Limited</option>
+                                    </select>
+                                </div>
+                                <div style="margin-right:20px;">
+                                    <label>Broker Id</label><br>
+                                    <input type="text" value="12081600" style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                                </div>
+                                <div style="margin-right:20px;">
+                                    <label>Client Id</label><br>
+                                    <input type="text" value="72264491" style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                                </div>
+                                <button style="padding:8px 16px; border-radius:24px; border:1px solid #ccc; background:white; cursor:pointer;">
+                                    ⬆ Upload
+                                </button>
+                            </div>
+
+                            <!-- Broker Input Row 2 -->
+                            <div style="display:flex; align-items:center;">
+                                <div style="margin-right:20px;">
+                                    <label>Broker Name</label><br>
+                                    <select style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                                        <option>Groww Brokering Limited</option>
+                                    </select>
+                                </div>
+                                <div style="margin-right:20px;">
+                                    <label>Broker Id</label><br>
+                                    <input type="text" value="11073300" style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                                </div>
+                                <div style="margin-right:20px;">
+                                    <label>Client Id</label><br>
+                                    <input type="text" value="72264491" style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                                </div>
+                                <button style="padding:8px 16px; border-radius:24px; border:1px solid #ccc; background:white; cursor:pointer;">
+                                    ⬆ Upload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Control Script -->
+                    <script>
+                        function openModalCMR() {
+                            document.getElementById('edit_cmr_modal').style.display = 'block';
+                        }
+
+                        function closeModalCMR() {
+                            document.getElementById('edit_cmr_modal').style.display = 'none';
+                        }
+
+                        function saveCMRForm() {
+                            alert("CMR information saved!");
+                            closeModalCMR();
+                        }
+                    </script>
+                    <!-- CMR Form End -->
+                </div>
+                <!-- cmr form end -->
+            {% endblock %}
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    function toggleSection(id) {
+        const section = document.getElementById(id);
+        const header = section.previousElementSibling;
+        const isVisible = section.style.display === 'none';
+
+        if (isVisible) {
+            section.style.display = 'grid';
+            header.classList.add('open');
+        } else {
+            section.style.display = 'none';
+            header.classList.remove('open');
+        }
+    }
+
+    // Ensure all sections are visible on initial load
+    document.querySelectorAll('.custom-section-body').forEach(sec => {
+        sec.style.display = 'grid';
+    });
+    document.querySelectorAll('.custom-section-header').forEach(head => {
+        head.classList.add('open');
+    });
+
+    function enableEdit(sectionId) {
+        const section = document.getElementById(sectionId);
+        section.querySelectorAll('.display-field').forEach(el => el.style.display = 'none');
+        section.querySelectorAll('.edit-field').forEach(el => el.style.display = 'block');
+    }
+
+    function cancelEdit(sectionId) {
+        const section = document.getElementById(sectionId);
+        section.querySelectorAll('.display-field').forEach(el => el.style.display = 'block');
+        section.querySelectorAll('.edit-field').forEach(el => el.style.display = 'none');
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Angel Investing Shares{% endblock %}</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="{% static 'css/style.css' %}"> -->
+    
+
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="{% static 'Csss/Style.css' %}" />
+    <link rel="stylesheet" href="{% static 'Csss/header.css' %}" />
+
+
+    {% block style %}
+        <style>
+            /* cointainer content block */
+                /* .main_class {
+                        width: 90%;
+                        max-width: 1200px;
+                        margin: 20px auto;
+                        padding: 20px;
+                        background-color: #f8f9fa;
+                        border-radius: 10px;
+                        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                    }   */
+
+            .bold { font-weight: bold; }
+            .italic { font-style: italic; }
+            .underline { text-decoration: underline; }
+            .bold_italic { font-weight: bold; font-style: italic; }
+            .bold_underline { font-weight: bold; text-decoration: underline; }
+            .italic_underline { font-style: italic; text-decoration: underline; }
+            .all { font-weight: bold; font-style: italic; text-decoration: underline; }
+
+          .up {
+            color: green;
+            font-weight: bold;
+          }
+
+          .down {
+            color: red;
+            font-weight: bold;
+          }
+          .yellow-profit {
+            color: #FFD400;
+          }
+
+        </style>
+    {% endblock %}
+</head>
+
+<body>
+
+    <div class="unlisted-landing-page">
+        <!-- header marquee -->
+        <div class="header-container-running">
+          <div class="unlisted-deals">UnlistedDeals</div>
+          <div class="stock-ticker">
+            <marquee behavior="scroll" direction="left" scrollamount="10">
+              {% for stock in marquee_stocks %}
+                {% if stock.percentage_diff is not None %}
+                  <span class="stock">
+                    {{ stock.company_name|upper }}:
+                     <span class="yellow-profit">₹{{ stock.share_price|floatformat:2 }}</span>
+                    {% if stock.percentage_diff > 0 %}
+                      <span class="up">▲ ({{ stock.percentage_diff|floatformat:2 }}%)</span>
+                    {% elif stock.percentage_diff < 0 %}
+                      <span class="down">▼ ({{ stock.percentage_diff|floatformat:2 }}%)</span>
+                    {% else %}
+                      <span>(0.00%)</span>
+                    {% endif %}
+                  </span>
+                  &nbsp;&nbsp;&nbsp;
+                {% endif %}
+              {% endfor %}
+            </marquee>
+          </div>
+        </div>
+
+
+
+        <!--  base.html Navigation Bar - options   -->
+        {% include 'landing/navbar/navbar.html' %}
+
+        <main class="main_class">
+            {% block content %}
+
+                <!-- base.html Banner changeable -->
+                {% include 'landing/navbar/navDetail.html' %}
+
+                <!-- base.html - Explore Unlisted Shares  -->
+                {% include 'landing/index/index.html' %}
+
+                <!-- base.html block content data -->
+                {% include 'landing/index/index2.html' %}
+
+                <!-- footer -->
+                {% include 'landing/footer/footer.html' %}
+            {% endblock %}
+
+            {% block stat %}
+            {% endblock %}
+        </main>
+
+        
+    </div>
+  
+  <script>
+    const hamburger = document.querySelector('.hamburger');
+    const navContainer = document.querySelector('.nav-container');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      navContainer.classList.toggle('active');
+    });
+
+    // Close menu when clicking on a link (optional)
+    document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      navContainer.classList.remove('active');
+    }));
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+    crossorigin="anonymous">
+  </script>
+
+</body>
+
+
+</html>

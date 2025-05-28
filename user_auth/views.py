@@ -1,105 +1,77 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, LoginForm
 from django.contrib import messages
 from django.core.paginator import Paginator
 
-from user_auth.forms import *
-from user_auth.models import *
-from user_auth.utils import *
+from .forms import *
+from .models import *
+from .utils import *
+
+from site_Manager.models import *
 
 from unlisted_stock_marketplace.forms import *
 from unlisted_stock_marketplace.models import *
 from unlisted_stock_marketplace.utils import *
 
-def base(request):
-    stocks = StockData.objects.all()
+from django.core.mail import send_mail
+from django.conf import settings
+import uuid
+from django.db.models import Q
 
-    # Calculate percentage difference and store it in a new attribute
+from django.http import FileResponse, Http404
+from django.forms import inlineformset_factory
+
+
+from .utils import parse_user_date
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import CustomUser
+from .forms import UserTypeUpdateForm
+
+def is_admin_or_site_manager(user):
+    return user.user_type in ['AD', 'SM']
+
+@login_required
+@user_passes_test(is_admin_or_site_manager)
+def manage_user_types(request):
+    query = request.GET.get('q', '')
+    users = CustomUser.objects.exclude(user_type='AD')
+    if query:
+        users = users.filter(username__icontains=query) | users.filter(email__icontains=query)
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        new_type = request.POST.get('user_type')
+        user = get_object_or_404(CustomUser, id=user_id)
+        user.user_type = new_type
+        user.save()
+        return redirect('manage_user_types')
+
+    return render(request, 'SiteManageUsers/ManageUserAuth.html', {'users': users, 'query': query})
+
+
+def base(request):
+    # homepage banner
+    banner = HeroSectionBanner.objects.filter(is_active=True).first()
+    
+    # Base.html Stocks Displayed
+    stocks = StockData.objects.all()
     for stock in stocks:
         if stock.ltp and stock.share_price and stock.share_price > 0:
             stock.percentage_diff = ((stock.ltp - stock.share_price) / stock.share_price) * 100
         else:
             stock.percentage_diff = None  # Handle missing or zero share price
+    return render(request, "base.html", {"stocks": stocks,"banner": banner})
 
-    return render(request, "base.html", {"stocks": stocks})
-
-
-# def base(request):
-#     query = request.GET.get('q', '')
-#     stocks = StockData.objects.filter(company_name__icontains=query) if query else StockData.objects.all()
-#     return render(request, 'base.html', {'stocks': stocks, 'query': query})
-
-# def register_view(request):
-#     if request.method == 'POST':
-#         form = CustomUserCreationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             login(request, user)
-#             return redirect('login_view')
-#     else:
-#         form = CustomUserCreationForm()
-#     return render(request, 'accounts/register.html', {'form': form})
-
-# def login_view(request):
-#     if request.method == 'POST':
-#         form = LoginForm(data=request.POST)
-#         if form.is_valid():
-#             user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
-#             if user is not None:
-#                 login(request, user)
-#                 return redirect('base')
-#     else:
-#         form = LoginForm()
-#     return render(request, 'accounts/login.html', {'form': form})
-
-from django.contrib.auth import login, authenticate
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.core.mail import send_mail
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.contrib.auth.tokens import default_token_generator
-from django.template.loader import render_to_string
-from django.conf import settings
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
-from django.conf import settings
-from .forms import CustomUserCreationForm, LoginForm, CustomUserProfileForm
-from .models import CustomUser
-import uuid
-
-# User Registration View
-# def register_view(request):
-#     if request.method == 'POST':
-#         form = CustomUserCreationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save(commit=False)
-#             user.is_active = False  # User will be activated after email verification
-#             user.otp = str(uuid.uuid4())[:6]  # Generate a 6-digit OTP
-#             user.save()
-            
-#             # Send verification email
-#             send_mail(
-#                 'Verify Your Account',
-#                 f'Your OTP for verification is {user.otp}',
-#                 settings.EMAIL_HOST_USER,
-#                 [user.email],
-#                 fail_silently=False,
-#             )
-#             messages.success(request, "Check your email for the OTP to verify your account.")
-#             return redirect('verify_email', user_id=user.id)
-#     else:
-#         form = CustomUserCreationForm()
-    
-#     return render(request, 'accounts/register.html', {'form': form})
-
-from django.contrib import messages
-
+# 
+# 
+# ---------------------------------------------------------------------
+# ---------------------------- User Authentication ------------------------
+# -------------------------------------------------------------------
+# 
+# 
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -114,7 +86,7 @@ def register_view(request):
             else:
                 form.add_error('phone_number', "Phone number is required.")
                 messages.error(request, "Phone number is required.")
-                return render(request, 'accounts/register.html', {'form': form})
+                return render(request, 'Authentication/register.html', {'form': form})
 
             user.save()
 
@@ -136,14 +108,7 @@ def register_view(request):
     else:
         form = CustomUserCreationForm()
 
-    return render(request, 'accounts/register.html', {'form': form})
-
-import uuid
-from django.core.mail import send_mail
-from django.conf import settings
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from .models import CustomUser
+    return render(request, 'Authentication/register.html', {'form': form})
 
 def resend_otp(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
@@ -164,7 +129,6 @@ def resend_otp(request, user_id):
     messages.success(request, "A new OTP has been sent to your email.")
     return redirect('verify_email', user_id=user.id)
 
-
 # Email Verification View
 def verify_email(request, user_id):
     user = CustomUser.objects.get(id=user_id)
@@ -179,9 +143,15 @@ def verify_email(request, user_id):
         else:
             messages.error(request, "Invalid OTP. Try again.")
     
-    return render(request, 'accounts/verify_email.html', {'user': user})
+    return render(request, 'Authentication/verify_email.html', {'user': user})
 
 # Login View
+from django.shortcuts import redirect
+from django.contrib.auth import login, authenticate
+from django.contrib import messages
+from .forms import LoginForm  # assuming you have a custom LoginForm
+
+
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
@@ -189,11 +159,36 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, "Login successful!")
-            return redirect('view_profile')
+
+            # Superuser redirect
+            if user.is_superuser:
+                return redirect('SM_User:UnlistedStocksUpdateSM')
+
+            # Redirect based on user_type
+            user_type = getattr(user, 'user_type', None)
+
+            if user_type == 'RM':
+                return redirect('RM_User:dashboardRM')  # Replace with your actual URL name
+            elif user_type == 'AC':
+                return redirect('Acc_User:dashboardAcc')
+            elif user_type == 'SM'  or user_type == 'AD':
+                return redirect('SM_User:UnlistedStocksUpdateSM')
+            elif user_type == 'DF':
+                return redirect('profile')
+            elif user_type == 'ST':
+                return redirect('ST_User:dashboardST')
+            # elif user_type == 'AP':
+            #     return redirect('associate_partner_dashboard')
+            # elif user_type == 'PT':
+            #     return redirect('partner_dashboard')
+            else:
+                return redirect('base')  # default fallback
+
     else:
         form = LoginForm()
     
-    return render(request, 'accounts/login.html', {'form': form})
+    return render(request, 'Authentication/login.html', {'form': form})
+
 
 # Logout View
 @login_required
@@ -202,83 +197,27 @@ def logout_view(request):
     messages.success(request, "Logged out successfully.")
     return redirect('login')
 
-# profile
-# @login_required
-# def view_profile(request):
-#     return render(request, 'accounts/profile.html', {'user': request.user})
-
-# @login_required
-# def edit_profile(request):
-#     user = request.user
-
-#     if request.method == 'POST':
-#         form = CustomUserProfileForm(request.POST, request.FILES, instance=user, user_instance=user)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('view_profile')
-#     else:
-#         form = CustomUserProfileForm(instance=user, user_instance=user)
-
-#     return render(request, 'accounts/edit_profile.html', {'form': form})
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from .forms import CustomUserProfileForm, BankAccountFormSet, CMRCopyFormSet
-from .models import UserProfile
+# 
+# ---------------------------------------
+# ------------ Profile ----------------------
+# ------------------------------------------
+# 
+# 
 
 @login_required
 def view_profile(request):
-    profile = UserProfile.objects.get(user=request.user)
-    return render(request, 'accounts/profile.html', {
-            'profile': profile,
-            'bank_accounts': profile.bank_accounts.all(),
-            'cmr_copies': profile.cmr_copies.all(),
-        })
-from django.contrib.auth.decorators import login_required
-from django.forms import inlineformset_factory
-from django.shortcuts import render, redirect
-from .forms import CustomUserProfileForm
-from .models import UserProfile, BankAccount, CMRCopy
+    return render(request, 'accounts/profile.html')
 
 @login_required
 def edit_profile(request):
-    user = request.user
-    profile, _ = UserProfile.objects.get_or_create(user=user)
+    return render(request, 'accounts/edit_profile.html')
 
-    # Get extra form counts from GET query (default 1)
-    extra_bank = int(request.GET.get('extra_bank', 1))
-    extra_cmr = int(request.GET.get('extra_cmr', 1))
 
-    # Inline formsets with dynamic extra
-    BankAccountFormSet = inlineformset_factory(
-        UserProfile, BankAccount, fields='__all__', extra=extra_bank, can_delete=True
-    )
-    CMRCopyFormSet = inlineformset_factory(
-        UserProfile, CMRCopy, fields='__all__', extra=extra_cmr, can_delete=True
-    )
-
-    if request.method == 'POST':
-        form = CustomUserProfileForm(request.POST, request.FILES, instance=profile)
-        bank_formset = BankAccountFormSet(request.POST, instance=profile)
-        cmr_formset = CMRCopyFormSet(request.POST, instance=profile)
-
-        if form.is_valid() and bank_formset.is_valid() and cmr_formset.is_valid():
-            form.save()
-            bank_formset.save()
-            cmr_formset.save()
-            return redirect('view_profile')
-    else:
-        form = CustomUserProfileForm(instance=profile)
-        bank_formset = BankAccountFormSet(instance=profile)
-        cmr_formset = CMRCopyFormSet(instance=profile)
-
-    return render(request, 'accounts/edit_profile.html', {
-        'form': form,
-        'bank_formset': bank_formset,
-        'cmr_formset': cmr_formset,
-        'extra_bank': extra_bank,
-        'extra_cmr': extra_cmr,
-    })
+# 
+# ------------------------------------------
+# -------------------- Contact ---------------- 
+# ------------------------------------------
+# 
 
 # contact
 @login_required
@@ -302,6 +241,12 @@ def contact_view(request):
     page_obj = paginator.get_page(page_number)
     return render(request, 'contact/contactView.html', {'page_obj': page_obj})
 
+# 
+# ------------------------------------------
+# -------------------- Others ---------------- 
+# ------------------------------------------
+# 
+
 # about
 def about(request):
     return render(request, 'about/about.html')
@@ -309,4 +254,30 @@ def about(request):
 # FAQ
 def faq(request):
     return render(request, 'FAQ/faq.html')
+
+
+# blog
+def blog(request):
+    return render(request, 'blog/blog.html')
+
+
+# 
+# ------------------------------------------
+# -------------------------- CMR ---------------
+# ------------------------------------------
+# 
+@login_required
+def download_cmr_file(request, cmr_id):
+    # Get the CMR record
+    try:
+        cmr = CMRCopy.objects.get(id=cmr_id, user_profile=request.user.profile)
+    except CMRCopy.DoesNotExist:
+        raise Http404("CMR file not found.")
+    
+    # Check if a file exists
+    if cmr.cmr_file:
+        # Return the file as a response
+        return FileResponse(cmr.cmr_file, as_attachment=True, filename=cmr.cmr_file.name)
+    else:
+        raise Http404("CMR file not found.")
 

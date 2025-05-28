@@ -1,154 +1,80 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from .models import *
-import json
+from django.views.decorators.http import require_POST
+
+from django.views.decorators.csrf import csrf_exempt
+
 from django.utils.timezone import localtime
+from django.utils import timezone
 
+from decimal import Decimal
+from django.db.models import Q
 
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.http import JsonResponse
+
+import json
+from collections import defaultdict
+
+from .forms import *
+from .models import *
+from .utils import *
+from .views import *
+
+# 
+# 
+# ---------------------------------------------------------------------
+# ------------------ stock list Unlisted index.html ------------------------
+# -------------------------------------------------------------------
+# 
+# 
 @login_required
 def stock_list(request):
     query = request.GET.get('q', '')
     stocks = StockData.objects.filter(company_name__icontains=query) if query else StockData.objects.all()
     return render(request, 'stocks/stock_list.html', {'stocks': stocks, 'query': query})
 
-# @login_required
-# def stock_detail(request, stock_id):
-#     stock = get_object_or_404(StockData, id=stock_id)
-#     price_history = StockHistory.objects.filter(stock=stock).order_by('timestamp')
+from .models import CustomFieldDefinition, CustomFieldValue, TableHeader
 
-#     if not price_history.exists():
-#         print("❌ No stock history found for this stock.")
+# balance Sheet chash flow etc
+def get_sheet_data(stock_id, model_type):
+    field_definitions = CustomFieldDefinition.objects.filter(stock_id=stock_id, model_type=model_type)
+    field_values = CustomFieldValue.objects.filter(field_definition__in=field_definitions)
+    headers = TableHeader.objects.filter(custom_field_values__in=field_values).distinct().order_by('order')
+    particulars_header = headers.filter(title__iexact="PARTICULARS").first()
+    data_headers = headers.exclude(id=particulars_header.id if particulars_header else None)
     
-#     stock_dates = [
-#         localtime(timestamp).strftime('%Y-%m-%d')
-#         for timestamp in price_history.values_list('timestamp', flat=True)
-#         if timestamp is not None
-#     ]
+    parent_rows = field_values.filter(parent_field_value__isnull=True)
+    child_values = field_values.filter(parent_field_value__isnull=False)
 
-#     stock_prices = [float(price) for price in price_history.values_list('price', flat=True)]
+    table_rows = []
+    for parent in parent_rows:
+        row = {
+            'name': parent.name,
+            'text_style': parent.text_style,
+            'values': {},
+        }
+        if parent.table_header:
+            row['values'][parent.table_header.id] = parent.display_value()
+        children = child_values.filter(parent_field_value=parent)
+        for child in children:
+            if child.table_header:
+                row['values'][child.table_header.id] = child.display_value()
+        table_rows.append(row)
 
-#     # Fetching related directors
-#     directors = stock.directors.all()  # Use related_name="directors" from ForeignKey in Director model
-#     stock_searched = StockData.objects.order_by('-number_of_times_searched').first()
-#     # Calculate the percentage difference in the view
-#     if stock_searched and stock_searched.share_price is not None and stock_searched.ltp is not None:
-#         percentage_diff = ((stock_searched.ltp - stock_searched.share_price) / stock_searched.share_price) * 100
-#     else:
-#         percentage_diff = 0
+    return {
+        'headers': data_headers,
+        'particulars_header': particulars_header,
+        'rows': table_rows
+    }
 
-
-#     context = {
-#         'stock': stock,
-#         'directors': directors,
-#         'stock_searched':stock_searched,
-#         'percentage_diff': percentage_diff,
-#         'stock_dates': json.dumps(stock_dates),
-#         'stock_prices': json.dumps(stock_prices),
-#     }
-#     return render(request, 'stocks/stock_detail.html', context)
-
-
-# @login_required
-# def stock_detail(request, stock_id):
-#     stock = get_object_or_404(StockData, id=stock_id)
-#     price_history = StockHistory.objects.filter(stock=stock).order_by('timestamp')
-
-#     if not price_history.exists():
-#         print("❌ No stock history found for this stock.")
-
-#     stock_dates = [
-#         localtime(timestamp).strftime('%Y-%m-%d')
-#         for timestamp in price_history.values_list('timestamp', flat=True)
-#         if timestamp is not None
-#     ]
-
-#     stock_prices = [float(price) for price in price_history.values_list('price', flat=True)]
-
-#     # Fetching related directors
-#     directors = stock.directors.all()
-    
-#     # Fetch the most searched stock
-#     stock_searched = StockData.objects.order_by('-number_of_times_searched').first()
-    
-#     if stock_searched and stock_searched.share_price is not None and stock_searched.ltp is not None:
-#         percentage_diff = ((stock_searched.ltp - stock_searched.share_price) / stock_searched.share_price) * 100
-#     else:
-#         percentage_diff = 0
-
-#     # Fetching Balance Sheet Data
-#     balance_sheets = BalanceSheet.objects.filter(stock_period__stock=stock).order_by('stock_period__stock_date')
-
-#     balance_sheet_data = {}
-#     headers = ["Particulars"]
-#     for bs in balance_sheets:
-#         stock_date = bs.stock_period.stock_date.strftime('%Y-%m-%d')
-#         headers.append(stock_date)
-
-#         for field in BalanceSheet._meta.fields:
-#             if field.name not in ["id", "stock_period", "total_equity_and_liabilities", "total_assets"]:
-#                 if field.verbose_name not in balance_sheet_data:
-#                     balance_sheet_data[field.verbose_name] = []
-#                 balance_sheet_data[field.verbose_name].append(getattr(bs, field.name, 0))
-
-#     # Fetching Profit & Loss Statement Data
-#     profit_loss_statements = ProfitLossStatement.objects.filter(stock_period__stock=stock).order_by('stock_period__stock_date')
-
-#     profit_loss_data = {}
-#     pl_headers = ["Particulars"]
-#     for pls in profit_loss_statements:
-#         stock_date = pls.stock_period.stock_date.strftime('%Y-%m-%d')
-#         pl_headers.append(stock_date)
-
-#         for field in ProfitLossStatement._meta.fields:
-#             if field.name not in ["id", "stock_period"]:
-#                 if field.verbose_name not in profit_loss_data:
-#                     profit_loss_data[field.verbose_name] = []
-#                 profit_loss_data[field.verbose_name].append(getattr(pls, field.name, 0))
-
-#     # Fetching Cash Flow Statement Data
-#     cash_flows = CashFlow.objects.filter(stock_period__stock=stock).order_by('stock_period__stock_date')
-
-
-#     cash_flow_data = {}
-#     cf_headers = ["Particulars"]
-#     for cf in cash_flows:
-#         stock_date = cf.stock_period.stock_date.strftime('%Y-%m-%d')
-#         cf_headers.append(stock_date)
-
-#         for field in CashFlow._meta.fields:
-#             if field.name not in ["id", "stock_period"]:
-#                 if field.verbose_name not in cash_flow_data:
-#                     cash_flow_data[field.verbose_name] = []
-#                 cash_flow_data[field.verbose_name].append(getattr(cf, field.name, 0))
-
-
-#     stock_holder = get_object_or_404(StockData, pk=stock_id)
-#     shareholdings = stock_holder.shareholdings.all()  # uses related_name
-
-#     context = {
-#         'stock': stock,
-#         'directors': directors,
-#         'stock_searched': stock_searched,
-#         'percentage_diff': percentage_diff,
-#         'stock_dates': json.dumps(stock_dates),
-#         'stock_prices': json.dumps(stock_prices),
-#         'headers': headers,
-#         'balance_sheet_data': balance_sheet_data,
-#         'pl_headers': pl_headers,
-#         'profit_loss_data': profit_loss_data,
-#         'cf_headers': cf_headers,
-#         'cash_flow_data': cash_flow_data,
-#         'cash_flows':cash_flows,
-#         'stock_holder': stock_holder,
-#         'shareholdings': shareholdings
-#     }
-#     return render(request, 'stocks/stock_detail.html', context)
-
+# Stock Detail - onclick on stock name
 @login_required
 def stock_detail(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
     price_history = StockHistory.objects.filter(stock=stock).order_by('timestamp')
+    
 
     if not price_history.exists():
         print("❌ No stock history found for this stock.")
@@ -181,35 +107,11 @@ def stock_detail(request, stock_id):
         percentage_diff = ((stock_searched.ltp - stock_searched.share_price) / stock_searched.share_price) * 100
     else:
         percentage_diff = 0
-
-
-    stock_holder = get_object_or_404(StockData, pk=stock_id)
-    shareholdings = stock_holder.shareholdings.all()  # uses related_name
-
-    # Fetching multiple stocks to display in the cards section
-    all_stocks = StockData.objects.all()  # Fetch all stocks or customize this query as needed
-
     # 
     # 
     # 
-    # balance sheet, cashflow, and other tables
-    # 
-    # 
-    # 
-    selected_stock = StockData.objects.get(id=stock_id)
-
-    field_definitions = CustomFieldDefinition.objects.all()
 
 
-    headers = TableHeader.objects.filter(
-        custom_field_values__stock=selected_stock,
-        custom_field_values__field_definition__in=field_definitions
-    ).distinct().order_by('order')
-
-    all_values = CustomFieldValue.objects.filter(
-        stock=selected_stock,
-        field_definition__in=field_definitions
-    ).select_related('field_definition', 'table_header')
 
     # 
     # 
@@ -220,11 +122,23 @@ def stock_detail(request, stock_id):
     # 
     # 
     reports = Report.objects.filter(stock=stock)  
+    # 
+    # 
+    # 
+    
 
+    # 
+    # 
+    # 
+    # 
     #  company subsidiary and associate    
     relations = stock.related_companies.all()
+    # 
+    # 
+    # 
+    # 
 
-        # 
+    # 
     # 
     # 
     # 
@@ -234,8 +148,45 @@ def stock_detail(request, stock_id):
     # principalBusinessActivity = StockData.PrincipalBusinessActivity.all()
     principal_activities = stock.business_activities.all()
     # 
+    # 
+    # 
+    
+
+    # 
+    # 
+    # 
+    stock_holder = get_object_or_404(StockData, pk=stock_id)
+    shareholdings = stock_holder.shareholdings.all()  # uses related_name
+    # 
+    # 
+    # 
+    
+
     # company FAQ
     faqs = stock.faqs.all()
+    # 
+    # 
+    # 
+    
+
+    # 
+    # 
+    # 
+    brokers = Broker.objects.all()
+    # 
+    # 
+    # 
+    
+
+    # 
+    # 
+    # 
+    # Fetching multiple stocks to display in the cards section
+    all_stocks = StockData.objects.all()  # Fetch all stocks or customize this query as needed
+    # 
+    # 
+    # 
+
     context = {
         'stock': stock,
         'directors': directors,
@@ -244,30 +195,36 @@ def stock_detail(request, stock_id):
         'stock_dates': json.dumps(stock_dates),
         'stock_prices': json.dumps(stock_prices),
 
-        'stock_holder': stock_holder,
-        'shareholdings': shareholdings,
-
-        'all_stocks': all_stocks, 
+        # balance sheet, cashflow, and other tables
+        'balance_sheet_data': get_sheet_data(stock.id, 'BalanceSheet'),
+        'pl_account_data': get_sheet_data(stock.id, 'PLAccount'),
+        'cash_flow_data': get_sheet_data(stock.id, 'CashFlow'),
+        'financial_ratios_data': get_sheet_data(stock.id, 'FinancialRatios'),
+        'dividend_data': get_sheet_data(stock.id, 'Dividend'),
+        # end balance sheet, cashflow, and other tables
         
-        'selected_stock': selected_stock,
-        'headers': headers,
-        'field_definitions': field_definitions,
-        'all_values': all_values,
-
+            
         'reports': reports,
+
+        'principalBusinessActivity':principal_activities,
 
         'relations': relations,
 
+        'shareholdings': shareholdings,
+
         'faqs': faqs,
 
-        'principalBusinessActivity':principal_activities,
+        'brokers': brokers,
+        
+        'all_stocks': all_stocks, 
 
     }
     return render(request, 'stocks/stock_detail.html', context)
 
 
+# stock list in table list format  other page/ blue page list DO not delete
 @login_required
-def angelStockListing(request):
+def StockListingTableFormat(request):
     stocks = StockData.objects.all()
     
     search_query = request.GET.get('search', '')
@@ -297,95 +254,119 @@ def angelStockListing(request):
         'selected_sector': selected_sector
     })
 
-# navbarMarquee
-def stock_ticker_view(request):
-    stocks = StockData.objects.all()
 
-    # Calculate percentage difference and store it in a new attribute
-    for stock in stocks:
-        if stock.ltp and stock.share_price and stock.share_price > 0:
-            stock.percentage_diff = ((stock.ltp - stock.share_price) / stock.share_price) * 100
+# 
+# 
+# ---------------------------------------------------------------------
+# ------------------ Wishlist -------------
+# ------------------------------------------------------------------
+# 
+# 
+
+def get_next_wishlist_group_name(request):
+    user = request.user
+    base_name = "List"
+    groups = WishlistGroup.objects.filter(user=user).order_by("name")
+    group_index = 1
+
+    for group in groups:
+        if group.wishlist_items.count() < 20:
+            return JsonResponse({'group_name': group.name})
+        group_index += 1
+
+    # No existing group with space, create a new one
+    group_name = f"{base_name} {group_index}"
+    WishlistGroup.objects.create(user=user, name=group_name)
+    return JsonResponse({'group_name': group_name})
+
+
+@require_POST
+@login_required
+def add_to_wishlist(request):
+    stock_id = request.POST.get("stock_id")
+    group_name = request.POST.get("custom_list_name")
+
+    if not stock_id or not group_name:
+        return JsonResponse({"error": "Missing stock_id or group name"}, status=400)
+
+    stock = get_object_or_404(StockData, id=stock_id)
+    group, _ = WishlistGroup.objects.get_or_create(user=request.user, name=group_name)
+
+    Wishlist.objects.get_or_create(user=request.user, stock=stock, defaults={'group': group})
+    return redirect('unlisted_stock_marketplace:wish_list')
+
+
+@login_required
+def wish_list(request):
+    search_query = request.GET.get('search', '')
+    selected_group_id = request.GET.get('group')
+    show_all_unlisted = request.GET.get('unlisted') == '1'
+    show_all_angel = request.GET.get('angel') == '1'
+
+    groups = WishlistGroup.objects.filter(user=request.user).order_by('created_on')
+    stock_list = []
+    wishlist_data = []
+
+    # If viewing Unlisted or Angel stocks directly
+    if show_all_unlisted or show_all_angel:
+        stock_type = "Unlisted" if show_all_unlisted else "Angel"
+        stocks = StockData.objects.filter(stock_type=stock_type)
+
+        if search_query:
+            stocks = stocks.filter(
+                Q(company_name__icontains=search_query) |
+                Q(scrip_name__icontains=search_query)
+            )
+
+        stock_list = stocks  # Send queryset directly to the template
+
+    else:
+        # Viewing wishlist (with optional group filter)
+        if selected_group_id:
+            selected_group = get_object_or_404(WishlistGroup, id=selected_group_id, user=request.user)
+            wishlist_items = Wishlist.objects.filter(user=request.user, group=selected_group).select_related('stock')
         else:
-            stock.percentage_diff = None  # Handle missing or zero share price
+            wishlist_items = Wishlist.objects.filter(user=request.user).select_related('stock')
 
-    return render(request, "navbar/navbar.html", {"stocks": stocks})
+        if search_query:
+            wishlist_items = wishlist_items.filter(
+                Q(stock__company_name__icontains=search_query) |
+                Q(stock__scrip_name__icontains=search_query)
+            )
+
+        wishlist_data = wishlist_items
+
+    return render(request, 'accounts/profile.html', {
+        'groups': groups,
+        'wishlist_data': wishlist_data,
+        'stock_list': stock_list,
+        'search_query': search_query,
+        'show_all_unlisted': show_all_unlisted,
+        'show_all_angel': show_all_angel,
+    })
 
 
-# 
-# 
-# def all_data_view(request, stock_id=None):
-#     stock_periods = StockPeriod.objects.all().order_by('-year', '-month', '-day')
-#     table_headers = TableHeader.objects.prefetch_related('fields').all()
-#     field_definitions = CustomFieldDefinition.objects.all()
+# add to wishlist from group 1,2,
+@login_required
+def add_to_group(request, stock_id):
+    stock = get_object_or_404(StockData, id=stock_id)
+    group = WishlistGroup.objects.filter(user=request.user).order_by('-created_on').first()
 
-#     custom_values = CustomFieldValue.objects.select_related(
-#         'stock', 'stock_period', 'field_definition', 'table_header'
-#     )
+    if group:
+        exists = Wishlist.objects.filter(user=request.user, stock=stock, group=group).exists()
+        if exists:
+            messages.warning(request, f"{stock.company_name} is already added in Group {group.name}.")
+        else:
+            Wishlist.objects.create(user=request.user, stock=stock, group=group)
+            messages.success(request, f"{stock.company_name} added to Group {group.name} successfully.")
     
-#     if stock_id:
-#         custom_values = custom_values.filter(stock_id=stock_id)
+    return redirect(request.META.get('HTTP_REFERER', 'accounts:profile'))
 
-#     # Get distinct stock list
-#     stock_list = StockData.objects.filter(
-#         id__in=custom_values.values_list('stock_id', flat=True).distinct()
-#     )
-
-#     context = {
-#         'stock_periods': stock_periods,
-#         'table_headers': table_headers,
-#         'field_definitions': field_definitions,
-#         'custom_values': custom_values,
-#         'stock_list': stock_list,
-#         'selected_stock_id': int(stock_id) if stock_id else None,
-#     }
-#     return render(request, 'balance_sheet.html', context)
-
-# -------------------------------------------------
-# -------------------------------------------------
-
-# -------------------------------------------------
-# -------------------------------------------------
-# def balance_sheet_view(request):
-#     field_definitions = CustomFieldDefinition.objects.filter(model_type='BALANCE_SHEET')
-#     table_headers = TableHeader.objects.all()
-#     custom_values_qs = CustomFieldValue.objects.filter(field_definition__in=field_definitions)
-
-#     # Create a nested dict: stock -> field_id -> header_id -> value
-#     custom_values = defaultdict(lambda: defaultdict(dict))
-#     stocks = set()
-
-#     for val in custom_values_qs:
-#         custom_values[val.stock][val.field_definition_id][val.table_header_id] = val
-#         stocks.add(val.stock)
-
-#     context = {
-#         "field_definitions": field_definitions,
-#         "table_headers": table_headers,
-#         "custom_values": custom_values,
-#         "stocks": sorted(stocks, key=lambda x: str(x)),
-#     }
-#     return render(request, "balance_sheet.html", context)
+@login_required
+def remove_from_group(request, wishlist_id):
+    wishlist_item = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
+    wishlist_item.delete()
+    return redirect(request.META.get('HTTP_REFERER', 'accounts:profile'))
 
 
-def balance_sheet_view(request, stock_id):
-    selected_stock = StockData.objects.get(id=stock_id)
 
-    field_definitions = CustomFieldDefinition.objects.all()
-
-    headers = TableHeader.objects.filter(
-        custom_field_values__stock=selected_stock,
-        custom_field_values__field_definition__in=field_definitions
-    ).distinct().order_by('order')
-
-    all_values = CustomFieldValue.objects.filter(
-        stock=selected_stock,
-        field_definition__in=field_definitions
-    ).select_related('field_definition', 'table_header')
-
-    context = {
-        'selected_stock': selected_stock,
-        'headers': headers,
-        'field_definitions': field_definitions,
-        'all_values': all_values,
-    }
-    return render(request, 'balance_sheet.html', context)

@@ -2,11 +2,27 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.conf import settings
 from django.db import models
 
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.db import models
+
+
 class CustomUser(AbstractUser):
+    USER_TYPE_CHOICES = [
+        ('RM', 'Relationship Manager'),
+        ('AC', 'Accounts'),
+        ('SM', 'Site Manager'),
+        ('ST', 'Share Transfer'),
+        ('AD', 'Admin'),
+        ('DF', 'Default User'),
+        ('AP', 'Associate Partner'),   
+        ('PT', 'Partner'),             
+    ]
+
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(unique=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
-    
+    user_type = models.CharField(max_length=2, choices=USER_TYPE_CHOICES, default='DF')
+
     groups = models.ManyToManyField(
         Group,
         related_name="customuser_set",
@@ -76,11 +92,20 @@ class BankAccount(models.Model):
         return f"{self.bank_name} - {self.account_number}"
 
 
+from django.core.validators import FileExtensionValidator
+
 class CMRCopy(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='cmr_copies')
-    broker = models.ForeignKey(Broker, on_delete=models.CASCADE)  # FK using internal PK
+    broker = models.ForeignKey(Broker, on_delete=models.CASCADE)
     client_id = models.CharField(max_length=50)
     client_name = models.CharField(max_length=100)
+    cmr_file = models.FileField(
+        upload_to='cmr_files/',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png'])],
+        help_text="Upload a scanned copy or PDF"
+    )
 
     @property
     def broker_id(self):

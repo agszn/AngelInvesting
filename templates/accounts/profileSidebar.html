@@ -1,0 +1,160 @@
+<!-- Sidebar -->
+<div style="width: 35%; border-radius: 12px; padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center;">
+        <div class="profile-sidebar mb-3" style="font-family: Arial, sans-serif; padding: 10px;">
+            <div style="width: 450px; border-radius: 8px; margin: 0 auto;">
+                {% if messages %}
+                <div>
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Tabs -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background-color: #2e3a59; padding: 10px; font-size: 14px;">
+                    <!-- Group Buttons -->
+                    <div style="display: flex; gap: 6px;">
+                        {% for group in groups %}
+                            <a href="?group={{ group.id }}"
+                            style="padding: 4px 8px; border-radius: 4px; text-decoration: none; background-color: #2e7bb4; color: white;
+                            {% if request.GET.group|default:'' == group.id|stringformat:'s' %}border-bottom: 2px solid #60d394;{% endif %}"
+                            onmouseover="this.style.borderBottom='2px solid #60d394';"
+                            onmouseout="if('{{ request.GET.group|default:'' }}' != '{{ group.id }}') this.style.borderBottom='none';">
+                                {{ group.name }} | 
+                            </a>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Unlisted / Angel Tabs -->
+                    <div style="display: flex; gap: 12px;">
+                        <a href="?unlisted=1"
+                        style="padding: 4px 8px; text-decoration: none;
+                        {% if show_all_unlisted %}color: #60d394; border-bottom: 2px solid #60d394;{% else %}color: white;{% endif %}"
+                        onmouseover="this.style.borderBottom='2px solid #60d394';"
+                        onmouseout="if (!{{ show_all_unlisted|yesno:'true,false' }}) this.style.borderBottom='none';">
+                            Unlisted | 
+                        </a>
+
+                        <a href="?angel=1"
+                        style="padding: 4px 8px; text-decoration: none;
+                        {% if show_all_angel %}color: #60d394; border-bottom: 2px solid #60d394;{% else %}color: white;{% endif %}"
+                        onmouseover="this.style.borderBottom='2px solid #60d394';"
+                        onmouseout="if (!{{ show_all_angel|yesno:'true,false' }}) this.style.borderBottom='none';">
+                            Angel Invest
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div style="background-color: #3a456d; padding: 8px 12px;">
+                    <form method="get" style="display: flex;">
+                        <input type="text"
+                            name="search"
+                            value="{{ search_query }}"
+                            placeholder="Search by company or scrip name"
+                            style="flex: 1; padding: 6px 10px; border: none; background-color: transparent; color: white; font-size: 14px; outline: none;">
+                        <button type="submit"
+                                style="background: none; border: none; cursor: pointer; padding: 0 8px;"
+                                title="Search">
+                            <span style="color: white; font-size: 18px;">&#128269;</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Wishlist Display -->
+
+                {% if not show_all_unlisted and not show_all_angel %}
+                    <div style="max-height: 700px; overflow-y: auto;">
+                        {% for item in wishlist_data %}
+                            <div style="background-color: #dee7f2; padding: 10px; margin-bottom: 5px; border-radius: 6px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="font-weight: bold;">
+                                        {{ item.stock.company_name }}
+
+                                        <!-- Compact action buttons -->
+                                        <div style="display: inline-flex; align-items: center; gap: 4px; margin-left: 8px;">
+
+                                            <!-- × Button Form -->
+                                            <form method="post" action="{% url 'unlisted_stock_marketplace:remove_from_group' item.id %}" style="margin: 0;">
+                                                {% csrf_token %}
+                                                <button type="submit" style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; font-size: 12px;">×</button>
+                                            </form>
+
+                                            <!-- Buy Button (B) -->
+                                            <span onclick="openModal()" style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
+
+                                            <!-- Sell Button (S) -->
+                                            <span onclick="openModalSell()" style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="color: {% if item.stock.profit %}green{% else %}red{% endif %}; font-weight: bold;">
+                                        ₹{{ item.stock.share_price }}
+                                    </div>
+                                </div>
+
+                                <div style="text-align: right; font-size: 12px; color: #333;">
+                                    ₹{{ item.stock.profit }} {{ item.stock.profit_percentage }}%
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p style="color: white; text-align: center;">No items found.</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Stock List Display (Unlisted or Angel) -->
+                {% if show_all_unlisted or show_all_angel %}
+                    <div style="max-height: 700px; overflow-y: auto;">
+                        {% for stock in stock_list %}
+                            <div style="background-color: #dee7f2; padding: 10px; margin-bottom: 5px; border-radius: 6px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="font-weight: bold;">
+                                        {{ stock.company_name }}
+
+                                        <!-- Button container: makes ×, B, S inline and compact -->
+                                        <div style="display: inline-flex; align-items: center; gap: 4px; margin-left: 8px;">
+                                            
+                                            <!-- + Button Form -->
+                                            <form method="post" action="{% url 'unlisted_stock_marketplace:add_to_group' stock.id %}" style="margin: 0;">
+                                                {% csrf_token %}
+                                                <button type="submit" style="background-color: #d71414; color: white; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; font-size: 12px;">+</button>
+                                            </form>
+
+                                            <!-- Buy Button (B) -->
+                                            <span onclick="openModal()" style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
+                                            
+                                            <!-- Sell Button (S) -->
+                                            <span onclick="openModalSell()" style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
+                                        </div>
+                                    </div>
+                                    <div style="color: {% if stock.profit %}green{% else %}red{% endif %}; font-weight: bold;">
+                                        ₹{{ stock.share_price }}
+                                    </div>
+                                </div>
+                                
+                                <div style="text-align: right; font-size: 12px; color: #333;">
+                                    ₹{{ stock.profit }} {{ stock.profit_percentage }}%
+                                </div>
+
+                                {% if show_all_angel %}
+                                    <form method="post" action="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" style="margin-top: 6px; background-color: #60d394; border: none; border-radius: 4px; padding: 2px 6px; cursor: pointer;">+</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+
+                        {% empty %}
+                            <p style="color: white; text-align: center;">No stocks found.</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+<!-- left end -->
+</div>
+

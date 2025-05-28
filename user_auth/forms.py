@@ -1,9 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import *
+
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .models import *
+
+from django import forms
 from .models import CustomUser
 
 class CustomUserCreationForm(forms.ModelForm):
@@ -14,14 +17,17 @@ class CustomUserCreationForm(forms.ModelForm):
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter your username',
+                'style': 'padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%;',
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter your email',
+                'style': 'padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%;',
             }),
             'phone_number': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter your phone number',
+                'style': 'padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%;',
             }),
         }
 
@@ -33,21 +39,54 @@ class CustomUserCreationForm(forms.ModelForm):
             raise forms.ValidationError("Phone number must be at least 6 digits.")
         return phone
 
+from django import forms
+from .models import CustomUser
+
+class UserTypeUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['user_type']
+        widgets = {
+            'user_type': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
+from django import forms
+from django.contrib.auth.forms import AuthenticationForm
+
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
         label='Username',
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter your username',
+            'placeholder': 'Enter your Username',
+            'style': (
+                'padding: 16px; '
+                'border: 1px solid #ced4da; '
+                'border-radius: 8px; '
+                'font-size: 18px; '
+                'height: 52px;'
+                'width: 100%;'
+                
+            ),
         })
     )
     password = forms.CharField(
-        label='Phone Number (as Password)',
+        label='Password (Phone Number)',
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter your phone number',
+            'placeholder': 'Enter your password (mobile number)',
+            'style': (
+                'padding: 16px; '
+                'border: 1px solid #ced4da; '
+                'border-radius: 8px; '
+                'font-size: 18px; '
+                'height: 52px;'
+                'width: 100%;'
+            ),
         })
     )
+
 
 # class CustomUserProfileForm(forms.ModelForm):
 #     pan_number = forms.CharField(
@@ -111,10 +150,29 @@ from django import forms
 from django.forms import inlineformset_factory
 from .models import UserProfile, BankAccount, CMRCopy
 
+# 
 class CustomUserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['whatsapp_number', 'pan_number', 'pan_card_photo', 'adhar_number', 'adhar_card_photo']
+
+from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import get_user_model
+from .models import UserProfile
+
+User = get_user_model()
+
+class PersonalInfoForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone_number']
+
+class ProfileInfoForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['whatsapp_number', 'photo']
 
 
 BankAccountFormSet = inlineformset_factory(
@@ -128,10 +186,11 @@ BankAccountFormSet = inlineformset_factory(
 CMRCopyFormSet = inlineformset_factory(
     UserProfile,
     CMRCopy,
-    fields=['broker', 'client_id', 'client_name'],
+    fields=['broker', 'client_id', 'client_name', 'cmr_file'],  # Added 'cmr_file'
     extra=1,
     can_delete=True
 )
+
 
 class ContactForm(forms.ModelForm):
     class Meta:

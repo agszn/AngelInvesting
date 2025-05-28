@@ -1,0 +1,65 @@
+<!-- profile_view.html -->
+{% extends "accounts/profile.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block profile_content %}
+            <div style="margin: auto; background: white; border-radius: 10px; max-width: 600px; overflow: hidden;">
+                <!-- Header -->
+                <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>NSE LTD</strong>
+                        <span style="color: #7cffaf; margin-left: 10px;">₹1,965.62</span>
+                        <span style="color: #bbb; font-size: 12px;"> - 175 6216.250</span>
+                    </div>
+
+
+                </div>
+
+                <!-- Form Body -->
+
+
+                <div style="background-color: #f1f6ff; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div style="grid-column: span 1;">
+                        <label for="advisor">Advisor</label>
+                        <select id="advisor" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                            <option>Thangiv</option>
+                        </select>
+                    </div>
+
+                    <div style="grid-column: span 1;">
+                        <label for="broker">Broker</label>
+                        <select id="broker" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                            <option>Zerodha LTD</option>
+                        </select>
+                    </div>
+
+                    <div style="grid-column: span 1;">
+                        <label for="quantity">Bought Price</label>
+                        <input type="text" id="quantity" value="₹1965.62" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                        <div style="margin-top: 5px; font-size: 12px;">
+                            <label><input type="radio" name="orderType" checked> Market</label>
+                            <label style="margin-left: 10px;"><input type="radio" name="orderType"> Limit</label>
+                        </div>
+                    </div>
+
+                    
+
+                    <div style="grid-column: span 1;">
+                        <label>Quantity</label>
+                        <input type="text" value=" 250  " readonly style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                    </div>
+
+                    <div style="grid-column: span 1;">
+                        <label>Total Amount</label>
+                        <input type="text" value="₹491405" readonly style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="background-color: #3a456d; padding: 15px; text-align: right;">
+                    <button style="background-color: #4caf50; color: white; padding: 10px 20px; border-radius: 20px; border: none; font-weight: bold;">
+                        ✔ Place Order
+                    </button>
+                </div>
+            </div>
+{% endblock %}

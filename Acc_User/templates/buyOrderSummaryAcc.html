@@ -1,0 +1,239 @@
+{% extends "baseStructureAcc.html" %}
+{% block title %}Shares List{% endblock %}
+
+
+{% block subtitle %}Buy Order Summary{% endblock %}
+
+{% block Accprofile_content %}
+            <div class="Accorder-details">
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>Sl.no</th>
+                            <th>Order_Id</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>RM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Ord_01</td>
+                            <td>11-04-2025</td>
+                            <td>11.30am</td>
+                            <td>Vishnu</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>Customer_name</th>
+                            <th>Customer_Id</th>
+                            <th>Pan Number</th>
+                            <th>Email_id</th>
+                            <th>MObile Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Nikhil Chavan</td>
+                            <td>thangiv_01</td>
+                            <td>GHTHD2523M</td>
+                            <td>nikhilc@gmail.com</td>
+                            <td>7676801529</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>Broker Name</th>
+                            <th>Broker Id</th>
+                            <th>Client Id</th>
+                            <th>Broker Pan Number</th>
+                            <th>Broker Email Id</th>
+                            <th>Broker Contact Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Zeroda Brokering Limited</td>
+                            <td>12081600</td>
+                            <td>72264491</td>
+                            <td>-</td>
+                            <td>zeroda@gmail.com</td>
+                            <td>58965742</td>
+                        </tr>
+                        <tr>
+                            <td>Groww Brokering Limited</td>
+                            <td>12081600</td>
+                            <td>72264491</td>
+                            <td>-</td>
+                            <td>groww@gmail.com</td>
+                            <td>58965742</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>Bank Name</th>
+                            <th>Bank A/c Details</th>
+                            <th>IFS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Bank Of Baroda</td>
+                            <td>521452663258</td>
+                            <td>BARB0BELGAU</td>
+                        </tr>
+                        <tr>
+                            <td>Kotak Mahindra Bank</td>
+                            <td>521452663258</td>
+                            <td>KKBK0008227</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="order-details-transaction">
+                <div class="AccpaymentAddsection">
+                    <button class="AccpaymentAdd btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal">Add Payment</button>
+                </div>
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>SLNO</th>
+                            <th>Date</th>
+                            <th>Bank</th>
+                            <th>Enter Amount</th>
+                            <th>Remaining Amount</th>
+                            <th>Screenshot</th>
+                            <th>Remark</th>
+                            <th>Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>11-04-2025</td>
+                            <td>Bank Of Baroda</td>
+                            <td>5000000.00</td>
+                            <td>639500.00</td>
+                            <td>view file</td>
+                            <td>Done</td>
+                            <td>
+                                 <select style="border: none; outline: none; padding: 5px; cursor: pointer;">
+                                    <option selected disabled>Select</option>
+                                    <option style="color: green;">Received</option>
+                                    <option style="color: red;">Not Received</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="Accbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>SLNO</th>
+                            <th>Broker</th>
+                            <th>ISIN Number</th>
+                            <th>Stock</th>
+                            <th>Order Type</th>
+                            <th>Buy/Sell</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>zeroda Brokering limited</td>
+                            <td>INE012L01014</td>
+                            <td>NNS LTD</td>
+                            <td>Limit</td>
+                            <td>Buy</td>
+                            <td>1850</td>
+                            <td>250</td>
+                            <td>462500.00</td>
+                            <td>Transfer Successful</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+                <div class="Accpayment-process">
+                    <h4><Big>Total: </Big>1139500.00</h4>
+                    <button class="payment-button">Process To Account Department</button>
+                    <p>Note: complet Payment Received</p>
+                </div>
+            </div>
+
+            <div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg-custom">
+                    <div class="modal-content custom-modal">
+            
+                        <div class="Accmodal-header">
+                            <h5 class="modal-title" id="buyModalLabel">
+                                Add Payment
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                <label class="form-label">Select Bank</label>
+                                <select class="form-select">
+                                    <option>Bank Of Baroda</option>
+                                    <option>Kotak Mahindra</option>
+                                </select>
+                                </div>
+                    
+                                <div class="col-6">
+                                    <label class="form-label">Remain Amount</label>
+                                    <input type="number" class="form-control" value="250" readonly>
+                                </div>
+                    
+                                <div class="col-6">
+                                <label class="form-label">Enter Amount</label>
+                                    <input type="number" class="form-control" value="250">
+                                </div>
+                    
+                                <div class="col-6">
+                                    <label class="form-label">Pending Amount</label>
+                                    <input type="text" class="form-control" value="₹1965.62">
+                                </div>
+                    
+                                <div class="col-6">
+                                    <label class="form-label">Upload Screenshot</label>
+                                    <input type="file" class="form-control">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Remark</label>
+                                    <input type="text" class="form-control">
+                                </div>
+                                <div class="col-6">
+                                        <label class="form-label">Status</label>
+                                        <select style="border: none; outline: none; padding: 5px; cursor: pointer;" class="form-control">
+                                            <option selected disabled>Select</option>
+                                            <option style="color: green;">Received</option>
+                                            <option style="color: red;">Not Received</option>
+                                        </select>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- Modal Footer -->
+                        <div class="modal-footer justify-content-center">
+                        <button class="btn btn-success w-100">
+                            ✔️ Submit
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+{% endblock %}
