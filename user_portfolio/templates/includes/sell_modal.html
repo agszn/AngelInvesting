@@ -1,0 +1,43 @@
+{% for stock in global_stocks %}
+  <div class="modal fade" id="sellModal{{ stock.id }}" tabindex="-1" role="dialog" aria-labelledby="sellModalLabel{{ stock.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form method="POST" action="{% url 'user_portfolio:sell_stock' stock.id %}">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title">Sell {{ stock.company_name }}</h5>
+            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="advisor">Advisor</label>
+              <select name="advisor" class="form-control" required>
+                {% for advisor in global_advisors %}
+                  <option value="{{ advisor.id }}">{{ advisor.name }} ({{ advisor.advisor_type }})</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="broker">Broker</label>
+              <select name="broker" class="form-control" required>
+                {% for broker in global_brokers %}
+                  <option value="{{ broker.id }}">{{ broker.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Quantity</label>
+              <input type="number" name="quantity" class="form-control" value="{{ stock.lot }}" required>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-danger">Place Sell Order</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endfor %}

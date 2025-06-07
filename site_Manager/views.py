@@ -44,6 +44,14 @@ from decimal import Decimal, InvalidOperation
 import csv, io
 from django.http import HttpResponse
 
+from decimal import Decimal, InvalidOperation
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.db.models import Q
+from .forms import *
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def UnlistedStocksUpdateSM(request):
     today = timezone.now().date()
 
@@ -56,33 +64,34 @@ def UnlistedStocksUpdateSM(request):
         if stock_id:
             stock = get_object_or_404(StockData, pk=stock_id)
 
-            try:
-                share_price = Decimal(share_price_str) if share_price_str else None
-            except (InvalidOperation, TypeError):
-                share_price = None
-
+            # Only update lot_size directly in StockData
             try:
                 lot_size = int(lot_size_str) if lot_size_str else None
+                if lot_size is not None:
+                    stock.lot = lot_size
+                    stock.save()
             except (ValueError, TypeError):
-                lot_size = None
+                pass  # Ignore invalid lot sizes
 
-            if lot_size is not None:
-                stock.lot = lot_size
-            if conviction_level:
-                stock.conviction_level = conviction_level
-            stock.save()
-
+            # Create or update the snapshot for today
             snapshot, _ = StockDailySnapshot.objects.get_or_create(stock=stock, date=today)
 
-            if share_price is not None:
-                snapshot.share_price = share_price
+            try:
+                share_price = Decimal(share_price_str) if share_price_str else None
+                if share_price is not None:
+                    snapshot.share_price = share_price
+            except (InvalidOperation, TypeError):
+                pass
+
             if conviction_level:
                 snapshot.conviction_level = conviction_level
-            snapshot.save()
+
+            snapshot.save(update_stockdata=False)
 
             return redirect('SM_User:UnlistedStocksUpdateSM')
 
-    query = request.GET.get('q', '')
+    # Handle GET request
+    query = request.GET.get('q', '').strip()
     all_stocks = StockData.objects.all()
 
     if query:
@@ -90,30 +99,61 @@ def UnlistedStocksUpdateSM(request):
 
     snapshots = []
     for stock in all_stocks:
-        today_snapshot = StockDailySnapshot.objects.filter(stock=stock, date=today).first()
-        if today_snapshot:
-            snapshots.append(today_snapshot)
+        snapshot = StockDailySnapshot.objects.filter(stock=stock, date=today).first()
+        if snapshot:
+            snapshots.append(snapshot)
         else:
+            # Fallback to the most recent snapshot, or a placeholder with today's date
             latest_snapshot = StockDailySnapshot.objects.filter(stock=stock).order_by('-date').first()
             snapshots.append(latest_snapshot or StockDailySnapshot(stock=stock, date=today))
+
+    # Optional: Display CSV upload result feedback
+    upload_result = request.session.pop('csv_update_result', None)
 
     return render(request, 'UnlistedStocksUpdateSM.html', {
         'snapshots': snapshots,
         'conviction_choices': CONVICTION_CHOICES,
         'search_query': query,
         'today': today,
+        'upload_result': upload_result,
     })
 
-def download_unlisted_stocks_csv(request):
-    today = timezone.now().date()
-    snapshot_qs = StockDailySnapshot.objects.filter(date=today).select_related('stock')
 
-    unique_stock_ids = set()
-    filtered_snapshots = []
-    for snapshot in snapshot_qs:
-        if snapshot.stock.id not in unique_stock_ids:
-            unique_stock_ids.add(snapshot.stock.id)
-            filtered_snapshots.append(snapshot)
+from django.db.models import Max
+
+def download_unlisted_stocks_csv(request):
+    # Get the latest snapshot date per stock
+    latest_dates = (
+        StockDailySnapshot.objects
+        .values('stock')
+        .annotate(latest_date=Max('date'))
+    )
+
+    # Build a dictionary {stock_id: latest_date}
+    latest_date_map = {item['stock']: item['latest_date'] for item in latest_dates}
+
+    # Query snapshots matching the latest date per stock
+    latest_snapshots = StockDailySnapshot.objects.filter(
+        *[
+            # For each stock, filter snapshot on stock=stock_id and date=latest_date
+            # But Django ORM can’t do this in a single query without subqueries
+            # So do a filter with Q or subquery here:
+            # We'll use a Q expression below
+        ]
+    )
+
+    # The above approach is tricky in one query, so simpler approach:
+    # Get all latest snapshots with a subquery:
+
+    from django.db.models import OuterRef, Subquery
+
+    latest_snapshot_subquery = StockDailySnapshot.objects.filter(
+        stock=OuterRef('stock')
+    ).order_by('-date').values('pk')[:1]
+
+    latest_snapshots = StockDailySnapshot.objects.filter(
+        pk__in=Subquery(latest_snapshot_subquery)
+    ).select_related('stock')
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="unlisted_stocks_update.csv"'
@@ -121,8 +161,10 @@ def download_unlisted_stocks_csv(request):
     writer = csv.writer(response)
     writer.writerow(['Company Name', 'Conviction Level', 'Share Price'])
 
-    for snapshot in filtered_snapshots:
-        writer.writerow([snapshot.stock.company_name, snapshot.conviction_level, snapshot.share_price])
+    for snapshot in latest_snapshots:
+        # Filter only unlisted stocks if needed:
+        if snapshot.stock.stock_type == 'Unlisted':
+            writer.writerow([snapshot.stock.company_name, snapshot.conviction_level, snapshot.share_price])
 
     return response
 
@@ -179,3 +221,99 @@ def upload_unlisted_stocks_csv(request):
     return redirect('SM_User:UnlistedStocksUpdateSM')
 
 
+
+
+# custom fields
+from django.shortcuts import render, get_object_or_404, redirect
+from unlisted_stock_marketplace.models import *
+from .forms import *
+
+def custom_field_list(request):
+    definitions = CustomFieldDefinition.objects.select_related('stock').all()
+    return render(request, 'custom_fields/definition_list.html', {'definitions': definitions})
+
+def custom_field_create(request):
+    if request.method == 'POST':
+        form = CustomFieldDefinitionForm(request.POST)
+        formset = CustomFieldValueFormSet(request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            definition = form.save()
+            formset.instance = definition
+            formset.save()
+            return redirect('SM_User:custom_field_list')
+    else:
+        form = CustomFieldDefinitionForm()
+        formset = CustomFieldValueFormSet()
+
+    return render(request, 'custom_fields/definition_form.html', {'form': form, 'formset': formset})
+
+def custom_field_edit(request, pk):
+    definition = get_object_or_404(CustomFieldDefinition, pk=pk)
+    if request.method == 'POST':
+        form = CustomFieldDefinitionForm(request.POST, instance=definition)
+        formset = CustomFieldValueFormSet(request.POST, instance=definition)
+
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            return redirect('SM_User:custom_field_list')
+    else:
+        form = CustomFieldDefinitionForm(instance=definition)
+        formset = CustomFieldValueFormSet(instance=definition)
+
+    return render(request, 'custom_fields/definition_form.html', {'form': form, 'formset': formset})
+
+
+# add broker
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from .models import Broker, Advisor
+from .forms import BrokerForm, AdvisorForm  # You’ll need to create these forms
+
+# ----------- BROKER VIEWS -----------
+
+class BrokerListView(ListView):
+    model = Broker
+    template_name = 'broker/broker_list.html'
+    context_object_name = 'brokers'
+
+class BrokerCreateView(CreateView):
+    model = Broker
+    form_class = BrokerForm
+    template_name = 'broker/broker_form.html'
+    success_url = reverse_lazy('SM_User:broker-list')
+
+class BrokerUpdateView(UpdateView):
+    model = Broker
+    form_class = BrokerForm
+    template_name = 'broker/broker_form.html'
+    success_url = reverse_lazy('SM_User:broker-list')
+
+class BrokerDeleteView(DeleteView):
+    model = Broker
+    template_name = 'broker/broker_confirm_delete.html'
+    success_url = reverse_lazy('SM_User:broker-list')
+
+# ----------- ADVISOR VIEWS -----------
+
+# views.py
+class AdvisorTypeListView(ListView):
+    model = Advisor
+    template_name = 'advisor/advisor_type_list.html'
+    context_object_name = 'types'
+
+class AdvisorTypeCreateView(CreateView):
+    model = Advisor
+    fields = ['advisor_type']
+    template_name = 'advisor/advisor_type_form.html'
+    success_url = reverse_lazy('SM_User:advisor-type-list')
+
+from django.views.generic import DeleteView
+from django.urls import reverse_lazy
+
+class AdvisorTypeDeleteView(DeleteView):
+    model = Advisor
+    template_name = 'advisor/advisor_type_confirm_delete.html'
+    success_url = reverse_lazy('SM_User:advisor-type-list')

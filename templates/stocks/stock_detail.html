@@ -257,11 +257,34 @@
               {% endif %}
             </div>
             <div class="header-buttons">
-                <a href="" class="stock-btn yellow-btn buy-btn" 
-                  style="width:90 ;"> Buy </a>
-                <!-- url 'unlisted_stock_marketplace:sell_stock' stock.id %} -->
-                <a href="" 
-                  class="stock-btn yellow-btn buy-btn" style="width:85 ;"> Sell</a>
+              <!-- Buy start  -->
+                <!-- <a href="javascript:void(0);" onclick="openBuyModal('{{ stock.id }}')">Buy</a> -->
+
+                <a href="#" onclick="openBuyModal('{{ stock.id }}'); return false;" class="stock-btn yellow-btn buy-btn" 
+                  style="width:90 ;">Buy</a>
+
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+
+                  {% include 'includes/buy_modal.html' %}
+
+                  {% block scripts %}
+                    <script>
+                      function openBuyModal(stockId) {
+                        $('#buyModal' + stockId).modal('show');
+                      }
+                      function openSellModal(stockId) {
+                        $('#sellModal' + stockId).modal('show');
+                      }
+                    </script>
+                  {% endblock %}
+                <!-- buy end  -->
+
+                <a href="#" onclick="openSellModal('{{ stock.id }}'); return false;" class="stock-btn yellow-btn buy-btn" style="width:85;">Sell</a>
+
+                  {% include 'includes/sell_modal.html' %}
+
+
             </div>
 
             <a href="#" 

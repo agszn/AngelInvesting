@@ -44,13 +44,6 @@ def profile_context(request):
 
     # Profile and Transactions
     profile, created = UserProfile.objects.get_or_create(user=user)
-    transactions = StockTransaction.objects.filter(user=user)
-
-    if search_query:
-        transactions = transactions.filter(share_name__icontains=search_query)
-
-    if stock_type_filter:
-        transactions = transactions.filter(stock__stock_type=stock_type_filter)
 
     return {
         'wishlist_items': wishlist_items,
@@ -64,7 +57,6 @@ def profile_context(request):
         'profile': profile,
         'bank_accounts': profile.bank_accounts.all() if profile else [],
         'cmr_copies': profile.cmr_copies.all() if profile else [],
-        'stock_transactions': transactions,
     }
 
 

@@ -54,10 +54,6 @@ class StockHistoryInline(admin.TabularInline):
     extra = 1
     readonly_fields = ('price', 'timestamp')
 
-class StockTransactionInline(admin.TabularInline):
-    model = StockTransaction
-    extra = 1
-    readonly_fields = ('user', 'share_name', 'date_bought', 'price_bought', 'price_sold', 'date_sold', 'current_status', 'profit', 'profit_percentage')
 
 class CompanyRelationInline(admin.TabularInline):
     model = CompanyRelation
@@ -86,7 +82,7 @@ class StockDataAdmin(admin.ModelAdmin):
     search_fields = ('company_name', 'scrip_name', 'isin_no', 'sector', 'industry', 'cin', 'stock_type')
     list_filter = ('sector', 'conviction_level', 'drhp_filed', 'rofr_require', 'stock_type')
 
-    inlines = [DirectorInline,CompanyRelationInline, PrincipalBusinessActivityInline,FAQAdmin,ReportAdmin, ShareholdingPatternAdmin, StockHistoryInline, StockTransactionInline]  
+    inlines = [DirectorInline,CompanyRelationInline, PrincipalBusinessActivityInline,FAQAdmin,ReportAdmin, ShareholdingPatternAdmin, StockHistoryInline]  
 
     fieldsets = (
         (None, {
@@ -447,5 +443,5 @@ class StockDailySnapshotAdmin(admin.ModelAdmin):
 admin.site.register(StockData, StockDataAdmin)
 admin.site.register(Director)
 admin.site.register(StockHistory)
-admin.site.register(StockTransaction)
+
 

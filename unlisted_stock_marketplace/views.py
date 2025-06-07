@@ -29,7 +29,7 @@ from .views import *
 # -------------------------------------------------------------------
 # 
 # 
-@login_required
+
 def stock_list(request):
     query = request.GET.get('q', '')
     stocks = StockData.objects.filter(company_name__icontains=query) if query else StockData.objects.all()
@@ -70,7 +70,6 @@ def get_sheet_data(stock_id, model_type):
     }
 
 # Stock Detail - onclick on stock name
-@login_required
 def stock_detail(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
     price_history = StockHistory.objects.filter(stock=stock).order_by('timestamp')
@@ -172,15 +171,6 @@ def stock_detail(request, stock_id):
     # 
     # 
     # 
-    brokers = Broker.objects.all()
-    # 
-    # 
-    # 
-    
-
-    # 
-    # 
-    # 
     # Fetching multiple stocks to display in the cards section
     all_stocks = StockData.objects.all()  # Fetch all stocks or customize this query as needed
     # 
@@ -214,8 +204,6 @@ def stock_detail(request, stock_id):
 
         'faqs': faqs,
 
-        'brokers': brokers,
-        
         'all_stocks': all_stocks, 
 
     }

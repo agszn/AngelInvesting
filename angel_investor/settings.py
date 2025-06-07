@@ -77,8 +77,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
                 'user_auth.context_processors.profile_context',
                 'user_auth.context_processors.marquee_stocks',
+                'user_portfolio.context_processors.buy_sell_context',
             ],
         },
     },
@@ -97,6 +99,31 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'angelInvestingDB',
+#         'USER': 'postgres',
+#         'PASSWORD': 'G7!xV9#pLd3@tQzA',
+#         'HOST': '194.164.151.204',  
+#         'PORT': '5432',
+#     }
+# }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     },
+#     'prod': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'angelInvestingDB',
+#         'USER': 'postgres',
+#         'PASSWORD': 'G7!xV9#pLd3@tQzA',
+#         'HOST': '194.164.151.204',
+#         'PORT': '5432',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -191,13 +218,12 @@ LOGOUT_REDIRECT_URL = 'login'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'mail.theangelinvesting.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '@gmail.com'
-EMAIL_HOST_PASSWORD = '   '
-DEFAULT_FROM_EMAIL = '@gmail.com'
-ADMIN_EMAIL = '@gmail.com'
+EMAIL_HOST_USER = 'info@theangelinvesting.com'
+EMAIL_HOST_PASSWORD = 'J69NTFjSfcVfYgrhSdfG'
+ADMIN_EMAIL = 'info@theangelinvesting.com'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -1,0 +1,202 @@
+create a model.py  for 
+1. stockTransactionBuy   : [foreign key from appname.tablename - 
+a.(unlisted_stock_marketplace.StockData, 
+b. unlisted_stock_marketplace.company_name, 
+c. unlisted_stock_marketplace.share_price, 
+d. unlisted_stock_marketplace.ltp, 
+e. unlisted_stock_marketplace.quantity, 
+f. unlisted_stock_marketplace.lot, 
+g. unlisted_stock_marketplace.stock_type,  )], 
+unlisted_stock_marketplace.conviction_level
+unlisted_stock_marketplace.sector
+
+h. CompanyProfit = unlisted_stock_marketplace.profit
+i. CompanyProfitPercentage = unlisted_stock_marketplace.profit_percentage
+
+j. (site_Manager.Broker, 
+site_Manager.Advisor), 
+
+k. OrderType =  buyStockMarketQuantity (radio button) , 
+    buyLimitQuantity(radio button), 
+
+l. PurchaseStockQuantity if user selects buyLimitQuantity else equal to lot, 
+m. AvgPrice = PurchaseStockQuantity * unlisted_stock_marketplace.share_price
+n. boughtPrice,   
+o.  TotalInvestedAmount autogenerate
+p.  CurrentValue of TotalInvestedAmount autogenerate
+q. DailyProfit/Loss autogenerate
+r. DailyProfitPercentage/Loss  autogenerate
+s. totalProfit/Loss  autogenerate
+t. totalProfitPercentage/Loss  autogenerate
+u. Status dropdown - [Completed,Processing, Cancel, Onhold]
+    created_at 
+    updated_at 
+  orderid
+date
+time 
+user_auth.BankAccount
+addpayment foreign key to addpayment Table  
+
+2. stockTransactionSell  : [foreign key from appname.tablename - 
+a. (unlisted_stock_marketplace.StockData, 
+unlisted_stock_marketplace.company_name, 
+unlisted_stock_marketplace.share_price, 
+unlisted_stock_marketplace.ltp, 
+unlisted_stock_marketplace.quantity, 
+unlisted_stock_marketplace.lot, 
+unlisted_stock_marketplace.stock_type,  )] 
+
+b. (site_Manager.Broker, site_Manager.Advisor),  
+
+c. SellStockquantity 
+d. SellingStockPrice
+d. TotalSellingPrice auto calcutale SellStockquantity * SellingStockPrice
+    created_at 
+    updated_at 
+
+
+also in 
+3. class StockData(models.Model):
+    company_name = models.CharField(max_length=775, blank=True, null=True)
+    scrip_name = models.CharField(max_length=775, blank=True, null=True)
+    isin_no = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    cin = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    sector = models.CharField(max_length=100, blank=True, null=True)  # Renamed from industry
+    category = models.CharField(max_length=775, blank=True, null=True)  # Category/Sub-Category
+    
+    registration_date = models.DateField(blank=True, null=True)
+    drhp_filed = models.BooleanField(default=False)
+    available_on = models.CharField(max_length=50, blank=True, null=True)
+    rofr_require = models.BooleanField(default=False)
+
+    outstanding_shares = models.BigIntegerField(blank=True, null=True)
+    face_value = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(0)])  # FV
+    book_value = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # BV
+    market_capitalization = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    profit = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    profit_percentage = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    
+    eps = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pe_ratio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    ps_ratio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pbv = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    share_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    ltp = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # Last traded price
+    week_52_high = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    week_52_low = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    lifetime_high = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    lifetime_high_date = models.DateField(blank=True, null=True)
+    lifetime_low = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    lifetime_low_date = models.DateField(blank=True, null=True)
+    day_high = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    day_low = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    
+    lot = models.PositiveIntegerField(default=1, blank=True, null=True)
+    quantity = models.PositiveIntegerField(default=0, blank=True, null=True)
+    conviction_level = models.CharField(max_length=50, choices=CONVICTION_CHOICES, default='Very High', blank=True, null=True)
+
+    number_of_times_searched = models.PositiveIntegerField(default=0)
+    
+    pan_no = models.CharField(max_length=10, unique=True, blank=True, null=True)
+    gst_no = models.CharField(max_length=15, unique=True, blank=True, null=True)
+
+    logo = models.ImageField(upload_to='stock_logos/', blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    company_overview = models.TextField(blank=True, null=True)
+    registered_office_address = models.TextField(blank=True, null=True)
+    transfer_agent_address = models.TextField(blank=True, null=True)
+
+    stock_type = models.CharField(
+        max_length=20,
+        choices=STOCK_TYPE_CHOICES,
+        default='Unlisted',
+        blank=True,
+        null=True,
+        help_text="Type of stock: Unlisted, Angel, or Listed"
+    )
+    def formatted_share_price(self):
+        return f"₹{self.share_price:,.2f}" if self.share_price else "N/A"
+
+    def save(self, *args, **kwargs):
+        """Automatically log price changes to StockHistory before updating"""
+        if self.pk:  # Ensure it's an existing instance
+            old_stock = StockData.objects.filter(pk=self.pk).first()
+            if old_stock and old_stock.share_price != self.share_price and self.share_price is not None:
+                StockHistory.objects.create(stock=self, price=self.share_price)
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return f"{self.company_name} - ₹{self.share_price}" 
+    
+    def set_custom_field(self, field_name, value):
+        field_def, created = CustomFieldDefinition.objects.get_or_create(name=field_name)
+        custom_value, created = CustomFieldValue.objects.update_or_create(
+            stock=self,
+            field_definition=field_def,
+            defaults={'value': value}
+        )
+
+    def get_custom_field(self, field_name):
+        try:
+            custom_value = self.custom_field_values.get(field_definition__name=field_name)
+            return custom_value.value
+        except CustomFieldValue.DoesNotExist:
+            return None
+ add UserID - autogenerate 
+
+
+
+4. in class CustomUser(AbstractUser):
+    USER_TYPE_CHOICES = [
+        ('RM', 'Relationship Manager'),
+        ('AC', 'Accounts'),
+        ('SM', 'Site Manager'),
+        ('ST', 'Share Transfer'),
+        ('AD', 'Admin'),
+        ('DF', 'Default User'),
+        ('AP', 'Associate Partner'),   
+        ('PT', 'Partner'),             
+    ]
+
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(unique=True)
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    user_type = models.CharField(max_length=2, choices=USER_TYPE_CHOICES, default='DF')
+
+    groups = models.ManyToManyField(
+        Group,
+        related_name="customuser_set",
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="customuser_set",
+        blank=True
+    )  add
+User_RM_Assigned- assign user_type.RM  to other all other users , even a user who may be a RM should be assigned another RM user , 
+
+
+5. RM_Clients = CustomUser.User_RM_Assigned  
+CustomUser = Joining Date CustomUser
+CustomUser ID= StockData.UserID
+CustomUser name= Custom fullname 
+CustomUser phone_number = CustomUser.phone_number
+Today's Payment Collected = stockTransactionBuy.created / updated
+10 Days Payment Collected
+Month Payment Collected
+
+addpayment Table  
+data 
+time 
+create 
+updated 
+BankAccount foreign 
+total amount 
+remaining amouth 
+screenshot remark
+
+
+daily_profit_loss = (todays - previous_close_price) * purchase_quantity
+daily_profit_loss_percentage = ((ltp - previous_close_price) / previous_close_price) * 100

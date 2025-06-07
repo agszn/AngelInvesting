@@ -1,0 +1,34 @@
+{% extends "baseStructureSM.html" %}
+{% block title %}Broker{% endblock %}
+
+{% block subtitle %}Broker{% endblock %}
+
+{% block SMprofile_content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-primary">Broker List</h2>
+    <a href="{% url 'SM_User:broker-add' %}" class="btn btn-success view">Add Broker</a>
+  </div>
+
+  {% if brokers %}
+    <div class="row">
+      {% for broker in brokers %}
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title text-dark">{{ broker.name }}</h5>
+              <p class="card-text mb-1"><strong>PAN:</strong> {{ broker.pan }}</p>
+              <p class="card-text mb-1"><strong>Email:</strong> {{ broker.email }}</p>
+              <p class="card-text mb-3"><strong>Contact:</strong> {{ broker.contact }}</p>
+              <a href="{% url 'SM_User:broker-edit' broker.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
+              <a href="{% url 'SM_User:broker-delete' broker.pk %}" class="btn btn-outline-danger btn-sm ms-2">Delete</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No brokers found.</p>
+  {% endif %}
+</div>
+{% endblock %}

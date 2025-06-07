@@ -19,7 +19,17 @@ urlpatterns = [
     # profile
     path('profile/', view_profile, name='profile'),
     path('profile/edit/', edit_profile, name='edit_profile'),
-    path('download/cmr/<int:cmr_id>/', download_cmr_file, name='download_cmr_file'),
+    # bank
+    path('bank-details/', bankAccDetails, name='bank-details'),
+    path('save-bank-account/', save_bank_account, name='save_bank_account'),
+    path('get-bank-account/<int:bank_id>/', get_bank_account, name='get-bank-account'),
+    path('delete-bank-account/<int:bank_id>/', delete_bank_account, name='delete_bank_account'),
+
+
+    # CMR
+    path('delete-cmr/<int:cmr_id>/', delete_cmr, name='delete_cmr'),
+    path('download-cmr/<int:cmr_id>/', download_cmr_file, name='download_cmr_file'),
+
     # contact
     path('contact/', contact, name='contact'),
     path('contactView/', contact_view, name='contactView'),

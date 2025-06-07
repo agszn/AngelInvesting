@@ -44,6 +44,9 @@ def sell_orders(request):
 
 
 
+
+# testing
+
 # 
 # 
 # ---------------------------------------------------------------------
@@ -51,58 +54,57 @@ def sell_orders(request):
 # ------------------------------------------------------------------
 # 
 # 
-@login_required
+# user_portfolio/views.py
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+from .models import BuyTransaction, SellTransaction
+from unlisted_stock_marketplace.models import *
+from site_Manager.models import *
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+from decimal import Decimal
+
+from .models import BuyTransaction
+from site_Manager.models import Broker, Advisor
+from unlisted_stock_marketplace.models import StockData
+
+
+# user_portfolio/views.py
+@require_POST
 def buy_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
-    brokers = Broker.objects.all()
-    
-    query = request.GET.get('q', '').strip()
-    stock_type = request.GET.get('stock_type', '')
-    
-    transactions = StockTransaction.objects.filter(user=request.user)
-    
-    if request.method == 'POST':
-        number_of_shares = int(request.POST.get('number_of_shares', 1))
+    try:
+        advisor_id = request.POST.get('advisor')
+        broker_id = request.POST.get('broker')
+        quantity = int(request.POST.get('quantity'))
+        price_per_share = Decimal(request.POST.get('price_per_share'))
         order_type = request.POST.get('order_type')
-        limit_price_raw = request.POST.get('limit_price')
-        broker_id = request.POST.get('broker_id')
 
+        total_amount = quantity * price_per_share
+
+        advisor = get_object_or_404(Advisor, id=advisor_id)
         broker = get_object_or_404(Broker, id=broker_id)
 
-        # Use Decimal to prevent type mismatch
-        price = Decimal(limit_price_raw) if order_type == 'Limit' and limit_price_raw else stock.ltp
-
-        transactions = StockTransaction.objects.create(
+        BuyTransaction.objects.create(
             user=request.user,
             stock=stock,
-            share_name=stock.company_name,
-            date_bought=timezone.now().date(),
-            price_bought=price,
-            number_of_shares=number_of_shares,
-            current_status='Holding',
-            transaction_type='Purchase',
-            quantity=number_of_shares,
-            broker=broker
+            advisor=advisor,
+            broker=broker,
+            quantity=quantity,
+            price_per_share=price_per_share,
+            order_type=order_type,
+            total_amount=total_amount,
         )
 
-        if query:
-            transactions = transactions.filter(share_name__icontains=query)
+        messages.success(request, f"Buy order placed for {stock.company_name} successfully.")
+    except Exception as e:
+        messages.error(request, f"Buy order failed: {str(e)}")
 
-        if stock_type:
-            transactions = transactions.filter(stock__stock_type=stock_type)
-            
-        messages.success(request, f'You have successfully purchased {number_of_shares} shares of {stock.company_name} at ₹{price}.')
-        return redirect('unlisted_stock_marketplace:stock_detail', stock_id=stock.id)
-
-
-
-    return render(request, 'User_portfolio/buy.html', {
-        'stock': stock,
-        'brokers': brokers,
-        'stock_transactions': transactions,
-        'selected_stock_type': stock_type,
-        'search_query': query,
-    })
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 # 
@@ -112,51 +114,29 @@ def buy_stock(request, stock_id):
 # ------------------------------------------------------------------
 # 
 # 
-@login_required
-def sell_stock(request, transaction_id):
-    transaction = get_object_or_404(StockTransaction, id=transaction_id, user=request.user)
 
-    query = request.GET.get('q', '').strip()
-    stock_type = request.GET.get('stock_type', '')
-    
-    transactions = StockTransaction.objects.filter(user=request.user)
-    
+@require_POST
+def sell_stock(request, stock_id):
+    stock = get_object_or_404(StockData, id=stock_id)
 
-    if query:
-        transactions = transactions.filter(share_name__icontains=query)
+    try:
+        advisor_id = request.POST.get('advisor')
+        broker_id = request.POST.get('broker')
+        quantity = int(request.POST.get('quantity'))
 
-    if stock_type:
-        transactions = transactions.filter(stock__stock_type=stock_type)
+        advisor = get_object_or_404(Advisor, id=advisor_id)
+        broker = get_object_or_404(Broker, id=broker_id)
 
-    if transaction.current_status == 'Sold':
-        messages.warning(request, 'This stock has already been sold.')
-        return redirect('user_portfolio:portfolio')  # or wherever your portfolio view is
+        SellTransaction.objects.create(
+            user=request.user,  
+            advisor=advisor,
+            broker=broker,
+            stock=stock,
+            quantity=quantity,
+        )
 
-    if request.method == 'POST':
-        number_of_shares_to_sell = int(request.POST.get('number_of_shares', 1))
-        order_type = request.POST.get('order_type')
-        limit_price_raw = request.POST.get('limit_price')
+        messages.success(request, f"Sell order placed for {stock.company_name}  {quantity}")
+    except Exception as e:
+        messages.error(request, f"Failed to place sell order: {str(e)}")
 
-        if number_of_shares_to_sell > transaction.number_of_shares:
-            messages.error(request, f'You only own {transaction.number_of_shares} shares.')
-            return redirect('user_portfolio:sell_stock', transaction_id=transaction.id)
-
-        price_sold = Decimal(limit_price_raw) if order_type == 'Limit' and limit_price_raw else transaction.stock.ltp
-
-        transaction.price_sold = price_sold
-        transaction.date_sold = timezone.now().date()
-        transaction.current_status = 'Sold'
-        transaction.transaction_type = 'Sale'
-        transaction.quantity = number_of_shares_to_sell
-        transaction.save()
-
-        messages.success(request, f'You have successfully sold {number_of_shares_to_sell} shares of {transaction.share_name} at ₹{price_sold}.')
-        return redirect('user_portfolio:portfolio')
-
-    return render(request, 'User_portfolio/sell.html', {
-        'transaction': transaction,
-        'stock': transaction.stock,
-        'stock_transactions': transactions,
-        'selected_stock_type': stock_type,
-        'search_query': query,
-    })
+    return redirect(request.META.get('HTTP_REFERER', '/'))
