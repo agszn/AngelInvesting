@@ -24,8 +24,50 @@ from .views import *
 
 from unlisted_stock_marketplace.models import *
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import UserPortfolioSummary, BuyTransaction
+from decimal import Decimal
+
+@login_required
 def profile_overview(request):
-    return render(request, 'portfolio/overview.html')
+    user = request.user
+    summary = getattr(user, 'portfolio_summary', None)
+
+    # Group by advisor name for per-advisor summary
+    advisor_data = {}
+    completed_buys = BuyTransaction.objects.filter(user=user, status='completed')
+
+    for tx in completed_buys:
+        key = tx.advisor.name if tx.advisor else 'Other Advisor'
+        if key not in advisor_data:
+            advisor_data[key] = {
+                'invested': Decimal('0'),
+                'market_value': Decimal('0'),
+                'today_gain': Decimal('0'),
+            }
+        advisor_data[key]['invested'] += tx.total_amount
+        if tx.stock.ltp:
+            advisor_data[key]['market_value'] += tx.quantity * tx.stock.ltp
+            advisor_data[key]['today_gain'] += (tx.stock.ltp - tx.stock.share_price) * tx.quantity
+
+    for advisor in advisor_data.values():
+        advisor['overall_gain'] = advisor['market_value'] - advisor['invested']
+        advisor['gain_percent'] = (
+            (advisor['overall_gain'] / advisor['invested']) * 100
+            if advisor['invested'] > 0 else 0
+        )
+        advisor['today_gain_percent'] = (
+            (advisor['today_gain'] / advisor['invested']) * 100
+            if advisor['invested'] > 0 else 0
+        )
+
+    context = {
+        'summary': summary,
+        'advisor_data': advisor_data,
+    }
+    return render(request, 'portfolio/overview.html', context)
+
 
 def unlisted_view(request):
     return render(request, 'portfolio/unlistedOverview.html')
@@ -36,8 +78,29 @@ def angel_invest(request):
 def portfolio_view(request):
     return render(request, 'portfolio/PortfolioList.html')
 
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from user_portfolio.models import BuyTransaction  # Adjust if in another app
+
+@login_required
 def buy_orders(request):
-    return render(request, 'portfolio/BuyOrdersList.html')
+    buy_orders = BuyTransaction.objects.filter(user=request.user).select_related('stock', 'advisor', 'broker').order_by('-timestamp')
+
+    # Optional: Search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        buy_orders = buy_orders.filter(stock__company_name__icontains=search_query)
+
+    # Optional: Pagination
+    paginator = Paginator(buy_orders, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'portfolio/BuyOrdersList.html', {
+        'page_obj': page_obj,
+        'search_query': search_query,
+    })
+
 
 def sell_orders(request):
     return render(request, 'portfolio/SellOrdersList.html')
@@ -140,3 +203,5 @@ def sell_stock(request, stock_id):
         messages.error(request, f"Failed to place sell order: {str(e)}")
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+

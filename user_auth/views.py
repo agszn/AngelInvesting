@@ -33,24 +33,55 @@ from .forms import UserTypeUpdateForm
 def is_admin_or_site_manager(user):
     return user.user_type in ['AD', 'SM']
 
+# @login_required
+# @user_passes_test(is_admin_or_site_manager)
+# def manage_user_types(request):
+#     query = request.GET.get('q', '')
+#     users = CustomUser.objects.exclude(user_type='AD')
+#     if query:
+#         users = users.filter(username__icontains=query) | users.filter(email__icontains=query)
+
+#     if request.method == 'POST':
+#         user_id = request.POST.get('user_id')
+#         new_type = request.POST.get('user_type')
+#         user = get_object_or_404(CustomUser, id=user_id)
+#         user.user_type = new_type
+#         user.save()
+#         return redirect('manage_user_types')
+
+#     return render(request, 'SiteManageUsers/ManageUserAuth.html', {'users': users, 'query': query})
+
 @login_required
 @user_passes_test(is_admin_or_site_manager)
 def manage_user_types(request):
     query = request.GET.get('q', '')
     users = CustomUser.objects.exclude(user_type='AD')
+    rms = CustomUser.objects.filter(user_type='RM')
+
     if query:
         users = users.filter(username__icontains=query) | users.filter(email__icontains=query)
 
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
         new_type = request.POST.get('user_type')
+        assigned_rm_id = request.POST.get('assigned_rm')
+
         user = get_object_or_404(CustomUser, id=user_id)
         user.user_type = new_type
+
+        if assigned_rm_id:
+            user.assigned_rm_id = assigned_rm_id
+        else:
+            user.assigned_rm = None
+
         user.save()
         return redirect('manage_user_types')
 
-    return render(request, 'SiteManageUsers/ManageUserAuth.html', {'users': users, 'query': query})
-
+    return render(request, 'SiteManageUsers/ManageUserAuth.html', {
+        'users': users,
+        'rms': rms,
+        'query': query,
+    })
 
 def base(request):
     # homepage banner

@@ -1,3 +1,5 @@
+# app: user_auth
+# models.py
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.conf import settings
 from django.db import models
@@ -19,7 +21,7 @@ class CustomUser(AbstractUser):
         ('Other', 'Other'),           
     ]
 
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True, unique=True)
     email = models.EmailField(unique=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
     user_type = models.CharField(max_length=5, choices=USER_TYPE_CHOICES, default='DF')
@@ -35,6 +37,14 @@ class CustomUser(AbstractUser):
         blank=True
     )
 
+    assigned_rm = models.ForeignKey(
+            'self',
+            null=True,
+            blank=True,
+            on_delete=models.SET_NULL,
+            limit_choices_to={'user_type': 'RM'},
+            related_name='assigned_users'
+        )
 
 from django.db import models
 from django.conf import settings

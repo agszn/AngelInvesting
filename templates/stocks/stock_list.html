@@ -183,7 +183,7 @@
         </div>
         <div class="info-third">
           <span class="spantext">Lot:<strong> {{ stock.lot }}</strong></span>
-          <span class="spantext">Qty:<strong>{{ stock.quantity }}</strong></span>
+          <!-- <span class="spantext">Qty:<strong>{{ stock.quantity }}</strong></span> -->
           <span class="spantext">Share Price:<strong> ₹{{ stock.share_price }}</strong></span>
         </div>
         <div class="actions">
@@ -193,20 +193,31 @@
           <button onclick="openBuyModal('{{ stock.id }}'); return false;">
               Buy Now
           </button>
-          <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-          <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+
 
             {% include 'includes/buy_modal.html' %}
+
 
 
             <!-- Buy Now Button end  -->
 
           <!-- Sell Now Button -->
-          <button onclick="openSellModal('{{ stock.id }}', '{{ stock.company_name }}', '{{ stock.share_price }}', '{{ stock.lot }}')">
+          <button onclick="openSellModal('{{ stock.id }}'); return false;">
               Sell Now
           </button>
 
+            {% include 'includes/sell_modal.html' %}
 
+            {% block scripts %}
+              <script>
+                function openBuyModal(stockId) {
+                  $('#buyModal' + stockId).modal('show');
+                }
+                function openSellModal(stockId) {
+                  $('#sellModal' + stockId).modal('show');
+                }
+              </script>
+            {% endblock %}
         </div>
         <!-- <button class="wishlist" onclick="window.location.href='{% url 'unlisted_stock_marketplace:wish_list' %}'">
             Add to Wishlist 🛒
@@ -314,10 +325,6 @@
     });
   });
 </script>
-<script>
-  function openBuyModal(stockId) {
-    $('#buyModal' + stockId).modal('show');
-  }
-</script>
+
 <!-- end of wishlist label code -->
 {% endblock %}

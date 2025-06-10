@@ -211,36 +211,61 @@ def stock_detail(request, stock_id):
 
 
 # stock list in table list format  other page/ blue page list DO not delete
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.core.paginator import Paginator
+from .models import StockData, StockHistory
+import json
+
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+import json
+from .models import StockData, StockHistory
+
 @login_required
 def StockListingTableFormat(request):
     stocks = StockData.objects.all()
-    
+
+    # Search Filter
     search_query = request.GET.get('search', '')
     if search_query:
         stocks = stocks.filter(company_name__icontains=search_query)
-    
+
+    # Sector Filter (optional future use)
     selected_sector = request.GET.get('sector', '')
     if selected_sector:
         stocks = stocks.filter(sector=selected_sector)
 
-    paginator = Paginator(stocks, 10)
-    page_number = request.GET.get('page')
+    # Entries per page
+    try:
+        per_page = int(request.GET.get('entries', 10))
+    except ValueError:
+        per_page = 10
+
+    # Pagination
+    paginator = Paginator(stocks, per_page)
+    page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
-    stock_history_data = {}
-    for stock in page_obj:
-        history = StockHistory.objects.filter(stock=stock).order_by('-timestamp')[:100]
-        stock_history_data[stock.id] = list(history.values('timestamp', 'price'))
+    # Chart data mapping
+    stock_history_data = {
+        stock.id: list(StockHistory.objects.filter(stock=stock).order_by('-timestamp')[:30].values('timestamp', 'price'))
+        for stock in page_obj
+    }
 
-    sectors = StockData.objects.values_list('sector', flat=True).distinct()
-
-    return render(request, 'AngelStockList/stockList.html', {
+    return render(request, 'stocks/StockListTable.html', {
         'page_obj': page_obj,
         'stock_history_data': json.dumps(stock_history_data, default=str),
-        'sectors': sectors,
         'search_query': search_query,
-        'selected_sector': selected_sector
+        'selected_sector': selected_sector,
+        'per_page': per_page,
+        'total_count': paginator.count,
+        'start_index': page_obj.start_index(),
+        'end_index': page_obj.end_index(),
     })
+
 
 
 # 

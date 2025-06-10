@@ -1,162 +1,354 @@
 {% extends "baseStructureRM.html" %}
-{% block title %}Shares List{% endblock %}
 
-{% block SubTitleRM %}Buy Order Summary{% endblock %}S
+{% block title %}Buy Order Summary{% endblock %}
+{% block SubTitleRM %}Buy Order Summary{% endblock %}
 
 {% block RMprofile_content %}
-            <table class="RMbuyorder-table">
-                <thead>
-                    <tr>
-                        <th>Sl.no</th>
-                        <th>Order_Id</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Client Name</th>
-                        <th>Client Id</th>
-                        <th>RM</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Ord_01</td>
-                        <td>11-04-2025</td>
-                        <td>11.30am</td>
-                        <td>Suraj Deshpande</td>
-                        <td>102457</td>
-                        <td>Vishnu</td>
-                    </tr>
-                </tbody>
-            </table>
-            <table class="RMbuyorder-table">
-                <thead>
-                    <tr>
-                        <th>Customer_name</th>
-                        <th>Customer_Id</th>
-                        <th>Pan Number</th>
-                        <th>Email_id</th>
-                        <th>MObile Number</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Nikhil Chavan</td>
-                        <td>thangiv_01</td>
-                        <td>GHTHD2523M</td>
-                        <td>nikhilc@gmail.com</td>
-                        <td>7676801529</td>
-                    </tr>
-                </tbody>
-            </table>
-            <table class="RMbuyorder-table">
-                <thead>
-                    <tr>
-                        <th>Broker Name</th>
-                        <th>Broker Id</th>
-                        <th>Client Id</th>
-                        <th>Broker Pan Number</th>
-                        <th>Broker Email Id</th>
-                        <th>Broker Contact Number</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Zeroda Brokering Limited</td>
-                        <td>12081600</td>
-                        <td>72264491</td>
-                        <td>-</td>
-                        <td>zeroda@gmail.com</td>
-                        <td>58965742</td>
-                    </tr>
-                    <tr>
-                        <td>Groww Brokering Limited</td>
-                        <td>12081600</td>
-                        <td>72264491</td>
-                        <td>-</td>
-                        <td>groww@gmail.com</td>
-                        <td>58965742</td>
-                    </tr>
-                </tbody>
-            </table>
-            <table class="RMbuyorder-table">
-                <thead>
-                    <tr>
-                        <th>Bank Name</th>
-                        <th>Bank A/c Details</th>
-                        <th>IFS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Bank Of Baroda</td>
-                        <td>521452663258</td>
-                        <td>BARB0BELGAU</td>
-                    </tr>
-                    <tr>
-                        <td>Kotak Mahindra Bank</td>
-                        <td>521452663258</td>
-                        <td>KKBK0008227</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="RMorder-details-transaction">
-                <table class="RMbuyorder-table">
-                    <thead>
-                        <tr>
-                            <th>SLNO</th>
-                            <th>Broker</th>
-                            <th>ISIN Number</th>
-                            <th>Stock</th>
-                            <th>Order Type</th>
-                            <th>Avg Buy Price</th>
-                            <th>Selling Price</th>
-                            <th>Qty</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>zeroda Brokering limited</td>
-                            <td>INE012L01014</td>
-                            <td>NNS LTD</td>
-                            <td>Limit</td>
-                            <td>1850</td>
-                            <td><input type="number" class="form-control" value="250" readonly></td>
-                            <td>250</td>
-                            <td>462500.00</td>
-                            <td>Successful</td>
-                        </tr>
-                         <tr>
-                            <td>1</td>
-                            <td>zeroda Brokering limited</td>
-                            <td>INE012L01015</td>
-                            <td>PHILIPS LIGHTING</td>
-                            <td>Market</td>
-                            <td>1375</td>
-                            <td><input type="number" class="form-control" value="250" readonly></td>
-                            <td>100</td>
-                            <td>137500.00</td>
-                            <td>Successful</td>
-                        </tr>
-                         <tr>
-                            <td>1</td>
-                            <td>zeroda Brokering limited</td>
-                            <td>INE012L01016</td>
-                            <td>TATA CAPITAL LTD</td>
-                            <td>Market</td>
-                            <td>925</td>
-                            <td><input type="number" class="form-control" value="250" readonly></td>
-                            <td>400</td>
-                            <td>370000.00</td>
-                            <td>Successful</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="RMpayment-process">
-                    <h4><Big>Total: </Big>1139500.00</h4>
-                    <button class="RMpayment-button">Process To Account Department</button>
+  {% if order %}
+    <h6 style="padding-top: 2%;">Order Details</h6>
+    <table class="RMbuyorder-table">
+      <thead>
+        <tr>
+          <th>Sl.no</th>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Time</th>
+          <!-- <th>Client Name</th>
+          <th>Client ID</th>
+          <th>RM</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ order.id }}</td>
+          <td>{{ order.order_id }}</td>
+          <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+          <td>{{ order.timestamp|time:"h:i A" }}</td>
+          <!-- <td>{{ order.user.profile.user.username }}</td>
+          <td>{{ order.user.profile.custom_user_id }}</td>
+          <td>{{ order.user.profile.user.assigned_rm }}</td> -->
+        </tr>
+      </tbody>
+    </table>
+
+    <h6 style="padding-top: 2%;">Client Details</h6>
+    <table class="RMbuyorder-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Custom User ID</th>
+          <th>PAN Number</th>
+          <th>Email</th>
+          <th>Mobile Number</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ order.user.profile.user.username }}</td>
+          <td>{{ order.user.profile.custom_user_id }}</td>
+          <td>{{ order.user.profile.pan_number }}</td>
+          <td>{{ order.user.email }}</td>
+          <td>{{ order.user.profile.mobile_number }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    {% if cmr %}
+      <h6 style="padding-top: 2%;">Broker Details</h6>
+      <table class="RMbuyorder-table">
+        <thead>
+          <tr>
+            <th>Broker Name</th>
+            <th>Broker ID</th>
+            <th>Client ID</th>
+            <th>Broker PAN Number</th>
+            <th>Broker Email</th>
+            <th>Broker Contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ cmr.broker.name }}</td>
+            <td>{{ cmr.broker.broker_id }}</td>
+            <td>{{ cmr.client_id_input }}</td>
+            <td>{{ cmr.broker.pan }}</td>
+            <td>{{ cmr.broker.email }}</td>
+            <td>{{ cmr.broker.contact }}</td>
+          </tr>
+        </tbody>
+      </table>
+    {% else %}
+      <p>No broker details found.</p>
+    {% endif %}
+
+    {% if bank_accounts %}
+      <h6 style="padding-top: 2%;">Bank Account Details</h6>
+      <table class="RMbuyorder-table">
+        <thead>
+          <tr>
+            <th>Bank Name</th>
+            <th>Account Holder Name</th>
+            <th>Account Number</th>
+            <th>IFSC Code</th>
+            <th>Account Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for account in bank_accounts %}
+          <tr>
+            <td>{{ account.bank_name }}</td>
+            <td>{{ account.account_holder_name }}</td>
+            <td>{{ account.account_number }}</td>
+            <td>{{ account.ifsc_code }}</td>
+            <td>{{ account.account_type }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No bank account details found.</p>
+    {% endif %}
+
+    <!-- Add Payment Button -->
+    <div class="RMpaymentAddsection" style="padding-top: 2%;">
+      <button class="RMpaymentAdd btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal">Add Payment</button>
+    </div>
+
+    <!-- Payment Records Table -->
+    <table class="RMbuyorder-table">
+      <thead>
+        <tr>
+          <th>SLNO</th>
+          <th>Date</th>
+          <th>Bank</th>
+          <th>Enter Amount</th>
+          <th>Remaining Amount</th>
+          <th>Upload Screenshot</th>
+          <th>Remark</th>
+          <th>Status</th>
+          <th>Actions</th>  <!-- NEW COLUMN -->
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in rm_view.payment_records.all %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ payment.date|date:"d-m-Y" }}</td>
+          <td>{{ payment.bank_name }}</td>
+          <td>{{ payment.amount }}</td>
+          <td>{{ payment.remaining_amount }}</td>
+          <td>
+            {% if payment.screenshot %}
+              <a href="{{ payment.screenshot.url }}" target="_blank">👁️‍🗨️</a>
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+          <td>{{ payment.remark }}</td>
+          <td>{{ payment.payment_status|capfirst }}</td>
+          <td>
+            <!-- Edit Button -->
+            <button 
+              class="btn btn-sm btn-outline-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#buyModal"
+              onclick="loadPaymentData('{{ payment.id }}')">
+              ✏️ 
+            </button>
+            <a href="{% url 'RM_User:delete_payment' payment.id %}" class="btn btn-sm btn-danger" 
+              onclick="return confirm('Are you sure you want to delete this payment?');">
+              🗑️
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9">No payment records found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+    <!-- Add Payment Modal -->
+    <!-- Add/Edit Payment Modal PopUp form -->
+    <div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg-custom">
+        <div class="modal-content custom-modal">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h5 class="modal-title" id="buyModalLabel">
+              {{ modal_title|default:"Add Payment" }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <!-- Modal Form -->
+          <div class="modal-body">
+            <form 
+              action="{% if payment %}{% url 'RM_User:edit_payment' payment.id %}{% else %}{% url 'RM_User:add_payment' order.order_id %}{% endif %}" 
+              method="post" 
+              enctype="multipart/form-data">
+              {% csrf_token %}
+              
+              <div class="row g-3">
+                <div class="col-6">
+                  <label class="form-label">Select Bank</label>
+                  <select name="bank_name" class="form-select">
+                    {% for bank in bank_accounts %}
+                      <option value="{{ bank.bank_name }}" {% if payment and payment.bank_name == bank.bank_name %}selected{% endif %}>{{ bank.bank_name }}</option>
+                    {% endfor %}
+                  </select>
                 </div>
-            </div>
+
+                <div class="col-6">
+                  <label class="form-label">Remaining Amount</label>
+                  <input type="number" name="remaining_amount" class="form-control" value="{{ payment.remaining_amount|default:order.total_amount }}">
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label">Enter Amount</label>
+                  <input type="number" name="amount" class="form-control" required value="{{ payment.amount|default:'' }}">
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label">Upload Screenshot</label>
+                  <input type="file" name="screenshot" class="form-control">
+                  {% if payment.screenshot %}
+                    <a href="{{ payment.screenshot.url }}" target="_blank">View Existing</a>
+                  {% endif %}
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label">Remark</label>
+                  <input type="text" name="remark" class="form-control" value="{{ payment.remark|default:'' }}">
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label">Status</label>
+                  <select name="payment_status" class="form-select">
+                    <option value="pending" {% if payment.payment_status == "pending" %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if payment.payment_status == "approved" %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if payment.payment_status == "rejected" %}selected{% endif %}>Rejected</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="modal-footer justify-content-center mt-3">
+                <button type="submit" class="btn btn-success w-100">✔️ {% if payment %}Update{% else %}Submit{% endif %}</button>
+              </div>
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <!-- <h6 style="padding-top: 2%;">Order Transaction Details</h3>
+    <table class="RMbuyorder-table">
+      <thead>
+        <tr>
+          <th>SLNO</th>
+          <th>Broker</th>
+          <th>ISIN Number</th>
+          <th>Stock</th>
+          <th>Order Type</th>
+          <th>Avg Buy Price</th>
+          <th>Selling Price</th>
+          <th>Qty</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.buytransactionitem_set.all %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.broker.broker_name }}</td>
+            <td>{{ item.isin_number }}</td>
+            <td>{{ item.stock_data.company_name }}</td>
+            <td>{{ item.order_type }}</td>
+            <td>{{ item.avg_buy_price }}</td>
+            <td>
+              <input type="number" class="form-control" value="{{ item.selling_price }}" readonly>
+            </td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.amount }}</td>
+            <td>{{ item.status }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="10">No transaction details available.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table> -->
+
+    <h6 style="padding-top: 2%;">Order Transaction Details</h6>
+    <table class="RMbuyorder-table">
+      <thead>
+        <tr>
+          <th>SLNO</th>
+          <th>Broker</th>
+          <th>ISIN Number</th>
+          <th>Stock</th>
+          <th>Order Type</th>
+          <th>Share Price</th>
+          <th>Buy Price</th>
+          <th>Qty</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in TransactionDetails %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.broker.name }}</td>
+            <td>{{ item.stock.isin_no }}</td>
+            <td>{{ item.stock.company_name }}</td>
+            <td>{{ item.order_type }}</td>
+            <td>{{ item.stock.share_price }}</td>
+            <td>{{ item.price_per_share }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.total_amount }}</td>
+            <td>{{ item.status }}</td>
+            <td>
+              <a href="{% url 'RM_User:edit_transaction' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
+
+              <!-- <a href="{% url 'RM_User:delete_transaction' pk=item.id %}"
+                onclick="return confirm('Are you sure you want to delete this transaction?');"
+                class="btn btn-danger btn-sm"
+                title="Delete Transaction"
+                aria-label="Delete Transaction">
+                🗑️
+              </a> -->
+
+
+
+            </td>
+
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="10" class="text-center">No transaction details available.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="RMpayment-process">
+      <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
+      <button class="RMpayment-button">Process To Account Department</button>
+    </div>
+
+  {% else %}
+    <p>No order details found.</p>
+  {% endif %}
 {% endblock %}

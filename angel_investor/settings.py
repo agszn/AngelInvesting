@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'RM_User',
     'Share_Transfer',
     'site_Manager',
+    
 ]
 
 MIDDLEWARE = [

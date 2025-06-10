@@ -200,3 +200,32 @@ screenshot remark
 
 daily_profit_loss = (todays - previous_close_price) * purchase_quantity
 daily_profit_loss_percentage = ((ltp - previous_close_price) / previous_close_price) * 100
+
+
+
+
+from decimal import Decimal
+class RM_UserAnalytics(models.Model):
+    rm_user = models.OneToOneField("RM_User", on_delete=models.CASCADE, related_name='analytics')
+
+    total_buy_orders = models.PositiveIntegerField(default=0)
+    total_sell_orders = models.PositiveIntegerField(default=0)
+    total_quantity_bought = models.PositiveIntegerField(default=0)
+    total_quantity_sold = models.PositiveIntegerField(default=0)
+    total_invested = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    total_realized = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def update_stats(self):
+        buy_txns = BuyTransaction.objects.filter(user=self.rm_user.user)
+        sell_txns = SellTransaction.objects.filter(user=self.rm_user.user)
+
+        self.total_buy_orders = buy_txns.count()
+        self.total_sell_orders = sell_txns.count()
+        self.total_quantity_bought = sum(b.quantity for b in buy_txns)
+        self.total_quantity_sold = sum(s.quantity for s in sell_txns)
+        self.total_invested = sum(b.total_amount for b in buy_txns)
+        self.total_realized = sum((s.total_value or 0) for s in sell_txns)
+
+        self.save()

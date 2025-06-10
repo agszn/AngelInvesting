@@ -1,3 +1,5 @@
+# app: site_Manager
+# models.py
 from django.db import models
 
 class HeroSectionBanner(models.Model):
