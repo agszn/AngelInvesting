@@ -139,6 +139,7 @@ from unlisted_stock_marketplace.models import StockData
 
 from django.http import JsonResponse
 
+
 def load_advisors_brokers(request):
     advisors = list(Advisor.objects.values('id', 'advisor_type'))
     brokers = list(Broker.objects.values('id', 'name'))
