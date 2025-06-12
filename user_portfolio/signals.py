@@ -61,3 +61,27 @@ def update_portfolio_and_rm_view(sender, instance, created, **kwargs):
     rm_view.save()
 
 
+
+
+# auto update the ither advisor stock price automatically
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from decimal import Decimal
+from unlisted_stock_marketplace.models import StockData
+from user_portfolio.models import BuyTransactionOtherAdvisor
+
+@receiver(post_save, sender=StockData)
+def update_transactions_on_stock_change(sender, instance, **kwargs):
+    related_transactions = BuyTransactionOtherAdvisor.objects.filter(stock=instance)
+
+    for txn in related_transactions:
+        txn.market_value = Decimal(txn.quantity) * instance.share_price
+        txn.overall_gain_loss = txn.market_value - txn.total_amount
+
+        if instance.ltp:
+            change_per_share = instance.share_price - instance.ltp
+            txn.todays_gain_loss = Decimal(txn.quantity) * change_per_share
+        else:
+            txn.todays_gain_loss = Decimal('0.00')
+
+        txn.save(update_fields=['market_value', 'overall_gain_loss', 'todays_gain_loss'])

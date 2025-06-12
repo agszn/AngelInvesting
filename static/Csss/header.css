@@ -8,6 +8,15 @@
     margin: 0;
 }
 
+.fixed-header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: #0C1D31;
+}
+
 .header-container-running {
     height: 45px;
     display: flex;
@@ -51,8 +60,6 @@ marquee {
     color: #FF0000;
 }
 
-
-
 /* Mobile responsive styles stock ticker */
 @media (min-width: 320px) and (max-width: 767px) {
     * {
@@ -63,17 +70,9 @@ marquee {
         margin: 0;
     }
 
-    .header-container {
-        height: 45px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px;
-    }
-
     .unlisted-deals {
         width: 180%;
-        font-size: 16px;
+        font-size: 12px;
         font-weight: 600;
         color: #FFD400;
     }
@@ -104,6 +103,15 @@ marquee {
     .down {
         color: #FF0000;
     }
+    .fixed-header-container {
+        position: fixed;
+        top: 0;
+        width: 100%;
+    }
+    
+    .main_class {
+        padding-top: 140px;
+    }
 }
 
 /* styling for header */
@@ -116,40 +124,24 @@ marquee {
 }
 
 .header {
+    width: 100%;
     background-color: transparent;
     color: white;
-    /* padding: 20px 100px; */
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    padding: 0 50px;
 }
 
-.header-container {
+.navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0px 0px;
-    position: relative;
 }
 
-.logo {
-    margin: 0px 16px 0px 0px !important;
-  }
-
-.nav-container {
-    display: flex;
-    flex-grow: 1;
-    justify-content: center;
-}
-
-.nav-menu {
-    display: flex;
-    list-style: none;
-    margin: 0px 0px;
+.navbar-brand img {
+    height: 40px;
 }
 
 .nav-item {
-    margin: 0px 20px;
+    margin: 0px 15px;
     padding: 0px;
 }
 
@@ -166,6 +158,28 @@ marquee {
 
 .nav-link:hover {
     color: #f39c12;
+}
+
+.navbar-toggler {
+  border-color: white;
+}
+
+.navbar-toggler-icon {
+  background-image: none;
+  width: 1.5em;
+  height: 1.5em;
+  position: relative;
+}
+
+.navbar-toggler-icon::before,
+.navbar-toggler-icon::after,
+.navbar-toggler-icon div {
+  content: "";
+  background-color: white;
+  height: 2px;
+  width: 100%;
+  display: block;
+  margin: 6px 0;
 }
 
 .auth-button {
@@ -188,72 +202,22 @@ marquee {
     background-color: #e67e22;
 }
 
-.hamburger {
-    display: none;
-    cursor: pointer;
-    margin-left: 1rem;
-}
-
-.bar {
-    display: block;
-    width: 25px;
-    height: 3px;
-    margin: 5px auto;
-    background-color: white;
-    transition: all 0.3s ease;
-}
-
-/* @media (max-width: 1024px) {
-    .nav-item {
-        margin: 0 0.5rem;
-    }
-    
-    .nav-link {
-        font-size: 0.9rem;
-    }
-} */
 
 @media (min-width: 320px) and (max-width: 767px) {
 
     .header {
+        padding: 0 15px;
+    }
+    .navbar-collapse {
         background-color: transparent;
-        color: white;
-        padding: 20px 10px;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-
-    .header-container {
-        flex-wrap: initial;
-    }
-
-    .nav-container {
-        order: 3;
-        width: 100%;
-        display: none;
-        margin-top: 1rem;
-    }
-
-    .nav-container.active {
-        display: block;
-    }
-
-    .nav-menu {
-        flex-direction: column;
-        background-color: #34495e;
+        padding: 15px;
+        margin-top: 10px;
         border-radius: 5px;
-        padding: 1rem 0;
     }
 
     .nav-item {
-        margin: 0.5rem 0;
+        margin: 10px 0;
         text-align: center;
-    }
-
-    .hamburger {
-        display: block;
-        order: 2;
     }
 
     .auth-button {
@@ -262,25 +226,11 @@ marquee {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
     }
-
-    .hamburger.active .bar:nth-child(1) {
-        transform: translateY(8px) rotate(45deg);
+    .navbar-brand img {
+        height: 30px;
     }
 
-    .hamburger.active .bar:nth-child(2) {
-        opacity: 0;
-    }
-
-    .hamburger.active .bar:nth-child(3) {
-        transform: translateY(-8px) rotate(-45deg);
-    }
 }
-
-
-
-
-
-
 
 
 /* styling for mob-responsive-header*/

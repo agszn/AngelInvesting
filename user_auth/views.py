@@ -392,7 +392,7 @@ def view_profile(request):
                 messages.error(request, "Please correct the errors in the CMR form.")
         
         else:
-            form = UserProfileForm(request.POST, instance=profile)
+            form = UserProfileForm(request.POST, request.FILES, instance=profile)
             if form.is_valid():
                 form.save()
                 messages.success(request, "Profile updated.")
@@ -434,7 +434,7 @@ def edit_profile(request):
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from .models import BankAccount
-from .forms import BankAccountForm  # Create this form
+from .forms import BankAccountForm  
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -465,6 +465,9 @@ def save_bank_account(request):
         bank.account_type = request.POST.get('account_type', '')
         bank.account_number = request.POST.get('account_number', '')
         bank.ifsc_code = request.POST.get('ifsc_code', '')
+        
+        if 'statementPaper' in request.FILES:
+            bank.statementPaper = request.FILES['statementPaper']
         bank.save()
 
         return redirect('profile')

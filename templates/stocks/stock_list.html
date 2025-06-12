@@ -48,10 +48,16 @@
           .stock-card-info:hover .stock-tooltip {
               display: block;
           }
+
 .search-bar-wrapper {
     display: flex;
     justify-content: center;
     margin-bottom: 30px;
+}
+.search-bar-wrapper form{
+  display: flex; 
+  width: 100%; 
+  justify-content: center;
 }
 
 .search-bar-input {
@@ -123,6 +129,39 @@
     from {opacity: 0;}
     to {opacity: 1;}
   }
+
+@media (min-width: 320px) and (max-width: 767px) {
+  .search-bar-wrapper form{
+    margin-bottom: 30px;
+    display:flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: center;
+  }
+  .search-bar-input {
+    padding: 10px 15px;  
+    width: 90%;
+    height: 50px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    margin-bottom:5px;
+    margin-right: 0;
+  }
+  .search-bar-button
+  {
+    padding: 10px 15px;  
+    width: 90%;
+    height: 50px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    margin-bottom:5px;
+    margin-right: 0;
+  }
+}
 </style>  
     <div class="hero-section3">
         <div class="hero-headers">
@@ -130,7 +169,7 @@
         </div>
 
         <div class="search-bar-wrapper">
-            <form method="GET" style="display: flex; width: 100%; justify-content: center;">
+            <form method="GET" style="">
                 <input class="search-bar-input" type="text" name="q" placeholder="Search here..." value="{{ query }}">
                 <button class="search-bar-button" type="submit">SEARCH</button>
             </form>

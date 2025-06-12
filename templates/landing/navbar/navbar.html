@@ -375,9 +375,86 @@ body {
 <body>
   <main class="page-container">
 
-{% load static %}  
-<header class="header">
-    <div class="header-container">
+  {% load static %}  
+  <header class="header">
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a href="/" class="navbar-brand"><img src="{% static 'Media/images/site-logo.png' %}" alt=""></a>
+        <button class="navbar-toggler"  style="border-color: white;" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+              <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+            {% if user.is_authenticated %}
+              <li class="nav-item">
+                <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="nav-link">Unlisted Share</a>
+              </li>
+              <li class="nav-item">
+                <a href="/" class="nav-link">Angel Investing</a>
+              </li>
+               <li class="nav-item">
+                <a href="{%  url 'about' %}" class="nav-link">About Us</a>
+              </li>
+              <li class="nav-item">
+                <a href="{%  url 'blog' %}" class="nav-link">Blogs</a>
+              </li>
+              <li class="nav-item">
+                <a href="{%  url 'faq' %}" class="nav-link">FAQ's</a>
+              </li>
+              {% if user.user_type == 'RM' %}
+               <li class="nav-item"><a href="{% url 'RM_User:dashboardRM' %}" class="nav-link" style="color: #c0e0f1;">RM</a></li>
+              {% elif user.user_type == 'AC' %}
+                <li class="nav-item"><a href="{% url 'Acc_User:dashboardAcc' %}" class="nav-link">Acc</a></li>
+              {% elif user.user_type == 'ST' %}
+                <li class="nav-item"><a href="{% url 'ST_User:dashboardST' %}" class="nav-link">Transfer</a></li>    
+              {% elif user.user_type == 'SM' or user.user_type == 'AD' %}
+                <li class="nav-item">
+                  <a href="{% url 'SM_User:UnlistedStocksUpdateSM' %}" class="nav-link" style="color: #8ee0ea;">Admin</a>
+                </li>
+              {% endif %}
+              <li class="nav-item" style="color: #ffd400;">
+                <a class="nav-link" href="{% url 'profile' %}" style="color: #ffd400;">
+                  Welcome, {{ user.username }}
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="nav-link">Unlisted Share</a>
+              </li>
+
+              <li class="nav-item">
+                <a href="/" class="nav-link">Angel Investing</a>
+              </li>
+              <li class="nav-item">
+                <a href="{%  url 'about' %}" class="nav-link">About Us</a>
+              </li>
+              <li class="nav-item">
+                <a href="{%  url 'blog' %}" class="nav-link">Blogs</a>
+              </li>
+              <li class="nav-item">
+                <a href="{%  url 'faq' %}" class="nav-link">FAQ's</a>
+              </li>
+
+              <li class="nav-item">
+                  <a href="{% url 'login' %}" class="nav-link" style="text-decoration: none;">Login/Sign up</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+
+
+    <!-- <div class="header-container">
       <a href="/" class="logo"><img src="{% static 'Media/images/site-logo.png' %}" alt=""></a>
 
       <div class="nav-container">
@@ -455,25 +532,7 @@ body {
         <span class="bar"></span>
         <span class="bar"></span>
       </div>
-    </div>
+    </div> -->
   </header>
-<!-- <header class="header">
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">MySite</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-</header> -->
-  </main>
+</main>
 

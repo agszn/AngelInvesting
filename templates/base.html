@@ -62,6 +62,7 @@
 <body>
 
     <div class="unlisted-landing-page">
+      <div class="fixed-header-container">
         <!-- header marquee -->
         <div class="header-container-running">
           <div class="unlisted-deals">UnlistedDeals</div>
@@ -90,9 +91,9 @@
 
 
         <!--  base.html Navigation Bar - options   -->
-        {% include 'landing/navbar/navbar.html' %}
-
-        <main class="main_class">
+        {% include 'landing/navbar/navbar.html' %}  
+      </div>
+        <main class="main_class" style="padding-top: 120px;">
             {% block content %}
 
                 <!-- base.html Banner changeable -->
@@ -115,7 +116,7 @@
         
     </div>
   
-  <script>
+  <!-- <script>
     const hamburger = document.querySelector('.hamburger');
     const navContainer = document.querySelector('.nav-container');
 
@@ -129,7 +130,7 @@
       hamburger.classList.remove('active');
       navContainer.classList.remove('active');
     }));
-  </script>
+  </script> -->
 
   <!-- <script src="{% static 'js/bootstrap-4.6.0.min.js' %}"></script>
   <script src="{% static 'js/bootstrap.bundle-5.3.5.min.js' %}"></script> -->

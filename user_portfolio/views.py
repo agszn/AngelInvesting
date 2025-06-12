@@ -29,56 +29,179 @@ from django.shortcuts import render
 from .models import UserPortfolioSummary, BuyTransaction
 from decimal import Decimal
 
+# @login_required
+# def profile_overview(request):
+#     user = request.user
+#     summary = getattr(user, 'portfolio_summary', None)
+
+#     # Group by advisor name for per-advisor summary
+#     advisor_data = {}
+#     completed_buys = BuyTransaction.objects.filter(user=user, status='completed')
+
+#     for tx in completed_buys:
+#         key = tx.advisor.advisor_type if tx.advisor else 'Other Advisor'
+#         if key not in advisor_data:
+#             advisor_data[key] = {
+#                 'invested': Decimal('0'),
+#                 'market_value': Decimal('0'),
+#                 'today_gain': Decimal('0'),
+#             }
+#         advisor_data[key]['invested'] += tx.total_amount
+#         if tx.stock.ltp:
+#             advisor_data[key]['market_value'] += tx.quantity * tx.stock.ltp
+#             advisor_data[key]['today_gain'] += (tx.stock.ltp - tx.stock.share_price) * tx.quantity
+
+#     for advisor in advisor_data.values():
+#         advisor['overall_gain'] = advisor['market_value'] - advisor['invested']
+#         advisor['gain_percent'] = (
+#             (advisor['overall_gain'] / advisor['invested']) * 100
+#             if advisor['invested'] > 0 else 0
+#         )
+#         advisor['today_gain_percent'] = (
+#             (advisor['today_gain'] / advisor['invested']) * 100
+#             if advisor['invested'] > 0 else 0
+#         )
+
+#     context = {
+#         'summary': summary,
+#         'advisor_data': advisor_data,
+#     }
+#     return render(request, 'portfolio/overview.html', context)
+
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.shortcuts import render
+from .models import UserPortfolioSummary, BuyTransactionOtherAdvisor
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.db.models import Sum
+from decimal import Decimal
+from .models import UserPortfolioSummary, BuyTransactionOtherAdvisor
+
+
 @login_required
 def profile_overview(request):
     user = request.user
-    summary = getattr(user, 'portfolio_summary', None)
 
-    # Group by advisor name for per-advisor summary
-    advisor_data = {}
-    completed_buys = BuyTransaction.objects.filter(user=user, status='completed')
+    # Fetch portfolio summary
+    try:
+        portfolio_summary = UserPortfolioSummary.objects.get(user=user)
+    except UserPortfolioSummary.DoesNotExist:
+        portfolio_summary = None
 
-    for tx in completed_buys:
-        key = tx.advisor.name if tx.advisor else 'Other Advisor'
-        if key not in advisor_data:
-            advisor_data[key] = {
-                'invested': Decimal('0'),
-                'market_value': Decimal('0'),
-                'today_gain': Decimal('0'),
-            }
-        advisor_data[key]['invested'] += tx.total_amount
-        if tx.stock.ltp:
-            advisor_data[key]['market_value'] += tx.quantity * tx.stock.ltp
-            advisor_data[key]['today_gain'] += (tx.stock.ltp - tx.stock.share_price) * tx.quantity
+    # Aggregate advisor transactions
+    advisor_transactions = BuyTransactionOtherAdvisor.objects.filter(user=user)
+    advisor_summary = {
+        "total_invested": sum((tx.invested_amount for tx in advisor_transactions), Decimal("0.00")),
+        "market_value": sum((tx.market_value for tx in advisor_transactions), Decimal("0.00")),
+        "overall_gain_loss": sum((tx.overall_gain_loss for tx in advisor_transactions), Decimal("0.00")),
+        "todays_gain_loss": sum((tx.todays_gain_loss for tx in advisor_transactions), Decimal("0.00")),
+    }
 
-    for advisor in advisor_data.values():
-        advisor['overall_gain'] = advisor['market_value'] - advisor['invested']
-        advisor['gain_percent'] = (
-            (advisor['overall_gain'] / advisor['invested']) * 100
-            if advisor['invested'] > 0 else 0
-        )
-        advisor['today_gain_percent'] = (
-            (advisor['today_gain'] / advisor['invested']) * 100
-            if advisor['invested'] > 0 else 0
-        )
+    # Calculate individual summary percentages
+    unlisted_invested = portfolio_summary.total_invested if portfolio_summary else Decimal("0.00")
+    unlisted_gain = portfolio_summary.overall_gain_loss if portfolio_summary else Decimal("0.00")
+    unlisted_today_gain = portfolio_summary.todays_gain_loss if portfolio_summary else Decimal("0.00")
+
+    advisor_invested = advisor_summary["total_invested"]
+    advisor_gain = advisor_summary["overall_gain_loss"]
+    advisor_today_gain = advisor_summary["todays_gain_loss"]
+
+    # Total calculations
+    total_invested = unlisted_invested + advisor_invested
+    total_market_value = (portfolio_summary.total_market_value if portfolio_summary else Decimal("0.00")) + advisor_summary["market_value"]
+    total_gain_loss = unlisted_gain + advisor_gain
+    total_todays_gain = unlisted_today_gain + advisor_today_gain
+
+    # Percentages
+    def percent(numerator, denominator):
+        return round((numerator / denominator * 100), 2) if denominator else 0
 
     context = {
-        'summary': summary,
-        'advisor_data': advisor_data,
+        "portfolio_summary": portfolio_summary,
+        "advisor_summary": advisor_summary,
+        "total_invested": total_invested,
+        "total_market_value": total_market_value,
+        "total_gain_loss": total_gain_loss,
+        "todays_gain": total_todays_gain,
+        "overall_gain_loss_percent": percent(total_gain_loss, total_invested),
+        "todays_gain_percent": percent(total_todays_gain, total_invested),
+        "unlisted_overall_percent": percent(unlisted_gain, unlisted_invested),
+        "unlisted_today_percent": percent(unlisted_today_gain, unlisted_invested),
+        "advisor_overall_percent": percent(advisor_gain, advisor_invested),
+        "advisor_today_percent": percent(advisor_today_gain, advisor_invested),
     }
+
     return render(request, 'portfolio/overview.html', context)
 
 @login_required
 def unlisted_view(request):
-    return render(request, 'portfolio/unlistedOverview.html')
+    summary = get_object_or_404(UserPortfolioSummary, user=request.user)
+    return render(request, 'portfolio/unlistedOverview.html', {'summary': summary})
 
 @login_required
 def angel_invest(request):
     return render(request, 'portfolio/angelOverview.html')
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import *
+from .utils import update_user_holdings
+
+from django.core.paginator import Paginator
+from django.db.models import Q
+from site_Manager.models import Advisor, Broker
+
 @login_required
 def portfolio_view(request):
-    return render(request, 'portfolio/PortfolioList.html')
+    update_user_holdings(request.user)  # Refresh summary data
+
+    holdings = UserStockInvestmentSummary.objects.filter(user=request.user)
+
+    # Filters
+    advisor_id = request.GET.get('advisor')
+    broker_id = request.GET.get('broker')
+    transaction_type = request.GET.get('type')  # buy or sell
+    search_query = request.GET.get('search')
+
+    if advisor_id:
+        holdings = holdings.filter(advisor__id=advisor_id)
+    if broker_id:
+        holdings = holdings.filter(broker__id=broker_id)
+    if transaction_type == 'buy':
+        holdings = holdings.filter(total_buys__gt=0)
+    elif transaction_type == 'sell':
+        holdings = holdings.filter(total_sells__gt=0)
+    if search_query:
+        holdings = holdings.filter(stock__company_name__icontains=search_query)
+
+    # Pagination
+    paginator = Paginator(holdings, 10)  # 10 per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # For dropdowns
+    advisors = Advisor.objects.all()
+    brokers = Broker.objects.all()
+
+    return render(request, 'portfolio/PortfolioList.html', {
+        'holdings': page_obj,
+        'advisors': advisors,
+        'brokers': brokers,
+        'current_filters': {
+            'advisor': advisor_id,
+            'broker': broker_id,
+            'type': transaction_type,
+            'search': search_query,
+        },
+        'page_obj': page_obj,
+    })
+
+
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -182,28 +305,73 @@ def load_advisors_brokers(request):
 
 #     return redirect(request.META.get('HTTP_REFERER', '/'))
 
+
+##################################################
+# current main #########################################
+# @require_POST
+# def buy_stock(request, stock_id):
+#     stock = get_object_or_404(StockData, id=stock_id)
+#     advisor = get_object_or_404(Advisor, id=request.POST.get('advisor'))
+#     broker = get_object_or_404(Broker, id=request.POST.get('broker'))
+#     quantity = int(request.POST.get('quantity'))
+#     price_per_share = Decimal(request.POST.get('price_per_share'))
+#     order_type = request.POST.get('order_type')
+    
+#     total_amount = quantity * price_per_share
+
+#     BuyTransaction.objects.create(
+#         user=request.user,
+#         stock=stock,
+#         advisor=advisor,
+#         broker=broker,
+#         quantity=quantity,
+#         price_per_share=price_per_share,
+#         order_type=order_type,
+#         total_amount=total_amount,
+#     )
+#     messages.success(request, f"Buy order placed for {stock.company_name} successfully.")
+#     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+from .models import BuyTransaction, BuyTransactionOtherAdvisor
+
 @require_POST
 def buy_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
-    advisor = get_object_or_404(Advisor, id=request.POST.get('advisor'))
+    advisor_id = request.POST.get('advisor')
     broker = get_object_or_404(Broker, id=request.POST.get('broker'))
     quantity = int(request.POST.get('quantity'))
     price_per_share = Decimal(request.POST.get('price_per_share'))
     order_type = request.POST.get('order_type')
-    
+
     total_amount = quantity * price_per_share
 
-    BuyTransaction.objects.create(
-        user=request.user,
-        stock=stock,
-        advisor=advisor,
-        broker=broker,
-        quantity=quantity,
-        price_per_share=price_per_share,
-        order_type=order_type,
-        total_amount=total_amount,
-    )
-    messages.success(request, f"Buy order placed for {stock.company_name} successfully.")
+    advisor = get_object_or_404(Advisor, id=advisor_id)
+
+    if advisor.advisor_type.lower() != 'other':
+        BuyTransaction.objects.create(
+            user=request.user,
+            stock=stock,
+            advisor=advisor,
+            broker=broker,
+            quantity=quantity,
+            price_per_share=price_per_share,
+            order_type=order_type,
+            total_amount=total_amount,
+        )
+        messages.success(request, f"Buy order placed for {stock.company_name} with Advisor '{advisor.advisor_type}'.")
+    else:
+        BuyTransactionOtherAdvisor.objects.create(
+            user=request.user,
+            stock=stock,
+            advisor=advisor,
+            broker=broker,
+            quantity=quantity,
+            price_per_share=price_per_share,
+            order_type=order_type,
+            total_amount=total_amount,
+        )
+        messages.success(request, f"Buy order placed for {stock.company_name} with Advisor 'Other'.")
+
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 

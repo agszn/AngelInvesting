@@ -213,6 +213,7 @@ from django.shortcuts import render
 from datetime import timedelta
 from .models import RMUserView, RMPaymentRecord
 
+@login_required
 def dashboardRM(request):
     today = timezone.now().date()
     ten_days_ago = today - timedelta(days=10)
@@ -259,20 +260,23 @@ def dashboardRM(request):
 
     return render(request, 'dashboardRM.html', context)
 
-
+@login_required
 def ordersRM(request):
     return render(request, 'ordersRM.html')
 
+@login_required
 def sellorderRM(request):
     return render(request, 'sellorderRM.html')
 
+@login_required
 def ShareListRM(request):
     return render(request, 'ShareListRM.html')
 
+@login_required
 def selldersummeryRM(request):
     return render(request, 'selldersummeryRM.html')
 
-
+@login_required
 def angelInvestRM(request):
     return render(request, 'angelInvestRM.html')
 

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from django.contrib.auth.decorators import login_required
 def BlogSM(request):
     return render(request, 'BlogSM.html')
 
@@ -12,6 +12,7 @@ from django.shortcuts import render, redirect
 from .models import *
 from unlisted_stock_marketplace.models import *
 
+@login_required
 def HomepageBannerSM(request):
     banner = HeroSectionBanner.objects.filter(is_active=True).first()
 
@@ -49,7 +50,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.db.models import Q
 from .forms import *
-from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def UnlistedStocksUpdateSM(request):
@@ -120,7 +121,7 @@ def UnlistedStocksUpdateSM(request):
 
 
 from django.db.models import Max
-
+@login_required
 def download_unlisted_stocks_csv(request):
     # Get the latest snapshot date per stock
     latest_dates = (
@@ -168,6 +169,7 @@ def download_unlisted_stocks_csv(request):
 
     return response
 
+@login_required
 def upload_unlisted_stocks_csv(request):
     if request.method == "POST" and request.FILES.get("csv_file"):
         csv_file = request.FILES['csv_file']
@@ -228,10 +230,12 @@ from django.shortcuts import render, get_object_or_404, redirect
 from unlisted_stock_marketplace.models import *
 from .forms import *
 
+@login_required
 def custom_field_list(request):
     definitions = CustomFieldDefinition.objects.select_related('stock').all()
     return render(request, 'custom_fields/definition_list.html', {'definitions': definitions})
 
+@login_required
 def custom_field_create(request):
     if request.method == 'POST':
         form = CustomFieldDefinitionForm(request.POST)
@@ -248,6 +252,7 @@ def custom_field_create(request):
 
     return render(request, 'custom_fields/definition_form.html', {'form': form, 'formset': formset})
 
+@login_required
 def custom_field_edit(request, pk):
     definition = get_object_or_404(CustomFieldDefinition, pk=pk)
     if request.method == 'POST':

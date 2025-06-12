@@ -224,7 +224,7 @@ from django.db.models import Q
 import json
 from .models import StockData, StockHistory
 
-@login_required
+
 def StockListingTableFormat(request):
     stocks = StockData.objects.all()
 
