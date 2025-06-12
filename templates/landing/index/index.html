@@ -106,8 +106,28 @@
             <span class="spantext">Share Price:<strong> ₹{{ stock.share_price }}</strong></span>
           </div>
           <div class="actions">
-            <button>Buy Now</button>
-            <button>Sell Now</button>
+          <button type="button"
+            title="Buy {{ stock.company_name }}"
+            onclick='openBuyModal(
+              "{{ stock.id }}",
+              "{{ stock.company_name|escapejs }}",
+              "{{ stock.share_price }}",
+              "{{ stock.quantity }}",
+              "{% url 'user_portfolio:buy_stock' stock.id %}"
+            )'>
+            Buy
+          </button>
+
+          <button type="button"
+            onclick='openSellModal(
+              "{{ stock.id }}",
+              "{{ stock.company_name|escapejs }}",
+              "{{ stock.share_price }}",
+              "{{ stock.quantity }}",
+              "{% url 'user_portfolio:sell_stock' stock.id %}"
+            )'>
+            Sell
+          </button>
           </div>
           <button class="wishlist">Add to Wishlist 🛒</button>
         </div>

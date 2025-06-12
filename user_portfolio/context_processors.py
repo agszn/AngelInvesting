@@ -1,10 +1,12 @@
 # user_portfolio/context_processors.py
-from site_Manager.models import Broker, Advisor
-from unlisted_stock_marketplace.models import StockData
+import json
+from site_Manager.models import Advisor, Broker
 
 def buy_sell_context(request):
+    advisors = [{'id': a.id, 'name': a.advisor_type} for a in Advisor.objects.all()]
+    brokers = list(Broker.objects.values('id', 'name'))
+
     return {
-        'global_brokers': Broker.objects.all(),
-        'global_advisors': Advisor.objects.all(),
-        'global_stocks': StockData.objects.all()
+        'advisors_json': json.dumps(advisors),
+        'brokers_json': json.dumps(brokers),
     }

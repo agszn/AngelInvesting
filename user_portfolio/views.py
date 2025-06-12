@@ -68,13 +68,15 @@ def profile_overview(request):
     }
     return render(request, 'portfolio/overview.html', context)
 
-
+@login_required
 def unlisted_view(request):
     return render(request, 'portfolio/unlistedOverview.html')
 
+@login_required
 def angel_invest(request):
     return render(request, 'portfolio/angelOverview.html')
 
+@login_required
 def portfolio_view(request):
     return render(request, 'portfolio/PortfolioList.html')
 
@@ -101,7 +103,7 @@ def buy_orders(request):
         'search_query': search_query,
     })
 
-
+@login_required
 def sell_orders(request):
     return render(request, 'portfolio/SellOrdersList.html')
 
@@ -135,38 +137,72 @@ from .models import BuyTransaction
 from site_Manager.models import Broker, Advisor
 from unlisted_stock_marketplace.models import StockData
 
+from django.http import JsonResponse
+
+def load_advisors_brokers(request):
+    advisors = list(Advisor.objects.values('id', 'advisor_type'))
+    brokers = list(Broker.objects.values('id', 'name'))
+    return JsonResponse({
+        'advisors': advisors,
+        'brokers': brokers
+    })
+
 
 # user_portfolio/views.py
+# @require_POST
+# def buy_stock(request, stock_id):
+#     stock = get_object_or_404(StockData, id=stock_id)
+#     try:
+#         advisor_id = request.POST.get('advisor')
+#         broker_id = request.POST.get('broker')
+#         quantity = int(request.POST.get('quantity'))
+#         price_per_share = Decimal(request.POST.get('price_per_share'))
+#         order_type = request.POST.get('order_type')
+
+#         total_amount = quantity * price_per_share
+
+#         advisor = get_object_or_404(Advisor, id=advisor_id)
+#         broker = get_object_or_404(Broker, id=broker_id)
+
+#         BuyTransaction.objects.create(
+#             user=request.user,
+#             stock=stock,
+#             advisor=advisor,
+#             broker=broker,
+#             quantity=quantity,
+#             price_per_share=price_per_share,
+#             order_type=order_type,
+#             total_amount=total_amount,
+#         )
+
+#         messages.success(request, f"Buy order placed for {stock.company_name} successfully.")
+#     except Exception as e:
+#         messages.error(request, f"Buy order failed: {str(e)}")
+
+#     return redirect(request.META.get('HTTP_REFERER', '/'))
+
 @require_POST
 def buy_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
-    try:
-        advisor_id = request.POST.get('advisor')
-        broker_id = request.POST.get('broker')
-        quantity = int(request.POST.get('quantity'))
-        price_per_share = Decimal(request.POST.get('price_per_share'))
-        order_type = request.POST.get('order_type')
+    advisor = get_object_or_404(Advisor, id=request.POST.get('advisor'))
+    broker = get_object_or_404(Broker, id=request.POST.get('broker'))
+    quantity = int(request.POST.get('quantity'))
+    price_per_share = Decimal(request.POST.get('price_per_share'))
+    order_type = request.POST.get('order_type')
+    
+    total_amount = quantity * price_per_share
 
-        total_amount = quantity * price_per_share
-
-        advisor = get_object_or_404(Advisor, id=advisor_id)
-        broker = get_object_or_404(Broker, id=broker_id)
-
-        BuyTransaction.objects.create(
-            user=request.user,
-            stock=stock,
-            advisor=advisor,
-            broker=broker,
-            quantity=quantity,
-            price_per_share=price_per_share,
-            order_type=order_type,
-            total_amount=total_amount,
-        )
-
-        messages.success(request, f"Buy order placed for {stock.company_name} successfully.")
-    except Exception as e:
-        messages.error(request, f"Buy order failed: {str(e)}")
-
+    BuyTransaction.objects.create(
+        user=request.user,
+        stock=stock,
+        advisor=advisor,
+        broker=broker,
+        quantity=quantity,
+        price_per_share=price_per_share,
+        order_type=order_type,
+        total_amount=total_amount,
+    )
+    messages.success(request, f"Buy order placed for {stock.company_name} successfully.")
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 

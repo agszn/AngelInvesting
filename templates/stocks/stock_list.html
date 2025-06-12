@@ -187,37 +187,29 @@
           <span class="spantext">Share Price:<strong> ₹{{ stock.share_price }}</strong></span>
         </div>
         <div class="actions">
-          <!--  url 'unlisted_stock_marketplace:buy_stock' stock.id -->
-
-          <!-- Buy Now Button start -->
-          <button onclick="openBuyModal('{{ stock.id }}'); return false;">
-              Buy Now
+          <button type="button"
+            title="Buy {{ stock.company_name }}"
+            onclick='openBuyModal(
+              "{{ stock.id }}",
+              "{{ stock.company_name|escapejs }}",
+              "{{ stock.share_price }}",
+              "{{ stock.quantity }}",
+              "{% url 'user_portfolio:buy_stock' stock.id %}"
+            )'>
+            Buy
           </button>
 
-
-            {% include 'includes/buy_modal.html' %}
-
-
-
-            <!-- Buy Now Button end  -->
-
-          <!-- Sell Now Button -->
-          <button onclick="openSellModal('{{ stock.id }}'); return false;">
-              Sell Now
+          <button type="button"
+            onclick='openSellModal(
+              "{{ stock.id }}",
+              "{{ stock.company_name|escapejs }}",
+              "{{ stock.share_price }}",
+              "{{ stock.quantity }}",
+              "{% url 'user_portfolio:sell_stock' stock.id %}"
+            )'>
+            Sell
           </button>
 
-            {% include 'includes/sell_modal.html' %}
-
-            {% block scripts %}
-              <script>
-                function openBuyModal(stockId) {
-                  $('#buyModal' + stockId).modal('show');
-                }
-                function openSellModal(stockId) {
-                  $('#sellModal' + stockId).modal('show');
-                }
-              </script>
-            {% endblock %}
         </div>
         <!-- <button class="wishlist" onclick="window.location.href='{% url 'unlisted_stock_marketplace:wish_list' %}'">
             Add to Wishlist 🛒

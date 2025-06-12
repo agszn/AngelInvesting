@@ -12,6 +12,8 @@ from unlisted_stock_marketplace.models import *
 from site_Manager.models import *
 # user_portfolio/models.py
 
+import uuid
+from datetime import datetime
 
 User = get_user_model()
 
@@ -39,9 +41,9 @@ class BuyTransaction(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.order_id:
-            count = BuyTransaction.objects.count() + 1
-            self.order_id = f"Ord_B_{count:03d}"
+            self.order_id = f"Ord_B_{uuid.uuid4().hex[:10].upper()}"
         super().save(*args, **kwargs)
+
 
 
 
@@ -60,10 +62,14 @@ class SellTransaction(models.Model):
     
     order_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
 
+    
+
     def save(self, *args, **kwargs):
         if not self.order_id:
-            count = SellTransaction.objects.count() + 1
-            self.order_id = f"Ord_S_{count:03d}"
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]  # Up to milliseconds
+            self.order_id = f"Ord_S_{timestamp}"
+        super().save(*args, **kwargs)
+
         
         # Calculate total value
         if self.quantity and self.selling_price:

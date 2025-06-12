@@ -280,15 +280,14 @@ class TableHeader(models.Model):
         super().save(*args, **kwargs)
 
 
+# 
+from django.db import models
+from django.core.exceptions import ValidationError
+
 TEXT_STYLE_CHOICES = [
     ('normal', 'Normal'),
     ('bold', 'Bold'),
     ('italic', 'Italic'),
-    ('underline', 'Underline'),
-    ('bold_italic', 'Bold & Italic'),
-    ('bold_underline', 'Bold & Underline'),
-    ('italic_underline', 'Italic & Underline'),
-    ('all', 'Bold, Italic & Underline'),
 ]
 
 UNIT_CHOICES = [
@@ -314,18 +313,24 @@ MODEL_TYPE_CHOICES = [
     ('DividendHistory', 'Dividend History'),
 ]
 
+
 class CustomFieldDefinition(models.Model):
     stock = models.ForeignKey(
         'StockData',
         on_delete=models.CASCADE,
         related_name='custom_field_definitions',
-        help_text="Associate this field with a specific stock", blank=True, null=True
+        blank=True,
+        null=True,
+        help_text="Associate this field with a specific stock"
     )
-    table_title = models.CharField(max_length=775, blank=True, null=True, help_text="Friendly section title for UI (e.g., 'Non-current assets')")
-    
+    table_title = models.CharField(
+        max_length=775,
+        blank=True,
+        null=True,
+        help_text="Friendly section title for UI (e.g., 'Non-current assets')"
+    )
     model_type = models.CharField(max_length=50, choices=MODEL_TYPE_CHOICES, blank=True, null=True)
-    custom_model_name = models.CharField(max_length=100, blank=True, null=True, help_text="Optional custom model name (e.g., 'CustomRatios')")
-
+    custom_model_name = models.CharField(max_length=100, blank=True, null=True)
     unit = models.CharField(max_length=10, choices=UNIT_CHOICES, blank=True, null=True)
 
     def clean(self):
@@ -339,41 +344,37 @@ class CustomFieldDefinition(models.Model):
         stock_name = f" [{self.stock.company_name}]" if self.stock and self.stock.company_name else ""
         return f"{self.get_model_display_name()}{stock_name}"
 
+from django.db import models
+from django.core.exceptions import ValidationError
 
-    def clean(self):
-        from django.core.exceptions import ValidationError
-        if not self.model_type and not self.custom_model_name:
-            raise ValidationError("Either 'model_type' or 'custom_model_name' must be provided.")
-
-    def get_model_display_name(self):
-        return self.get_model_type_display() if self.model_type else self.custom_model_name or "Unknown"
-
-    def __str__(self):
-        stock_name = f" [{self.stock.company_name}]" if self.stock and self.stock.company_name else ""
-        return f"{self.get_model_display_name()}{stock_name}"
-   
-
+TEXT_STYLE_CHOICES = [
+    ('normal', 'Normal'),
+    ('bold', 'Bold'),
+    ('italic', 'Italic'),
+    ('underline', 'Underline'),
+]
 
 class CustomFieldValue(models.Model):
     field_definition = models.ForeignKey(
         'CustomFieldDefinition', 
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='custom_values'
     )
 
     name = models.CharField(max_length=775, blank=True, null=True)
     description = models.TextField(max_length=775, blank=True, null=True)
 
-    int_value = models.IntegerField(null=True, blank=True)
-    dec_value = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
+    int_value = models.IntegerField(blank=True, null=True)
+    dec_value = models.DecimalField(max_digits=20, decimal_places=4, blank=True, null=True)
     char_value = models.TextField(blank=True, null=True)
-    date_value = models.DateField(null=True, blank=True)
+    date_value = models.DateField(blank=True, null=True)
 
     table_header = models.ForeignKey(
         'TableHeader',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='custom_field_values',
+        related_name='custom_field_values'
     )
 
     text_style = models.CharField(
@@ -393,16 +394,26 @@ class CustomFieldValue(models.Model):
     class Meta:
         verbose_name = "Custom Field Value"
         verbose_name_plural = "Custom Field Values"
+        indexes = [
+            models.Index(fields=['field_definition']),
+            models.Index(fields=['parent_field_value']),
+            models.Index(fields=['table_header']),
+        ]
 
     def __str__(self):
         return self.name or f"Value #{self.pk}"
 
     def display_value(self):
-        """Return the formatted display value with unit/symbol"""
+        """
+        Returns a human-readable representation of the value.
+        Optimized to avoid extra DB hits when used with select_related('field_definition').
+        """
+        unit = getattr(self.field_definition, 'unit', '') or ''
+        
         if self.int_value is not None:
-            return f"{self.int_value}{self.field_definition.unit or ''}"
+            return f"{self.int_value}{unit}"
         elif self.dec_value is not None:
-            return f"{self.dec_value}{self.field_definition.unit or ''}"
+            return f"{self.dec_value}{unit}"
         elif self.date_value is not None:
             return self.date_value.strftime('%Y-%m-%d')
         elif self.char_value:
@@ -410,41 +421,22 @@ class CustomFieldValue(models.Model):
         return self.name or ''
 
     def get_raw_value(self):
-        """Return the raw numeric value for calculations"""
-        if self.int_value is not None:
-            return self.int_value
-        elif self.dec_value is not None:
-            return self.dec_value
-        return None
+        """
+        Returns raw numeric value for computation, if available.
+        """
+        return self.int_value if self.int_value is not None else self.dec_value
 
-    def clean(self):
-        """Validation to allow values in both parent and sub-values"""
-        has_value = any([
-            self.int_value is not None,
-            self.dec_value is not None,
-            self.char_value,
-            self.date_value is not None
-        ])
+    # def clean(self):
+    #     """
+    #     Validates the model instance before saving.
+    #     Ensures that either int, dec, char, or date value is set.
+    #     Requires 'name' for top-level parent values.
+    #     """
+    #     if not self.parent_field_value and not self.name:
+    #         raise ValidationError("Parent values must have a name.")
 
-        if not self.parent_field_value and not self.name:
-            raise ValidationError("Parent values must have a name.")
-        
-        # if not has_value:
+        # if self.int_value is None and self.dec_value is None and not self.char_value and self.date_value is None:
         #     raise ValidationError("At least one value must be provided (int, dec, char, or date).")
-
-
-    def save(self, *args, **kwargs):
-            """Auto-fill sub-value names and reset value fields for sub-values"""
-            if self.parent_field_value:
-                if not self.name:
-                    self.name = f"{self.parent_field_value.name} (Sub-value)"
-                # Sub-values should not store actual values
-                self.int_value = None
-                self.dec_value = None
-                self.char_value = None
-                self.date_value = None
-            super().save(*args, **kwargs)
-
 
 # 
 # 

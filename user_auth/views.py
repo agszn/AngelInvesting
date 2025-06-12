@@ -33,6 +33,18 @@ from .forms import UserTypeUpdateForm
 def is_admin_or_site_manager(user):
     return user.user_type in ['AD', 'SM']
 
+
+import json
+from site_Manager.models import Broker, Advisor
+
+def tst(request):
+    brokers = Broker.objects.values('id', 'name')
+    advisors = Advisor.objects.values('id', 'advisor_type')
+    return render(request, 'testBuySell.html', {
+        'global_brokers_json': json.dumps(list(brokers)),
+        'global_advisors_json': json.dumps(list(advisors)),
+    })
+
 # @login_required
 # @user_passes_test(is_admin_or_site_manager)
 # def manage_user_types(request):

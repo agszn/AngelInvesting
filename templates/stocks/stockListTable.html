@@ -32,7 +32,7 @@
       <thead>
         <tr>
           <th>Sl No</th>
-          <th class="logo">Logo</th>
+          <th class="logo"></th>
           <th>Share Name</th>
           <th>Sector</th>
           <th>Price <br><span class="inline">In ₹ Per Share</span></th>
@@ -74,10 +74,29 @@
           </td>
           <td class="btns">
             <div class="buy-sell-btn">
-              <button class="buy-btn" onclick="openBuyModal('{{ stock.id }}'); return false;">Buy</button>
-                {% include 'includes/buy_modal.html' %}
 
-              <button class="sell-btn" onclick="openSellModal('{{ stock.id }}'); return false;">Sell</button>
+                <button class="buy-btn" type="button"
+                  title="Buy {{ stock.company_name }}"
+                  onclick='openBuyModal(
+                    "{{ stock.id }}",
+                    "{{ stock.company_name|escapejs }}",
+                    "{{ stock.share_price }}",
+                    "{{ stock.quantity }}",
+                    "{% url 'user_portfolio:buy_stock' stock.id %}"
+                  )'>
+                  Buy
+                </button>
+
+                <button class="sell-btn"  type="button"
+                  onclick='openSellModal(
+                    "{{ stock.id }}",
+                    "{{ stock.company_name|escapejs }}",
+                    "{{ stock.share_price }}",
+                    "{{ stock.quantity }}",
+                    "{% url 'user_portfolio:sell_stock' stock.id %}"
+                  )'>
+                  Sell
+                </button>
             </div>
 
             <!-- <button class="wishlist-btn">

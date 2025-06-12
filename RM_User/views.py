@@ -65,27 +65,59 @@ from .models import RMUserView, RMPaymentRecord
 
 # app: RM_User
 # models.py
+from django.db.models import Sum
+
+# @login_required
+# def buyordersummeryRM(request, order_id):
+#     order = BuyTransaction.objects.filter(order_id=order_id).first()
+#     user_profile = order.user.profile
+#     cmr = CMRCopy.objects.filter(user_profile=user_profile).first()
+#     bank_accounts = BankAccount.objects.filter(user_profile=user_profile)
+
+#     rm_view = RMUserView.objects.filter(order_id=order_id).first()
+#     TransactionDetails = BuyTransaction.objects.all()
+
+#     # ✅ Calculate total paid
+#     total_paid = rm_view.payment_records.aggregate(Sum('amount'))['amount__sum'] or 0
+#     remaining_amount = order.total_amount - total_paid
+
+#     context = {
+#         'order': order,
+#         'cmr': cmr,
+#         'bank_accounts': bank_accounts,
+#         'rm_view': rm_view,
+#         'TransactionDetails': TransactionDetails,
+#         'remaining_amount': remaining_amount,
+#     }
+#     return render(request, 'buyordersummeryRM.html', context)
+
+
 @login_required
 def buyordersummeryRM(request, order_id):
-    # Get the buy transaction
-    order = BuyTransaction.objects.filter(order_id=order_id).first()
-
+    # Get the BuyTransaction
+    order = get_object_or_404(BuyTransaction, order_id=order_id)
     user_profile = order.user.profile
+
+    # Get associated data
     cmr = CMRCopy.objects.filter(user_profile=user_profile).first()
     bank_accounts = BankAccount.objects.filter(user_profile=user_profile)
-
-    # ✅ Correct way to fetch RMUserView using order_id
     rm_view = RMUserView.objects.filter(order_id=order_id).first()
-    TransactionDetails = BuyTransaction.objects.all()
+
+    # Total amount paid so far for this order
+    total_paid = rm_view.payment_records.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Calculate remaining amount
+    remaining_amount = order.total_amount - total_paid
+
     context = {
         'order': order,
         'cmr': cmr,
         'bank_accounts': bank_accounts,
         'rm_view': rm_view,
-        'TransactionDetails':TransactionDetails,
+        'TransactionDetails': BuyTransaction.objects.all(),
+        'remaining_amount': remaining_amount,
     }
     return render(request, 'buyordersummeryRM.html', context)
-
 
 from django.views.decorators.csrf import csrf_exempt
 from .models import RMPaymentRecord
@@ -100,6 +132,20 @@ from user_portfolio.models import BuyTransaction  # adjust if import differs
 from django.utils import timezone
 from django.http import HttpResponseBadRequest
 
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest
+from user_portfolio.models import BuyTransaction  # Adjust import if needed
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseBadRequest
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import RMPaymentRecord, BuyTransaction, RMUserView
+
 @csrf_exempt
 @login_required
 def add_or_edit_payment(request, order_id=None, payment_id=None):
@@ -109,12 +155,16 @@ def add_or_edit_payment(request, order_id=None, payment_id=None):
         else:  # Add flow
             order = get_object_or_404(BuyTransaction, order_id=order_id)
             rm_view = get_object_or_404(RMUserView, order_id=order_id)
-            payment = RMPaymentRecord(rm_user_view=rm_view, date=timezone.now().date(), time=timezone.now().time())
+            payment = RMPaymentRecord(
+                rm_user_view=rm_view,
+                date=timezone.now().date(),
+                time=timezone.now().time()
+            )
 
-        # Shared logic
+        # Process form fields safely
         payment.bank_name = request.POST.get('bank_name')
-        payment.amount = request.POST.get('amount')
-        payment.remaining_amount = request.POST.get('remaining_amount')
+        payment.amount = Decimal(request.POST.get('amount') or '0')
+        payment.remaining_amount = Decimal(request.POST.get('remaining_amount') or '0')
         payment.remark = request.POST.get('remark')
         payment.payment_status = request.POST.get('payment_status', 'pending')
 
@@ -125,6 +175,7 @@ def add_or_edit_payment(request, order_id=None, payment_id=None):
         return redirect('RM_User:buyordersummery', order_id=payment.rm_user_view.order_id)
 
     return HttpResponseBadRequest("Invalid request method")
+
 
 @login_required
 def delete_payment(request, payment_id):

@@ -1,6 +1,10 @@
 # app: RM_User
 # models.py
 
+
+# app: RM_User
+# models.py
+
 from django.db import models
 from django.conf import settings
 from user_auth.models import UserProfile, BankAccount, CMRCopy
@@ -59,7 +63,7 @@ class RMUserView(models.Model):
             self.pan_number = profile.pan_number
             self.email = profile.email or self.user.email
             self.mobile_number = profile.mobile_number
-
+            self.assigned_rm = self.user.assigned_rm
             bank = profile.bank_accounts.first()
             if bank:
                 self.bank_name = bank.bank_name
@@ -89,13 +93,17 @@ class RMUserView(models.Model):
                     self.selling_price = sell_txn.selling_price
                     self.sell_status = sell_txn.status
                     self.timestamp = sell_txn.timestamp
-                    self.order_type = 'market'  # default assumption for sell if not explicitly stored
+                    self.order_type = 'market'  
                     self.stock = sell_txn.stock
                     self.isin_no = sell_txn.stock.isin_no if sell_txn.stock else None
         except Exception as e:
             print(f"Auto population error: {e}")
+            
+    def save(self, *args, **kwargs):
+        self.auto_populate_from_sources()
+        super().save(*args, **kwargs)
 
-
+            
 class RMPaymentRecord(models.Model):
     rm_user_view = models.ForeignKey(RMUserView, on_delete=models.CASCADE, related_name='payment_records')
     date = models.DateField()

@@ -187,10 +187,10 @@ def stock_detail(request, stock_id):
 
         # balance sheet, cashflow, and other tables
         'balance_sheet_data': get_sheet_data(stock.id, 'BalanceSheet'),
-        'pl_account_data': get_sheet_data(stock.id, 'PLAccount'),
+        'pl_account_data': get_sheet_data(stock.id, 'ProfitLossStatement'),
         'cash_flow_data': get_sheet_data(stock.id, 'CashFlow'),
         'financial_ratios_data': get_sheet_data(stock.id, 'FinancialRatios'),
-        'dividend_data': get_sheet_data(stock.id, 'Dividend'),
+        'dividend_data': get_sheet_data(stock.id, 'DividendHistory'),
         # end balance sheet, cashflow, and other tables
         
             
@@ -255,7 +255,7 @@ def StockListingTableFormat(request):
         for stock in page_obj
     }
 
-    return render(request, 'stocks/StockListTable.html', {
+    return render(request, 'stocks/stockListTable.html', {
         'page_obj': page_obj,
         'stock_history_data': json.dumps(stock_history_data, default=str),
         'search_query': search_query,
