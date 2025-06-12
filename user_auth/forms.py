@@ -88,110 +88,60 @@ class LoginForm(AuthenticationForm):
     )
 
 
-# class CustomUserProfileForm(forms.ModelForm):
-#     pan_number = forms.CharField(
-#         required=False,
-#         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter PAN Number'})
-#     )
-#     pan_card_photo = forms.ImageField(required=False)
-#     adhar_number = forms.CharField(
-#         required=False,
-#         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Aadhaar Number'})
-#     )
-#     adhar_card_photo = forms.ImageField(required=False)
-
-#     class Meta:
-#         model = CustomUser
-#         fields = [
-#             'username', 'first_name', 'last_name', 'email', 'phone_number'
-#         ]
-#         widgets = {
-#             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your username'}),
-#             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your first name'}),
-#             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your last name'}),
-#             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email'}),
-#             'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your phone number'}),
-#         }
-
-#     def __init__(self, *args, **kwargs):
-#         self.user_instance = kwargs.pop('user_instance', None)
-#         super().__init__(*args, **kwargs)
-
-#         if self.user_instance:
-#             # Get or create UserProfile linked to user
-#             user_profile, _ = UserProfile.objects.get_or_create(user=self.user_instance)
-
-#             # Load UserProfile fields
-#             self.fields['pan_number'].initial = user_profile.pan_number
-#             self.fields['pan_card_photo'].initial = user_profile.pan_card_photo
-#             self.fields['adhar_number'].initial = user_profile.adhar_number
-#             self.fields['adhar_card_photo'].initial = user_profile.adhar_card_photo
-
-#     def save(self, commit=True):
-#         # Save CustomUser fields
-#         custom_user = super().save(commit=commit)
-
-#         # Save UserProfile fields
-#         user_profile, _ = UserProfile.objects.get_or_create(user=custom_user)
-#         user_profile.pan_number = self.cleaned_data.get('pan_number')
-#         user_profile.adhar_number = self.cleaned_data.get('adhar_number')
-
-#         if self.cleaned_data.get('pan_card_photo'):
-#             user_profile.pan_card_photo = self.cleaned_data.get('pan_card_photo')
-#         if self.cleaned_data.get('adhar_card_photo'):
-#             user_profile.adhar_card_photo = self.cleaned_data.get('adhar_card_photo')
-
-#         if commit:
-#             user_profile.save()
-
-#         return custom_user
 
 from django import forms
 from django.forms import inlineformset_factory
 from .models import UserProfile, BankAccount, CMRCopy
 
-# 
-class CustomUserProfileForm(forms.ModelForm):
-    class Meta:
-        model = UserProfile
-        fields = ['whatsapp_number', 'pan_number', 'pan_card_photo', 'adhar_number', 'adhar_card_photo']
-
+# profile
 from django import forms
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import get_user_model
 from .models import UserProfile
 
-User = get_user_model()
+from django import forms
+from .models import UserProfile
 
-class PersonalInfoForm(forms.ModelForm):
-
-    class Meta:
-        model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'phone_number']
-
-class ProfileInfoForm(forms.ModelForm):
+class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['whatsapp_number', 'photo']
+        fields = ['first_name', 'middle_name', 'last_name', 'email',
+                  'whatsapp_number', 'mobile_number', 'photo',
+                  'pan_number', 'pan_card_photo', 'adhar_number', 'adhar_card_photo']
+        widgets = {
+            'email': forms.EmailInput(attrs={'type': 'email'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].required = False  # Make all fields optional
 
 
-BankAccountFormSet = inlineformset_factory(
-    UserProfile,
-    BankAccount,
-    fields=['account_holder_name', 'bank_name', 'account_number', 'account_type', 'account_status', 'linked_phone_number'],
-    extra=1,
-    can_delete=True
-)
+# bank acc
+from django import forms
+from .models import BankAccount
 
-CMRCopyFormSet = inlineformset_factory(
-    UserProfile,
-    CMRCopy,
-    fields=['broker', 'client_id', 'client_name', 'cmr_file'],  # Added 'cmr_file'
-    extra=1,
-    can_delete=True
-)
+class BankAccountForm(forms.ModelForm):
+    class Meta:
+        model = BankAccount
+        fields = ['account_holder_name', 'bank_name', 'account_type', 'account_number', 'ifsc_code']
 
 
+
+# CMR
+class CMRForm(forms.ModelForm):
+    class Meta:
+        model = CMRCopy
+        fields = ['broker', 'client_id_input', 'cmr_file']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['broker'].queryset = Broker.objects.all()
+        self.fields['broker'].empty_label = "-- Select Broker --"
+        self.fields['broker'].required = True
+
+
+
+# contact
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
@@ -212,4 +162,5 @@ class ContactForm(forms.ModelForm):
                 'rows': 5
             }),
         }
+
 

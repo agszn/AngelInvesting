@@ -1,0 +1,104 @@
+{% extends "accounts/profile.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block profile_content %}
+    <!-- <div style="margin: auto; background: white; border-radius: 10px; max-width: 600px; overflow: hidden;">  -->
+      <div style="max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px;">
+        <h3 style="color: #1a3e6e;">Order Summary</h3>
+
+        <div style="margin-bottom: 15px;">
+          <input type="text" placeholder="Search or type command..." style="padding: 8px 12px; width: 50%; border-radius: 5px; border: 1px solid #ccc;">
+          <button style="margin-left: 10px; color: green; background: none; border: none; font-weight: bold; cursor: pointer;">Buy Order</button>
+          <span style="margin-left: 10px; color: #333;">|</span>
+          <button style="margin-left: 10px; background: none; border: none; font-weight: bold; cursor: pointer;">Sell Order</button>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <thead style="background: #1a3e6e; color: white;">
+            <tr>
+              <th style="padding: 10px;">Stock Name ᐯ</th>
+              <th style="padding: 10px;">Advisor</th>
+              <th style="padding: 10px;">Broker</th>
+              <th style="padding: 10px;">Quantity</th>
+              <th style="padding: 10px;">Buy Price</th>
+              <th style="padding: 10px;">Total Amt</th>
+              <th style="padding: 10px;">Order Type</th>
+              <th style="padding: 10px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: #f5f9ff;">
+              <td style="padding: 10px;">NSE LTD</td>
+              <td>Thangiv</td>
+              <td>Zerodha Brokering Limited</td>
+              <td>250</td>
+              <td>1850</td>
+              <td>462000</td>
+              <td>Market</td>
+              <td style="color: green;">Completed</td>
+            </tr>
+            <tr style="background: white;">
+              <td style="padding: 10px;">PHILIPS LIGHTING</td>
+              <td>Thangiv</td>
+              <td>Zerodha Brokering Limited</td>
+              <td>100</td>
+              <td>1375</td>
+              <td>137500</td>
+              <td>Market</td>
+              <td style="color: green;">Completed</td>
+            </tr>
+            <tr style="background: #f5f9ff;">
+              <td style="padding: 10px;">TATA CAPITAL LTD</td>
+              <td>Thangiv</td>
+              <td>Zerodha Brokering Limited</td>
+              <td>200</td>
+              <td>925</td>
+              <td>740000</td>
+              <td>Market</td>
+              <td style="color: green;">Completed</td>
+            </tr>
+            <tr style="background: white;">
+              <td style="padding: 10px;">TATA REFRACTORIES LTD</td>
+              <td>Others</td>
+              <td>Groww Broker Limited</td>
+              <td>100</td>
+              <td>1695</td>
+              <td>169500</td>
+              <td>Market</td>
+              <td style="color: orange;">Processing</td>
+            </tr>
+            <tr style="background: #f5f9ff;">
+              <td style="padding: 10px;">HERO FINCORP LTD</td>
+              <td>Others</td>
+              <td>Zerodha Brokering Limited</td>
+              <td>100</td>
+              <td>1425</td>
+              <td>142500</td>
+              <td>Market</td>
+              <td style="color: red;">Cancel</td>
+            </tr>
+            <tr style="background: white;">
+              <td style="padding: 10px;">POLYMATECH ELECTRONICS LTD</td>
+              <td>Others</td>
+              <td>Zerodha Brokering Limited</td>
+              <td>100</td>
+              <td>2625</td>
+              <td>262500</td>
+              <td>Limit</td>
+              <td style="color: #cc6600;">Onhold</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top: 20px; text-align: right;">
+          <button style="padding: 6px 10px; margin: 2px; border: none; border-radius: 4px; background: #4a5a87; color: white;">1</button>
+          <button style="padding: 6px 10px; margin: 2px; border: none; background: white; border-radius: 4px; color: #4a5a87;">2</button>
+          <button style="padding: 6px 10px; margin: 2px; border: none; background: white; border-radius: 4px; color: #4a5a87;">3</button>
+          <button style="padding: 6px 10px; margin: 2px; border: none; background: white; border-radius: 4px; color: #4a5a87;">4</button>
+          <button style="padding: 6px 10px; margin: 2px; border: none; background: white; border-radius: 4px; color: #4a5a87;">5</button>
+          <button style="padding: 6px 10px; margin: 2px; border: none; background: #4a5a87; border-radius: 4px; color: white;">&#62;</button>
+          <button style="padding: 6px 10px; margin: 2px; border: none; background: #4a5a87; border-radius: 4px; color: white;">All</button>
+        </div>
+      </div>
+    <!-- </div> -->
+{% endblock %}

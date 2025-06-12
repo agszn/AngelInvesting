@@ -1,0 +1,19 @@
+{% extends "baseStructureSM.html" %}
+{% block title %}Advisor{% endblock %}
+
+
+{% block subtitle %} Advisor {% endblock %}
+
+{% block SMprofile_content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Confirm Delete</h2>
+
+    <p>Are you sure you want to delete the advisor type "<strong>{{ object.name }}</strong>"?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <a href="{% url 'SM_User:advisor-type-list' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+</div>
+{% endblock %}

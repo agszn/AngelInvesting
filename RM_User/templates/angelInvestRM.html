@@ -1,31 +1,52 @@
 {% extends "baseStructureRM.html" %}
 {% block title %}Shares List{% endblock %}
 
-{% block SubTitleRM %}Angel Invest RM{% endblock %}S
+{% block SubTitleRM %}Angel Invest RM{% endblock %}
+
+{% block RMSearch_content %}
+    <form method="get" style="margin-bottom: 20px;">
+        {% if stocks %}
+            <button type="submit" name="download" value="1" style="padding: 2%;">                        
+                ⬇️
+            </button>
+        {% endif %}
+        <input type="text" name="q" placeholder="Search by company or industry" value="{{ query }}">
+        <button type="submit" style="padding: 2%;">🔎</button>
+
+    </form>
+{% endblock %}
 
 {% block RMprofile_content %}
-            <table class="RMbuyorder-table">
-                <thead>
-                    <tr>
-                        <th>Sl.no</th>
-                        <th>Company Name</th>
-                        <th>Industry</th>
-                        <th>Conviction Level</th>
-                        <th>Today's Price</th>
-                        <th>Yesterda's Price</th>
-                        <th>Lot_size</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>NSC LTD</td>
-                        <td>Equity Market-Exchange</td>
-                        <td>Very High</td>
-                        <td>1850</td>
-                        <td>1850</td>
-                        <td>250</td>
-                    </tr>
-                </tbody>
-            </table>
+
+
+    <table class="RMbuyorder-table">
+        <thead>
+            <tr>
+                <th>Sl.no</th>
+                <th>Company Name</th>
+                <th>Industry</th>
+                <th>Conviction Level</th>
+                <th>Today's Price</th>
+                <th>Yesterday's Price</th>
+                <th>Lot_size</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ stock.company_name }}</td>
+                <td>{{ stock.sector }}</td>  
+                <td>{{ stock.conviction_level }}</td> 
+                <td>{{ stock.share_price }}</td> 
+                <td>{{ stock.ltp }}</td>  
+                <td>{{ stock.lot }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No shares found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

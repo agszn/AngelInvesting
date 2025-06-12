@@ -183,17 +183,31 @@
         </div>
         <div class="info-third">
           <span class="spantext">Lot:<strong> {{ stock.lot }}</strong></span>
-          <span class="spantext">Qty:<strong>{{ stock.quantity }}</strong></span>
+          <!-- <span class="spantext">Qty:<strong>{{ stock.quantity }}</strong></span> -->
           <span class="spantext">Share Price:<strong> ₹{{ stock.share_price }}</strong></span>
         </div>
         <div class="actions">
-          <!--  url 'unlisted_stock_marketplace:buy_stock' stock.id -->
-          <button onclick="window.location.href=''">
-            Buy Now
+          <button type="button"
+            title="Buy {{ stock.company_name }}"
+            onclick='openBuyModal(
+              "{{ stock.id }}",
+              "{{ stock.company_name|escapejs }}",
+              "{{ stock.share_price }}",
+              "{{ stock.quantity }}",
+              "{% url 'user_portfolio:buy_stock' stock.id %}"
+            )'>
+            Buy
           </button>
-          <!--  url 'unlisted_stock_marketplace:sell_stock' stock.id  -->
-          <button onclick="window.location.href=''">
-            Sell Now
+
+          <button type="button"
+            onclick='openSellModal(
+              "{{ stock.id }}",
+              "{{ stock.company_name|escapejs }}",
+              "{{ stock.share_price }}",
+              "{{ stock.quantity }}",
+              "{% url 'user_portfolio:sell_stock' stock.id %}"
+            )'>
+            Sell
           </button>
 
         </div>

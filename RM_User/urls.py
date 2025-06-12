@@ -20,10 +20,20 @@ urlpatterns = [
         path('unlistedSharesRM/',unlistedSharesRM,name='unlistedSharesRM'),
         path('angelInvestRM/',angelInvestRM,name='angelInvestRM'),
         
-        path('buyordersummeryRM/',buyordersummeryRM,name='buyordersummeryRM'),        
+        path('buyordersummary/<str:order_id>/', buyordersummeryRM, name='buyordersummery'),
         
         path('selldersummeryRM/',selldersummeryRM,name='selldersummeryRM'),
         
+        path('payment/add/<str:order_id>/', add_or_edit_payment, name='add_payment'),
+        path('payment/edit/<int:payment_id>/', add_or_edit_payment, name='edit_payment'),
+        
+        path('payment/delete/<int:payment_id>/',delete_payment, name='delete_payment'),
+        
+        path('transaction/<int:pk>/edit/', edit_buy_transaction, name='edit_transaction'),
+        
+        path('transaction/<int:pk>/delete/', delete_buy_transaction, name='delete_transaction'),
+
+            
     ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

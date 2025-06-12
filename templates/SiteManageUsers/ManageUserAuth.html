@@ -1,7 +1,5 @@
 {% extends "baseStructureSM.html" %}
 {% block title %}Users{% endblock %}
-
-
 {% block subtitle %} Users {% endblock %}
 
 {% block SMprofile_content %}
@@ -21,6 +19,7 @@
         <th>Email</th>
         <th>Current Type</th>
         <th>Change To</th>
+        <th>Assign RM</th>
       </tr>
     </thead>
     <tbody>
@@ -30,7 +29,7 @@
         <td>{{ user.email }}</td>
         <td>{{ user.get_user_type_display }}</td>
         <td>
-          <form method="post" class="d-flex gap-2">
+          <form method="post" class="d-flex gap-2 align-items-center">
             {% csrf_token %}
             <input type="hidden" name="user_id" value="{{ user.id }}">
             <select name="user_type" class="form-select">
@@ -38,7 +37,21 @@
               <option value="RM" {% if user.user_type == 'RM' %}selected{% endif %}>Relationship Manager</option>
               <option value="AC" {% if user.user_type == 'AC' %}selected{% endif %}>Accounts</option>
               <option value="SM" {% if user.user_type == 'SM' %}selected{% endif %}>Site Manager</option>
+              <option value="AP" {% if user.user_type == 'AP' %}selected{% endif %}>Associate Partner</option>
+              <option value="PT" {% if user.user_type == 'PT' %}selected{% endif %}>Partner</option>
             </select>
+        </td>
+        <td>
+            <select name="assigned_rm" class="form-select">
+              <option value="">-- Select RM --</option>
+              {% for rm in rms %}
+              <option value="{{ rm.id }}" {% if user.assigned_rm and user.assigned_rm.id == rm.id %}selected{% endif %}>
+                {{ rm.username }} ({{ rm.email }})
+              </option>
+              {% endfor %}
+            </select>
+        </td>
+        <td>
             <button type="submit" class="btn btn-primary">Update</button>
           </form>
         </td>

@@ -1,0 +1,15 @@
+{% extends "baseStructureSM.html" %}
+{% block title %}Broker{% endblock %}
+
+
+{% block subtitle %} Broker {% endblock %}
+
+{% block SM:profile_content %}
+ <h2 style="color: red;">Confirm Delete</h2>
+    <p>Are you sure you want to delete "{{ object.name }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="padding: 6px 12px; background-color: red; color: white; border: none;">Delete</button>
+        <a href="{% url 'SM_User:broker-list' %}" style="margin-left: 10px; text-decoration: none;">Cancel</a>
+    </form>
+{% endblock %}

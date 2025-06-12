@@ -1,0 +1,72 @@
+{% for stock in global_stocks %}
+  <div class="modal fade" id="buyModal{{ stock.id }}" tabindex="-1" role="dialog" aria-labelledby="buyModalLabel{{ stock.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" style="border-radius: 10px; overflow: hidden;">
+        <form method="POST" action="{% url 'user_portfolio:buy_stock' stock.id %}">
+          {% csrf_token %}
+
+          <!-- Header -->
+          <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>{{ stock.company_name }}</strong>
+              <span style="color: #7cffaf; margin-left: 10px;">₹{{ stock.share_price }}</span>
+            </div>
+            <button type="button" class="close" data-dismiss="modal" style="background: none; border: none; color: white; font-size: 24px;">&times;</button>
+          </div>
+
+          <!-- Body -->
+          <div style="background-color: #f1f6ff; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+
+            <!-- Advisor -->
+            <div style="grid-column: span 1;">
+              <label for="advisor">Advisor</label>
+              <select name="advisor" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                {% for advisor in global_advisors %}
+                  <option value="{{ advisor.id }}">{{ advisor.name }} ({{ advisor.advisor_type }})</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Broker -->
+            <div style="grid-column: span 1;">
+              <label for="broker">Broker</label>
+              <select name="broker" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                {% for broker in global_brokers %}
+                  <option value="{{ broker.id }}">{{ broker.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Quantity -->
+            <div style="grid-column: span 1;">
+              <label>Quantity</label>
+              <input type="number" name="quantity" value="{{ stock.lot }}" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+            </div>
+
+            <!-- Price per Share -->
+            <div style="grid-column: span 1;">
+              <label>Price per Share</label>
+              <input type="number" step="0.01" name="price_per_share" value="{{ stock.share_price }}" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+            </div>
+
+            <!-- Order Type -->
+            <div style="grid-column: span 1;">
+              <label>Order Type</label>
+              <div style="margin-top: 5px; font-size: 12px;">
+                <label><input type="radio" name="order_type" value="market" checked> Market</label>
+                <label style="margin-left: 10px;"><input type="radio" name="order_type" value="limit"> Limit</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div style="background-color: #3a456d; padding: 15px; text-align: right;">
+            <button type="submit" style="background-color: #4caf50; color: white; padding: 10px 20px; border-radius: 20px; border: none; font-weight: bold;">
+              ✔ Place Buy Order
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endfor %}

@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% block title %}Stock List{% endblock %}
+{% load static %}
+
+{% load custom_filters %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'Csss/listingview.css' %}" />
+
+<main class="stock-container">
+  <form method="get" id="filter-form">
+    <div class="controls">
+      <div class="show-entries">
+        Show
+        <select id="entries-select" name="entries" onchange="document.getElementById('filter-form').submit();">
+          <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+          <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
+          <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+          <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+        </select>
+        entries
+      </div>
+      <div class="search-filter">
+        <input type="text" name="search" placeholder="Search here..." id="search-input" value="{{ search_query }}">
+        <button type="submit" id="filter-btn">Filter</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="table-container">
+    <table id="stock-table">
+      <thead>
+        <tr>
+          <th>Sl No</th>
+          <th class="logo"></th>
+          <th>Share Name</th>
+          <th>Sector</th>
+          <th>Price <br><span class="inline">In ₹ Per Share</span></th>
+          <th>Market Cap <br><span class="inline">In ₹ Crores</span></th>
+          <th>Lifetime High</th>
+          <th>Lifetime Low</th>
+          <th class="chart">Chart</th>
+          <th class="options">Options</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for stock in page_obj %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="clogo">
+            {% if stock.logo %}
+            <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">
+                <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" style="max-width: 50px; max-height: 50px; object-fit: contain;">
+            </a>
+            {% else %}
+            <span>No Logo</span>
+            {% endif %}
+
+          </td>
+
+          <td>            
+                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">  {{ stock.company_name }}</a>
+            </td>
+          <td>{{ stock.sector }}</td>
+          <td>₹ {{ stock.share_price }}</td>
+          <td>{{ stock.market_capitalization }}</td>
+          <td>₹ {{ stock.lifetime_high }}</td>
+          <td>₹ {{ stock.lifetime_low }}</td>
+          <td>
+            <div class="chart-img">
+              <canvas id="chart-{{ stock.id }}" width="200" height="100"></canvas>
+            </div>
+          </td>
+          <td class="btns">
+            <div class="buy-sell-btn">
+
+                <button class="buy-btn" type="button"
+                  title="Buy {{ stock.company_name }}"
+                  onclick='openBuyModal(
+                    "{{ stock.id }}",
+                    "{{ stock.company_name|escapejs }}",
+                    "{{ stock.share_price }}",
+                    "{{ stock.quantity }}",
+                    "{% url 'user_portfolio:buy_stock' stock.id %}"
+                  )'>
+                  Buy
+                </button>
+
+                <button class="sell-btn"  type="button"
+                  onclick='openSellModal(
+                    "{{ stock.id }}",
+                    "{{ stock.company_name|escapejs }}",
+                    "{{ stock.share_price }}",
+                    "{{ stock.quantity }}",
+                    "{% url 'user_portfolio:sell_stock' stock.id %}"
+                  )'>
+                  Sell
+                </button>
+            </div>
+
+            <!-- <button class="wishlist-btn">
+              <span class="cart-icon">
+                <img src="{% static 'Media/images/cart-list.svg' %}" alt="">
+              </span>
+              Add to Wishlist
+            </button> -->
+
+
+            <button 
+              class="stock-btn yellow-btn wishlist-btn wishlist" 
+              data-stock-id="{{ stock.id }}" 
+              data-stock-name="{{ stock.company_name }}" 
+              data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
+              style="width: 100%;">
+              Wishlist 🛒
+            </button>
+
+
+
+            {% include 'includes/sell_modal.html' %}
+
+            {% block scripts %}
+              <script>
+                function openBuyModal(stockId) {
+                  $('#buyModal' + stockId).modal('show');
+                }
+                function openSellModal(stockId) {
+                  $('#sellModal' + stockId).modal('show');
+                }
+              </script>
+            {% endblock %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10">No stocks found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <div class="pagination-info">
+      Showing {{ start_index }} to {{ end_index }} of {{ total_count }} entries
+    </div>
+    <div class="page-numbers">
+      {% if page_obj.has_previous %}
+        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}entries={{ per_page }}&page={{ page_obj.previous_page_number }}">Previous</a>
+      {% endif %}
+
+      {% for page_num in page_obj.paginator.page_range %}
+        {% if page_num == page_obj.number %}
+          <a href="#" class="active">{{ page_num }}</a>
+        {% elif page_num >= page_obj.number|add:"-2" and page_num <= page_obj.number|add:"2" %}
+          <a href="?{% if search_query %}search={{ search_query }}&{% endif %}entries={{ per_page }}&page={{ page_num }}">{{ page_num }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}entries={{ per_page }}&page={{ page_obj.next_page_number }}">Next</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const stockHistoryData = {{ stock_history_data|safe }};
+
+    Object.entries(stockHistoryData).forEach(([stockId, dataPoints]) => {
+      const ctx = document.getElementById(`chart-${stockId}`)?.getContext('2d');
+      if (!ctx) return;
+
+      const dates = dataPoints.map(dp => dp.timestamp);
+      const prices = dataPoints.map(dp => dp.price);
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [{
+            label: '',
+            data: prices,
+            borderColor: 'rgba(255, 215, 0, 0.8)',
+            backgroundColor: 'rgba(255, 215, 0, 0.1)',
+            borderWidth: 2,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: true,
+          scales: {
+            x: { display: false },
+            y: { display: false }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          }
+        }
+      });
+    });
+  </script>
+
+
+        <!-- below is the wishlist list confirmation -->
+        <!-- Modal -->
+        <!-- Wishlist Confirmation Modal -->
+        <div id="wishlistModal" class="wishlist-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6);">
+          <div class="wishlist-modal-content" style="background-color: #fff; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative;">
+            
+            <span class="close" onclick="document.getElementById('wishlistModal').style.display='none'" style="position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #aaa; cursor: pointer;">&times;</span>
+
+            <h3 style="margin-top: 0; font-size: 20px; color: #333;">Confirm Wishlist</h3>
+            <p style="font-size: 16px; color: #555;">You're about to add <strong id="stockName" style="color: #000;"></strong> to <strong id="wishlistGroupName" style="color: #000;"></strong>.</p>
+
+            <form id="wishlistForm" method="POST" action="{% url 'unlisted_stock_marketplace:add_to_wishlist' %}" style="margin-top: 20px;">
+              {% csrf_token %}
+              <input type="hidden" name="stock_id" id="stockIdInput">
+              <input type="hidden" name="custom_list_name" id="customListName">
+
+              <button type="submit" class="stock-btn yellow-btn" style="background-color: #f7c948; color: #000; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; width: 100%;">Confirm Add</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- end of wishlist confirmation -->
+  <!-- update the list label of wishlist -->
+  <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const wishlistBtns = document.querySelectorAll(".wishlist-btn");
+      const modal = document.getElementById("wishlistModal");
+      const stockNameDisplay = document.getElementById("stockName");
+      const wishlistGroupName = document.getElementById("wishlistGroupName");
+      const stockIdInput = document.getElementById("stockIdInput");
+      const customListName = document.getElementById("customListName");
+      const closeBtn = document.querySelector(".wishlist-modal .close");
+
+      wishlistBtns.forEach(btn => {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const stockId = this.dataset.stockId;
+          const stockName = this.dataset.stockName;
+          const fetchUrl = this.dataset.url + `?stock_id=${stockId}`;
+
+          fetch(fetchUrl)
+            .then(res => res.json())
+            .then(data => {
+              stockNameDisplay.textContent = stockName;
+              wishlistGroupName.textContent = data.group_name;
+              stockIdInput.value = stockId;
+              customListName.value = data.group_name;
+              modal.style.display = "block";
+            });
+        });
+      });
+
+      closeBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+
+      window.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+    });
+  </script>
+
+  <!-- end of wishlist label code -->
+</main>
+
+{% endblock %}

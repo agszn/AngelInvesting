@@ -54,10 +54,6 @@ class StockHistoryInline(admin.TabularInline):
     extra = 1
     readonly_fields = ('price', 'timestamp')
 
-class StockTransactionInline(admin.TabularInline):
-    model = StockTransaction
-    extra = 1
-    readonly_fields = ('user', 'share_name', 'date_bought', 'price_bought', 'price_sold', 'date_sold', 'current_status', 'profit', 'profit_percentage')
 
 class CompanyRelationInline(admin.TabularInline):
     model = CompanyRelation
@@ -86,7 +82,7 @@ class StockDataAdmin(admin.ModelAdmin):
     search_fields = ('company_name', 'scrip_name', 'isin_no', 'sector', 'industry', 'cin', 'stock_type')
     list_filter = ('sector', 'conviction_level', 'drhp_filed', 'rofr_require', 'stock_type')
 
-    inlines = [DirectorInline,CompanyRelationInline, PrincipalBusinessActivityInline,FAQAdmin,ReportAdmin, ShareholdingPatternAdmin, StockHistoryInline, StockTransactionInline]  
+    inlines = [DirectorInline,CompanyRelationInline, PrincipalBusinessActivityInline,FAQAdmin,ReportAdmin, ShareholdingPatternAdmin, StockHistoryInline]  
 
     fieldsets = (
         (None, {
@@ -231,6 +227,23 @@ class CustomFieldValueForm(forms.ModelForm):
                 for ft in ['int', 'dec', 'char', 'date']:
                     self.fields[f"{ft}_value"].widget = forms.HiddenInput()
 
+from django.contrib import admin
+from .models import CustomFieldValue
+
+@admin.register(CustomFieldValue)
+class CustomFieldValueAdmin(admin.ModelAdmin):
+    list_display = ['name', 'field_definition', 'display_value', 'parent_field_value']
+    list_filter = ['field_definition', 'table_header']
+    search_fields = ['name', 'char_value']
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "parent_field_value":
+            kwargs["queryset"] = CustomFieldValue.objects.filter(parent_field_value__isnull=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    class Media:
+        js = ('js/custom_scroll.js',)
+
 # Inline for CustomFieldValue in CustomFieldDefinition admin
 # from django.contrib import admin
 # from .models import CustomFieldDefinition, CustomFieldValue
@@ -284,21 +297,11 @@ from django.contrib import admin
 from .models import CustomFieldDefinition, CustomFieldValue
 from .forms import CustomFieldValueForm
 
-
 class CustomFieldValueInline(admin.TabularInline):
     model = CustomFieldValue
     form = CustomFieldValueForm
-    extra = 1
-    # classes = ['collapse']
+    extra = 25
 
-    # Custom field to add multiple entries for the same CustomFieldDefinition
-    def get_extra(self, request, obj=None):
-        """
-        Override the `extra` value to allow adding more rows in the inline.
-        """
-        return 5  # You can change this number to show more or less rows by default
-
-# Admin for CustomFieldDefinition
 @admin.register(CustomFieldDefinition)
 class CustomFieldDefinitionAdmin(admin.ModelAdmin):
     list_display = ['stock', 'unit', 'model_type', 'get_model_display_name']
@@ -314,54 +317,6 @@ class CustomFieldDefinitionAdmin(admin.ModelAdmin):
     def get_model_display_name(self, obj):
         return obj.get_model_display_name()
     get_model_display_name.admin_order_field = 'model_type'
-
-from django.db.models import OuterRef, Subquery, Min
-
-
-# Admin for CustomFieldValue
-from django.urls import reverse
-from django.utils.html import format_html
-from django.utils.http import urlencode
-
-
-from django.contrib import admin
-from django.urls import reverse
-from django.utils.html import format_html
-from django.utils.http import urlencode
-from .forms import CustomFieldValueForm  # Adjust according to your project structure
-
-@admin.register(CustomFieldValue)
-class CustomFieldValueAdmin(admin.ModelAdmin):
-    form = CustomFieldValueForm
-    list_display = ['linked_name', 'field_definition', 'display_value', 'text_style', 'parent_field_value_link']
-    list_filter = ['field_definition__stock', 'text_style', 'parent_field_value']
-    search_fields = ['name', 'description']
-
-    def display_value(self, obj):
-        return obj.display_value()
-    display_value.admin_order_field = 'dec_value'
-
-    def linked_name(self, obj):
-        """Display name as a link to filter all values with that name."""
-        url = (
-            reverse("admin:unlisted_stock_marketplace_customfieldvalue_changelist")
-            + "?" + urlencode({"name": obj.name})
-        )
-        return format_html('<a href="{}">{}</a>', url, obj.name or "—")
-    linked_name.short_description = "Name"
-
-    def parent_field_value_link(self, obj):
-        """Display the parent field value as a link to its details."""
-        if obj.parent_field_value:
-            url = reverse("admin:unlisted_stock_marketplace_customfieldvalue_change", args=[obj.parent_field_value.pk])
-            return format_html('<a href="{}">{}</a>', url, obj.parent_field_value.name or "—")
-        return "No Parent"
-    parent_field_value_link.short_description = "Parent Field Value"
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('field_definition', 'parent_field_value')
-
 
 
 
@@ -447,5 +402,5 @@ class StockDailySnapshotAdmin(admin.ModelAdmin):
 admin.site.register(StockData, StockDataAdmin)
 admin.site.register(Director)
 admin.site.register(StockHistory)
-admin.site.register(StockTransaction)
+
 

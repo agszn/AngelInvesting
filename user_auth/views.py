@@ -33,24 +33,67 @@ from .forms import UserTypeUpdateForm
 def is_admin_or_site_manager(user):
     return user.user_type in ['AD', 'SM']
 
+
+import json
+from site_Manager.models import Broker, Advisor
+
+def tst(request):
+    brokers = Broker.objects.values('id', 'name')
+    advisors = Advisor.objects.values('id', 'advisor_type')
+    return render(request, 'testBuySell.html', {
+        'global_brokers_json': json.dumps(list(brokers)),
+        'global_advisors_json': json.dumps(list(advisors)),
+    })
+
+# @login_required
+# @user_passes_test(is_admin_or_site_manager)
+# def manage_user_types(request):
+#     query = request.GET.get('q', '')
+#     users = CustomUser.objects.exclude(user_type='AD')
+#     if query:
+#         users = users.filter(username__icontains=query) | users.filter(email__icontains=query)
+
+#     if request.method == 'POST':
+#         user_id = request.POST.get('user_id')
+#         new_type = request.POST.get('user_type')
+#         user = get_object_or_404(CustomUser, id=user_id)
+#         user.user_type = new_type
+#         user.save()
+#         return redirect('manage_user_types')
+
+#     return render(request, 'SiteManageUsers/ManageUserAuth.html', {'users': users, 'query': query})
+
 @login_required
 @user_passes_test(is_admin_or_site_manager)
 def manage_user_types(request):
     query = request.GET.get('q', '')
     users = CustomUser.objects.exclude(user_type='AD')
+    rms = CustomUser.objects.filter(user_type='RM')
+
     if query:
         users = users.filter(username__icontains=query) | users.filter(email__icontains=query)
 
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
         new_type = request.POST.get('user_type')
+        assigned_rm_id = request.POST.get('assigned_rm')
+
         user = get_object_or_404(CustomUser, id=user_id)
         user.user_type = new_type
+
+        if assigned_rm_id:
+            user.assigned_rm_id = assigned_rm_id
+        else:
+            user.assigned_rm = None
+
         user.save()
         return redirect('manage_user_types')
 
-    return render(request, 'SiteManageUsers/ManageUserAuth.html', {'users': users, 'query': query})
-
+    return render(request, 'SiteManageUsers/ManageUserAuth.html', {
+        'users': users,
+        'rms': rms,
+        'query': query,
+    })
 
 def base(request):
     # homepage banner
@@ -204,14 +247,291 @@ def logout_view(request):
 # 
 # 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import UserProfile
+from .forms import UserProfileForm  # we'll create this form next
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import UserProfile
+from .forms import UserProfileForm
+from site_Manager.models import Broker 
+
+# @login_required
+# def view_profile(request):
+#     profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+#     if request.method == 'POST':
+#         form = UserProfileForm(request.POST, request.FILES, instance=profile)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Profile updated successfully.")
+#             return redirect('profile')  # avoid form resubmission
+#         else:
+#             messages.error(request, "Please correct the errors below.")
+#     else:
+#         form = UserProfileForm(instance=profile)
+
+#     return render(request, 'accounts/profile.html', {'profile': profile, 'form': form})
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import UserProfile, Broker, CMRCopy
+from .forms import UserProfileForm, CMRForm
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import UserProfile, Broker, CMRCopy
+from .forms import UserProfileForm, CMRForm  # assuming you have these forms
+# @login_required
+# def view_profile(request):
+#     profile, _ = UserProfile.objects.get_or_create(user=request.user)
+#     brokers = Broker.objects.all()
+#     cmr_copies = CMRCopy.objects.filter(user_profile=profile)
+
+#     form = UserProfileForm(instance=profile)
+#     cmr_form = CMRForm()
+
+#     if request.method == 'POST':
+#         form_type = request.POST.get('form_type')
+
+        
+#     if request.method == 'POST':
+#         form_type = request.POST.get('form_type')
+
+#         if form_type == 'cmr_form':
+#             cmr_id = request.POST.get('cmr_id')
+#             broker_id = request.POST.get('broker_id')
+#             broker_id_input = request.POST.get('broker_id_input')
+#             client_id_input = request.POST.get('client_id_input')
+#             cmr_file = request.FILES.get('cmr_file')
+
+#             if not broker_id:
+#                 messages.error(request, "Broker selection is required.")
+#                 return redirect('profile')
+
+#             broker = Broker.objects.filter(id=broker_id).first()
+#             if not broker:
+#                 messages.error(request, "Invalid broker selected.")
+#                 return redirect('profile')
+
+#             # Create or update CMR copy
+#             if cmr_id:
+#                 cmr = CMRCopy.objects.filter(pk=cmr_id, user_profile=profile).first()
+#                 if not cmr:
+#                     messages.error(request, "CMR copy not found.")
+#                     return redirect('profile')
+#             else:
+#                 cmr = CMRCopy(user_profile=profile)
+
+#             cmr.broker = broker
+#             cmr.broker_id_input = broker_id_input
+#             cmr.client_id_input = client_id_input
+#             if cmr_file:
+#                 cmr.cmr_file = cmr_file
+#             cmr.save()
+
+#             messages.success(request, f"CMR copy {'updated' if cmr_id else 'added'} successfully.")
+#             return redirect('profile')
+
+#         elif form_type == 'profile_form':
+#             form = UserProfileForm(request.POST, request.FILES, instance=profile)
+#             if form.is_valid():
+#                 form.save()
+#                 messages.success(request, "Profile updated successfully.")
+#                 return redirect('profile')
+#             else:
+#                 messages.error(request, "Please correct the errors below.")
+
+#     return render(request, 'accounts/profile.html', {
+#         'profile': profile,
+#         'form': form,
+#         'cmr_form': cmr_form,
+#         'brokers': brokers,
+#         'cmr_copies': cmr_copies,
+#     })
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import UserProfile, Broker, CMRCopy
+from .forms import UserProfileForm, CMRForm
+
 @login_required
 def view_profile(request):
-    return render(request, 'accounts/profile.html')
+    user = request.user
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    brokers = Broker.objects.all()
+    cmr_copies = CMRCopy.objects.filter(user_profile=profile)
+
+    form = UserProfileForm(instance=profile)
+    cmr_form = CMRForm()
+
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type')
+
+        if form_type == 'cmr_form':
+            cmr_id = request.POST.get('cmr_id')
+            if cmr_id:
+                cmr_instance = get_object_or_404(CMRCopy, id=cmr_id, user_profile=profile)
+                cmr_form = CMRForm(request.POST, request.FILES, instance=cmr_instance)
+            else:
+                cmr_form = CMRForm(request.POST, request.FILES)
+
+            if cmr_form.is_valid():
+                cmr = cmr_form.save(commit=False)
+                cmr.user_profile = profile
+                cmr.save()
+                messages.success(request, "CMR record saved successfully.")
+                return redirect('profile')
+            else:
+                messages.error(request, "Please correct the errors in the CMR form.")
+        
+        else:
+            form = UserProfileForm(request.POST, instance=profile)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Profile updated.")
+                return redirect('profile')
+            else:
+                messages.error(request, "Please correct the errors in the profile form.")
+
+    context = {
+        'form': form,
+        'cmr_form': cmr_form,
+        'brokers': brokers,
+        'cmr_copies': cmr_copies,
+        'profile': profile,
+    }
+    return render(request, 'accounts/profile.html', context)
+
+
+
 
 @login_required
 def edit_profile(request):
-    return render(request, 'accounts/edit_profile.html')
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
 
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('view_profile')
+    else:
+        form = UserProfileForm(instance=profile)
+
+    return render(request, 'accounts/edit_profile.html', {'form': form})
+
+# 
+# ------------------------------------------
+# -------------------------- Bank Account Details ---------------
+# ------------------------------------------
+# 
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from .models import BankAccount
+from .forms import BankAccountForm  # Create this form
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@login_required
+def bankAccDetails(request):
+    user = request.user
+    bank_accounts = BankAccount.objects.filter(user_profile=user.userprofile)
+    return render(request, 'accounts/profile.html', {'bank_accounts': bank_accounts})
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import BankAccount
+
+@csrf_exempt
+@login_required
+def save_bank_account(request):
+    if request.method == 'POST':
+        account_id = request.POST.get('account_id')
+
+        if account_id:  
+            bank = get_object_or_404(BankAccount, id=account_id, user_profile=request.user.profile)
+        else:  
+            bank = BankAccount(user_profile=request.user.profile)
+        bank.account_holder_name = request.POST.get('account_holder_name', '')
+        bank.bank_name = request.POST.get('bank_name', '')
+        bank.account_type = request.POST.get('account_type', '')
+        bank.account_number = request.POST.get('account_number', '')
+        bank.ifsc_code = request.POST.get('ifsc_code', '')
+        bank.save()
+
+        return redirect('profile')
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+@csrf_exempt
+@login_required
+def get_bank_account(request, bank_id):
+    bank = get_object_or_404(BankAccount, id=bank_id, user_profile=request.user.userprofile)
+    data = {
+        'account_holder_name': bank.account_holder_name,
+        'bank_name': bank.bank_name,
+        'account_type': bank.account_type,
+        'account_number': bank.account_number,
+        'ifsc_code': bank.ifsc_code,
+    }
+    return JsonResponse(data)
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, get_object_or_404
+from .models import BankAccount
+
+
+@login_required
+def delete_bank_account(request, bank_id):
+    profile = UserProfile.objects.get(user=request.user)
+    account = get_object_or_404(BankAccount, id=bank_id, user_profile=profile)
+    if request.method == 'POST':
+        account.delete()
+        return redirect('profile')
+    return redirect('profile')
+
+
+# 
+# ------------------------------------------
+# -------------------------- CMR ---------------
+# ------------------------------------------
+# 
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
+
+
+@login_required
+def delete_cmr(request, cmr_id):
+    cmr = get_object_or_404(CMRCopy, id=cmr_id, user_profile__user=request.user)
+    if request.method == 'POST':
+        cmr.delete()
+        messages.success(request, "CMR record deleted successfully.")
+    else:
+        messages.error(request, "Invalid request method.")
+    return redirect('profile')
+
+from django.http import FileResponse, Http404
+
+@login_required
+def download_cmr_file(request, cmr_id):
+    try:
+        cmr = CMRCopy.objects.get(id=cmr_id, user_profile__user=request.user)
+        if cmr.cmr_file:
+            return FileResponse(cmr.cmr_file.open(), as_attachment=True, filename=cmr.cmr_file.name)
+        else:
+            raise Http404("CMR file not found.")
+    except CMRCopy.DoesNotExist:
+        raise Http404("CMR record not found.")
 
 # 
 # ------------------------------------------
@@ -259,25 +579,4 @@ def faq(request):
 # blog
 def blog(request):
     return render(request, 'blog/blog.html')
-
-
-# 
-# ------------------------------------------
-# -------------------------- CMR ---------------
-# ------------------------------------------
-# 
-@login_required
-def download_cmr_file(request, cmr_id):
-    # Get the CMR record
-    try:
-        cmr = CMRCopy.objects.get(id=cmr_id, user_profile=request.user.profile)
-    except CMRCopy.DoesNotExist:
-        raise Http404("CMR file not found.")
-    
-    # Check if a file exists
-    if cmr.cmr_file:
-        # Return the file as a response
-        return FileResponse(cmr.cmr_file, as_attachment=True, filename=cmr.cmr_file.name)
-    else:
-        raise Http404("CMR file not found.")
 
