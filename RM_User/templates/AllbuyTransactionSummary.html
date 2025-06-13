@@ -1,0 +1,96 @@
+{% extends "baseStructureRM.html" %}
+
+{% block title %}Buy Order Transaction{% endblock %}
+{% block SubTitleRM %}Buy Order Transaction{% endblock %}
+
+{% block RMSearch_content %}
+  <form method="get" style="margin-bottom: 20px;">
+    <input type="text" name="company_name" placeholder="Company Name" value="{{ request.GET.company_name }}">
+    <input type="text" name="order_id" placeholder="Order ID" value="{{ request.GET.order_id }}">
+    <input type="date" name="timestamp" value="{{ request.GET.timestamp }}">
+
+    <select name="user">
+      <option value="">-- User --</option>
+      {% for u in users %}
+        <option value="{{ u.id }}" {% if request.GET.user == u.id|stringformat:"s" %}selected{% endif %}>{{ u.username }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="broker">
+      <option value="">-- Broker --</option>
+      {% for bro in brokers %}
+        <option value="{{ bro.id }}" {% if request.GET.broker == bro.id|stringformat:"s" %}selected{% endif %}>{{ bro.name }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="order_type">
+      <option value="">-- Order Type --</option>
+      <option value="market" {% if request.GET.order_type == "market" %}selected{% endif %}>Market</option>
+      <option value="limit" {% if request.GET.order_type == "limit" %}selected{% endif %}>Limit</option>
+    </select>
+
+    <button type="submit">🔍 Filter</button>
+    <a href="{% url 'RM_User:AllbuyTransactionSummary' %}">🔄 Reset</a>
+  </form>
+{% endblock %}
+
+{% block RMprofile_content %}
+
+  <!-- Order Transaction Details -->
+
+    <h6 style="padding-top: 2%;">Order Transaction Details</h6>
+    <table class="RMbuyorder-table">
+      <thead>
+        <tr>
+          <th>SLNO</th>
+          <th>Broker</th>
+          <th>ISIN Number</th>
+          <th>Stock</th>
+          <th>Order Type</th>
+          <th>Share Price</th>
+          <th>Buy Price</th>
+          <th>Qty</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in TransactionDetails %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.broker.name }}</td>
+            <td>{{ item.stock.isin_no }}</td>
+            <td>{{ item.stock.company_name }}</td>
+            <td>{{ item.order_type }}</td>
+            <td>{{ item.stock.share_price }}</td>
+            <td>{{ item.price_per_share }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.total_amount }}</td>
+            <td>{{ item.status }}</td>
+            <td>
+              <a href="{% url 'RM_User:edit_transaction' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
+
+              <!-- <a href="{% url 'RM_User:delete_transaction' pk=item.id %}"
+                onclick="return confirm('Are you sure you want to delete this transaction?');"
+                class="btn btn-danger btn-sm"
+                title="Delete Transaction"
+                aria-label="Delete Transaction">
+                🗑️
+              </a> -->
+
+
+
+            </td>
+
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="10" class="text-center">No transaction details available.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+{% endblock %}

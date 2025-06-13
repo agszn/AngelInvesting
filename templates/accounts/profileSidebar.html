@@ -89,9 +89,24 @@
                     </button>
                   {% endif %}
 
-                  <span onclick="openModal()" style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
-                  <span onclick="openModalSell()" style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
-                </div>
+                  <span title="Buy {{ stock.company_name }}"
+                      onclick='openBuyModal(
+                        "{{ stock.id }}",
+                        "{{ stock.company_name|escapejs }}",
+                        "{{ stock.share_price }}",
+                        "{{ stock.quantity }}",
+                        "{% url 'user_portfolio:buy_stock' stock.id %}"
+                      )' style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
+
+                  <span onclick='openSellModal(
+                      "{{ stock.id }}",
+                      "{{ stock.company_name|escapejs }}",
+                      "{{ stock.share_price }}",
+                      "{{ stock.quantity }}",
+                      "{% url 'user_portfolio:sell_stock' stock.id %}"
+                    )' style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
+                        </div>
+
               </div>
 
               <div style="color: {% if stock.profit %}green{% else %}red{% endif %}; font-weight: bold;">

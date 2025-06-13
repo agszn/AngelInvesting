@@ -114,10 +114,53 @@ def buyordersummeryRM(request, order_id):
         'cmr': cmr,
         'bank_accounts': bank_accounts,
         'rm_view': rm_view,
-        'TransactionDetails': BuyTransaction.objects.all(),
+        'TransactionDetails': BuyTransaction.objects.filter(order_id=order_id),
         'remaining_amount': remaining_amount,
     }
     return render(request, 'buyordersummeryRM.html', context)
+
+def AllbuyTransactionSummary(request):
+    transactions = BuyTransaction.objects.all()
+
+    # Get filter values from request
+    user_id = request.GET.get('user')
+    company_name = request.GET.get('company_name')
+    advisor_id = request.GET.get('advisor')
+    broker_id = request.GET.get('broker')
+    order_type = request.GET.get('order_type')
+    status = request.GET.get('status')
+    order_id = request.GET.get('order_id')
+    timestamp = request.GET.get('timestamp')
+
+    # Apply filters
+    if user_id:
+        transactions = transactions.filter(user__id=user_id)
+    if company_name:
+        transactions = transactions.filter(stock__company_name__icontains=company_name)
+    if advisor_id:
+        transactions = transactions.filter(advisor__id=advisor_id)
+    if broker_id:
+        transactions = transactions.filter(broker__id=broker_id)
+    if order_type:
+        transactions = transactions.filter(order_type=order_type)
+    if status:
+        transactions = transactions.filter(status=status)
+    if order_id:
+        transactions = transactions.filter(order_id__icontains=order_id)
+    if timestamp:
+        transactions = transactions.filter(timestamp__date=timestamp)
+
+    context = {
+        'TransactionDetails': transactions,
+        'users': User.objects.all(),
+        'advisors': Advisor.objects.all(),
+        'brokers': Broker.objects.all(),
+    }
+    return render(request, 'AllbuyTransactionSummary.html', context)
+
+
+def AllsellTransactionSummary(request):
+    return render(request, 'AllsellTransactionSummary.html')
 
 from django.views.decorators.csrf import csrf_exempt
 from .models import RMPaymentRecord

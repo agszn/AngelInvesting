@@ -32,6 +32,11 @@ urlpatterns = [
         path('transaction/<int:pk>/edit/', edit_buy_transaction, name='edit_transaction'),
         
         path('transaction/<int:pk>/delete/', delete_buy_transaction, name='delete_transaction'),
+        
+        path('AllbuyTransactionSummary/',AllbuyTransactionSummary,name='AllbuyTransactionSummary'),
+
+
+        path('AllsellTransactionSummary/',AllsellTransactionSummary,name='AllsellTransactionSummary'),
 
             
     ]
