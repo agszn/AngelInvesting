@@ -420,7 +420,6 @@ from .models import UserProfile, CMRCopy, Broker
 from .forms import UserProfileForm, CMRForm
 from unlisted_stock_marketplace.models import StockData, Wishlist, WishlistGroup
 
-from django.db.models import IntegerField
 
 @login_required
 def view_profile(request):
@@ -492,12 +491,7 @@ def view_profile(request):
         group_number=Subquery(
             Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
             .values('group__name')[:1]
-        ),
-        wishlist_id=Subquery(
-        Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
-        .values('id')[:1],
-        output_field=IntegerField()
-    )
+        )
     )
 
     groups = WishlistGroup.objects.filter(user=user)

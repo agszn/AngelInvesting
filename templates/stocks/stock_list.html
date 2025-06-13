@@ -250,22 +250,22 @@
           </button>
 
         </div>
-        <!-- <button class="wishlist" onclick="window.location.href='{% url 'unlisted_stock_marketplace:wish_list' %}'">
-            Add to Wishlist 🛒
-        </button> -->
-
-      <button 
-        class="stock-btn yellow-btn wishlist-btn wishlist" 
-        data-stock-id="{{ stock.id }}" 
-        data-stock-name="{{ stock.company_name }}" 
-        data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
-        style="width: 100%;">
-        Wishlist 🛒
-      </button>
-
-
+        <!-- Wishlist Button (used in 5 places) -->
+        <button 
+          class="stock-btn yellow-btn wishlist-btn wishlist" 
+          data-stock-id="{{ stock.id }}" 
+          data-stock-name="{{ stock.company_name }}" 
+          data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
+          style="width: 100%;">
+          Wishlist 🛒
+        </button>
 
       </div>
+
+
+
+
+
 
       {% endfor %}
               
@@ -275,87 +275,8 @@
         </div>
 
         <!-- below is the wishlist list confirmation -->
-        <!-- Modal -->
-        <!-- Wishlist Confirmation Modal -->
-        <div id="wishlistModal" class="wishlist-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6);">
-          <div class="wishlist-modal-content" style="background-color: #fff; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative;">
-            
-            <span class="close" onclick="document.getElementById('wishlistModal').style.display='none'" style="position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #aaa; cursor: pointer;">&times;</span>
 
-            <h3 style="margin-top: 0; font-size: 20px; color: #333;">Confirm Wishlist</h3>
-            <p style="font-size: 16px; color: #555;">You're about to add <strong id="stockName" style="color: #000;"></strong> to <strong id="wishlistGroupName" style="color: #000;"></strong>.</p>
 
-            <form id="wishlistForm" method="POST" action="{% url 'unlisted_stock_marketplace:add_to_wishlist' %}" style="margin-top: 20px;">
-              {% csrf_token %}
-              <input type="hidden" name="stock_id" id="stockIdInput">
-              <input type="hidden" name="custom_list_name" id="customListName">
-
-              <button type="submit" class="stock-btn yellow-btn" style="background-color: #f7c948; color: #000; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; width: 100%;">Confirm Add</button>
-            </form>
-          </div>
-        </div>
-
-        <!-- end of wishlist confirmation -->
-<!-- update the list label of wishlist -->
-<script>
-  function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-              const cookie = cookies[i].trim();
-              if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-              }
-          }
-      }
-      return cookieValue;
-  }
-  const csrftoken = getCookie('csrftoken');
-</script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const wishlistBtns = document.querySelectorAll(".wishlist-btn");
-    const modal = document.getElementById("wishlistModal");
-    const stockNameDisplay = document.getElementById("stockName");
-    const wishlistGroupName = document.getElementById("wishlistGroupName");
-    const stockIdInput = document.getElementById("stockIdInput");
-    const customListName = document.getElementById("customListName");
-    const closeBtn = document.querySelector(".wishlist-modal .close");
-
-    wishlistBtns.forEach(btn => {
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-
-        const stockId = this.dataset.stockId;
-        const stockName = this.dataset.stockName;
-        const fetchUrl = this.dataset.url + `?stock_id=${stockId}`;
-
-        fetch(fetchUrl)
-          .then(res => res.json())
-          .then(data => {
-            stockNameDisplay.textContent = stockName;
-            wishlistGroupName.textContent = data.group_name;
-            stockIdInput.value = stockId;
-            customListName.value = data.group_name;
-            modal.style.display = "block";
-          });
-      });
-    });
-
-    closeBtn.addEventListener("click", () => {
-      modal.style.display = "none";
-    });
-
-    window.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-      }
-    });
-  });
-</script>
 
 <!-- end of wishlist label code -->
 {% endblock %}

@@ -23,7 +23,7 @@ urlpatterns = [
     
     path('remove_from_group/<int:wishlist_id>/', remove_from_group, name='remove_from_group'),
         
-    path('wishlist/', wish_list, name='wish_list'),
+    # path('wishlist/', wish_list, name='wish_list'),
     
     ]
 

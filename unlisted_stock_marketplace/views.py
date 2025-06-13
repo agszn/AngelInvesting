@@ -1,3 +1,4 @@
+# unlisted_stock_marketplace/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -276,21 +277,44 @@ def StockListingTableFormat(request):
 # 
 # 
 
+
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import WishlistGroup, Wishlist
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+
+
+@login_required
 def get_next_wishlist_group_name(request):
-    user = request.user
-    base_name = "List"
-    groups = WishlistGroup.objects.filter(user=user).order_by("name")
-    group_index = 1
+    try:
+        stock_id = request.GET.get('stock_id')
+        if not stock_id:
+            return JsonResponse({'error': 'Missing stock ID'}, status=400)
 
-    for group in groups:
-        if group.wishlist_items.count() < 20:
-            return JsonResponse({'group_name': group.name})
-        group_index += 1
+        stock = StockData.objects.get(id=stock_id)
 
-    # No existing group with space, create a new one
-    group_name = f"{base_name} {group_index}"
-    WishlistGroup.objects.create(user=user, name=group_name)
-    return JsonResponse({'group_name': group_name})
+        # Find group with < 20 items
+        group = (
+            WishlistGroup.objects.filter(user=request.user)
+            .annotate(count=Count('wishlist_items'))
+            .filter(count__lt=20)
+            .order_by('created_on')
+            .first()
+        )
+
+        if not group:
+            group = WishlistGroup.objects.create(user=request.user)
+
+        return JsonResponse({'group_name': group.name})
+
+    except Exception as e:
+        # Temporary debug output
+        return JsonResponse({'error': str(e)}, status=500)
+
 
 
 @require_POST
@@ -305,81 +329,93 @@ def add_to_wishlist(request):
     stock = get_object_or_404(StockData, id=stock_id)
     group, _ = WishlistGroup.objects.get_or_create(user=request.user, name=group_name)
 
-    Wishlist.objects.get_or_create(user=request.user, stock=stock, defaults={'group': group})
-    return redirect('unlisted_stock_marketplace:wish_list')
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user, stock=stock, defaults={'group': group})
 
-
-@login_required
-def wish_list(request):
-    search_query = request.GET.get('search', '')
-    selected_group_id = request.GET.get('group')
-    show_all_unlisted = request.GET.get('unlisted') == '1'
-    show_all_angel = request.GET.get('angel') == '1'
-
-    groups = WishlistGroup.objects.filter(user=request.user).order_by('created_on')
-    stock_list = []
-    wishlist_data = []
-
-    # If viewing Unlisted or Angel stocks directly
-    if show_all_unlisted or show_all_angel:
-        stock_type = "Unlisted" if show_all_unlisted else "Angel"
-        stocks = StockData.objects.filter(stock_type=stock_type)
-
-        if search_query:
-            stocks = stocks.filter(
-                Q(company_name__icontains=search_query) |
-                Q(scrip_name__icontains=search_query)
-            )
-
-        stock_list = stocks  # Send queryset directly to the template
-
+    if not created:
+        request.session['popup_message'] = f"{stock.company_name} already exists in {wishlist.group.name}"
     else:
-        # Viewing wishlist (with optional group filter)
-        if selected_group_id:
-            selected_group = get_object_or_404(WishlistGroup, id=selected_group_id, user=request.user)
-            wishlist_items = Wishlist.objects.filter(user=request.user, group=selected_group).select_related('stock')
-        else:
-            wishlist_items = Wishlist.objects.filter(user=request.user).select_related('stock')
+        request.session['popup_message'] = f"{stock.company_name} added to {group.name}"
 
-        if search_query:
-            wishlist_items = wishlist_items.filter(
-                Q(stock__company_name__icontains=search_query) |
-                Q(stock__scrip_name__icontains=search_query)
-            )
+    return redirect('profile')
 
-        wishlist_data = wishlist_items
+# @login_required
+# def wish_list(request):
+#     user = request.user
+#     groups = WishlistGroup.objects.filter(user=user).prefetch_related('wishlist_items__stock')
 
-    return render(request, 'accounts/profile.html', {
-        'groups': groups,
-        'wishlist_data': wishlist_data,
-        'stock_list': stock_list,
-        'search_query': search_query,
-        'show_all_unlisted': show_all_unlisted,
-        'show_all_angel': show_all_angel,
-    })
+#     show_all_unlisted = request.GET.get('unlisted') == '1'
+#     show_all_angel = request.GET.get('angel') == '1'
+#     group_id = request.GET.get('group')
 
+#     search_query = request.GET.get('search', '').strip()
+
+#     if group_id:
+#         # Show only stocks in the selected group
+#         selected_group = get_object_or_404(WishlistGroup, id=group_id, user=user)
+#         stock_list = [item.stock for item in selected_group.wishlist_items.select_related('stock')]
+#     else:
+#         # Show unlisted stocks (default)
+#         stock_list = StockData.objects.filter(category='unlisted')
+
+#         # Filter search if needed
+#         if search_query:
+#             stock_list = stock_list.filter(
+#                 Q(company_name__istartswith=search_query) |
+#                 Q(scrip_name__istartswith=search_query)
+#             )
+
+#         # Show full list, annotate wishlist info
+#         user_wishlist = Wishlist.objects.filter(user=user).select_related('group', 'stock')
+#         wishlist_map = {
+#             w.stock.id: w.group.name for w in user_wishlist
+#         }
+
+#         for stock in stock_list:
+#             stock.in_group = stock.id in wishlist_map
+#             stock.group_number = wishlist_map.get(stock.id, '')
+
+#     popup_message = request.session.pop('popup_message', None)
+
+#     return render(request, 'accounts/profile.html', {
+#         'popup_message': popup_message,
+#         'groups': groups,
+#         'stock_list': stock_list,
+#         'show_all_unlisted': show_all_unlisted,
+#         'show_all_angel': show_all_angel,
+#         'search_query': search_query,
+#     })
 
 # add to wishlist from group 1,2,
 @login_required
 def add_to_group(request, stock_id):
-    stock = get_object_or_404(StockData, id=stock_id)
-    group = WishlistGroup.objects.filter(user=request.user).order_by('-created_on').first()
+    if request.method == 'POST':
+        stock = get_object_or_404(StockData, id=stock_id)
+        user = request.user
 
-    if group:
-        exists = Wishlist.objects.filter(user=request.user, stock=stock, group=group).exists()
-        if exists:
-            messages.warning(request, f"{stock.company_name} is already added in Group {group.name}.")
-        else:
-            Wishlist.objects.create(user=request.user, stock=stock, group=group)
-            messages.success(request, f"{stock.company_name} added to Group {group.name} successfully.")
-    
-    return redirect(request.META.get('HTTP_REFERER', 'accounts:profile'))
+        existing_entry = Wishlist.objects.filter(user=user, stock=stock).first()
+        if existing_entry:
+            return JsonResponse({'status': 'exists', 'stock_name': stock.company_name, 'group_name': existing_entry.group.name})
 
+        # Try to find group with space
+        groups = WishlistGroup.objects.filter(user=user).order_by('created_on')
+        for group in groups:
+            if group.wishlist_items.count() < 20:
+                Wishlist.objects.create(user=user, stock=stock, group=group)
+                return JsonResponse({'status': 'added', 'stock_name': stock.company_name, 'group_name': group.name})
+
+        # No space, create a new group
+        new_group = WishlistGroup.objects.create(user=user)
+        Wishlist.objects.create(user=user, stock=stock, group=new_group)
+        return JsonResponse({'status': 'added', 'stock_name': stock.company_name, 'group_name': new_group.name})
+
+    return JsonResponse({'status': 'error'})
+
+# unlisted_stock_marketplace/views.py
+from django.views.decorators.http import require_POST
+
+@require_POST
 @login_required
 def remove_from_group(request, wishlist_id):
     wishlist_item = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
     wishlist_item.delete()
     return redirect(request.META.get('HTTP_REFERER', 'accounts:profile'))
-
-
-

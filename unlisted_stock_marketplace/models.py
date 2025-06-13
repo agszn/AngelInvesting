@@ -508,7 +508,7 @@ class PrincipalBusinessActivity(models.Model):
         return f"{self.product_service_name} ({self.nic_code})"
     
 
-
+# unlisted_stock_marketplace/models.py
 # wishlist
 class WishlistGroup(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist_groups')
