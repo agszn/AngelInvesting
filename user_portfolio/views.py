@@ -121,6 +121,8 @@ def profile_overview(request):
     def percent(numerator, denominator):
         return round((numerator / denominator * 100), 2) if denominator else 0
 
+    stock_context = get_user_stock_context(user, request)
+
     context = {
         "portfolio_summary": portfolio_summary,
         "advisor_summary": advisor_summary,
@@ -134,18 +136,31 @@ def profile_overview(request):
         "unlisted_today_percent": percent(unlisted_today_gain, unlisted_invested),
         "advisor_overall_percent": percent(advisor_gain, advisor_invested),
         "advisor_today_percent": percent(advisor_today_gain, advisor_invested),
+        **stock_context,
     }
 
     return render(request, 'portfolio/overview.html', context)
 
+from django.contrib import messages
+
 @login_required
 def unlisted_view(request):
-    summary = get_object_or_404(UserPortfolioSummary, user=request.user)
-    return render(request, 'portfolio/unlistedOverview.html', {'summary': summary})
+    try:
+        user = request.user
+        summary = UserPortfolioSummary.objects.get(user=request.user)
+        stock_context = get_user_stock_context(user, request)
+    except UserPortfolioSummary.DoesNotExist:
+        messages.error(request, "No portfolio summary found. Please create one first.")
+        return redirect('user_portfolio:profile_overview')  # or any safe fallback
+    return render(request, 'portfolio/unlistedOverview.html', {'summary': summary, **stock_context})
+
 
 @login_required
 def angel_invest(request):
-    return render(request, 'portfolio/angelOverview.html')
+    user = request.user
+    stock_context = get_user_stock_context(user, request)
+    
+    return render(request, 'portfolio/angelOverview.html',{ **stock_context})
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
@@ -188,6 +203,8 @@ def portfolio_view(request):
     advisors = Advisor.objects.all()
     brokers = Broker.objects.all()
 
+    user = request.user
+    stock_context = get_user_stock_context(user, request)
     return render(request, 'portfolio/PortfolioList.html', {
         'holdings': page_obj,
         'advisors': advisors,
@@ -199,36 +216,59 @@ def portfolio_view(request):
             'search': search_query,
         },
         'page_obj': page_obj,
+        **stock_context
     })
-
-
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from user_portfolio.models import BuyTransaction  # Adjust if in another app
-
+from django.shortcuts import render
+from user_portfolio.models import BuyTransaction, BuyTransactionOtherAdvisor
+from user_portfolio.utils import get_user_stock_context  # Assuming this exists
 @login_required
 def buy_orders(request):
-    buy_orders = BuyTransaction.objects.filter(user=request.user).select_related('stock', 'advisor', 'broker').order_by('-timestamp')
-
-    # Optional: Search
+    user = request.user
     search_query = request.GET.get('search', '')
+
+    buy_orders = BuyTransaction.objects.filter(user=user).select_related('stock', 'advisor', 'broker').order_by('-timestamp')
     if search_query:
         buy_orders = buy_orders.filter(stock__company_name__icontains=search_query)
 
-    # Optional: Pagination
     paginator = Paginator(buy_orders, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Other advisor orders
+    buy_orders_Advisor = BuyTransactionOtherAdvisor.objects.filter(user=user).select_related('stock', 'advisor', 'broker').order_by('-timestamp')
+
+    # DEBUG: Log the count
+    # print("Other Advisor Orders:", buy_orders_Advisor.count())
+
+    stock_context = get_user_stock_context(user, request)
+
     return render(request, 'portfolio/BuyOrdersList.html', {
         'page_obj': page_obj,
         'search_query': search_query,
+        'buy_orders_Advisor': buy_orders_Advisor,
+        **stock_context
     })
 
 @login_required
 def sell_orders(request):
-    return render(request, 'portfolio/SellOrdersList.html')
+    user = request.user
+    stock_context = get_user_stock_context(user, request)
+    Sell_orders_value = SellTransaction.objects.filter(user=request.user).select_related('stock', 'advisor', 'broker').order_by('-timestamp')
+    
+    # Optional: Search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        Sell_orders_value = Sell_orders_value.filter(stock__company_name__icontains=search_query)
+        
+    # Optional: Pagination
+    paginator = Paginator(Sell_orders_value, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'portfolio/SellOrdersList.html',{'Sell_orders_value':Sell_orders_value, 'page_obj':page_obj,**stock_context})
 
 
 
@@ -333,8 +373,11 @@ def load_advisors_brokers(request):
 #     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 from .models import BuyTransaction, BuyTransactionOtherAdvisor
+from user_auth.decorators import require_complete_profile
 
 @require_POST
+@login_required
+@require_complete_profile
 def buy_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
     advisor_id = request.POST.get('advisor')
@@ -384,6 +427,8 @@ def buy_stock(request, stock_id):
 # 
 
 @require_POST
+@login_required
+@require_complete_profile
 def sell_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
 

@@ -122,7 +122,13 @@ def buyordersummeryRM(request, order_id):
 def AllbuyTransactionSummary(request):
     transactions = BuyTransaction.objects.all()
 
-    # Get filter values from request
+    # Filter: Only show users assigned to this RM
+    if request.user.user_type == 'RM':
+        users = User.objects.filter(assigned_rm=request.user)
+    else:
+        users = User.objects.all()
+
+    # Filters from request
     user_id = request.GET.get('user')
     company_name = request.GET.get('company_name')
     advisor_id = request.GET.get('advisor')
@@ -150,14 +156,19 @@ def AllbuyTransactionSummary(request):
     if timestamp:
         transactions = transactions.filter(timestamp__date=timestamp)
 
+    # Distinct dropdown lists
+    company_names = BuyTransaction.objects.values_list('stock__company_name', flat=True).distinct()
+    order_ids = BuyTransaction.objects.values_list('order_id', flat=True).distinct()
+
     context = {
         'TransactionDetails': transactions,
-        'users': User.objects.all(),
+        'users': users,
         'advisors': Advisor.objects.all(),
         'brokers': Broker.objects.all(),
+        'company_names': company_names,
+        'order_ids': order_ids,
     }
     return render(request, 'AllbuyTransactionSummary.html', context)
-
 
 def AllsellTransactionSummary(request):
     return render(request, 'AllsellTransactionSummary.html')

@@ -12,6 +12,8 @@ app_name = 'unlisted_stock_marketplace'
 urlpatterns = [
 
     path('', stock_list, name='stock_list'),
+    path('stocks/suggestions/', stock_suggestions, name='stock_suggestions'),
+    
     path('stock/<int:stock_id>/', stock_detail, name='stock_detail'),
 
     path('StockDetailedListings/', StockListingTableFormat, name='StockListingTableFormat'),

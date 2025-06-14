@@ -161,6 +161,20 @@
     margin-bottom:5px;
     margin-right: 0;
   }
+  .suggestion-box {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: 100%;
+    z-index: 10;
+  }
+  .suggestion-box div {
+    padding: 8px;
+    cursor: pointer;
+  }
+  .suggestion-box div:hover {
+    background-color: #f0f0f0;
+  }
 }
 </style>  
     <div class="hero-section3">
@@ -168,11 +182,19 @@
             <h1 class="heading">Explore Unlisted Shares</h1>
         </div>
 
-        <div class="search-bar-wrapper">
+        <!-- <div class="search-bar-wrapper">
             <form method="GET" style="">
                 <input class="search-bar-input" type="text" name="q" placeholder="Search here..." value="{{ query }}">
                 <button class="search-bar-button" type="submit">SEARCH</button>
             </form>
+        </div> -->
+
+        <div class="search-bar-wrapper" style="position: relative;">
+            <form method="GET">
+                <input id="searchInput" class="search-bar-input" type="text" name="q" placeholder="Search here..." value="{{ query }}" autocomplete="off">
+                <button class="search-bar-button" type="submit">SEARCH</button>
+            </form>
+            <div id="suggestions" class="suggestion-box" style="display: none;"></div>
         </div>
     </div>
 
@@ -274,9 +296,50 @@
          <a href="{% url 'unlisted_stock_marketplace:StockListingTableFormat' %}"><button class="viewallbtn1">View All Listings</button></a>
         </div>
 
-        <!-- below is the wishlist list confirmation -->
+        <!-- below is the start of search bar auto complete-->
 
 
 
-<!-- end of wishlist label code -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const input = document.getElementById('searchInput');
+      const suggestionsBox = document.getElementById('suggestions');
+
+      input.addEventListener('input', function () {
+          const query = this.value;
+          if (query.length === 0) {
+              suggestionsBox.style.display = 'none';
+              return;
+          }
+
+          fetch(`/stocks/suggestions/?q=${encodeURIComponent(query)}`)
+              .then(response => response.json())
+              .then(data => {
+                  suggestionsBox.innerHTML = '';
+                  if (data.length === 0) {
+                      suggestionsBox.style.display = 'none';
+                      return;
+                  }
+
+                  data.forEach(stock => {
+                      const div = document.createElement('div');
+                      div.textContent = stock.company_name;
+                      div.onclick = function () {
+                          input.value = stock.company_name;
+                          suggestionsBox.style.display = 'none';
+                      };
+                      suggestionsBox.appendChild(div);
+                  });
+                  suggestionsBox.style.display = 'block';
+              });
+      });
+
+      document.addEventListener('click', function (e) {
+          if (!document.querySelector('.search-bar-wrapper').contains(e.target)) {
+              suggestionsBox.style.display = 'none';
+          }
+      });
+  });
+</script>
+<!-- end of searchbar auto complete -->
 {% endblock %}

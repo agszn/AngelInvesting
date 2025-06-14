@@ -31,6 +31,19 @@ from .views import *
 # 
 # 
 
+from django.http import JsonResponse
+from .models import StockData
+
+def stock_suggestions(request):
+    query = request.GET.get('q', '')
+    if query:
+        stocks = StockData.objects.filter(company_name__icontains=query)[:10]
+        results = [{'id': stock.id, 'company_name': stock.company_name} for stock in stocks]
+    else:
+        results = []
+    return JsonResponse(results, safe=False)
+
+
 def stock_list(request):
     query = request.GET.get('q', '')
     stocks = StockData.objects.filter(company_name__icontains=query) if query else StockData.objects.all()
@@ -268,7 +281,7 @@ def StockListingTableFormat(request):
     })
 
 
-
+# 
 # 
 # 
 # ---------------------------------------------------------------------

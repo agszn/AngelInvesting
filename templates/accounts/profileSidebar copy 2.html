@@ -71,11 +71,11 @@
                     <form method="POST" action="{% url 'unlisted_stock_marketplace:remove_from_group' stock.wishlist_id %}" style="display: inline;">
                         {% csrf_token %}
                         <span style="background-color: #999; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px;">
-                        G - {{ stock.group_number }}
+                        Group {{ stock.group_number }}
                         </span>
                         <button type="submit" title="Remove from Group"
                         style="margin-left: 6px; background-color: #e74c3c; color: white; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; cursor: pointer;">
-                         ✖
+                        Remove ✖
                         </button>
                     </form>
 
@@ -85,7 +85,7 @@
                       data-stock-name="{{ stock.company_name }}"
                       data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}"
                       style="padding: 2px 6px; border-radius: 4px; border: none; font-size: 12px; background-color: #f7c948;">
-                      ➕
+                      Wishlist 🛒
                     </button>
                   {% endif %}
 

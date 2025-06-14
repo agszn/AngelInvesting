@@ -310,6 +310,7 @@
     }
     return cookieValue;
   }
+
   const csrftoken = getCookie('csrftoken');
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -324,6 +325,11 @@
     wishlistBtns.forEach(btn => {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
+
+        if (!isAuthenticated) {
+          redirectToLogin();
+          return;
+        }
 
         const stockId = this.dataset.stockId;
         const stockName = this.dataset.stockName;
@@ -363,7 +369,72 @@
     });
   });
 </script>
+
 <!-- wishlist end -->
+
+
+<!-- testomonials scrolls -->
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+      const track = document.getElementById('carouselTrack');
+      const cards = document.querySelectorAll('.testimonial-card');
+      const cardCount = cards.length / 2;
+      let currentPosition = 0;
+      let cardWidth = cards[0].offsetWidth + 20;
+      let animationId;
+      let isHovering = false;
+      let speed = 1;
+
+      // Clone cards for infinite effect
+      function initializeCarousel() {
+        cardWidth = cards[0].offsetWidth + 20;
+        track.style.width = `${cardWidth * cardCount * 2}px`;
+      }
+
+      function animate() {
+        if (!isHovering) {
+          currentPosition -= speed;
+
+          // Reset position when we've scrolled all original cards
+          if (currentPosition <= -cardWidth * cardCount) {
+            currentPosition = 0;
+          }
+
+          track.style.transform = `translateX(${currentPosition}px)`;
+        }
+
+        animationId = requestAnimationFrame(animate);
+      }
+
+      // Pause on hover
+      track.addEventListener('mouseenter', () => {
+        isHovering = true;
+      });
+
+      track.addEventListener('mouseleave', () => {
+        isHovering = false;
+      });
+
+      // Handle touch events for mobile
+      track.addEventListener('touchstart', () => {
+        isHovering = true;
+      });
+
+      track.addEventListener('touchend', () => {
+        isHovering = false;
+      });
+
+      // Initialize and start animation
+      window.addEventListener('resize', initializeCarousel);
+      initializeCarousel();
+      animate();
+
+      // Clean up animation on exit
+      window.addEventListener('beforeunload', () => {
+        cancelAnimationFrame(animationId);
+      });
+    });
+</script>
 </body>
 
 

@@ -496,6 +496,18 @@
     border-radius: 5px;
 }
 
+.read-btn>a {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background-color: #0E213F;
+    padding: 10px 60px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
 .faq-section {
     margin: 0px 100px 50px;
 }
@@ -553,7 +565,33 @@
     display: flex;
 }
 
+.blog-img {
+    height: 254px;
+    width: 100%;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid black;
+}
 .blog-container {
+   margin: 0px 20px;
+   
+}
+
+.blog-head {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.blog-para {
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    margin-bottom: 40px;
+}
+
+/* .blog-container {
     background-color: #0E213F;
     color: white;
     padding: 25px 25px;
@@ -574,9 +612,9 @@
     font-size: 18px;
     font-weight: 300;
     margin-bottom: 20px;
-}
+} */
 
-.read-more-heading, a {
+/* .read-more-heading, a {
     width: 40%;
     display: contents;
     font-family: "Outfit", sans-serif;
@@ -584,11 +622,11 @@
     font-weight: 300;
     margin: 0px;
     
-}
+} */
 
-.arrow {
+/* .arrow {
     font-size: 20px;
-}
+} */
 
 .carasoul {
     margin: 0px 100px 60px;

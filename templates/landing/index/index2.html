@@ -137,11 +137,9 @@
     </div>
 
 
-    <div class="accordion-overall" id="accordionOverall">
-      <!-- Left Column -->
+    <!-- <div class="accordion-overall" id="accordionOverall">
       <div class="accordionc1">
         <div class="accordion" id="accordionLeft">
-          <!-- 5 Accordions Left -->
           <div class="accordion-item">
             <h2 class="accordion-header" id="leftHeading1">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#leftCollapse1"
@@ -156,7 +154,6 @@
                 startups or private firms.</div>
             </div>
           </div>
-          <!-- Repeat for 4 more -->
           <div class="accordion-item">
             <h2 class="accordion-header" id="leftHeading2">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -213,10 +210,8 @@
         </div>
       </div>
 
-      <!-- Right Column -->
       <div class="accordionc2">
         <div class="accordion" id="accordionRight">
-          <!-- 5 Accordions Right -->
           <div class="accordion-item">
             <h2 class="accordion-header" id="rightHeading1">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#rightCollapse1"
@@ -230,7 +225,7 @@
                 unlisted securities, though with less liquidity and regulatory oversight than listed ones.</div>
             </div>
           </div>
-          <!-- Repeat for 4 more -->
+
           <div class="accordion-item">
             <h2 class="accordion-header" id="rightHeading2">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -273,44 +268,33 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     <div class="read-more">
-      <button class="read-btn">Read More</button>
+      <button class="read-btn"><a href="{%  url 'faq' %}" class="custom-btnM">Read More</a></button>
     </div>
-
     <div class="blogs">
       <div class="blog-title-section">
         <h1 class="blog-title">Blogs</h1>
       </div>
       <div class="all-blogs">
         <div class="blog-container">
-          <h1 class="blog-head">💼 How Can You Buy Unlisted Shares?</h1>
-          <p class="blog-para">Direct Purchase from Company Employees or Promoters Companies often offer ESOPs (Employee Stock Ownership
-            Plans), and employees may choose to sell their shares. Through Unlisted Share Platforms Online platforms
-            specialize in matching buyers and sellers of unlisted shares.</p>
-            <a href=""><h1 class="read-more-heading">
-              Read More <span class="arrow">→</span>
-            </h1></a>
+          <a href="{%  url 'blog' %}"><img class="blog-img" src="{%  static 'Media/images/unlistedstock-blog.jpg' %}" alt=""></a>
+          <h1 class="blog-head">📈 Benefits of Investing in Unlisted Shares</h1>
+          <p class="blog-para">Early-Stage Investment Get in early on promising companies before they go public. High Growth Potential Once listed, the valuation of such stocks can surge dramatically. </p>
         </div>
         <div class="blog-container">
-          <h1 class="blog-head">🏆 Why Are CSK Unlisted Shares in Demand?</h1>
-          <p class="blog-para">Strong Brand Value CSK is one of the most successful and beloved teams in IPL history, with multiple
-            championships and a massive fan base. Stable Management With MS Dhoni at the helm and a disciplined team
-            culture, CSK has earned a reputation for consistency both on and off the field. </p>
-            <a href=""><h1 class="read-more-heading">
-              Read More <span class="arrow">→</span>
-            </h1></a>
+          <a href="{%  url 'blog' %}"><img class="blog-img" src="{%  static 'Media/images/csk-blog.jpg' %}" alt=""></a>
+          <h1 class="blog-head">🟡 What Are CSK Unlisted Shares?</h1>
+          <p class="blog-para">Chennai Super Kings Cricket Ltd (CSKCL) is the company that owns the CSK IPL franchise. After being demerged from India Cements Ltd in 2015, CSK became a separate entity.</p>
         </div>
         <div class="blog-container">
-          <h1 class="blog-head">📊 Why Are HDFC Securities Unlisted Shares in Demand?</h1>
-          <p class="blog-para">As a subsidiary of HDFC Bank, the company benefits from strong parentage and operational stability.
-            Consistent Profits HDFC Securities has been consistently profitable with healthy margins, even during
-            volatile
-            market conditions. Digital Growth With increasing investor participation and digital adoption.</p>
-            <a href=""><h1 class="read-more-heading">
-              Read More <span class="arrow">→</span>
-            </h1></a>
+          <a href="{%  url 'blog' %}"><img class="blog-img" src="{%  static 'Media/images/hdfc-blog.jpg' %}" alt=""></a>
+          <h1 class="blog-head">🟡 What Are CSK Unlisted Shares?</h1>
+          <p class="blog-para">HDFC Securities Ltd is a leading stock broking and financial services company in India. It is a subsidiary of HDFC Bank, one of the country’s most respected and profitable private banks.</p>
         </div>
+      </div>
+      <div class="read-more">
+        <a href="{%  url 'blog' %}"><button class="read-btn">Read More</button></a>
       </div>
     </div>
 

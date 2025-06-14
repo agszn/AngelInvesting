@@ -300,7 +300,7 @@ from .forms import CustomFieldValueForm
 class CustomFieldValueInline(admin.TabularInline):
     model = CustomFieldValue
     form = CustomFieldValueForm
-    extra = 25
+    extra = 15
 
 @admin.register(CustomFieldDefinition)
 class CustomFieldDefinitionAdmin(admin.ModelAdmin):

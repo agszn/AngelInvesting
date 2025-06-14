@@ -422,6 +422,106 @@ from unlisted_stock_marketplace.models import StockData, Wishlist, WishlistGroup
 
 from django.db.models import IntegerField
 
+# @login_required
+# def view_profile(request):
+#     user = request.user
+#     profile, _ = UserProfile.objects.get_or_create(user=user)
+#     brokers = Broker.objects.all()
+#     cmr_copies = CMRCopy.objects.filter(user_profile=profile)
+
+#     form = UserProfileForm(instance=profile)
+#     cmr_form = CMRForm()
+
+#     # --- Handle POST for Profile or CMR ---
+#     if request.method == 'POST':
+#         form_type = request.POST.get('form_type')
+
+#         if form_type == 'cmr_form':
+#             cmr_id = request.POST.get('cmr_id')
+#             if cmr_id:
+#                 cmr_instance = get_object_or_404(CMRCopy, id=cmr_id, user_profile=profile)
+#                 cmr_form = CMRForm(request.POST, request.FILES, instance=cmr_instance)
+#             else:
+#                 cmr_form = CMRForm(request.POST, request.FILES)
+
+#             if cmr_form.is_valid():
+#                 cmr = cmr_form.save(commit=False)
+#                 cmr.user_profile = profile
+#                 cmr.save()
+#                 messages.success(request, "CMR record saved successfully.")
+#                 return redirect('profile')
+#             else:
+#                 messages.error(request, "Please correct the errors in the CMR form.")
+
+#         else:
+#             form = UserProfileForm(request.POST, request.FILES, instance=profile)
+#             if form.is_valid():
+#                 form.save()
+#                 messages.success(request, "Profile updated.")
+#                 return redirect('profile')
+#             else:
+#                 messages.error(request, "Please correct the errors in the profile form.")
+
+#     # --- Wishlist/Unlisted/Angel Stocks Logic ---
+#     show_all_unlisted = request.GET.get("unlisted") == "1"
+#     show_all_angel = request.GET.get("angel") == "1"
+#     group_id = request.GET.get("group")
+#     search_query = request.GET.get("search", "")
+
+#     if group_id:
+#         group = get_object_or_404(WishlistGroup, id=group_id, user=user)
+#         wishlist_stocks = Wishlist.objects.filter(group=group).values_list("stock", flat=True)
+#         stock_list = StockData.objects.filter(id__in=wishlist_stocks)
+#     elif show_all_angel:
+#         stock_list = StockData.objects.filter(stock_type__iexact="angel")
+#     else:
+#         # Default to unlisted if nothing specified
+#         stock_list = StockData.objects.filter(stock_type__iexact="unlisted")
+#         show_all_unlisted = True
+
+#     if search_query:
+#         stock_list = stock_list.filter(
+#             Q(company_name__istartswith=search_query) |
+#             Q(scrip_name__istartswith=search_query)
+#         )
+
+#     stock_list = stock_list.annotate(
+#         in_group=Exists(
+#             Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
+#         ),
+#         group_number=Subquery(
+#             Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
+#             .values('group__name')[:1]
+#         ),
+#         wishlist_id=Subquery(
+#         Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
+#         .values('id')[:1],
+#         output_field=IntegerField()
+#     )
+#     )
+
+#     groups = WishlistGroup.objects.filter(user=user)
+
+#     context = {
+#         'form': form,
+#         'cmr_form': cmr_form,
+#         'brokers': brokers,
+#         'cmr_copies': cmr_copies,
+#         'profile': profile,
+
+#         # Stock data
+#         'stock_list': stock_list,
+#         'groups': groups,
+#         'show_all_unlisted': show_all_unlisted,
+#         'show_all_angel': show_all_angel,
+#         'search_query': search_query,
+#     }
+
+#     return render(request, 'accounts/profile.html', context)
+
+
+from user_portfolio.utils import get_user_stock_context
+
 @login_required
 def view_profile(request):
     user = request.user
@@ -463,44 +563,7 @@ def view_profile(request):
                 messages.error(request, "Please correct the errors in the profile form.")
 
     # --- Wishlist/Unlisted/Angel Stocks Logic ---
-    show_all_unlisted = request.GET.get("unlisted") == "1"
-    show_all_angel = request.GET.get("angel") == "1"
-    group_id = request.GET.get("group")
-    search_query = request.GET.get("search", "")
-
-    if group_id:
-        group = get_object_or_404(WishlistGroup, id=group_id, user=user)
-        wishlist_stocks = Wishlist.objects.filter(group=group).values_list("stock", flat=True)
-        stock_list = StockData.objects.filter(id__in=wishlist_stocks)
-    elif show_all_angel:
-        stock_list = StockData.objects.filter(stock_type__iexact="angel")
-    else:
-        # Default to unlisted if nothing specified
-        stock_list = StockData.objects.filter(stock_type__iexact="unlisted")
-        show_all_unlisted = True
-
-    if search_query:
-        stock_list = stock_list.filter(
-            Q(company_name__istartswith=search_query) |
-            Q(scrip_name__istartswith=search_query)
-        )
-
-    stock_list = stock_list.annotate(
-        in_group=Exists(
-            Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
-        ),
-        group_number=Subquery(
-            Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
-            .values('group__name')[:1]
-        ),
-        wishlist_id=Subquery(
-        Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
-        .values('id')[:1],
-        output_field=IntegerField()
-    )
-    )
-
-    groups = WishlistGroup.objects.filter(user=user)
+    stock_context = get_user_stock_context(user, request)
 
     context = {
         'form': form,
@@ -510,14 +573,12 @@ def view_profile(request):
         'profile': profile,
 
         # Stock data
-        'stock_list': stock_list,
-        'groups': groups,
-        'show_all_unlisted': show_all_unlisted,
-        'show_all_angel': show_all_angel,
-        'search_query': search_query,
+        **stock_context,
     }
 
     return render(request, 'accounts/profile.html', context)
+
+
 
 @login_required
 def edit_profile(request):
