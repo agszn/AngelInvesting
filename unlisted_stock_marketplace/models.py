@@ -111,6 +111,7 @@ class StockData(models.Model):
         except CustomFieldValue.DoesNotExist:
             return None
 
+
 from decimal import Decimal, InvalidOperation
 
 

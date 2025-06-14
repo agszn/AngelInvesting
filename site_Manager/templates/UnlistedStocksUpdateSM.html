@@ -12,10 +12,10 @@
                 <button type="submit" class="view">Search</button>
             </form>
 
-            <form method="POST" action="{% url 'SM_User:upload_unlisted_stocks_excel' %}" enctype="multipart/form-data">
+            <form method="POST" action="{% url 'SM_User:upload_unlisted_stocks_excel' %}" enctype="multipart/form-data"  style="display: flex; gap: 10px;">
                 {% csrf_token %}
                 <input type="file" name="excel_file" accept=".xlsx">
-                <button type="submit">Upload</button>
+                <button type="submit"  class="view">Upload</button>
             </form>
         </div>
     </div>

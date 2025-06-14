@@ -559,3 +559,77 @@ class AdvisorTypeDeleteView(DeleteView):
     model = Advisor
     template_name = 'advisor/advisor_type_confirm_delete.html'
     success_url = reverse_lazy('SM_User:advisor-type-list')
+
+
+
+# stockData
+from django.shortcuts import render, get_object_or_404, redirect
+from .forms import StockDataForm
+from django.db.models import Q
+
+def stockdata_crud(request):
+    search_query = request.GET.get('search', '')
+    sector_filter = request.GET.get('sector', '')
+    category_filter = request.GET.get('category', '')
+    conviction_filter = request.GET.get('conviction_level', '')
+    stock_type_filter = request.GET.get('stock_type', '')
+
+    queryset = StockData.objects.all()
+
+    if search_query:
+        queryset = queryset.filter(
+            Q(company_name__icontains=search_query) |
+            Q(scrip_name__icontains=search_query) |
+            Q(isin_no__icontains=search_query)
+        )
+
+    if sector_filter:
+        queryset = queryset.filter(sector=sector_filter)
+
+    if category_filter:
+        queryset = queryset.filter(category=category_filter)
+
+    if conviction_filter:
+        queryset = queryset.filter(conviction_level=conviction_filter)
+
+    if stock_type_filter:
+        queryset = queryset.filter(stock_type=stock_type_filter)
+
+    sectors = StockData.objects.values_list('sector', flat=True).distinct()
+    categories = StockData.objects.values_list('category', flat=True).distinct()
+    conviction_levels = StockData.objects.values_list('conviction_level', flat=True).distinct()
+    stock_types = StockData.objects.values_list('stock_type', flat=True).distinct()
+
+    form = StockDataForm()
+
+    return render(request, 'StockDataTemplate.html', {
+        'stocks': queryset,
+        'form': form,
+        'filters': {
+            'search_query': search_query,
+            'sector': sector_filter,
+            'category': category_filter,
+            'conviction_level': conviction_filter,
+            'stock_type': stock_type_filter,
+        },
+        'sectors': sectors,
+        'categories': categories,
+        'conviction_levels': conviction_levels,
+        'stock_types': stock_types,
+    })
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def edit_stockdata(request, pk):
+    stock = get_object_or_404(StockData, pk=pk)
+    if request.method == 'POST':
+        form = StockDataForm(request.POST, request.FILES, instance=stock)
+        if form.is_valid():
+            form.save()
+            return redirect('SM_User:stockdata_crud')
+    else:
+        form = StockDataForm(instance=stock)
+    return render(request, 'stockData_edit_modal.html', {'form': form, 'title': 'Edit Stock'})
+

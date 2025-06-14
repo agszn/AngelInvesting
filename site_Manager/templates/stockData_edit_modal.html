@@ -1,0 +1,26 @@
+{% extends "baseStructureSM.html" %}
+{% load static %}
+{% block title %}Banner{% endblock %}
+{% block subtitle %}Homepage Banner{% endblock %}
+
+{% block SMprofile_content %}
+    <h4>StockDate Edit</h4>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row">
+    {% for field in form %}
+        <div class="col-md-6 mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div class="text-danger small">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{% url 'SM_User:stockdata_crud' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

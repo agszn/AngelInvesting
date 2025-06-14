@@ -36,6 +36,10 @@ urlpatterns = [
         path('advisor-types/', AdvisorTypeListView.as_view(), name='advisor-type-list'),
         path('advisor-types/add/', AdvisorTypeCreateView.as_view(), name='advisor-type-add'),
         path('advisor-types/delete/<int:pk>/', AdvisorTypeDeleteView.as_view(), name='advisor-type-delete'),
+        
+        path('stockdata/', stockdata_crud, name='stockdata_crud'),
+        path('<int:pk>/edit/', edit_stockdata, name='edit_stockdata'),
+
 
     ]
 
