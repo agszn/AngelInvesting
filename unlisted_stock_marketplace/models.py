@@ -111,6 +111,7 @@ class StockData(models.Model):
         except CustomFieldValue.DoesNotExist:
             return None
 
+from decimal import Decimal, InvalidOperation
 
 
 class StockDailySnapshot(models.Model):
@@ -126,21 +127,19 @@ class StockDailySnapshot(models.Model):
 
     sector = models.CharField(max_length=100, blank=True, null=True)
 
+    lot = models.PositiveIntegerField(default=100, blank=True, null=True)
     class Meta:
         unique_together = ('stock', 'date')
 
     def save(self, *args, update_stockdata=False, **kwargs):
-        # Check if this is an update or new object
         is_new = self._state.adding
 
         if not is_new:
-            # Fetch original snapshot to detect changes in share_price
             original = StockDailySnapshot.objects.filter(pk=self.pk).first()
             if original and original.share_price != self.share_price:
-                # If share_price changed today, set ltp as old share_price
                 self.ltp = original.share_price
 
-        # For new snapshots or if ltp is still None
+        # Get previous day's snapshot if ltp is missing
         if self.ltp is None:
             previous_snapshot = (
                 StockDailySnapshot.objects
@@ -150,30 +149,44 @@ class StockDailySnapshot(models.Model):
             )
             self.ltp = previous_snapshot.share_price if previous_snapshot and previous_snapshot.share_price is not None else Decimal('0.00')
 
-        # Calculate profit and profit percentage
-        if self.ltp is not None and self.share_price is not None:
+        # Ensure ltp and share_price are not None
+        try:
+            self.ltp = Decimal(self.ltp) if self.ltp is not None else Decimal('0.00')
+        except InvalidOperation:
+            self.ltp = Decimal('0.00')
+
+        try:
+            self.share_price = Decimal(self.share_price) if self.share_price is not None else Decimal('0.00')
+        except InvalidOperation:
+            self.share_price = Decimal('0.00')
+
+        # Safely calculate profit and profit %
+        try:
             self.profit = self.share_price - self.ltp
             self.profit_percentage = (self.profit / self.ltp * 100) if self.ltp != 0 else Decimal('0.00')
-        else:
+        except Exception:
             self.profit = Decimal('0.00')
             self.profit_percentage = Decimal('0.00')
 
-        # Sync sector if missing or changed
+        # Sync sector if needed
         if not self.sector:
             self.sector = self.stock.sector
         elif self.stock.sector != self.sector:
             self.stock.sector = self.sector
             self.stock.save()
 
-        # Save snapshot first
         super().save(*args, **kwargs)
 
-        # Sync calculated fields to StockData - IMPORTANT!
-        self.stock.ltp = self.ltp  # <-- use snapshot's ltp, NOT share_price
+        # Sync to StockData (ltp is yesterday's, share_price is today’s)
+        self.stock.ltp = self.ltp
         self.stock.share_price = self.share_price
         self.stock.profit = self.profit
         self.stock.profit_percentage = self.profit_percentage
-        self.stock.conviction_level = self.conviction_level
+
+        # Keep previous conviction_level if new one is missing (must be handled externally)
+        if self.conviction_level:
+            self.stock.conviction_level = self.conviction_level
+
         self.stock.save()
 
     def __str__(self):

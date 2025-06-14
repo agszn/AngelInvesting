@@ -52,6 +52,81 @@ from django.db.models import Q
 from .forms import *
 
 
+# @login_required
+# def UnlistedStocksUpdateSM(request):
+#     today = timezone.now().date()
+
+#     if request.method == "POST":
+#         stock_id = request.POST.get('stock_id')
+#         share_price_str = request.POST.get('share_price')
+#         conviction_level = request.POST.get('conviction_level')
+#         lot_size_str = request.POST.get('lot_size')
+
+#         if stock_id:
+#             stock = get_object_or_404(StockData, pk=stock_id)
+
+#             # Only update lot_size directly in StockData
+#             try:
+#                 lot_size = int(lot_size_str) if lot_size_str else None
+#                 if lot_size is not None:
+#                     stock.lot = lot_size
+#                     stock.save()
+#             except (ValueError, TypeError):
+#                 pass  # Ignore invalid lot sizes
+
+#             # Create or update the snapshot for today
+#             snapshot, _ = StockDailySnapshot.objects.get_or_create(stock=stock, date=today)
+
+#             try:
+#                 share_price = Decimal(share_price_str) if share_price_str else None
+#                 if share_price is not None:
+#                     snapshot.share_price = share_price
+#             except (InvalidOperation, TypeError):
+#                 pass
+
+#             if conviction_level:
+#                 snapshot.conviction_level = conviction_level
+
+#             snapshot.save(update_stockdata=False)
+
+#             return redirect('SM_User:UnlistedStocksUpdateSM')
+
+#     # Handle GET request
+#     query = request.GET.get('q', '').strip()
+#     all_stocks = StockData.objects.all()
+
+#     if query:
+#         all_stocks = all_stocks.filter(Q(company_name__icontains=query) | Q(sector__icontains=query))
+
+#     snapshots = []
+#     for stock in all_stocks:
+#         snapshot = StockDailySnapshot.objects.filter(stock=stock, date=today).first()
+#         if snapshot:
+#             snapshots.append(snapshot)
+#         else:
+#             # Fallback to the most recent snapshot, or a placeholder with today's date
+#             latest_snapshot = StockDailySnapshot.objects.filter(stock=stock).order_by('-date').first()
+#             snapshots.append(latest_snapshot or StockDailySnapshot(stock=stock, date=today))
+
+#     # Optional: Display CSV upload result feedback
+#     upload_result = request.session.pop('csv_update_result', None)
+
+#     return render(request, 'UnlistedStocksUpdateSM.html', {
+#         'snapshots': snapshots,
+#         'conviction_choices': CONVICTION_CHOICES,
+#         'search_query': query,
+#         'today': today,
+#         'upload_result': upload_result,
+#     })
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from decimal import Decimal, InvalidOperation
+from django.db.models import Q
+
+
 @login_required
 def UnlistedStocksUpdateSM(request):
     today = timezone.now().date()
@@ -59,23 +134,38 @@ def UnlistedStocksUpdateSM(request):
     if request.method == "POST":
         stock_id = request.POST.get('stock_id')
         share_price_str = request.POST.get('share_price')
+        ltp_str = request.POST.get('ltp')
         conviction_level = request.POST.get('conviction_level')
         lot_size_str = request.POST.get('lot_size')
+        company_name = request.POST.get('company_name')
+        sector = request.POST.get('sector')
 
         if stock_id:
             stock = get_object_or_404(StockData, pk=stock_id)
 
-            # Only update lot_size directly in StockData
+            # Update editable stock fields
+            if company_name:
+                stock.company_name = company_name
+            if sector:
+                stock.sector = sector
             try:
                 lot_size = int(lot_size_str) if lot_size_str else None
                 if lot_size is not None:
                     stock.lot = lot_size
-                    stock.save()
             except (ValueError, TypeError):
-                pass  # Ignore invalid lot sizes
+                pass
 
-            # Create or update the snapshot for today
+            stock.save()
+
+            # Create or update snapshot
             snapshot, _ = StockDailySnapshot.objects.get_or_create(stock=stock, date=today)
+
+            try:
+                ltp = Decimal(ltp_str) if ltp_str else None
+                if ltp is not None:
+                    snapshot.ltp = ltp
+            except (InvalidOperation, TypeError):
+                pass
 
             try:
                 share_price = Decimal(share_price_str) if share_price_str else None
@@ -89,12 +179,11 @@ def UnlistedStocksUpdateSM(request):
 
             snapshot.save(update_stockdata=False)
 
-            return redirect('SM_User:UnlistedStocksUpdateSM')
+        return redirect('SM_User:UnlistedStocksUpdateSM')  # ✅ RETURN FIXED
 
-    # Handle GET request
+    # --- GET request handling ---
     query = request.GET.get('q', '').strip()
     all_stocks = StockData.objects.all()
-
     if query:
         all_stocks = all_stocks.filter(Q(company_name__icontains=query) | Q(sector__icontains=query))
 
@@ -104,11 +193,9 @@ def UnlistedStocksUpdateSM(request):
         if snapshot:
             snapshots.append(snapshot)
         else:
-            # Fallback to the most recent snapshot, or a placeholder with today's date
             latest_snapshot = StockDailySnapshot.objects.filter(stock=stock).order_by('-date').first()
             snapshots.append(latest_snapshot or StockDailySnapshot(stock=stock, date=today))
 
-    # Optional: Display CSV upload result feedback
     upload_result = request.session.pop('csv_update_result', None)
 
     return render(request, 'UnlistedStocksUpdateSM.html', {
@@ -223,6 +310,156 @@ def upload_unlisted_stocks_csv(request):
     return redirect('SM_User:UnlistedStocksUpdateSM')
 
 
+# update excel
+import pandas as pd
+import re
+from decimal import Decimal, InvalidOperation
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from unlisted_stock_marketplace.models import StockData, StockDailySnapshot
+import pandas as pd
+import re
+from decimal import Decimal, InvalidOperation
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+
+import openpyxl
+import openpyxl
+from decimal import Decimal, InvalidOperation
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.contrib import messages
+
+from django.views.decorators.csrf import csrf_exempt
+
+import openpyxl
+from decimal import Decimal, InvalidOperation
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+import openpyxl
+from decimal import Decimal, InvalidOperation
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils import timezone
+
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from difflib import get_close_matches
+from decimal import Decimal, InvalidOperation
+from difflib import get_close_matches
+import openpyxl
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@csrf_exempt
+def upload_unlisted_stocks_excel(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        wb = openpyxl.load_workbook(excel_file)
+        sheet = wb.active
+
+        today = timezone.now().date()
+        yesterday = today - timezone.timedelta(days=1)
+
+        updated_ids = []
+        skipped_names = []
+        failed_updates = []
+        newly_added = []
+        fallback_ids = []  # for rows with 0 fallback
+
+        for idx, row in enumerate(sheet.iter_rows(min_row=2), start=2):
+            try:
+                company_name = str(row[1].value).strip() if row[1].value else None
+                raw_conviction = str(row[2].value).strip() if row[2].value else None
+                conviction_level = raw_conviction.title() if raw_conviction else None
+                price_today = row[3].value
+                price_yesterday = row[4].value
+                lot_size = row[5].value
+
+                if not company_name:
+                    continue
+
+                stock = StockData.objects.filter(company_name__iexact=company_name).first()
+                if not stock:
+                    stock = StockData.objects.filter(scrip_name__iexact=company_name).first()
+
+                if not stock:
+                    # Suggest similar names
+                    all_names = list(StockData.objects.values_list('company_name', flat=True)) + \
+                                list(StockData.objects.values_list('scrip_name', flat=True))
+                    close = get_close_matches(company_name, all_names, n=3, cutoff=0.8)
+                    if close:
+                        skipped_names.append(company_name)
+                        continue
+
+                    # Create new StockData
+                    stock = StockData.objects.create(
+                        company_name=company_name,
+                        scrip_name=company_name,
+                        lot=int(lot_size) if lot_size else 100
+                    )
+                    newly_added.append(company_name)
+
+                # Create/update yesterday snapshot
+                try:
+                    ltp = Decimal(price_yesterday) if price_yesterday else Decimal('0.00')
+                except (InvalidOperation, TypeError):
+                    ltp = Decimal('0.00')
+                    fallback_ids.append(str(stock.id))
+
+                StockDailySnapshot.objects.get_or_create(
+                    stock=stock,
+                    date=yesterday,
+                    defaults={'share_price': ltp}
+                )
+
+                # Create or update today's snapshot
+                snapshot, _ = StockDailySnapshot.objects.get_or_create(stock=stock, date=today)
+
+                if conviction_level:
+                    if not snapshot.conviction_level or snapshot.conviction_level != conviction_level:
+                        snapshot.conviction_level = conviction_level
+
+                try:
+                    share_price = Decimal(price_today) if price_today else Decimal('0.00')
+                except (InvalidOperation, TypeError):
+                    share_price = Decimal('0.00')
+                    fallback_ids.append(str(stock.id))
+
+                snapshot.share_price = share_price
+
+                try:
+                    lot = int(lot_size) if lot_size else 0
+                except (ValueError, TypeError):
+                    lot = 0
+                    fallback_ids.append(str(stock.id))
+
+                snapshot.lot = lot
+
+                snapshot.save()
+                updated_ids.append(str(stock.id))
+
+            except Exception as e:
+                failed_updates.append(f"{company_name}: {str(e)}")
+
+        context = {
+            'upload_result': {
+                'updated_ids': updated_ids,
+                'skipped_names': skipped_names,
+                'failed_updates': failed_updates,
+                'newly_added': newly_added,
+                'fallback_ids': fallback_ids,  # for highlighting fallback 0 values
+            }
+        }
+        return render(request, 'UnlistedStocksUpdateSM.html', context)
+
+    return redirect('SM_User:UnlistedStocksUpdateSM')
 
 
 # custom fields

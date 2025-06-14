@@ -1,0 +1,145 @@
+{% extends "baseStructureSM.html" %}
+{% block title %} Unlisted Stock Update {% endblock %}
+{% block subtitle %} Unlisted Stock Update {% endblock %}
+
+{% block SMprofile_content %}
+<div class="SMtable-head">
+    <div class="SMheading">
+        <h3>Unlisted Share List </h3>
+
+        <div class="SMsearch-bar">
+            <form method="GET" style="display: flex; gap: 10px;">
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name or industry..." />
+                <button type="submit" class="view">Search</button>
+            </form>
+            <!-- <form method="GET" action="{% url 'SM_User:download_unlisted_stocks_csv' %}" style="display: flex; gap: 10px;">
+                <button type="submit" class="view">⬇️</button>
+            </form> -->
+
+            <!-- <form method="POST" action="{% url 'SM_User:upload_unlisted_stocks_csv' %}" enctype="multipart/form-data" style="display: flex; gap: 10px;">
+                {% csrf_token %}
+                <input type="file" name="csv_file" accept=".csv" required />
+                <button type="submit" class="view">⬆️</button>
+            </form> -->
+
+            <form method="POST" action="{% url 'SM_User:upload_unlisted_stocks_excel' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="excel_file" accept=".xlsx">
+            <button type="submit">Upload</button>
+            </form>
+
+        </div>
+    </div>
+
+    {% if upload_result %}
+        <div class="alert alert-info">
+            ✅ {{ upload_result.updated_ids|length }} stock{{ upload_result.updated_ids|length|pluralize }} updated.<br>
+
+            {% if upload_result.skipped_names %}
+                ⚠️ Skipped (Not Found): {{ upload_result.skipped_names|length }} → 
+                <span style="color:#b10000;">{{ upload_result.skipped_names|join:", " }}</span><br>
+            {% endif %}
+
+            {% if upload_result.failed_updates %}
+                ❌ Failed Updates:
+                <ul style="margin-top: 5px; color: #b10000; padding-left: 20px;">
+                    {% for failure in upload_result.failed_updates %}
+                        <li>{{ failure }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
+
+
+    <div class="SMtable-scroll-container">
+        <table class="SMbuyorder-table">
+            <thead>
+                    {% if upload_result.pending_additions %}
+                        <div class="alert alert-warning">
+                            ⚠️ The following stocks did not match any existing company_name or scrip_name.<br>
+                            Please confirm if you want to add them manually:
+                            <ul>
+                            {% for stock in upload_result.pending_additions %}
+                                <li>
+                                    {{ stock.company_name }} – Price: {{ stock.price }}, Conviction: {{ stock.conviction_level }}, Lot: {{ stock.lot }}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+
+                <tr>
+                    <th>Sl.no</th>
+                    <th>Company Name</th>
+                    <th>Industry</th>
+                    <th>Conviction Level</th>
+                    <th>Current Price</th>
+                    <th>Last Price</th>
+                    <th>Lot Size</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for snapshot in snapshots %}
+                {% if snapshot.stock %}
+                    {% with snapshot.stock.id|stringformat:"s" as sid %}
+                        {% with upload_result.updated_ids as updated_ids %}
+                            <tr class="{% if sid in updated_ids %}row-success{% endif %}">
+                        {% endwith %}
+                    {% endwith %}
+                        <form method="POST" action="{% url 'SM_User:UnlistedStocksUpdateSM' %}">
+                            {% csrf_token %}
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ snapshot.stock.company_name }}</td>
+                            <td>{{ snapshot.stock.sector }}</td>
+
+                            <td>
+                                <select name="conviction_level" required>
+                                    {% for key, label in conviction_choices %}
+                                        <option value="{{ key }}" {% if snapshot.conviction_level == key %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                            <td>
+                                <input type="number" step="0.01" name="share_price"
+                                       value="{{ snapshot.share_price|default_if_none:'' }}" required />
+                            </td>
+
+                            <td>{{ snapshot.ltp|default:"-" }}</td>
+
+                            <td>
+                                <input type="number" name="lot_size"
+                                       value="{{ snapshot.stock.lot|default_if_none:'' }}" required />
+                            </td>
+
+                            <input type="hidden" name="stock_id" value="{{ snapshot.stock.id }}" />
+
+                            <td><button type="submit" class="view">Save</button></td>
+                        </form>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="8" style="text-align:center; color: gray;">No snapshot available</td></tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .row-success {
+        background-color: #e0f9e0 !important;
+    }
+    .alert-info {
+        background-color: #e6f4ff;
+        padding: 10px;
+        margin: 10px 0;
+        border-left: 4px solid #3399ff;
+    }
+</style>
+{% endblock %}

@@ -17,6 +17,8 @@ urlpatterns = [
 
         path('UnlistedStocksUpdateSM/', UnlistedStocksUpdateSM, name='UnlistedStocksUpdateSM'),
         
+        path('upload_unlisted_stocks_excel/', upload_unlisted_stocks_excel, name='upload_unlisted_stocks_excel'),
+        
         path('unlisted-stocks/download-csv/', download_unlisted_stocks_csv, name='download_unlisted_stocks_csv'),
 
         path('unlisted-stocks/upload-csv/', upload_unlisted_stocks_csv, name='upload_unlisted_stocks_csv'),
