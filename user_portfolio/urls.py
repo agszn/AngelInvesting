@@ -19,6 +19,7 @@ urlpatterns = [
     
     # user_portfolio.urls
     path('buy_stock/<int:stock_id>/', buy_stock, name='buy_stock'),
+    
     path('sell_stock/<int:stock_id>/', sell_stock, name='sell_stock'),
     
     path('load-advisors-brokers/', load_advisors_brokers, name='load_advisors_brokers'),

@@ -425,10 +425,18 @@ def buy_stock(request, stock_id):
 # ------------------------------------------------------------------
 # 
 # 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from decimal import Decimal
+from .models import StockData, SellTransaction, Advisor, Broker
+from decimal import Decimal, InvalidOperation
+
+from decimal import Decimal, InvalidOperation
 
 @require_POST
 @login_required
-@require_complete_profile
 def sell_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
 
@@ -437,21 +445,34 @@ def sell_stock(request, stock_id):
         broker_id = request.POST.get('broker')
         quantity = int(request.POST.get('quantity'))
 
+        # Get the selling price safely
+        selling_price_str = request.POST.get('selling_price')
+        if selling_price_str:
+            try:
+                selling_price = Decimal(selling_price_str)
+            except InvalidOperation:
+                raise ValueError("Invalid selling price format.")
+        elif stock.share_price is not None:
+            selling_price = stock.share_price
+        else:
+            raise ValueError("Selling price is required and stock price is not available.")
+
         advisor = get_object_or_404(Advisor, id=advisor_id)
         broker = get_object_or_404(Broker, id=broker_id)
 
         SellTransaction.objects.create(
-            user=request.user,  
+            user=request.user,
             advisor=advisor,
             broker=broker,
             stock=stock,
             quantity=quantity,
+            selling_price=selling_price,
         )
 
-        messages.success(request, f"Sell order placed for {stock.company_name}  {quantity}")
+        messages.success(request, f"Sell order placed for {stock.company_name} ({quantity} shares at ₹{selling_price})")
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         messages.error(request, f"Failed to place sell order: {str(e)}")
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
-
-

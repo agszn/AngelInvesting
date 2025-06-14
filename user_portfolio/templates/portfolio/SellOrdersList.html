@@ -23,9 +23,9 @@
               <th style="padding: 10px;">Advisor</th>
               <th style="padding: 10px;">Broker</th>
               <th style="padding: 10px;">Quantity</th>
-              <th style="padding: 10px;">Buy Price</th>
+              <!-- <th style="padding: 10px;">Buy Price</th>
               <th style="padding: 10px;">Total Amt</th>
-              <th style="padding: 10px;">Order Type</th>
+              <th style="padding: 10px;">Order Type</th> -->
               <th style="padding: 10px;">Status</th>
             </tr>
           </thead>
@@ -35,7 +35,7 @@
               <td style="padding: 10px;">{{ order.stock.company_name }}</td>
               <td>
                   {% if order.advisor %}
-                    {{ order.advisor.name }}
+                    {{ order.advisor.advisor_type }}
                   {% else %}
                     Others
                   {% endif %}
@@ -48,9 +48,9 @@
                   {% endif %}
               </td>
               <td>{{ order.quantity }}</td>
-              <td>{{ order.price_per_share }}</td>
+              <!-- <td>{{ order.price_per_share }}</td>
               <td>{{ order.total_amount }}</td>
-              <td>{{ order.order_type|title }}</td>
+              <td>{{ order.order_type|title }}</td> -->
               <td style="color:
                   {% if order.status == 'Completed' %}green
                   {% elif order.status == 'Processing' %}orange

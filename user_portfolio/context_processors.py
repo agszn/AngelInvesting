@@ -10,3 +10,15 @@ def buy_sell_context(request):
         'advisors_json': json.dumps(advisors),
         'brokers_json': json.dumps(brokers),
     }
+
+from django.shortcuts import render, get_object_or_404, redirect
+from unlisted_stock_marketplace.models import *
+
+def stock_detail(request, stock_id):
+    stock = get_object_or_404(StockData, id=stock_id)
+    context = {
+        'stock': stock,
+        'advisors': Advisor.objects.all(),
+        'brokers': Broker.objects.all(),
+    }
+    return render(request, 'user_portfolio/sell_stock.html', context)
