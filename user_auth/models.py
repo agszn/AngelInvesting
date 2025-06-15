@@ -85,7 +85,7 @@ class UserProfile(models.Model):
     photo = models.ImageField(upload_to='user_photos/', blank=True, null=True)
     
     # KYC Information
-    pan_number = models.CharField(max_length=20, validators=[RegexValidator(r'^[A-Z]{4,5}[0-9]{3,4}[A-Z]$', 'Enter valid PAN number')], blank=True, null=True)
+    pan_number = models.CharField(max_length=20, validators=[RegexValidator(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}', 'Enter valid PAN number')], blank=True, null=True)
     pan_card_photo = models.ImageField(upload_to='pan_cards/', blank=True, null=True)
     adhar_number = models.CharField(max_length=12, validators=[RegexValidator(r'^\d{12}$', 'Enter valid 12-digit Aadhaar number')], blank=True, null=True)
     adhar_card_photo = models.ImageField(upload_to='adhar_cards/', blank=True, null=True)
