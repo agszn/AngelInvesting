@@ -119,16 +119,77 @@ def buyordersummeryRM(request, order_id):
     }
     return render(request, 'buyordersummeryRM.html', context)
 
+# displays of all users
+# def AllbuyTransactionSummary(request):
+#     transactions = BuyTransaction.objects.all()
+
+#     # Filter: Only show users assigned to this RM
+#     if request.user.user_type == 'RM':
+#         users = User.objects.filter(assigned_rm=request.user)
+#     else:
+#         users = User.objects.all()
+
+#     # Filters from request
+#     user_id = request.GET.get('user')
+#     company_name = request.GET.get('company_name')
+#     advisor_id = request.GET.get('advisor')
+#     broker_id = request.GET.get('broker')
+#     order_type = request.GET.get('order_type')
+#     status = request.GET.get('status')
+#     order_id = request.GET.get('order_id')
+#     timestamp = request.GET.get('timestamp')
+
+#     # Apply filters
+#     if user_id:
+#         transactions = transactions.filter(user__id=user_id)
+#     if company_name:
+#         transactions = transactions.filter(stock__company_name__icontains=company_name)
+#     if advisor_id:
+#         transactions = transactions.filter(advisor__id=advisor_id)
+#     if broker_id:
+#         transactions = transactions.filter(broker__id=broker_id)
+#     if order_type:
+#         transactions = transactions.filter(order_type=order_type)
+#     if status:
+#         transactions = transactions.filter(status=status)
+#     if order_id:
+#         transactions = transactions.filter(order_id__icontains=order_id)
+#     if timestamp:
+#         transactions = transactions.filter(timestamp__date=timestamp)
+
+#     # Distinct dropdown lists
+#     company_names = BuyTransaction.objects.values_list('stock__company_name', flat=True).distinct()
+#     order_ids = BuyTransaction.objects.values_list('order_id', flat=True).distinct()
+
+#     context = {
+#         'TransactionDetails': transactions,
+#         'users': users,
+#         'advisors': Advisor.objects.all(),
+#         'brokers': Broker.objects.all(),
+#         'company_names': company_names,
+#         'order_ids': order_ids,
+#     }
+#     return render(request, 'AllbuyTransactionSummary.html', context)
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from user_portfolio.models import BuyTransaction
+from user_auth.models import CustomUser
+from site_Manager.models import Advisor, Broker
+
+@login_required
 def AllbuyTransactionSummary(request):
-    transactions = BuyTransaction.objects.all()
-
-    # Filter: Only show users assigned to this RM
+    # Step 1: Restrict users to those assigned to the logged-in RM
     if request.user.user_type == 'RM':
-        users = User.objects.filter(assigned_rm=request.user)
+        users = CustomUser.objects.filter(assigned_rm=request.user)
     else:
-        users = User.objects.all()
+        users = CustomUser.objects.all()
 
-    # Filters from request
+    # Step 2: Restrict transactions to only those users
+    transactions = BuyTransaction.objects.filter(user__in=users)
+
+    # Step 3: Filters from request
     user_id = request.GET.get('user')
     company_name = request.GET.get('company_name')
     advisor_id = request.GET.get('advisor')
@@ -138,7 +199,6 @@ def AllbuyTransactionSummary(request):
     order_id = request.GET.get('order_id')
     timestamp = request.GET.get('timestamp')
 
-    # Apply filters
     if user_id:
         transactions = transactions.filter(user__id=user_id)
     if company_name:
@@ -156,9 +216,9 @@ def AllbuyTransactionSummary(request):
     if timestamp:
         transactions = transactions.filter(timestamp__date=timestamp)
 
-    # Distinct dropdown lists
-    company_names = BuyTransaction.objects.values_list('stock__company_name', flat=True).distinct()
-    order_ids = BuyTransaction.objects.values_list('order_id', flat=True).distinct()
+    # Step 4: Limit dropdowns to assigned users' data
+    company_names = transactions.values_list('stock__company_name', flat=True).distinct()
+    order_ids = transactions.values_list('order_id', flat=True).distinct()
 
     context = {
         'TransactionDetails': transactions,
@@ -170,8 +230,67 @@ def AllbuyTransactionSummary(request):
     }
     return render(request, 'AllbuyTransactionSummary.html', context)
 
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.utils import timezone
+from user_auth.models import CustomUser
+from user_portfolio.models import SellTransaction
+from site_Manager.models import Advisor, Broker
+
+@login_required
 def AllsellTransactionSummary(request):
-    return render(request, 'AllsellTransactionSummary.html')
+    # Step 1: Restrict users to those assigned to the logged-in RM
+    if request.user.user_type == 'RM':
+        users = CustomUser.objects.filter(assigned_rm=request.user)
+    else:
+        users = CustomUser.objects.all()
+
+    # Step 2: Restrict transactions to only those users
+    transactions = SellTransaction.objects.filter(user__in=users)
+
+    # Step 3: Filters from request
+    user_id = request.GET.get('user')
+    company_name = request.GET.get('company_name')
+    advisor_id = request.GET.get('advisor')
+    broker_id = request.GET.get('broker')
+    order_type = request.GET.get('order_type')
+    status = request.GET.get('status')
+    order_id = request.GET.get('order_id')
+    timestamp = request.GET.get('timestamp')
+
+    if user_id:
+        transactions = transactions.filter(user__id=user_id)
+    if company_name:
+        transactions = transactions.filter(stock__company_name__icontains=company_name)
+    if advisor_id:
+        transactions = transactions.filter(advisor__id=advisor_id)
+    if broker_id:
+        transactions = transactions.filter(broker__id=broker_id)
+    if order_type:
+        transactions = transactions.filter(order_type=order_type)
+    if status:
+        transactions = transactions.filter(status=status)
+    if order_id:
+        transactions = transactions.filter(order_id__icontains=order_id)
+    if timestamp:
+        transactions = transactions.filter(timestamp__date=timestamp)
+
+    # Step 4: Limit dropdowns to assigned users' data
+    company_names = transactions.values_list('stock__company_name', flat=True).distinct()
+    order_ids = transactions.values_list('order_id', flat=True).distinct()
+
+    context = {
+        'TransactionDetails': transactions,
+        'users': users,
+        'advisors': Advisor.objects.all(),
+        'brokers': Broker.objects.all(),
+        'company_names': company_names,
+        'order_ids': order_ids,
+    }
+
+    return render(request, 'AllsellTransactionSummary.html', context)
 
 from django.views.decorators.csrf import csrf_exempt
 from .models import RMPaymentRecord
@@ -267,31 +386,91 @@ from django.shortcuts import render
 from datetime import timedelta
 from .models import RMUserView, RMPaymentRecord
 
+# @login_required
+# def dashboardRM(request):
+#     today = timezone.now().date()
+#     ten_days_ago = today - timedelta(days=10)
+#     start_of_month = today.replace(day=1)
+
+#     # Transaction Metrics
+#     total_transactions = RMUserView.objects.count()
+#     total_buys = RMUserView.objects.filter(transaction_type='buy').count()
+#     total_sells = RMUserView.objects.filter(transaction_type='sell').count()
+
+#     # Total invested amount (sum of all buy total_amounts)
+#     total_invested = RMUserView.objects.filter(transaction_type='buy').aggregate(
+#         total=Sum('total_amount'))['total'] or 0
+
+#     # Payment Aggregates
+#     total_collected_today = RMPaymentRecord.objects.filter(date=today).aggregate(
+#         total=Sum('amount'))['total'] or 0
+#     total_collected_10_days = RMPaymentRecord.objects.filter(date__gte=ten_days_ago).aggregate(
+#         total=Sum('amount'))['total'] or 0
+#     total_collected_month = RMPaymentRecord.objects.filter(date__gte=start_of_month).aggregate(
+#         total=Sum('amount'))['total'] or 0
+
+#     # Graph Data (date vs amount)
+#     payments_by_day = RMPaymentRecord.objects.filter(
+#         date__gte=ten_days_ago
+#     ).values('date').annotate(
+#         total_amount=Sum('amount')
+#     ).order_by('date')
+
+#     chart_labels = [entry['date'].strftime('%d-%b') for entry in payments_by_day]
+#     chart_data = [float(entry['total_amount']) for entry in payments_by_day]
+
+#     context = {
+#         'total_transactions': total_transactions,
+#         'total_buys': total_buys,
+#         'total_sells': total_sells,
+#         'total_invested': total_invested,
+#         'total_collected_today': total_collected_today,
+#         'total_collected_10_days': total_collected_10_days,
+#         'total_collected_month': total_collected_month,
+#         'chart_labels': chart_labels,
+#         'chart_data': chart_data,
+#     }
+
+#     return render(request, 'dashboardRM.html', context)
+
+
+from django.db.models import Sum
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from RM_User.models import RMUserView, RMPaymentRecord
+
 @login_required
 def dashboardRM(request):
+    user = request.user
     today = timezone.now().date()
     ten_days_ago = today - timedelta(days=10)
     start_of_month = today.replace(day=1)
 
-    # Transaction Metrics
-    total_transactions = RMUserView.objects.count()
-    total_buys = RMUserView.objects.filter(transaction_type='buy').count()
-    total_sells = RMUserView.objects.filter(transaction_type='sell').count()
+    # Transaction Metrics (filtered by assigned_rm)
+    user_views = RMUserView.objects.filter(assigned_rm=user)
+    total_transactions = user_views.count()
+    total_buys = user_views.filter(transaction_type='buy').count()
+    total_sells = user_views.filter(transaction_type='sell').count()
 
     # Total invested amount (sum of all buy total_amounts)
-    total_invested = RMUserView.objects.filter(transaction_type='buy').aggregate(
+    total_invested = user_views.filter(transaction_type='buy').aggregate(
         total=Sum('total_amount'))['total'] or 0
 
+    # Related payment records for this RM only
+    rm_payment_records = RMPaymentRecord.objects.filter(rm_user_view__assigned_rm=user)
+
     # Payment Aggregates
-    total_collected_today = RMPaymentRecord.objects.filter(date=today).aggregate(
+    total_collected_today = rm_payment_records.filter(date=today).aggregate(
         total=Sum('amount'))['total'] or 0
-    total_collected_10_days = RMPaymentRecord.objects.filter(date__gte=ten_days_ago).aggregate(
+    total_collected_10_days = rm_payment_records.filter(date__gte=ten_days_ago).aggregate(
         total=Sum('amount'))['total'] or 0
-    total_collected_month = RMPaymentRecord.objects.filter(date__gte=start_of_month).aggregate(
+    total_collected_month = rm_payment_records.filter(date__gte=start_of_month).aggregate(
         total=Sum('amount'))['total'] or 0
 
     # Graph Data (date vs amount)
-    payments_by_day = RMPaymentRecord.objects.filter(
+    payments_by_day = rm_payment_records.filter(
         date__gte=ten_days_ago
     ).values('date').annotate(
         total_amount=Sum('amount')
@@ -314,21 +493,57 @@ def dashboardRM(request):
 
     return render(request, 'dashboardRM.html', context)
 
+
 @login_required
 def ordersRM(request):
     return render(request, 'ordersRM.html')
 
 @login_required
 def sellorderRM(request):
-    return render(request, 'sellorderRM.html')
+    rm_user = request.user
+    assigned_users = CustomUser.objects.filter(assigned_rm=rm_user)
+    sell_orders = SellTransaction.objects.filter(user__in=assigned_users).order_by('-timestamp')
+    return render(request, 'sellorderRM.html', {'sell_orders': sell_orders})
 
 @login_required
 def ShareListRM(request):
     return render(request, 'ShareListRM.html')
 
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from user_portfolio.models import SellTransaction
+from user_auth.models import UserProfile, CMRCopy, BankAccount
+
 @login_required
 def selldersummeryRM(request):
-    return render(request, 'selldersummeryRM.html')
+    order_id = request.GET.get('order_id')
+
+    if not order_id:
+        return render(request, 'selldersummeryRM.html', {'order': None})
+
+    # Get the sell transaction
+    order = get_object_or_404(SellTransaction, order_id=order_id)
+
+    # Get the user's profile
+    try:
+        profile = order.user.profile
+    except UserProfile.DoesNotExist:
+        profile = None
+
+    # Get the CMR copy for this user (assuming latest or first)
+    cmr = CMRCopy.objects.filter(user_profile=profile).first() if profile else None
+
+    # Get all bank accounts for this user
+    bank_accounts = BankAccount.objects.filter(user_profile=profile) if profile else None
+
+    context = {
+        'order': order,
+        'cmr': cmr,
+        'bank_accounts': bank_accounts,
+    }
+
+    return render(request, 'selldersummeryRM.html', context)
+
 
 @login_required
 def angelInvestRM(request):

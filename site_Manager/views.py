@@ -356,6 +356,120 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
+# @login_required
+# @csrf_exempt
+# def upload_unlisted_stocks_excel(request):
+#     if request.method == 'POST' and request.FILES.get('excel_file'):
+#         excel_file = request.FILES['excel_file']
+#         wb = openpyxl.load_workbook(excel_file)
+#         sheet = wb.active
+
+#         today = timezone.now().date()
+#         yesterday = today - timezone.timedelta(days=1)
+
+#         updated_ids = []
+#         skipped_names = []
+#         failed_updates = []
+#         newly_added = []
+#         fallback_ids = []  # for rows with 0 fallback
+
+#         for idx, row in enumerate(sheet.iter_rows(min_row=2), start=2):
+#             try:
+#                 company_name = str(row[1].value).strip() if row[1].value else None
+#                 raw_conviction = str(row[2].value).strip() if row[2].value else None
+#                 conviction_level = raw_conviction.title() if raw_conviction else None
+#                 price_today = row[3].value
+#                 price_yesterday = row[4].value
+#                 lot_size = row[5].value
+
+#                 if not company_name:
+#                     continue
+
+#                 stock = StockData.objects.filter(company_name__iexact=company_name).first()
+#                 if not stock:
+#                     stock = StockData.objects.filter(scrip_name__iexact=company_name).first()
+
+#                 if not stock:
+#                     # Suggest similar names
+#                     all_names = list(StockData.objects.values_list('company_name', flat=True)) + \
+#                                 list(StockData.objects.values_list('scrip_name', flat=True))
+#                     close = get_close_matches(company_name, all_names, n=3, cutoff=0.8)
+#                     if close:
+#                         skipped_names.append(company_name)
+#                         continue
+
+#                     # Create new StockData
+#                     stock = StockData.objects.create(
+#                         company_name=company_name,
+#                         scrip_name=company_name,
+#                         lot=int(lot_size) if lot_size else 100
+#                     )
+#                     newly_added.append(company_name)
+
+#                 # Create/update yesterday snapshot
+#                 try:
+#                     ltp = Decimal(price_yesterday) if price_yesterday else Decimal('0.00')
+#                 except (InvalidOperation, TypeError):
+#                     ltp = Decimal('0.00')
+#                     fallback_ids.append(str(stock.id))
+
+#                 StockDailySnapshot.objects.get_or_create(
+#                     stock=stock,
+#                     date=yesterday,
+#                     defaults={'share_price': ltp}
+#                 )
+
+#                 # Create or update today's snapshot
+#                 snapshot, _ = StockDailySnapshot.objects.get_or_create(stock=stock, date=today)
+
+#                 if conviction_level:
+#                     if not snapshot.conviction_level or snapshot.conviction_level != conviction_level:
+#                         snapshot.conviction_level = conviction_level
+
+#                 try:
+#                     share_price = Decimal(price_today) if price_today else Decimal('0.00')
+#                 except (InvalidOperation, TypeError):
+#                     share_price = Decimal('0.00')
+#                     fallback_ids.append(str(stock.id))
+
+#                 snapshot.share_price = share_price
+
+#                 try:
+#                     lot = int(lot_size) if lot_size else 0
+#                 except (ValueError, TypeError):
+#                     lot = 0
+#                     fallback_ids.append(str(stock.id))
+
+#                 snapshot.lot = lot
+
+#                 snapshot.save()
+#                 updated_ids.append(str(stock.id))
+
+#             except Exception as e:
+#                 failed_updates.append(f"{company_name}: {str(e)}")
+
+#         context = {
+#             'upload_result': {
+#                 'updated_ids': updated_ids,
+#                 'skipped_names': skipped_names,
+#                 'failed_updates': failed_updates,
+#                 'newly_added': newly_added,
+#                 'fallback_ids': fallback_ids,  # for highlighting fallback 0 values
+#             }
+#         }
+#         return render(request, 'UnlistedStocksUpdateSM.html', context)
+
+#     return redirect('SM_User:UnlistedStocksUpdateSM')
+
+
+from decimal import Decimal, InvalidOperation
+from difflib import get_close_matches
+import openpyxl
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
 @login_required
 @csrf_exempt
 def upload_unlisted_stocks_excel(request):
@@ -371,15 +485,15 @@ def upload_unlisted_stocks_excel(request):
         skipped_names = []
         failed_updates = []
         newly_added = []
-        fallback_ids = []  # for rows with 0 fallback
+        fallback_ids = []
 
         for idx, row in enumerate(sheet.iter_rows(min_row=2), start=2):
             try:
                 company_name = str(row[1].value).strip() if row[1].value else None
                 raw_conviction = str(row[2].value).strip() if row[2].value else None
                 conviction_level = raw_conviction.title() if raw_conviction else None
-                price_today = row[3].value
-                price_yesterday = row[4].value
+                price_today = row[3].value  # 13 June (today)
+                price_yesterday = row[4].value  # 12 June (yesterday)
                 lot_size = row[5].value
 
                 if not company_name:
@@ -390,7 +504,6 @@ def upload_unlisted_stocks_excel(request):
                     stock = StockData.objects.filter(scrip_name__iexact=company_name).first()
 
                 if not stock:
-                    # Suggest similar names
                     all_names = list(StockData.objects.values_list('company_name', flat=True)) + \
                                 list(StockData.objects.values_list('scrip_name', flat=True))
                     close = get_close_matches(company_name, all_names, n=3, cutoff=0.8)
@@ -398,7 +511,6 @@ def upload_unlisted_stocks_excel(request):
                         skipped_names.append(company_name)
                         continue
 
-                    # Create new StockData
                     stock = StockData.objects.create(
                         company_name=company_name,
                         scrip_name=company_name,
@@ -406,25 +518,28 @@ def upload_unlisted_stocks_excel(request):
                     )
                     newly_added.append(company_name)
 
-                # Create/update yesterday snapshot
+                # Handle yesterday's snapshot
                 try:
                     ltp = Decimal(price_yesterday) if price_yesterday else Decimal('0.00')
                 except (InvalidOperation, TypeError):
                     ltp = Decimal('0.00')
                     fallback_ids.append(str(stock.id))
 
-                StockDailySnapshot.objects.get_or_create(
+                snapshot_yesterday, _ = StockDailySnapshot.objects.get_or_create(
                     stock=stock,
-                    date=yesterday,
-                    defaults={'share_price': ltp}
+                    date=yesterday
+                )
+                snapshot_yesterday.ltp = ltp
+                snapshot_yesterday.save()
+
+                # Handle today's snapshot
+                snapshot, _ = StockDailySnapshot.objects.get_or_create(
+                    stock=stock,
+                    date=today
                 )
 
-                # Create or update today's snapshot
-                snapshot, _ = StockDailySnapshot.objects.get_or_create(stock=stock, date=today)
-
                 if conviction_level:
-                    if not snapshot.conviction_level or snapshot.conviction_level != conviction_level:
-                        snapshot.conviction_level = conviction_level
+                    snapshot.conviction_level = conviction_level
 
                 try:
                     share_price = Decimal(price_today) if price_today else Decimal('0.00')
@@ -441,12 +556,12 @@ def upload_unlisted_stocks_excel(request):
                     fallback_ids.append(str(stock.id))
 
                 snapshot.lot = lot
-
                 snapshot.save()
+
                 updated_ids.append(str(stock.id))
 
             except Exception as e:
-                failed_updates.append(f"{company_name}: {str(e)}")
+                failed_updates.append(f"{company_name or f'Row {idx}'}: {str(e)}")
 
         context = {
             'upload_result': {
@@ -454,13 +569,12 @@ def upload_unlisted_stocks_excel(request):
                 'skipped_names': skipped_names,
                 'failed_updates': failed_updates,
                 'newly_added': newly_added,
-                'fallback_ids': fallback_ids,  # for highlighting fallback 0 values
+                'fallback_ids': fallback_ids,
             }
         }
         return render(request, 'UnlistedStocksUpdateSM.html', context)
 
     return redirect('SM_User:UnlistedStocksUpdateSM')
-
 
 # custom fields
 from django.shortcuts import render, get_object_or_404, redirect
