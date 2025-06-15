@@ -6,7 +6,7 @@ from django.db import models
 
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
-
+from django.core.validators import RegexValidator
 
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = [
@@ -21,7 +21,7 @@ class CustomUser(AbstractUser):
         ('Other', 'Other'),           
     ]
 
-    phone_number = models.CharField(max_length=15, blank=True, null=True, unique=True)
+    phone_number = models.CharField(max_length=12, validators=[RegexValidator(r'^\+?\d{10,12}$', 'Enter valid phone number')], unique=True, blank=True, null=True)
     email = models.EmailField(unique=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
     user_type = models.CharField(max_length=5, choices=USER_TYPE_CHOICES, default='DF')
@@ -65,7 +65,7 @@ ACCOUNT_STATUS_CHOICES = [
 
 from django.db import models
 from django.conf import settings
-from django.core.validators import RegexValidator
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(
@@ -76,11 +76,11 @@ class UserProfile(models.Model):
     middle_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    whatsapp_number = models.CharField(max_length=10, validators=[RegexValidator(r'^\+?\d{10,15}$', 'Enter valid phone number')],
+    whatsapp_number = models.CharField(max_length=12, validators=[RegexValidator(r'^\+?\d{10,12}$', 'Enter valid phone number')],
     blank=True, null=True)
 
 
-    mobile_number = models.CharField(max_length=10, validators=[RegexValidator(r'^\+?\d{10,15}$', 'Enter valid phone number')],
+    mobile_number = models.CharField(max_length=12, validators=[RegexValidator(r'^\+?\d{10,12}$', 'Enter valid phone number')],
     blank=True, null=True)
     photo = models.ImageField(upload_to='user_photos/', blank=True, null=True)
     
