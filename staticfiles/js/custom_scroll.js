@@ -5,4 +5,15 @@ window.addEventListener('load', function () {
             element.scrollIntoView({ behavior: 'smooth' });
         }
     }
+
+    const checkbox = document.getElementById('toggleDescriptionCheckbox');
+    const descriptionField = document.querySelector('.description-field');
+
+    if (checkbox && descriptionField) {
+        checkbox.addEventListener('change', function () {
+            descriptionField.parentElement.style.display = this.checked ? 'block' : 'none';
+        });
+
+        descriptionField.parentElement.style.display = 'none';
+    }
 });

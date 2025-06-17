@@ -204,74 +204,7 @@ from django.contrib import admin
 from django import forms
 from .models import CustomFieldDefinition, CustomFieldValue, StockPeriod, TableHeader
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Custom form for the CustomFieldValue model
-# class CustomFieldValueForm(forms.ModelForm):
-#     class Meta:
-#         model = CustomFieldValue
-#         fields = '__all__'
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-
-#         field_def = self.initial.get('field_definition') or \
-#                     (self.instance.field_definition if self.instance.pk else None)
-
-#         if field_def:
-#             field_type = getattr(field_def, 'field_type', None)
-#             if field_type:
-#                 for ft in ['int', 'dec', 'char', 'date']:
-#                     field_name = f"{ft}_value"
-#                     if ft != field_type:
-#                         self.fields[field_name].widget = forms.HiddenInput()
-#             else:
-#                 for ft in ['int', 'dec', 'char', 'date']:
-#                     self.fields[f"{ft}_value"].widget = forms.HiddenInput()
-
-
-# from django.contrib import admin
-# from .models import CustomFieldValue
-
-# @admin.register(CustomFieldValue)
-# class CustomFieldValueAdmin(admin.ModelAdmin):
-#     list_display = ['name', 'field_definition', 'display_value', 'parent_field_value']
-#     list_filter = ['field_definition', 'table_header']
-#     search_fields = ['name', 'char_value']
-
-#     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-#         if db_field.name == "parent_field_value":
-#             kwargs["queryset"] = CustomFieldValue.objects.filter(parent_field_value__isnull=True)
-#         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-    
-#     class Media:
-#         js = ('js/custom_scroll.js',)
-
-
-
-
-# admin.py
-from django.contrib import admin
-from django import forms
-from django.utils.safestring import mark_safe
-from .models import CustomFieldDefinition, CustomFieldValue, TableHeader
-
 class CustomFieldValueForm(forms.ModelForm):
     class Meta:
         model = CustomFieldValue
@@ -280,77 +213,36 @@ class CustomFieldValueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Hide all value fields
-        for ft in ['int', 'dec', 'char', 'date']:
-            self.fields[f"{ft}_value"].widget = forms.HiddenInput()
-
-        # Show relevant field type
-        field_def = self.initial.get('field_definition') or (self.instance.field_definition if self.instance.pk else None)
+        field_def = self.initial.get('field_definition') or \
+                    (self.instance.field_definition if self.instance.pk else None)
 
         if field_def:
             field_type = getattr(field_def, 'field_type', None)
-            if field_type in ['int', 'dec', 'char', 'date']:
-                self.fields[f"{field_type}_value"].widget = forms.TextInput(attrs={
-                    'class': 'form-control mb-3',
-                    'placeholder': f"Enter {field_type} value"
-                })
+            if field_type:
+                for ft in ['int', 'dec', 'char', 'date']:
+                    field_name = f"{ft}_value"
+                    if ft != field_type:
+                        self.fields[field_name].widget = forms.HiddenInput()
+            else:
+                for ft in ['int', 'dec', 'char', 'date']:
+                    self.fields[f"{ft}_value"].widget = forms.HiddenInput()
 
-        # Description styling
-        self.fields['description'].widget.attrs.update({
-            'class': 'form-control mb-3 description-field'
-        })
+from django.contrib import admin
+from .models import CustomFieldValue
 
 @admin.register(CustomFieldValue)
 class CustomFieldValueAdmin(admin.ModelAdmin):
-    form = CustomFieldValueForm
     list_display = ['name', 'field_definition', 'display_value', 'parent_field_value']
     list_filter = ['field_definition', 'table_header']
     search_fields = ['name', 'char_value']
 
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-
-        if obj:
-            stock_id = obj.field_definition.stock.id if obj.field_definition and obj.field_definition.stock else None
-            model_type = obj.field_definition.model_type if obj.field_definition else None
-
-            if stock_id and model_type:
-                form.base_fields['parent_field_value'].queryset = CustomFieldValue.objects.filter(
-                    field_definition__stock_id=stock_id,
-                    field_definition__model_type=model_type,
-                    parent_field_value__isnull=True
-                ).exclude(pk=obj.pk)
-            else:
-                form.base_fields['parent_field_value'].queryset = CustomFieldValue.objects.none()
-
-        return form
-
-    def render_change_form(self, request, context, *args, **kwargs):
-        context['adminform'].form.fields['description'].help_text = mark_safe(
-            '<div><label><input type="checkbox" id="toggleDescriptionCheckbox"> Show description</label></div>'
-        )
-        return super().render_change_form(request, context, *args, **kwargs)
-
-    def save_model(self, request, obj, form, change):
-        if not change:
-            super().save_model(request, obj, form, change)
-        else:
-            original = self.model.objects.get(pk=obj.pk)
-            has_changed = any(getattr(original, field) != getattr(obj, field) for field in form.changed_data)
-            if has_changed:
-                super().save_model(request, obj, form, change)
-            else:
-                self.message_user(request, "No changes detected. Object not saved.")
-
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "parent_field_value":
+            kwargs["queryset"] = CustomFieldValue.objects.filter(parent_field_value__isnull=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
     class Media:
         js = ('js/custom_scroll.js',)
-
-
-
-
-
-
-
 
 
 
@@ -411,7 +303,7 @@ from .forms import CustomFieldValueForm
 class CustomFieldValueInline(admin.TabularInline):
     model = CustomFieldValue
     form = CustomFieldValueForm
-    extra = 25
+    extra = 15
 
 @admin.register(CustomFieldDefinition)
 class CustomFieldDefinitionAdmin(admin.ModelAdmin):
