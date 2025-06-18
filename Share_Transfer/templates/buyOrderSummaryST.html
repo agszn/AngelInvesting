@@ -18,12 +18,13 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>1</td>
-                            <td>Ord_01</td>
-                            <td>02-04-2025</td>
-                            <td>02-04-2025</td>
-                            <td>Vishnu</td>
-                            <td>Sagar</td>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.order_id }}</td>
+                            <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+                            <td>{{ order.timestamp|time:"h:i A" }}</td>
+                            <!-- <td>{{ order.user.profile.user.username }}</td>
+                            <td>{{ order.user.profile.custom_user_id }}</td> -->
+                            <td>{{ order.user.profile.user.assigned_rm }}</td> 
                         </tr>
                     </tbody>
                 </table>
@@ -39,44 +40,77 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Nikhil Chavan</td>
-                            <td>thangiv_01</td>
-                            <td>GHTHD2523M</td>
-                            <td>nikhilc@gmail.com</td>
-                            <td>7676801529</td>
+                            <td>{{ order.user.profile.user.username }}</td>
+                            <td>{{ order.user.profile.custom_user_id }}</td>
+                            <td>{{ order.user.profile.pan_number }}</td>
+                            <td>{{ order.user.email }}</td>
+                            <td>{{ order.user.profile.mobile_number }}</td>
                         </tr>
                     </tbody>
                 </table>
-                <table class="STbuyorder-table">
-                    <thead>
-                        <tr>
-                            <th>Broker Name</th>
-                            <th>Broker Id</th>
-                            <th>Client Id</th>
-                            <th>Broker Pan Number</th>
-                            <th>Broker Email Id</th>
-                            <th>Broker Contact Number</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Zeroda Brokering Limited</td>
-                            <td>12081600</td>
-                            <td>72264491</td>
-                            <td>-</td>
-                            <td>zeroda@gmail.com</td>
-                            <td>58965742</td>
-                        </tr>
-                        <tr>
-                            <td>Groww Brokering Limited</td>
-                            <td>12081600</td>
-                            <td>72264491</td>
-                            <td>-</td>
-                            <td>groww@gmail.com</td>
-                            <td>58965742</td>
-                        </tr>
-                    </tbody>
-                </table>
+                {% if cmr %}
+                    <table class="STbuyorder-table">
+                        <thead>
+                            <tr>
+                                <th>Broker Name</th>
+                                <th>Broker Id</th>
+                                <th>Client Id</th>
+                                <th>Broker Pan Number</th>
+                                <th>Broker Email Id</th>
+                                <th>Broker Contact Number</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Zeroda Brokering Limited</td>
+                                <td>12081600</td>
+                                <td>72264491</td>
+                                <td>-</td>
+                                <td>zeroda@gmail.com</td>
+                                <td>58965742</td>
+                            </tr>
+                                <tr>
+                                    <td>{{ cmr.broker.name }}</td>
+                                    <td>{{ cmr.broker.broker_id }}</td>
+                                    <td>{{ cmr.client_id_input }}</td>
+                                    <td>{{ cmr.broker.pan }}</td>
+                                    <td>{{ cmr.broker.email }}</td>
+                                    <td>{{ cmr.broker.contact }}</td>
+                                </tr>
+                        </tbody>
+                    </table>
+                {% else %}
+                <p>No broker details found.</p>
+                {% endif %}
+
+
+                {% if bank_accounts %}
+                    <table class="STbuyorder-table">
+                        <thead>
+                            <tr>
+                                <th>Bank Name</th>
+                                <th>Account Holder Name</th>
+                                <th>Account Number</th>
+                                <th>IFSC Code</th>
+                                <th>Account Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for account in bank_accounts %}
+                            <tr>
+                                <td>{{ account.bank_name }}</td>
+                                <td>{{ account.account_holder_name }}</td>
+                                <td>{{ account.account_number }}</td>
+                                <td>{{ account.ifsc_code }}</td>
+                                <td>{{ account.account_type }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                <p>No bank account details found.</p>
+                {% endif %}
+
             <div class="STorder-details-transaction">
                 <table class="STbuyorder-table">
                     <thead>
@@ -93,32 +127,74 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for payment in rm_view.payment_records.all %}
                         <tr>
-                            <td>1</td>
-                            <td>zeroda Brokering limited</td>
-                            <td>INE012L01014</td>
-                            <td>NNS LTD</td>
-                            <td>1850</td>
-                            <td>250</td>
-                            <td>462500.00</td>
-                            <td><button class="STpayment-button">Share Transfer</button></td>
-                            <td>Successful</td>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ payment.date|date:"d-m-Y" }}</td>
+                        <td>{{ payment.bank_name }}</td>
+                        <td>{{ payment.amount }}</td>
+                        <td>{{ payment.remaining_amount }}</td>
+                        <td>
+                            {% if payment.screenshot %}
+                            <a href="{{ payment.screenshot.url }}" target="_blank">👁️‍🗨️</a>
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                        <td>{{ payment.remark }}</td>
+                        <td>{{ payment.payment_status|capfirst }}</td>
                         </tr>
-                         <tr>
-                            <td>1</td>
-                            <td>zeroda Brokering limited</td>
-                            <td>INE012L01015</td>
-                            <td>PHILIPS LIGHTING</td>
-                            <td>1375</td>
-                            <td>100</td>
-                            <td>137500.00</td>
-                            <td><button class="STpayment-button">Share Transfer</button></td>
-                            <td>Successful</td>
+                        {% empty %}
+                        <tr>
+                        <td colspan="9">No payment records found.</td>
                         </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <table class="STbuyorder-table">
+                    <thead>
+                        <tr>
+                            <th>SLNO</th>
+                            <th>Broker</th>
+                            <th>ISIN Number</th>
+                            <th>Stock</th>
+                            <th>Order Type</th>
+                            <th>Share Price</th>
+                            <th>Buy Price</th>
+                            <th>Qty</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in TransactionDetails %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ item.broker.name }}</td>
+                            <td>{{ item.stock.isin_no }}</td>
+                            <td>{{ item.stock.company_name }}</td>
+                            <td>{{ item.order_type }}</td>
+                            <td>{{ item.stock.share_price }}</td>
+                            <td>{{ item.price_per_share }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.total_amount }}</td>
+                            <td>{{ item.status }}</td>
+                            <td>
+                            <a href="{% url 'ST_User:edit_transaction' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
+
+                            </td>
+
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center">No transaction details available.</td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
                 <div class="STpayment-process">
-                    <h4><Big>Total: </Big>1139500.00</h4>
+                    <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
                     <button class="STpayment-button">Generate Deal Letter</button>
                 </div>
             </div>

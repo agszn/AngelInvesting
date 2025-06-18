@@ -38,6 +38,9 @@
               <option value="DF" {% if user.user_type == 'DF' %}selected{% endif %}>Default/User</option>
               <option value="RM" {% if user.user_type == 'RM' %}selected{% endif %}>Relationship Manager</option>
               <option value="AC" {% if user.user_type == 'AC' %}selected{% endif %}>Accounts</option>
+
+              <option value="ST" {% if user.user_type == 'ST' %}selected{% endif %}>Share Transfer</option>
+
               <option value="SM" {% if user.user_type == 'SM' %}selected{% endif %}>Site Manager</option>
               <option value="AP" {% if user.user_type == 'AP' %}selected{% endif %}>Associate Partner</option>
               <option value="PT" {% if user.user_type == 'PT' %}selected{% endif %}>Partner</option>

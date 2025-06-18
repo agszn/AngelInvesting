@@ -564,18 +564,49 @@ from user_portfolio.models import BuyTransaction
 from user_portfolio.forms import BuyTransactionEditForm
 from django.contrib.auth.decorators import login_required
 
+# @login_required
+# def edit_buy_transaction(request, pk):
+#     transaction = get_object_or_404(BuyTransaction, pk=pk)
+#     order_id = transaction.order_id
+
+#     if request.method == 'POST':
+#         form = BuyTransactionEditForm(request.POST, instance=transaction, user=request.user)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('RM_User:buyordersummery', order_id=order_id)
+#     else:
+#         form = BuyTransactionEditForm(instance=transaction, user=request.user)
+
+#     return render(request, 'transaction/edit_transaction.html', {'form': form})
+
 @login_required
 def edit_buy_transaction(request, pk):
     transaction = get_object_or_404(BuyTransaction, pk=pk)
-    order_id = transaction.order_id  # Get order_id to redirect back
+    order_id = transaction.order_id
+
+    old_rm_status = transaction.RM_status
+    old_ac_status = transaction.AC_status
+    old_status = transaction.status
 
     if request.method == 'POST':
-        form = BuyTransactionEditForm(request.POST, instance=transaction)
+        form = BuyTransactionEditForm(request.POST, instance=transaction, user=request.user)
         if form.is_valid():
-            form.save()
-            return redirect('RM_User:buyordersummery', order_id=order_id)  # Redirect to same page
+            tx = form.save(commit=False)
+
+            user_type = getattr(request.user, 'user_type', None)
+
+            # Check if status changed to "completed" and assign approver accordingly
+            if user_type == 'RM' and old_rm_status != 'completed' and tx.RM_status == 'completed':
+                tx.RMApproved = request.user
+            elif user_type == 'AC' and old_ac_status != 'completed' and tx.AC_status == 'completed':
+                tx.ACApproved = request.user
+            elif user_type == 'ST' and old_status != 'completed' and tx.status == 'completed':
+                tx.STApproved = request.user
+
+            tx.save()
+            return redirect('RM_User:buyordersummery', order_id=order_id)
     else:
-        form = BuyTransactionEditForm(instance=transaction)
+        form = BuyTransactionEditForm(instance=transaction, user=request.user)
 
     return render(request, 'transaction/edit_transaction.html', {'form': form})
 

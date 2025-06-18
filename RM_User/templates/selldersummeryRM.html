@@ -126,7 +126,6 @@
         </tr>
       </thead>
       <tbody>
-        {% for item in order.buytransactionitem_set.all %}
           <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ item.broker.broker_name }}</td>
@@ -142,17 +141,15 @@
             <td>{{ item.amount }}</td>
             <td>{{ item.status }}</td>
           </tr>
-        {% empty %}
           <tr>
             <td colspan="10">No transaction details available.</td>
           </tr>
-        {% endfor %}
       </tbody>
     </table>
 
     <div class="RMpayment-process">
       <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
-      <button class="RMpayment-button">Process To Account Department</button>
+      <button class="RMpayment-button">Processed To Account Department</button>
     </div>
 
   {% else %}

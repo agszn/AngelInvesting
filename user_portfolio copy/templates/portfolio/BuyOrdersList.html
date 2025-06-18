@@ -1,0 +1,113 @@
+{% extends "accounts/profile.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block profile_content %}
+<div style="max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px;">
+  <h3 style="color: #1a3e6e;">Buy Order Summary</h3>
+
+  <form method="get" style="margin-bottom: 15px;">
+    <input type="text" name="search" placeholder="Search or type command..." value="{{ search_query }}" style="padding: 8px 12px; width: 50%; border-radius: 5px; border: 1px solid #ccc;">
+    <button type="submit" style="margin-left: 10px; padding: 8px 12px; border: none; background-color: #1a3e6e; color: white; border-radius: 5px;">Search</button>
+  </form>
+
+  <!-- Regular Buy Orders -->
+  <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+    <thead style="background: #1a3e6e; color: white;">
+      <tr>
+        <th style="padding: 10px;">Stock Name</th>
+        <th style="padding: 10px;">Advisor</th>
+        <th style="padding: 10px;">Broker</th>
+        <th style="padding: 10px;">Quantity</th>
+        <th style="padding: 10px;">Buy Price</th>
+        <th style="padding: 10px;">Total Amt</th>
+        <th style="padding: 10px;">Order Type</th>
+        <th style="padding: 10px;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in page_obj %}
+        <tr style="background: {% cycle '#f5f9ff' 'white' %};">
+          <td style="padding: 10px;">{{ order.stock.company_name }}</td>
+          <td style="padding: 10px;">
+            {% if order.advisor %}{{ order.advisor.advisor_type }}{% else %}Others{% endif %}
+          </td>
+          <td style="padding: 10px;">
+            {% if order.broker %}{{ order.broker.name }}{% else %}N/A{% endif %}
+          </td>
+          <td style="padding: 10px;">{{ order.quantity }}</td>
+          <td style="padding: 10px;">₹{{ order.price_per_share }}</td>
+          <td style="padding: 10px;">₹{{ order.total_amount }}</td>
+          <td style="padding: 10px;">{{ order.order_type|title }}</td>
+          <td style="padding: 10px; color:
+            {% if order.status == 'Completed' %}green
+            {% elif order.status == 'Processing' %}orange
+            {% elif order.status == 'Cancel' %}red
+            {% else %}#cc6600{% endif %};">
+            {{ order.status }}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" style="text-align: center; padding: 15px;">No buy orders found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <div style="margin-top: 20px; text-align: right;">
+    {% if page_obj.has_previous %}
+      <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+    {% endif %}
+
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
+    {% endif %}
+  </div>
+
+  <!-- Other Advisor Buy Orders -->
+  <!-- <h3 style="color: #1a3e6e; margin-top: 40px;">Other Advisor Buy Orders</h3>
+  <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+    <thead style="background: #1a3e6e; color: white;">
+      <tr>
+        <th style="padding: 10px;">Stock Name</th>
+        <th style="padding: 10px;">Advisor</th>
+        <th style="padding: 10px;">Broker</th>
+        <th style="padding: 10px;">Quantity</th>
+        <th style="padding: 10px;">Buy Price</th>
+        <th style="padding: 10px;">Total Amt</th>
+        <th style="padding: 10px;">Order Type</th>
+        <th style="padding: 10px;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for orderA in buy_orders_Advisor %}
+        <tr style="background: {% cycle '#f5f9ff' 'white' %};">
+          <td style="padding: 10px;">{{ orderA.stock.company_name }}</td>
+          <td style="padding: 10px;">
+            {% if orderA.advisor %}{{ orderA.advisor.advisor_type }}{% else %}Others{% endif %}
+          </td>
+          <td style="padding: 10px;">
+            {% if orderA.broker %}{{ orderA.broker.name }}{% else %}N/A{% endif %}
+          </td>
+          <td style="padding: 10px;">{{ orderA.quantity }}</td>
+          <td style="padding: 10px;">₹{{ orderA.price_per_share }}</td>
+          <td style="padding: 10px;">₹{{ orderA.total_amount }}</td>
+          <td style="padding: 10px;">{{ orderA.order_type|title }}</td>
+          <td style="padding: 10px; color:
+            {% if orderA.status == 'Completed' %}green
+            {% elif orderA.status == 'Processing' %}orange
+            {% elif orderA.status == 'Cancel' %}red
+            {% else %}#cc6600{% endif %};">
+            {{ orderA.status }}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" style="text-align: center; padding: 15px;">No buy orders from other advisors found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table> -->
+</div>
+{% endblock %}

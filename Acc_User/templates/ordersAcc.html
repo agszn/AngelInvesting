@@ -1,9 +1,40 @@
 {% extends "baseStructureAcc.html" %}
-{% block title %}Shares List{% endblock %}
-
-
-{% block subtitle %} Order List{% endblock %}
-
+{% block title %}Approved Transactions{% endblock %}
+{% block subtitle %}All Completed Transactions RM{% endblock %}
 {% block Accprofile_content %}
+
+
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Order ID</th>
+      <th>User</th>
+      <th>Stock</th>
+      <th>Quantity</th>
+      <th>Price</th>
+      <th>Total</th>
+      <th>Timestamp</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+      <tr>
+        <td>{{ order.type }}</td>
+        <td><a class="view" href="{% url 'Acc_User:buyOrderSummaryAcc' order.order_id %}">{{ order.order_id }}</a></td>
+        <td>{{ order.user }}</td>
+        <td>{{ order.stock }}</td>
+        <td>{{ order.quantity }}</td>
+        <td>{{ order.price }}</td>
+        <td>{{ order.total }}</td>
+        <td>{{ order.timestamp|date:"Y-m-d H:i" }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="8">No completed orders found.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 {% endblock %}

@@ -1,0 +1,46 @@
+{% extends "accounts/profile.html" %}
+{% block title %}My Profile{% endblock %}
+{% load math_filters %}
+
+{% block profile_content %}
+    <div style="display:flex; justify-content:space-between; background:#f2f7ff; padding:20px; border-radius:12px; margin-bottom:20px;">
+        <div style="text-align:center; flex:1;">
+            <div style="font-size:28px;">💰</div>
+            <div style="font-weight:600; font-size:14px;">Invested Amount</div>
+            <div style="font-size:18px; font-weight:600;">₹{{ summary.total_invested|floatformat:2 }}</div>
+        </div>
+        <div style="text-align:center; flex:1;">
+            <div style="font-size:28px;">💵</div>
+            <div style="font-weight:600; font-size:14px;">Current Value</div>
+            <div style="font-size:18px; font-weight:600;">₹{{ summary.total_market_value|floatformat:2 }}</div>
+        </div>
+        <div style="text-align:center; flex:1;">
+            <div style="font-size:28px;">🎯</div>
+            <div style="font-weight:600; font-size:14px;">Overall Loss/Gain</div>
+            {% with gain=summary.overall_gain_loss %}
+                <div style="font-size:18px; font-weight:600; color:{% if gain >= 0 %}#26ba71{% else %}#ff4c4c{% endif %};">
+                    ₹{{ gain|floatformat:2 }} 
+                    <span style="font-size:12px;">
+                        {% if summary.total_invested %}
+                            {{ gain|div:summary.total_invested|mul:100|floatformat:2 }}%
+                        {% endif %}
+                    </span>
+                </div>
+            {% endwith %}
+        </div>
+        <div style="text-align:center; flex:1;">
+            <div style="font-size:28px;">🟢</div>
+            <div style="font-weight:600; font-size:14px;">Today's Gain</div>
+            {% with today=summary.todays_gain_loss %}
+                <div style="font-size:18px; font-weight:600; color:{% if today >= 0 %}#26ba71{% else %}#ff4c4c{% endif %};">
+                    ₹{{ today|floatformat:2 }}
+                    <span style="font-size:12px;">
+                        {% if summary.total_market_value %}
+                            {{ today|div:summary.total_market_value|mul:100|floatformat:2 }}%
+                        {% endif %}
+                    </span>
+                </div>
+            {% endwith %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,9 +1,86 @@
 {% extends "baseStructureAcc.html" %}
 {% block title %}Shares List{% endblock %}
-
-
 {% block subtitle %}Dashboard{% endblock %}
-
 {% block Accprofile_content %}
+
+<h4>All Relationship Managers (RM)</h4>
+<ul>
+  {% for rm in rms %}
+    <li>{{ rm.username }} - {{ rm.email }}</li>
+  {% empty %}
+    <li>No RMs found.</li>
+  {% endfor %}
+</ul>
+
+<hr>
+
+<h4>Assign User to RM</h4>
+<form method="post">
+  {% csrf_token %}
+  <label for="user_id">Select User:</label>
+  <select name="user_id" required class="form-control" style="margin-bottom: 10px;">
+    <option value="">--Select User--</option>
+    {% for user in users %}
+      {% if user.user_type != 'RM' %}
+        <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+      {% endif %}
+    {% endfor %}
+  </select>
+
+  <label for="rm_id">Assign to RM:</label>
+  <select name="rm_id" required class="form-control" style="margin-bottom: 10px;">
+    <option value="">--Select RM--</option>
+    {% for rm in rms %}
+      <option value="{{ rm.id }}">{{ rm.username }} ({{ rm.email }})</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" class="btn btn-primary">Assign</button>
+</form>
+
+<hr>
+
+<h4>Users with Assigned RM</h4>
+
+<!-- Filter Form -->
+<form method="get" style="margin-bottom: 15px;">
+  <label for="filter_rm">Filter by RM:</label>
+  <select name="filter_rm" class="form-control" style="width: 300px; display: inline-block;">
+    <option value="">-- All RMs --</option>
+    {% for rm in rms %}
+      <option value="{{ rm.id }}" {% if selected_rm_id == rm.id|stringformat:"s" %}selected{% endif %}>
+        {{ rm.username }} ({{ rm.email }})
+      </option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Email</th>
+      <th>Assigned RM</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>
+          {% if user.assigned_rm %}
+            {{ user.assigned_rm.username }}
+          {% else %}
+            <span class="text-muted">Not Assigned</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="3">No users found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 {% endblock %}

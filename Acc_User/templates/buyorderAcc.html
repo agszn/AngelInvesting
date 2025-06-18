@@ -1,32 +1,40 @@
 {% extends "baseStructureAcc.html" %}
-{% block title %}Shares List{% endblock %}
+{% block title %}Buy Order List{% endblock %}
 
 {% block subtitle %}Buy Order List{% endblock %}
+
 {% block Accprofile_content %}
-                <table class="Accbuyorder-table">
-                        <thead>
-                        <tr>
-                                <th>Sl.no</th>
-                                <th>Order_Id</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Client_Name</th>
-                                <th>Client_Id</th>
-                                <th>Stock Details</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                                <td>1</td>
-                                <td>Ord_01</td>
-                                <td>11-04-2025</td>
-                                <td>11.30am</td>
-                                <td>Suraj Deshpande</td>
-                                <td>10255465</td>
-                                <td>    
-                                        <a class="AccView" href="{% url 'Acc_User:buyOrderSummaryAcc' %}"> View </a>
-                                </td>
-                        </tr>
-                        </tbody>
-                </table>
+    <table class="Accbuyorder-table">
+        <thead>
+            <tr>
+                <th>Sl.no</th>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Client Name</th>
+                <th>Client ID</th>
+                <th>Stock Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in buy_orders %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.order_id }}</td>
+                <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+                <td>{{ order.timestamp|time:"h:i A" }}</td>
+                <td>{{ order.user.profile.user.username }}</td>
+                <td>{{ order.user.profile.custom_user_id }}</td>
+                <td>
+                <a class="view" href="{% url 'Acc_User:buyOrderSummaryAcc' order.order_id %}">view Summary</a>
+                </td>
+
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No buy orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

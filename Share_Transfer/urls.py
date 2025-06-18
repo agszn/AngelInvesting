@@ -11,13 +11,18 @@ app_name = 'ST_User'
 
 urlpatterns = [
         path('dashboardST/', dashboardST, name='dashboardST'),
+        
         path('buyorderST/', buyorderST, name='buyorderST'),
-        path('buyOrderSummaryST/', buyOrderSummaryST, name='buyOrderSummaryST'),
+        
+        path('buyOrderSummaryST/<str:order_id>/', buyOrderSummaryST, name='buyOrderSummaryST'),
+        
         path('buyDealLetterrST/', buyDealLetterrST, name='buyDealLetterrST'),
         path('sellorderST/', sellorderST, name='sellorderST'),
         path('SellerSummaryST/', SellerSummaryST, name='SellerSummaryST'),
         path('sellDealLetterrST/', sellDealLetterrST, name='sellDealLetterrST'),
         path('clientST/', clientST, name='clientST'),
+        
+        path('transaction/<int:pk>/edit/', edit_buy_transaction, name='edit_transaction'),
         
     ]
 

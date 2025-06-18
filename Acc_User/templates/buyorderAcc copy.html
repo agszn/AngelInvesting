@@ -1,0 +1,40 @@
+{% extends "baseStructureAcc.html" %}
+{% block title %}Buy Order List{% endblock %}
+
+{% block SubTitleRM %}Buy Order List{% endblock %}
+
+{% block RMprofile_content %}
+    <table class="RMbuyorder-table">
+        <thead>
+            <tr>
+                <th>Sl.no</th>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Client Name</th>
+                <th>Client ID</th>
+                <th>Stock Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in buy_orders %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.order_id }}</td>
+                <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+                <td>{{ order.timestamp|time:"h:i A" }}</td>
+                <td>{{ order.user.profile.user.username }}</td>
+                <td>{{ order.user.profile.custom_user_id }}</td>
+                <td>
+                <a class="view" href="{% url 'RM_User:buyordersummery' order.order_id %}">view Summary</a>
+                </td>
+
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No buy orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

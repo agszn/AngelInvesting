@@ -35,7 +35,33 @@ class BuyTransaction(models.Model):
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
     
+    RM_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    RMApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='rm_approved_transactions'
+    )
+    
+    AC_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    ACApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='ac_approved_transactions'
+    )
+
+    
     status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    STApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='st_approved_transactions'
+    )
 
     order_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
 
@@ -44,7 +70,8 @@ class BuyTransaction(models.Model):
             self.order_id = f"Ord_B_{uuid.uuid4().hex[:10].upper()}"
         super().save(*args, **kwargs)
 
-
+    def __str__(self):
+        return f"{self.order_id} - {self.user.username}"
 
 
 # class BuyTransactionOtherAdvisor(models.Model):
@@ -129,6 +156,32 @@ class SellTransaction(models.Model):
     total_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
 
     status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    STApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='st_approved_sell_transactions'
+    )
+    
+    RM_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    RMApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='rm_approved_sell_transactions'
+    )
+    
+    AC_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    ACApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='ac_approved_sell_transactions'
+    )    
+
     order_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -150,6 +203,63 @@ class SellTransaction(models.Model):
     def __str__(self):
         return f"Sell Order {self.order_id} - {self.stock.company_name} x{self.quantity}"
 
+
+
+class SellTransactionOtherAdvisor(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    stock = models.ForeignKey(StockData, on_delete=models.CASCADE)
+    advisor = models.ForeignKey(Advisor, on_delete=models.SET_NULL, null=True)
+    broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True)
+    quantity = models.PositiveIntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    total_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+
+    status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    STApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='st_approved_sell_otherAdvisor_transactions'
+    )
+    
+    RM_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    RMApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='rm_approved_sell_otherAdvisor_transactions'
+    )
+    AC_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    ACApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='ac_approved_sell_otherAdvisor_transactions'
+    )    
+    
+    order_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.order_id:
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
+            self.order_id = f"Ord_SO_{timestamp}"
+
+        if self.selling_price is None and self.stock.share_price is not None:
+            self.selling_price = Decimal(self.stock.share_price)
+
+        if self.quantity and self.selling_price:
+            self.total_value = self.quantity * self.selling_price
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"SellOther - {self.order_id} - {self.stock.company_name} x{self.quantity}"
+    
 
 class UserPortfolioSummary(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="portfolio_summary")

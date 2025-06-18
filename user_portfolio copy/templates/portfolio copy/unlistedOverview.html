@@ -1,0 +1,58 @@
+{% extends "accounts/profile.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block profile_content %}
+    <!-- <div style="margin: auto; background: white; border-radius: 10px; max-width: 600px; overflow: hidden;"> -->
+        <!-- Summary Cards -->
+        <div style="display:flex; justify-content:space-between; background:#f2f7ff; padding:20px; border-radius:12px; margin-bottom:20px;">
+            <div style="text-align:center; flex:1;">
+                <div style="font-size:28px;">💰</div>
+                <div style="font-weight:600; font-size:14px;">Invested Amount</div>
+                <div style="font-size:18px; font-weight:600;">₹5 Lak</div>
+            </div>
+            <div style="text-align:center; flex:1;">
+                <div style="font-size:28px;">💵</div>
+                <div style="font-weight:600; font-size:14px;">Current Value</div>
+                <div style="font-size:18px; font-weight:600;">₹7 Lak</div>
+            </div>
+            <div style="text-align:center; flex:1;">
+                <div style="font-size:28px;">🎯</div>
+                <div style="font-weight:600; font-size:14px;">Overall Loss/Gain</div>
+                <div style="font-size:18px; font-weight:600; color:#26ba71;">₹2 Lak <span style="font-size:12px;">40.00%</span></div>
+            </div>
+            <div style="text-align:center; flex:1;">
+                <div style="font-size:28px;">🟢</div>
+                <div style="font-weight:600; font-size:14px;">Today's Gain</div>
+                <div style="font-size:18px; font-weight:600; color:#26ba71;">₹6000 <span style="font-size:12px;">+1.37%</span></div>
+            </div>
+        </div>
+
+        <!-- Table Header -->
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; padding:10px 20px; font-weight:600; font-size:14px; color:#344767;">
+            <div></div>
+            <div>Invested Amt</div>
+            <div>Market Value</div>
+            <div>Overall G/L</div>
+            <div>Today's G/L</div>
+        </div>
+
+        <!-- Row 1 -->
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; background:#eaf2ff; padding:16px 20px; margin-bottom:12px; border-radius:10px;">
+            <div>Unlisted Shares</div>
+            <div>₹2 Lak</div>
+            <div>₹4.20Lak</div>
+            <div style="color:#26ba71;">1.20Lak <span style="font-size:12px;">40.00%</span></div>
+            <div style="color:#26ba71;">₹3500 <span style="font-size:12px;">1%</span></div>
+        </div>
+
+        <!-- Row 2 -->
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; background:#eaf2ff; padding:16px 20px; border-radius:10px;">
+            <div>Other Advisor</div>
+            <div>₹1 Lak</div>
+            <div>₹2.80Lak</div>
+            <div style="color:#26ba71;">80K <span style="font-size:12px;">40.00%</span></div>
+            <div style="color:#26ba71;">₹2500 <span style="font-size:12px;">1%</span></div>
+        </div>
+
+    <!-- </div> -->
+{% endblock %}

@@ -19,9 +19,11 @@ urlpatterns = [
         path('clientAcc/', clientAcc, name='clientAcc'),
         path('reportsAcc/', reportsAcc, name='reportsAcc'),
         
-        path('buyOrderSummaryAcc/', buyOrderSummaryAcc, name='buyOrderSummaryAcc'),
+        path('buyOrderSummaryAcc/<str:order_id>/', buyOrderSummaryAcc, name='buyOrderSummaryAcc'),
         path('SellerSummaryAcc/', SellerSummaryAcc, name='SellerSummaryAcc'),
         path('AngelInvestAcc/', AngelInvestAcc, name='AngelInvestAcc'),
+        
+        path('transaction/<int:pk>/edit/', edit_buy_transaction, name='edit_transaction'),
         
     ]
 

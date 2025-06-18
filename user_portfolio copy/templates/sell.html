@@ -1,0 +1,55 @@
+{% extends "accounts/profile.html" %}
+{% block title %}Place Sell Order{% endblock %}
+
+{% block profile_content %}
+<form method="POST" action="{% url 'sell_stock' stock.id %}">
+    {% csrf_token %}
+    <div class="container mt-5">
+        <div style="margin: auto; background: white; border-radius: 10px; max-width: 600px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <div style="background-color: #454a6d; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-weight: bold;">{{ stock.company_name }}</span>
+                    <span style="color: #4cd964; margin-left: 10px;">₹{{ stock.ltp|default:"0.00" }}</span>
+                </div>
+                <div style="font-weight: bold;">SELL</div>
+            </div>
+
+            <div style="background-color: #eaf3ff; padding: 20px;">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label>Advisor</label>
+                        <select name="advisor" class="form-control" required>
+                            {% for advisor in advisors %}
+                                <option value="{{ advisor.id }}">{{ advisor.advisor_type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label>Broker</label>
+                        <select name="broker" class="form-control" required>
+                            {% for broker in brokers %}
+                                <option value="{{ broker.id }}">{{ broker.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label>Quantity</label>
+                        <input type="number" name="quantity" class="form-control" min="1" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Selling Price (₹)</label>
+                    <input type="number" name="selling_price" class="form-control" step="0.01" min="0" required>
+                </div>
+            </div>
+
+            <div style="background-color: #454a6d; padding: 15px 20px; text-align: right;">
+                <button type="submit" class="btn btn-light" style="border-radius: 25px;">
+                    ✔️ Place Order
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
