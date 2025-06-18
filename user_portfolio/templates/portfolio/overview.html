@@ -6,24 +6,24 @@
 {% block profile_content %}
     <div style="display:flex; justify-content:space-between; background:#f2f7ff; padding:20px; border-radius:12px; margin-bottom:20px;">
         <div style="text-align:center; flex:1;">
-            <div style="font-size:28px;">💰</div>
+            <!-- <div style="font-size:28px;">💰</div> -->
             <div style="font-weight:600; font-size:14px;">Invested Amount</div>
             <div style="font-size:18px; font-weight:600;">₹{{ total_invested|floatformat:2 }}</div>
         </div>
         <div style="text-align:center; flex:1;">
-            <div style="font-size:28px;">💵</div>
+            <!-- <div style="font-size:28px;">💵</div> -->
             <div style="font-weight:600; font-size:14px;">Current Value</div>
             <div style="font-size:18px; font-weight:600;">₹{{ total_market_value|floatformat:2 }}</div>
         </div>
         <div style="text-align:center; flex:1;">
-            <div style="font-size:28px;">🎯</div>
+            <!-- <div style="font-size:28px;">🎯</div> -->
             <div style="font-weight:600; font-size:14px;">Overall Loss/Gain</div>
             <div style="font-size:18px; font-weight:600; color:{% if total_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
                 ₹{{ total_gain_loss|floatformat:2 }} <span style="font-size:12px;">{{ overall_gain_loss_percent }}%</span>
             </div>
         </div>
         <div style="text-align:center; flex:1;">
-            <div style="font-size:28px;">🟢</div>
+            <!-- <div style="font-size:28px;">🟢</div> -->
             <div style="font-weight:600; font-size:14px;">Today's Gain</div>
             <div style="font-size:18px; font-weight:600; color:{% if todays_gain >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
                 ₹{{ todays_gain|floatformat:2 }} <span style="font-size:12px;">{{ todays_gain_percent }}%</span>

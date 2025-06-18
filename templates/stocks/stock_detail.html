@@ -243,6 +243,56 @@
     text-align: center;
   }
 
+  .carousel-container
+  {
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 40px 50px;
+    width: 100%;
+    min-height: 477px;
+    border-bottom: 2px solid #fff;
+    background-color: #0e213f;
+  }
+  .carousel-title
+  {
+    color: #fff;
+    font-family: &quot;Outfit&quot;, sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 60px;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  .carousel-content
+  {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+  }
+  .scroll-container
+  {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 20px;
+    padding: 10px 0;
+    max-width: 100%;
+  }
+  .company-card
+  {
+    border-radius: 10px;
+    padding: 28px 21px;
+    background-color: #fefefe;
+  }
+  .company-logo
+  {
+    width: 80%; 
+    height: 40px;
+    margin-bottom: 21px
+  }
 
 </style>
 
@@ -253,11 +303,10 @@
         <div >
             <div  class="stock-btn yellow-btn wishlist-btn" style="width: 95%;">
               {% if stock.logo %}
-                  <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo" >
+                  <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo">
               {% endif %}
             </div>
             <div class="header-buttons">
-
                 <a href="javascript:void(0);" class="stock-btn yellow-btn buy-btn" style="width:90 ;" onclick='openBuyModal(
                   "{{ stock.id }}",
                   "{{ stock.company_name|escapejs }}",
@@ -2010,93 +2059,36 @@
               <!-- most searched  start -->
               <!-- a -->
                 <!-- a -->
-                <div
-                  class="carousel-container"
-                  style="
-                    max-width: none;
-                    margin-left: auto;
-                    margin-right: auto;
-                    padding: 40px 50px;
-                    width: 100%;
-                    min-height: 477px;
-                    border-bottom: 2px solid #fff;
-                    background-color: #0e213f;
-                  ">
-                    <div
-                      class="carousel-title"
-                      style="
-                        color: #fff;
-                        font-family: &quot;Outfit&quot;, sans-serif;
-                        font-size: 40px;
-                        font-weight: 700;
-                        line-height: 60px;
-                        margin-bottom: 30px;
-                        text-align: center;
-                      "
-                    >
-                  Most Searched Unlisted &amp; Pre IPO Companies Stocks in India
-                </div>
-          
-                <div
-                  class="carousel-content"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 20px;
-                    position: relative;
-                  ">
-                    <!-- Left Navigation Arrow -->
-                    <div class="nav-arrow left" onclick="scrollLeft()">
-                      <svg
-                        width="40"
-                        height="40"
-                        viewBox="0 0 40 40"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="nav-arrow left"
-                        style="width: 40px; height: 40px; cursor: pointer"
-                      >
-                        <path
-                          d="M19.9052 14.8528L17.3342 12.2818L9.61789 19.9964L17.3324 27.7109L19.9033 25.1382L16.5815 21.8146H30.2852V18.1782H16.5815L19.9052 14.8528Z"
-                          fill="white"
-                        ></path>
-                        <path
-                          fill-rule="evenodd"
-                          clip-rule="evenodd"
-                          d="M5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818ZM8.42909 8.42909C6.90958 9.9486 5.70424 11.7525 4.88188 13.7379C4.05952 15.7232 3.63626 17.8511 3.63626 20C3.63626 22.1489 4.05952 24.2768 4.88188 26.2621C5.70424 28.2475 6.90958 30.0514 8.42909 31.5709C9.9486 33.0904 11.7525 34.2958 13.7379 35.1181C15.7232 35.9405 17.8511 36.3637 20 36.3637C22.1489 36.3637 24.2768 35.9405 26.2621 35.1181C28.2475 34.2958 30.0514 33.0904 31.5709 31.5709C34.6397 28.5021 36.3637 24.3399 36.3637 20C36.3637 15.6601 34.6397 11.4979 31.5709 8.42909C28.5021 5.36029 24.3399 3.63626 20 3.63626C15.6601 3.63626 11.4979 5.36029 8.42909 8.42909Z"
-                          fill="white"
-                        ></path>
-                      </svg>
+                <div class="carousel-container">
+                    <div class="carousel-title">
+                      Most Searched Unlisted &amp; Pre IPO Companies Stocks in India
                     </div>
-            
-                    <!-- Compapny Detail Card -->
                     <div
-                          class="scroll-container"
-                          id="scrollContainer"
-                          style="
-                            display: flex;
-                            overflow-x: auto;
-                            scroll-behavior: smooth;
-                            gap: 20px;
-                            padding: 10px 0;
-                            max-width: 100%;
-                          "
+                      class="carousel-content">
+                      <!-- Left Navigation Arrow -->
+                      <div class="nav-arrow left" onclick="scrollLeft()">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-arrow left"
+                          style="width: 40px; height: 40px; cursor: pointer"
                         >
-
-                      
+                            <path
+                              d="M19.9052 14.8528L17.3342 12.2818L9.61789 19.9964L17.3324 27.7109L19.9033 25.1382L16.5815 21.8146H30.2852V18.1782H16.5815L19.9052 14.8528Z"
+                              fill="white"
+                            >
+                            </path>
+                            <path
+                              fill-rule="evenodd"
+                              clip-rule="evenodd"
+                              d="M5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818ZM8.42909 8.42909C6.90958 9.9486 5.70424 11.7525 4.88188 13.7379C4.05952 15.7232 3.63626 17.8511 3.63626 20C3.63626 22.1489 4.05952 24.2768 4.88188 26.2621C5.70424 28.2475 6.90958 30.0514 8.42909 31.5709C9.9486 33.0904 11.7525 34.2958 13.7379 35.1181C15.7232 35.9405 17.8511 36.3637 20 36.3637C22.1489 36.3637 24.2768 35.9405 26.2621 35.1181C28.2475 34.2958 30.0514 33.0904 31.5709 31.5709C34.6397 28.5021 36.3637 24.3399 36.3637 20C36.3637 15.6601 34.6397 11.4979 31.5709 8.42909C28.5021 5.36029 24.3399 3.63626 20 3.63626C15.6601 3.63626 11.4979 5.36029 8.42909 8.42909Z"
+                              fill="white"
+                            ></path>
+                        </svg>
+                      </div>
+                      <!-- Compapny Detail Card -->
+                      <div class="scroll-container" id="scrollContainer">
                       {% for stock in all_stocks %}
-                        <div
-                          class="company-card"
-                          style="
-                            border-radius: 10px;
-                            padding: 28px 21px;
-
-                            background-color: #fefefe;
-                          "
-                        >
+                        <div class="company-card">
                           {% if stock.logo %}
-                              <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo" style="width: 80%; height: 40px; margin-bottom: 21px">
+                              <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo">
                           {% endif %}
                           <div
                             style="

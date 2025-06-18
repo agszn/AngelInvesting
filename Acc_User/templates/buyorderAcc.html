@@ -1,7 +1,7 @@
 {% extends "baseStructureAcc.html" %}
 {% block title %}Buy Order List{% endblock %}
 
-{% block subtitle %}Buy Order List{% endblock %}
+{% block Accsubtitle %}Buy Order List{% endblock %}
 
 {% block Accprofile_content %}
     <table class="Accbuyorder-table">
@@ -26,7 +26,7 @@
                 <td>{{ order.user.profile.user.username }}</td>
                 <td>{{ order.user.profile.custom_user_id }}</td>
                 <td>
-                <a class="view" href="{% url 'Acc_User:buyOrderSummaryAcc' order.order_id %}">view Summary</a>
+                <a class="AccView" href="{% url 'Acc_User:buyOrderSummaryAcc' order.order_id %}">View</a>
                 </td>
 
             </tr>

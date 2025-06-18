@@ -1,0 +1,38 @@
+<!-- RM_User/templates/transaction/edit_sell_transaction.html -->
+{% extends "baseStructureRM.html" %}
+
+{% block title %}Edit Sell Order{% endblock %}
+{% block SubTitleRM %}Edit Sell Order - {{ transaction.stock.company_name }}{% endblock %}
+
+{% block RMprofile_content %}
+<div class="container mt-4">
+    <h3 class="mb-4">Edit Sell Transaction – {{ transaction.stock.company_name }}</h3>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <!-- Show static context data -->
+        <div class="mb-3">
+            <p><strong>Order ID:</strong> {{ transaction.order_id }}</p>
+            <p><strong>Stock:</strong> {{ transaction.stock.company_name }}</p>
+            <p><strong>Quantity:</strong> {{ transaction.quantity }}</p>
+            <p><strong>Timestamp:</strong> {{ transaction.timestamp }}</p>
+        </div>
+
+        <!-- Dynamically rendered fields based on user type -->
+        {% for field in form.visible_fields %}
+        <div class="form-group mb-3">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div class="text-danger">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{% url 'RM_User:selldersummeryRM' transaction.order_id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

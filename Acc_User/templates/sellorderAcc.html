@@ -2,7 +2,7 @@
 {% block title %}Shares List{% endblock %}
 
 
-{% block subtitle %}Sell Order List{% endblock %}
+{% block Accsubtitle %}Sell Order List{% endblock %}
 
 {% block Accprofile_content %}
             <table class="Accbuyorder-table">
@@ -18,17 +18,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Ord_01</td>
-                        <td>11-04-2025</td>
-                        <td>11.30am</td>
-                        <td>Suraj Deshpande</td>
-                        <td>10255465</td>
-                        <td>    
-                                <a class="AccView" href="{% url 'Acc_User:SellerSummaryAcc' %}"> View </a>
-                        </td>
-                    </tr>
+                    {% for order in sell_orders %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ order.order_id }}</td>
+                            <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+                            <td>{{ order.timestamp|date:"h:i A" }}</td>
+                            <td>{{ order.user.profile.full_name }}</td>
+                            <td>{{ order.user.profile.custom_user_id }}</td>
+                            <td><a class="AccView" href="{% url 'Acc_User:SellerSummaryAcc' order.order_id %}">View</a></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7">No sell orders found.</td></tr>
+                    {% endfor %}
                 </tbody>
             </table>
 {% endblock %}

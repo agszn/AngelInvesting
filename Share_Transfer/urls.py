@@ -6,7 +6,6 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-
 app_name = 'ST_User'
 
 urlpatterns = [
@@ -17,12 +16,18 @@ urlpatterns = [
         path('buyOrderSummaryST/<str:order_id>/', buyOrderSummaryST, name='buyOrderSummaryST'),
         
         path('buyDealLetterrST/', buyDealLetterrST, name='buyDealLetterrST'),
+        
         path('sellorderST/', sellorderST, name='sellorderST'),
-        path('SellerSummaryST/', SellerSummaryST, name='SellerSummaryST'),
+        
+        path('SellerSummaryST/<str:order_id>/', SellerSummaryST, name='SellerSummaryST'),
+        
+
+        path('edit-sell-transaction/<int:pk>/', edit_sell_transactionST, name='edit_sell_transactionST'),
+        
         path('sellDealLetterrST/', sellDealLetterrST, name='sellDealLetterrST'),
         path('clientST/', clientST, name='clientST'),
         
-        path('transaction/<int:pk>/edit/', edit_buy_transaction, name='edit_transaction'),
+        path('transaction/<int:pk>/edit/', edit_buy_transactionST, name='edit_transactionST'),
         
     ]
 

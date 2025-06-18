@@ -5,7 +5,7 @@
 
 {% block RMprofile_content %}
   {% if order %}
-    <h3>Order Details</h3>
+    
     <table class="RMbuyorder-table">
       <thead>
         <tr>
@@ -31,7 +31,8 @@
       </tbody>
     </table>
 
-    <h3>Client Details</h3>
+    <h6 style="padding-top: 2%;">Customer Details</h6>
+
     <table class="RMbuyorder-table">
       <thead>
         <tr>
@@ -54,7 +55,7 @@
     </table>
 
     {% if cmr %}
-      <h3>Broker Details</h3>
+    <h6 style="padding-top: 2%;">CMR Details</h6>
       <table class="RMbuyorder-table">
         <thead>
           <tr>
@@ -82,7 +83,8 @@
     {% endif %}
 
     {% if bank_accounts %}
-      <h6 style="padding-top: 2%;">Bank Account Details</h6>
+
+    <h6 style="padding-top: 2%;">Bank Account Details</h6>
       <table class="RMbuyorder-table">
         <thead>
           <tr>
@@ -109,50 +111,56 @@
       <p>No bank account details found.</p>
     {% endif %}
 
-    <h3>Order Transaction Details</h3>
+    <h6 style="padding-top: 2%;">Transaction Details</h6>
+
     <table class="RMbuyorder-table">
       <thead>
         <tr>
           <th>SLNO</th>
           <th>Broker</th>
-          <th>ISIN Number</th>
+          <th>ISIN</th>
           <th>Stock</th>
-          <th>Order Type</th>
-          <th>Avg Buy Price</th>
+          <th>Advisor Type</th>
+          <th>Share Price</th>
           <th>Selling Price</th>
           <th>Qty</th>
-          <th>Amount</th>
+          <th>Total Value</th>
           <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
+        {% for item in TransactionDetails %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ item.broker.broker_name }}</td>
-            <td>{{ item.isin_number }}</td>
-            <td>{{ item.stock_data.company_name }}</td>
-            <td>{{ item.order_type }}</td>
-            <td>{{ item.avg_buy_price }}</td>
+            <td>{{ item.broker.name }}</td>
+            <td>{{ item.stock.isin_no }}</td>
+            <td>{{ item.stock.company_name }}</td>
             <td>
-              <input type="number" class="form-control" value="{{ item.selling_price }}" readonly>
+              {{ item.advisor.advisor_type|title }}
             </td>
-
+            <td>{{ item.stock.share_price }}</td>
+            <td>{{ item.selling_price }}</td>
             <td>{{ item.quantity }}</td>
-            <td>{{ item.amount }}</td>
-            <td>{{ item.status }}</td>
+            <td>{{ item.total_value }}</td>
+            <td>{{ item.RM_status }}</td>
+            <td>
+              <a href="{% url 'RM_User:edit_sell_transaction' item.id %}" class="btn btn-sm btn-outline-primary">✏️</a>
+            </td>
           </tr>
-          <tr>
-            <td colspan="10">No transaction details available.</td>
-          </tr>
+        {% empty %}
+          <tr><td colspan="11">No records found.</td></tr>
+        {% endfor %}
       </tbody>
     </table>
 
     <div class="RMpayment-process">
-      <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
-      <button class="RMpayment-button">Processed To Account Department</button>
+      <h4><strong>Total Amount: </strong> {{ order.total_value }}</h4>
+      <!-- <button class="RMpayment-button">Processed To Account Department</button> -->
     </div>
 
-  {% else %}
-    <p>No order details found.</p>
-  {% endif %}
+    {% else %}
+      <p>No order details found.</p>
+    {% endif %}
+
 {% endblock %}

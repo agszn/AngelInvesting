@@ -535,10 +535,10 @@
     width: 570px;
 }
 
-.accordion-button.collapsed {
+/* .accordion-button.collapsed {
     margin: -2px 0px 0px;
     border: 1px solid black;
-}
+} */
 
 .accordion-body {
     font-family: "Outfit", sans-serif;

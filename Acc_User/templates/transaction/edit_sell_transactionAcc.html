@@ -1,0 +1,63 @@
+{% extends "baseStructureAcc.html" %}
+{% block title %}Shares List{% endblock %}
+{% block Accsubtitle %}Account - Sell Transaction Edit Status {% endblock %}
+
+{% block Accprofile_content %}
+<form method="post">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+
+  <!-- Row 1: Static Display Fields -->
+  <div style="display: flex; margin-bottom: 15px;">
+    <div style="flex: 1; padding: 0 10px;">
+      <label><strong>Order ID</strong></label>
+      <input type="text" value="{{ transaction.order_id }}" class="form-control" readonly style="background-color: #e9ecef;" />
+    </div>
+    <div style="flex: 1; padding: 0 10px;">
+      <label><strong>Stock</strong></label>
+      <input type="text" value="{{ transaction.stock.company_name }}" class="form-control" readonly style="background-color: #e9ecef;" />
+    </div>
+    <div style="flex: 1; padding: 0 10px;">
+      <label><strong>Quantity</strong></label>
+      <input type="text" value="{{ transaction.quantity }}" class="form-control" readonly style="background-color: #e9ecef;" />
+    </div>
+  </div>
+
+  <!-- Row 2: Timestamp -->
+  <div style="display: flex; margin-bottom: 15px;">
+    <div style="flex: 1; padding: 0 10px;">
+      <label><strong>Timestamp</strong></label>
+      <input type="text" value="{{ transaction.timestamp }}" class="form-control" readonly style="background-color: #e9ecef;" />
+    </div>
+    <div style="flex: 2; padding: 0 10px;"></div>
+  </div>
+
+  <!-- Row 3: Editable Field -->
+  <div style="display: flex; margin-bottom: 15px;">
+    <div style="flex: 1; padding: 0 10px;">
+      <label>{{ form.AC_status.label }}</label>
+      {{ form.AC_status }}
+      {% if form.AC_status.errors %}
+        <div class="text-danger">{{ form.AC_status.errors }}</div>
+      {% endif %}
+    </div>
+    <div style="flex: 2; padding: 0 10px;"></div>
+  </div>
+
+  <!-- Row 4: Save & Cancel Buttons -->
+  <div style="display: flex; margin-top: 20px;">
+    <div style="flex: 1; padding: 0 10px;"></div> <!-- Empty space -->
+    <div style="flex: 1; padding: 0 10px;">
+      <button type="submit" style="width: 100%; height: 38px; background-color: #007bff; color: white; border: none; border-radius: 4px;">
+        Save
+      </button>
+    </div>
+    <div style="flex: 1; padding: 0 10px;">
+      <a href="{% url 'Acc_User:SellerSummaryAcc' transaction.order_id %}" style="width: 100%; display: inline-block; text-align: center; padding: 8px 0; background-color: #6c757d; color: white; border-radius: 4px; text-decoration: none;">
+        Cancel
+      </a>
+    </div>
+    <div style="flex: 1; padding: 0 10px;"></div>
+  </div>
+</form>
+{% endblock %}

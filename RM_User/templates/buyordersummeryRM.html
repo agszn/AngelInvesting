@@ -5,7 +5,7 @@
 
 {% block RMprofile_content %}
   {% if order %}
-    <h6 style="padding-top: 2%;">Order Details</h6>
+
     <table class="RMbuyorder-table">
       <thead>
         <tr>
@@ -128,8 +128,10 @@
       <th>Remaining Amount</th>
       <th>Upload Screenshot</th>
       <th>Remark</th>
-      <th>Status</th>
+      <th>RM Status</th>
       <th>Actions</th>
+      <th>AM Status</th>
+
     </tr>
   </thead>
   <tbody>
@@ -170,6 +172,8 @@
           🗑️
         </a> -->
       </td>
+      <td>Pending</td>
+
     </tr>
     {% empty %}
     <tr>
@@ -303,7 +307,7 @@
 
     <div class="RMpayment-process">
       <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
-      <button class="RMpayment-button">Process To Account Department</button>
+      <!-- <button class="RMpayment-button">Process To Account Department</button> -->
     </div>
 
   {% else %}

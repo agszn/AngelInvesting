@@ -511,6 +511,90 @@ from .models import SellTransaction, SellTransactionOtherAdvisor, UserStockInves
 #         messages.error(request, f"Failed to place sell order: {str(e)}")
 
 #     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+# save in 2 different db SellTransactionOtherAdvisor and SellTransaction
+# @require_POST
+# @login_required
+# def sell_stock(request, stock_id):
+#     stock = get_object_or_404(StockData, id=stock_id)
+
+#     try:
+#         advisor_id = request.POST.get('advisor')
+#         broker_id = request.POST.get('broker')
+#         quantity = int(request.POST.get('quantity'))
+
+#         # Parse selling price
+#         selling_price_str = request.POST.get('selling_price')
+#         if selling_price_str:
+#             try:
+#                 selling_price = Decimal(selling_price_str)
+#             except InvalidOperation:
+#                 raise ValueError("Invalid selling price format.")
+#         elif stock.share_price is not None:
+#             selling_price = stock.share_price
+#         else:
+#             raise ValueError("Selling price is required and stock price is not available.")
+
+#         advisor = get_object_or_404(Advisor, id=advisor_id)
+#         broker = get_object_or_404(Broker, id=broker_id)
+
+#         if advisor.advisor_type.lower() == 'other':
+#             SellTransactionOtherAdvisor.objects.create(
+#                 user=request.user,
+#                 advisor=advisor,
+#                 broker=broker,
+#                 stock=stock,
+#                 quantity=quantity,
+#                 selling_price=selling_price,
+#             )
+#             messages.success(request, f"Sell order placed for {stock.company_name} with Advisor 'Other'")
+#         else:
+#             try:
+#                 summary = UserStockInvestmentSummary.objects.get(user=request.user, stock=stock)
+#                 held_qty = summary.quantity_held
+
+#                 # Calculate how many shares are already pending in other sell orders
+#                 pending_qty = SellTransaction.objects.filter(
+#                     user=request.user,
+#                     stock=stock,
+#                     status__in=['processing', 'on_hold']
+#                 ).aggregate(total=models.Sum('quantity'))['total'] or 0
+
+#                 available_qty = held_qty - pending_qty
+
+#                 if quantity > available_qty:
+#                     messages.error(request, f"You only have {available_qty} shares available for selling. Cannot sell {quantity} shares.")
+#                     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+#             except UserStockInvestmentSummary.DoesNotExist:
+#                 messages.error(request, f"You do not hold any shares of {stock.company_name}. Cannot sell.")
+#                 return redirect(request.META.get('HTTP_REFERER', '/'))
+
+#             SellTransaction.objects.create(
+#                 user=request.user,
+#                 advisor=advisor,
+#                 broker=broker,
+#                 stock=stock,
+#                 quantity=quantity,
+#                 selling_price=selling_price,
+#             )
+#             messages.success(request, f"Sell order placed for {stock.company_name} ({quantity} shares at ₹{selling_price})")
+
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         messages.error(request, f"Failed to place sell order: {str(e)}")
+
+#     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from decimal import Decimal, InvalidOperation
+from .models import StockData, SellTransaction, Advisor, Broker, UserStockInvestmentSummary
+
 @require_POST
 @login_required
 def sell_stock(request, stock_id):
@@ -536,46 +620,41 @@ def sell_stock(request, stock_id):
         advisor = get_object_or_404(Advisor, id=advisor_id)
         broker = get_object_or_404(Broker, id=broker_id)
 
-        if advisor.advisor_type.lower() == 'other':
-            SellTransactionOtherAdvisor.objects.create(
+        # Check if user holds the stock
+        try:
+            summary = UserStockInvestmentSummary.objects.get(user=request.user, stock=stock)
+            held_qty = summary.quantity_held
+
+            # Calculate pending sell quantity
+            pending_qty = SellTransaction.objects.filter(
                 user=request.user,
-                advisor=advisor,
-                broker=broker,
                 stock=stock,
-                quantity=quantity,
-                selling_price=selling_price,
-            )
-            messages.success(request, f"Sell order placed for {stock.company_name} with Advisor 'Other'")
-        else:
-            try:
-                summary = UserStockInvestmentSummary.objects.get(user=request.user, stock=stock)
-                held_qty = summary.quantity_held
+                status__in=['processing', 'on_hold']
+            ).aggregate(total=models.Sum('quantity'))['total'] or 0
 
-                # Calculate how many shares are already pending in other sell orders
-                pending_qty = SellTransaction.objects.filter(
-                    user=request.user,
-                    stock=stock,
-                    status__in=['processing', 'on_hold']
-                ).aggregate(total=models.Sum('quantity'))['total'] or 0
+            available_qty = held_qty - pending_qty
 
-                available_qty = held_qty - pending_qty
-
-                if quantity > available_qty:
-                    messages.error(request, f"You only have {available_qty} shares available for selling. Cannot sell {quantity} shares.")
-                    return redirect(request.META.get('HTTP_REFERER', '/'))
-
-            except UserStockInvestmentSummary.DoesNotExist:
-                messages.error(request, f"You do not hold any shares of {stock.company_name}. Cannot sell.")
+            if quantity > available_qty:
+                messages.error(request, f"You only have {available_qty} shares available for selling. Cannot sell {quantity} shares.")
                 return redirect(request.META.get('HTTP_REFERER', '/'))
 
-            SellTransaction.objects.create(
-                user=request.user,
-                advisor=advisor,
-                broker=broker,
-                stock=stock,
-                quantity=quantity,
-                selling_price=selling_price,
-            )
+        except UserStockInvestmentSummary.DoesNotExist:
+            messages.error(request, f"You do not hold any shares of {stock.company_name}. Cannot sell.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        # Save transaction in SellTransaction regardless of advisor type
+        SellTransaction.objects.create(
+            user=request.user,
+            advisor=advisor,
+            broker=broker,
+            stock=stock,
+            quantity=quantity,
+            selling_price=selling_price,
+        )
+
+        if advisor.advisor_type.lower() == 'other':
+            messages.success(request, f"Sell order placed for {stock.company_name} with Advisor 'Other'")
+        else:
             messages.success(request, f"Sell order placed for {stock.company_name} ({quantity} shares at ₹{selling_price})")
 
     except Exception as e:

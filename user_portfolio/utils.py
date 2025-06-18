@@ -1,16 +1,35 @@
 # app_name : user_portfolio
 # utils.py
-from user_portfolio.models import *
-from unlisted_stock_marketplace.models import StockData
+# from user_portfolio.models import *
+# from unlisted_stock_marketplace.models import StockData
 
+# def update_user_holdings(user):
+#     stocks = StockData.objects.filter(buytransaction__user=user, buytransaction__status='completed').distinct()
+
+#     for stock in stocks:
+#         summary, _ = UserStockInvestmentSummary.objects.get_or_create(user=user, stock=stock)
+#         summary.update_from_transactions()
+#         summary.save()
+ 
 def update_user_holdings(user):
-    stocks = StockData.objects.filter(buytransaction__user=user, buytransaction__status='completed').distinct()
+    from user_portfolio.models import BuyTransaction, SellTransaction
+    from unlisted_stock_marketplace.models import StockData
+    from .models import UserStockInvestmentSummary
 
-    for stock in stocks:
+    # Get stock IDs from both buy and sell txns (excluding advisor_type='Other' in sell)
+    buy_stock_ids = BuyTransaction.objects.filter(user=user, status='completed').values_list('stock_id', flat=True)
+    sell_stock_ids = SellTransaction.objects.filter(
+        user=user,
+        status='completed'
+    ).exclude(advisor__advisor_type='Other').values_list('stock_id', flat=True)
+
+    stock_ids = set(list(buy_stock_ids) + list(sell_stock_ids))
+
+    for stock_id in stock_ids:
+        stock = StockData.objects.get(id=stock_id)
         summary, _ = UserStockInvestmentSummary.objects.get_or_create(user=user, stock=stock)
         summary.update_from_transactions()
         summary.save()
- 
 
 
 # utils.py or a shared module like user_helpers.py

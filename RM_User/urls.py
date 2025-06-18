@@ -22,7 +22,7 @@ urlpatterns = [
         
         path('buyordersummary/<str:order_id>/', buyordersummeryRM, name='buyordersummery'),
         
-        path('selldersummeryRM/',selldersummeryRM,name='selldersummeryRM'),
+        path('selldersummeryRM/<str:order_id>/',selldersummeryRM,name='selldersummeryRM'),
         
         path('payment/add/<str:order_id>/', add_or_edit_payment, name='add_payment'),
         path('payment/edit/<int:payment_id>/', add_or_edit_payment, name='edit_payment'),
@@ -37,6 +37,8 @@ urlpatterns = [
 
 
         path('AllsellTransactionSummary/',AllsellTransactionSummary,name='AllsellTransactionSummary'),
+
+        path('edit-sell-transaction/<int:pk>/', edit_sell_transaction, name='edit_sell_transaction'),
 
             
     ]

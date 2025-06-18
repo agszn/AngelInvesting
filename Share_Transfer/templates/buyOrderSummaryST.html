@@ -2,9 +2,10 @@
 {% block title %}Buy Order Summary{% endblock %}
 
 
-{% block STsubtitle %}Buy Order Summary{% endblock %}
+{% block STsubtitle %}Stock Transfer Buy Order Summary{% endblock %}
 
 {% block STprofile_content %}
+        {% if order %}
                 <table class="STbuyorder-table">
                     <thead>
                         <tr>
@@ -12,8 +13,9 @@
                             <th>Order_Id</th>
                             <th>Date of Order</th>
                             <th>Date of Execution</th>
-                            <th>RM</th>
-                            <th>Accounts</th>
+                            <th>Username</th>
+                            <th>User ID</th>
+                            <th>Assigned RM</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -22,8 +24,8 @@
                             <td>{{ order.order_id }}</td>
                             <td>{{ order.timestamp|date:"d-m-Y" }}</td>
                             <td>{{ order.timestamp|time:"h:i A" }}</td>
-                            <!-- <td>{{ order.user.profile.user.username }}</td>
-                            <td>{{ order.user.profile.custom_user_id }}</td> -->
+                            <td>{{ order.user.profile.user.username }}</td>
+                            <td>{{ order.user.profile.custom_user_id }}</td>
                             <td>{{ order.user.profile.user.assigned_rm }}</td> 
                         </tr>
                     </tbody>
@@ -52,7 +54,7 @@
                     <table class="STbuyorder-table">
                         <thead>
                             <tr>
-                                <th>Broker Name</th>
+                                <th>CMR Broker Name</th>
                                 <th>Broker Id</th>
                                 <th>Client Id</th>
                                 <th>Broker Pan Number</th>
@@ -62,21 +64,13 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Zeroda Brokering Limited</td>
-                                <td>12081600</td>
-                                <td>72264491</td>
-                                <td>-</td>
-                                <td>zeroda@gmail.com</td>
-                                <td>58965742</td>
+                                <td>{{ cmr.broker.name }}</td>
+                                <td>{{ cmr.broker.broker_id }}</td>
+                                <td>{{ cmr.client_id_input }}</td>
+                                <td>{{ cmr.broker.pan }}</td>
+                                <td>{{ cmr.broker.email }}</td>
+                                <td>{{ cmr.broker.contact }}</td>
                             </tr>
-                                <tr>
-                                    <td>{{ cmr.broker.name }}</td>
-                                    <td>{{ cmr.broker.broker_id }}</td>
-                                    <td>{{ cmr.client_id_input }}</td>
-                                    <td>{{ cmr.broker.pan }}</td>
-                                    <td>{{ cmr.broker.email }}</td>
-                                    <td>{{ cmr.broker.contact }}</td>
-                                </tr>
                         </tbody>
                     </table>
                 {% else %}
@@ -112,17 +106,16 @@
                 {% endif %}
 
             <div class="STorder-details-transaction">
-                <table class="STbuyorder-table">
+                <!-- <table class="STbuyorder-table">
                     <thead>
                        <tr>
                             <th>SLNO</th>
-                            <th>Broker</th>
-                            <th>ISIN Number</th>
-                            <th>Stock</th>
-                            <th>Buy price</th>
-                            <th>Qty</th>
+                            <th>Transaction Date</th>
+                            <th>Bank Name</th>
                             <th>Amount</th>
-                            <th>Action</th>
+                            <th>Balance Amount</th>
+                            <th>Screenshot</th>
+                            <th>Amount</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -150,7 +143,7 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-                </table>
+                </table> -->
                 <table class="STbuyorder-table">
                     <thead>
                         <tr>
@@ -181,7 +174,7 @@
                             <td>{{ item.total_amount }}</td>
                             <td>{{ item.status }}</td>
                             <td>
-                            <a href="{% url 'ST_User:edit_transaction' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
+                            <a href="{% url 'ST_User:edit_transactionST' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
 
                             </td>
 
@@ -198,4 +191,7 @@
                     <button class="STpayment-button">Generate Deal Letter</button>
                 </div>
             </div>
+        {% else %}
+            <p>No order details found.</p>
+        {% endif %}
 {% endblock %}

@@ -261,6 +261,9 @@ class SellTransactionOtherAdvisor(models.Model):
         return f"SellOther - {self.order_id} - {self.stock.company_name} x{self.quantity}"
     
 
+
+
+
 class UserPortfolioSummary(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="portfolio_summary")
     total_invested = models.DecimalField(max_digits=15, decimal_places=2, default=0)
@@ -283,19 +286,21 @@ from unlisted_stock_marketplace.models import StockData
 from site_Manager.models import Advisor, Broker
 from django.db.models import Sum, F
 from decimal import Decimal
+from decimal import Decimal
+from django.db.models import Sum, F, Q
 
 class UserStockInvestmentSummary(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    stock = models.ForeignKey(StockData, on_delete=models.CASCADE)
+    stock = models.ForeignKey('unlisted_stock_marketplace.StockData', on_delete=models.CASCADE)
 
-    advisor = models.ForeignKey(Advisor, on_delete=models.SET_NULL, null=True, blank=True)
-    broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=True)
+    advisor = models.ForeignKey('site_Manager.Advisor', on_delete=models.SET_NULL, null=True, blank=True)
+    broker = models.ForeignKey('site_Manager.Broker', on_delete=models.SET_NULL, null=True, blank=True)
 
     quantity_held = models.PositiveIntegerField(default=0)
     avg_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    share_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)  # from stock.share_price
-    ltp = models.DecimalField(max_digits=12, decimal_places=2, default=0)          # from stock.ltp
+    share_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)  # Current price
+    ltp = models.DecimalField(max_digits=12, decimal_places=2, default=0)          # Previous price
     previous_day_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     investment_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
@@ -312,9 +317,16 @@ class UserStockInvestmentSummary(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     def update_from_transactions(self):
-        buy_txns = BuyTransaction.objects.filter(user=self.user, stock=self.stock, status='completed')
-        sell_txns = SellTransaction.objects.filter(user=self.user, stock=self.stock, status='completed')
+        from user_portfolio.models import BuyTransaction, SellTransaction
 
+        buy_txns = BuyTransaction.objects.filter(user=self.user, stock=self.stock, status='completed')
+        sell_txns = SellTransaction.objects.filter(
+            user=self.user,
+            stock=self.stock,
+            status='completed'
+        ).exclude(advisor__advisor_type='Other')
+
+        # Basic counts and totals
         self.buy_order_count = buy_txns.count()
         self.buy_order_total = buy_txns.aggregate(
             total=Sum(F('price_per_share') * F('quantity'))
@@ -325,33 +337,35 @@ class UserStockInvestmentSummary(models.Model):
             total=Sum(F('selling_price') * F('quantity'))
         )['total'] or Decimal(0)
 
-        total_quantity = buy_txns.aggregate(total=Sum('quantity'))['total'] or 0
-        total_cost = buy_txns.aggregate(
+        total_bought_qty = buy_txns.aggregate(total=Sum('quantity'))['total'] or 0
+        total_bought_cost = buy_txns.aggregate(
             total=Sum(F('price_per_share') * F('quantity'))
         )['total'] or Decimal(0)
 
-        self.quantity_held = total_quantity
-        self.avg_price = (total_cost / total_quantity) if total_quantity else Decimal(0)
+        total_sold_qty = sell_txns.aggregate(total=Sum('quantity'))['total'] or 0
 
+        self.quantity_held = max(total_bought_qty - total_sold_qty, 0)
+        self.avg_price = (total_bought_cost / total_bought_qty) if total_bought_qty else Decimal(0)
+
+        # Set prices from stock
         self.share_price = self.stock.share_price or Decimal(0)
         self.ltp = self.stock.ltp or Decimal(0)
-        self.previous_day_price = self.stock.ltp or Decimal(0)
+        self.previous_day_price = self.ltp
 
+        # Calculated fields
         self.investment_amount = self.quantity_held * self.avg_price
-        self.market_value = self.quantity_held * self.ltp
+        self.market_value = self.quantity_held * self.share_price
         self.overall_gain_loss = self.market_value - self.investment_amount
-        self.day_gain_loss = self.quantity_held * (self.ltp - self.previous_day_price)
+        self.day_gain_loss = self.quantity_held * (self.share_price - self.previous_day_price)
 
-        # ✅ Assign most recent advisor & broker used in BuyTransaction
+        # Set last buy advisor/broker
         latest_txn = buy_txns.order_by('-timestamp').first()
         if latest_txn:
             self.advisor = latest_txn.advisor
             self.broker = latest_txn.broker
 
-
-
     class Meta:
-            unique_together = ('user', 'stock')
+        unique_together = ('user', 'stock')
 
     def __str__(self):
-            return f"{self.user.username} - {self.stock.company_name}"
+        return f"{self.user.username} - {self.stock.company_name}"

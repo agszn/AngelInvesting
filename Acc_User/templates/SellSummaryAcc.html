@@ -2,53 +2,57 @@
 {% block title %}Shares List{% endblock %}
 
 
-{% block subtitle %}Sell Order Summary{% endblock %}
+{% block Accsubtitle %} Accounts Sell Order Summary{% endblock %}
 
 {% block Accprofile_content %}
-                <table class="Accbuyorder-table">
-                    <thead>
-                        <tr>
-                            <th>Sl.no</th>
-                            <th>Order_Id</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Client Name</th>
-                            <th>Client Id</th>
-                            <th>RM</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Ord_01</td>
-                            <td>11-04-2025</td>
-                            <td>11.30am</td>
-                            <td>Suraj Deshpande</td>
-                            <td>102457</td>
-                            <td>Vishnu</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table class="Accbuyorder-table">
-                    <thead>
-                        <tr>
-                            <th>Customer_name</th>
-                            <th>Customer_Id</th>
-                            <th>Pan Number</th>
-                            <th>Email_id</th>
-                            <th>MObile Number</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Nikhil Chavan</td>
-                            <td>thangiv_01</td>
-                            <td>GHTHD2523M</td>
-                            <td>nikhilc@gmail.com</td>
-                            <td>7676801529</td>
-                        </tr>
-                    </tbody>
-                </table>
+        {% if order %}
+            <table class="Accbuyorder-table">
+                <thead>
+                    <tr>
+                        <th>Sl.no</th>
+                        <th>Order_Id</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Client Name</th>
+                        <th>Client Id</th>
+                        <th>RM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.order_id }}</td>
+                        <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+                        <td>{{ order.timestamp|time:"h:i A" }}</td>
+                        <td>{{ order.user.profile.user.username }}</td>
+                        <td>{{ order.user.profile.custom_user_id }}</td>
+                        <td>{{ order.user.profile.user.assigned_rm }}</td>
+                </tbody>
+            </table>
+            <h6 style="padding-top: 2%;">Customer Details</h6>
+            <table class="Accbuyorder-table">
+                <thead>
+                    <tr>
+                        <th>Customer_name</th>
+                        <th>Customer_Id</th>
+                        <th>Pan Number</th>
+                        <th>Email_id</th>
+                        <th>MObile Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td>{{ order.user.profile.user.username }}</td>
+                    <td>{{ order.user.profile.custom_user_id }}</td>
+                    <td>{{ order.user.profile.pan_number }}</td>
+                    <td>{{ order.user.email }}</td>
+                    <td>{{ order.user.profile.mobile_number }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            {% if cmr %}
+                <h6 style="padding-top: 2%;">CMR Details</h6>
                 <table class="Accbuyorder-table">
                     <thead>
                         <tr>
@@ -62,114 +66,96 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Zeroda Brokering Limited</td>
-                            <td>12081600</td>
-                            <td>72264491</td>
-                            <td>-</td>
-                            <td>zeroda@gmail.com</td>
-                            <td>58965742</td>
-                        </tr>
-                        <tr>
-                            <td>Groww Brokering Limited</td>
-                            <td>12081600</td>
-                            <td>72264491</td>
-                            <td>-</td>
-                            <td>groww@gmail.com</td>
-                            <td>58965742</td>
+                            <td>{{ cmr.broker.name }}</td>
+                            <td>{{ cmr.broker.broker_id }}</td>
+                            <td>{{ cmr.client_id_input }}</td>
+                            <td>{{ cmr.broker.pan }}</td>
+                            <td>{{ cmr.broker.email }}</td>
+                            <td>{{ cmr.broker.contact }}</td>
                         </tr>
                     </tbody>
                 </table>
+            {% else %}
+                <p>No broker details found.</p>
+            {% endif %}
+                
+            {% if bank_accounts %}
+                <h6 style="padding-top: 2%;">Bank Details</h6>
                 <table class="Accbuyorder-table">
                     <thead>
                         <tr>
                             <th>Bank Name</th>
-                            <th>Bank A/c Details</th>
-                            <th>IFS</th>
+                            <th>Account Holder Name</th>
+                            <th>Account Number</th>
+                            <th>IFSC Code</th>
+                            <th>Account Type</th>
                         </tr>
                     </thead>
                     <tbody>
+                    {% for account in bank_accounts %}
                         <tr>
-                            <td>Bank Of Baroda</td>
-                            <td>521452663258</td>
-                            <td>BARB0BELGAU</td>
+                            <td>{{ account.bank_name }}</td>
+                            <td>{{ account.account_holder_name }}</td>
+                            <td>{{ account.account_number }}</td>
+                            <td>{{ account.ifsc_code }}</td>
+                            <td>{{ account.account_type }}</td>
                         </tr>
-                        <tr>
-                            <td>Kotak Mahindra Bank</td>
-                            <td>521452663258</td>
-                            <td>KKBK0008227</td>
-                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
-                <div class="Accorder-details-transaction">
-                        <table class="Accbuyorder-table">
+            {% else %}
+                <p>No bank account details found.</p>
+            {% endif %}
+                
+            <div class="Accorder-details-transaction">
+                <h6 style="padding-top: 2%;">Transaction Details</h6>
+                    <table class="Accbuyorder-table">
                         <thead>
                                 <tr>
                                 <th>SLNO</th>
                                 <th>Broker</th>
-                                <th>ISIN Number</th>
+                                <th>ISIN</th>
                                 <th>Stock</th>
-                                <th>Order Type</th>
-                                <th>Avg Buy Price</th>
+                                <th>Advisor Type</th>
+                                <th>Share Price</th>
                                 <th>Selling Price</th>
                                 <th>Qty</th>
-                                <th>Amount</th>
+                                <th>Total Value</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                                 </tr>
                         </thead>
                         <tbody>
-                                <tr>
-                                <td>1</td>
-                                <td>zeroda Brokering limited</td>
-                                <td>INE012L01014</td>
-                                <td>NNS LTD</td>
-                                <td>Limit</td>
-                                <td>1850</td>
-                                <td><input type="number" class="form-control" value="250" readonly></td>
-                                <td>250</td>
-                                <td>462500.00</td>
-                                <td>Successful</td>
-                                </tr>
-                                <tr>
-                                <td>1</td>
-                                <td>zeroda Brokering limited</td>
-                                <td>INE012L01015</td>
-                                <td>PHILIPS LIGHTING</td>
-                                <td>Market</td>
-                                <td>1375</td>
-                                <td><input type="number" class="form-control" value="250" readonly></td>
-                                <td>100</td>
-                                <td>137500.00</td>
-                                <td>Successful</td>
-                                </tr>
-                                <tr>
-                                <td>1</td>
-                                <td>zeroda Brokering limited</td>
-                                <td>INE012L01016</td>
-                                <td>TATA CAPITAL LTD</td>
-                                <td>Market</td>
-                                <td>925</td>
-                                <td><input type="number" class="form-control" value="250" readonly></td>
-                                <td>400</td>
-                                <td>370000.00</td>
-                                <td>Successful</td>
-                                </tr>
-                                <tr>
-                                <td>1</td>
-                                <td>Groww Brokering limited</td>
-                                <td>INE012L01017</td>
-                                <td>TATA REFRACTERIES LTD</td>
-                                <td>Market</td>
-                                <td>1695</td>
-                                <td><input type="number" class="form-control" value="250" readonly></td>
-                                <td>100</td>
-                                <td>169500.00</td>
-                                <td>Successful</td>
-                                </tr>
+                            {% for item in TransactionDetails %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.broker.name }}</td>
+                                <td>{{ item.stock.isin_no }}</td>
+                                <td>{{ item.stock.company_name }}</td>
+                                <td>
+                                {{ item.advisor.advisor_type|title }}
+                                </td>
+                                <td>{{ item.stock.share_price }}</td>
+                                <td>{{ item.selling_price }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.total_value }}</td>
+                                <td>{{ item.AC_status }}</td>
+                                <td>
+                                <a href="{% url 'Acc_User:edit_sell_transactionAcc' item.id %}" class="btn btn-sm btn-outline-primary">✏️</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="11">No records found.</td></tr>
+                            {% endfor %}
                         </tbody>
-                        </table>
-                        <div class="Accpayment-process">
-                        <h4><Big>Total: </Big>1139500.00</h4>
-                        <button class="Accpayment-button">Process To Account Department</button>
-                        </div>
-                </div>
+                    </table>
+                    
+                    <div class="Accpayment-process">
+                        <h4><strong>Total Amount: </strong> {{ order.total_value }}</h4>
+                        <!-- <button class="Accpayment-button">Process To Account Department</button> -->
+                    </div>
+            </div>
+        {% else %}
+            <p>No order details found.</p>
+        {% endif %}
 {% endblock %}

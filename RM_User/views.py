@@ -319,6 +319,46 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import RMPaymentRecord, BuyTransaction, RMUserView
 
+# @csrf_exempt
+# @login_required
+# def add_or_edit_payment(request, order_id=None, payment_id=None):
+#     if request.method == 'POST':
+#         if payment_id:  # Edit flow
+#             payment = get_object_or_404(RMPaymentRecord, id=payment_id)
+#         else:  # Add flow
+#             order = get_object_or_404(BuyTransaction, order_id=order_id)
+#             rm_view = get_object_or_404(RMUserView, order_id=order_id)
+#             payment = RMPaymentRecord(
+#                 rm_user_view=rm_view,
+#                 date=timezone.now().date(),
+#                 time=timezone.now().time()
+#             )
+
+#         # Process form fields safely
+#         payment.bank_name = request.POST.get('bank_name')
+#         payment.amount = Decimal(request.POST.get('amount') or '0')
+#         payment.remaining_amount = Decimal(request.POST.get('remaining_amount') or '0')
+#         payment.remark = request.POST.get('remark')
+#         payment.payment_status = request.POST.get('payment_status', 'pending')
+
+#         if request.FILES.get('screenshot'):
+#             payment.screenshot = request.FILES['screenshot']
+
+#         payment.save()
+#         return redirect('RM_User:buyordersummery', order_id=payment.rm_user_view.order_id)
+
+#     return HttpResponseBadRequest("Invalid request method")
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponseBadRequest
+from decimal import Decimal
+
+from .models import RMPaymentRecord, RMUserView, BuyTransaction
+
 @csrf_exempt
 @login_required
 def add_or_edit_payment(request, order_id=None, payment_id=None):
@@ -334,15 +374,26 @@ def add_or_edit_payment(request, order_id=None, payment_id=None):
                 time=timezone.now().time()
             )
 
-        # Process form fields safely
+        # Input values
         payment.bank_name = request.POST.get('bank_name')
-        payment.amount = Decimal(request.POST.get('amount') or '0')
-        payment.remaining_amount = Decimal(request.POST.get('remaining_amount') or '0')
+        entered_amount = Decimal(request.POST.get('amount') or '0')
+        payment.amount = entered_amount
         payment.remark = request.POST.get('remark')
         payment.payment_status = request.POST.get('payment_status', 'pending')
 
         if request.FILES.get('screenshot'):
             payment.screenshot = request.FILES['screenshot']
+
+        # Auto-calculate remaining amount
+        rm_view = payment.rm_user_view
+        total_expected_amount = rm_view.total_amount  # <-- Assumes `total_amount` exists on RMUserView
+
+        # Sum of all other payments for this rm_view (excluding current one if editing)
+        previous_payments = RMPaymentRecord.objects.filter(rm_user_view=rm_view).exclude(id=payment.id)
+        total_paid_before = previous_payments.aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+
+        # Remaining = Total expected - (Previous paid + Current amount)
+        payment.remaining_amount = total_expected_amount - (total_paid_before + entered_amount)
 
         payment.save()
         return redirect('RM_User:buyordersummery', order_id=payment.rm_user_view.order_id)
@@ -498,12 +549,29 @@ def dashboardRM(request):
 def ordersRM(request):
     return render(request, 'ordersRM.html')
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from itertools import chain
+from operator import attrgetter
+
 @login_required
 def sellorderRM(request):
     rm_user = request.user
     assigned_users = CustomUser.objects.filter(assigned_rm=rm_user)
-    sell_orders = SellTransaction.objects.filter(user__in=assigned_users).order_by('-timestamp')
-    return render(request, 'sellorderRM.html', {'sell_orders': sell_orders})
+
+    # Fetch both types of sell transactions
+    sell_orders_main = SellTransaction.objects.filter(user__in=assigned_users).order_by('-timestamp')
+    # sell_orders_other = SellTransactionOtherAdvisor.objects.filter(user__in=assigned_users)
+
+    # Combine and sort them by timestamp (most recent first)
+    # combined_sell_orders = sorted(
+    #     chain(sell_orders_main, sell_orders_other),
+    #     key=attrgetter('timestamp'),
+    #     reverse=True
+    # )
+
+    return render(request, 'sellorderRM.html', {'sell_orders': sell_orders_main})
+
 
 @login_required
 def ShareListRM(request):
@@ -514,35 +582,159 @@ from django.contrib.auth.decorators import login_required
 from user_portfolio.models import SellTransaction
 from user_auth.models import UserProfile, CMRCopy, BankAccount
 
+# @login_required
+# def selldersummeryRM(request):
+#     order_id = request.GET.get('order_id')
+
+#     if not order_id:
+#         return render(request, 'selldersummeryRM.html', {'order': None})
+
+#     # Get the sell transaction
+#     order = get_object_or_404(SellTransaction, order_id=order_id)
+
+#     # Get the user's profile
+#     try:
+#         profile = order.user.profile
+#     except UserProfile.DoesNotExist:
+#         profile = None
+
+#     # Get the CMR copy for this user (assuming latest or first)
+#     cmr = CMRCopy.objects.filter(user_profile=profile).first() if profile else None
+
+#     # Get all bank accounts for this user
+#     bank_accounts = BankAccount.objects.filter(user_profile=profile) if profile else None
+
+#     context = {
+#         'order': order,
+#         'cmr': cmr,
+#         'bank_accounts': bank_accounts,
+#     }
+
+#     return render(request, 'selldersummeryRM.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# @login_required
+# def selldersummeryRM(request, order_id):
+#     # Get the base transaction from either model
+#     base_transaction = (
+#         SellTransaction.objects.filter(order_id=order_id).first() or
+#         SellTransactionOtherAdvisor.objects.filter(order_id=order_id).first()
+#     )
+#     if not base_transaction:
+#         return render(request, "not_found.html", {"message": "Sell order not found."})
+
+#     user_profile = base_transaction.user.profile
+
+#     cmr = CMRCopy.objects.filter(user_profile=user_profile).first()
+#     bank_accounts = BankAccount.objects.filter(user_profile=user_profile)
+#     rm_view = RMUserView.objects.filter(order_id=order_id).first()
+
+#     # Get matching transactions from both models
+#     sell_txns_main = SellTransaction.objects.filter(order_id=order_id)
+#     sell_txns_other = SellTransactionOtherAdvisor.objects.filter(order_id=order_id)
+
+#     # Merge and annotate with model_name for template logic
+#     all_transactions = []
+#     for txn in chain(sell_txns_main, sell_txns_other):
+#         txn.model_name = txn.__class__.__name__
+#         all_transactions.append(txn)
+
+#     # Payment calculation
+#     total_paid = rm_view.payment_records.aggregate(Sum('amount'))['amount__sum'] if rm_view and rm_view.payment_records.exists() else 0
+#     total_order_value = sum([txn.total_value or 0 for txn in all_transactions])
+#     remaining_amount = total_order_value - total_paid
+
+#     context = {
+#         'order': base_transaction,
+#         'cmr': cmr,
+#         'bank_accounts': bank_accounts,
+#         'rm_view': rm_view,
+#         'TransactionDetails': all_transactions,
+#         'remaining_amount': remaining_amount,
+#     }
+
+#     return render(request, 'selldersummeryRM.html', context)
+
+
+
+
+
+
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render
+from django.db.models import Sum
+from itertools import chain  # Optional now, but can be removed
+from .models import SellTransaction, CMRCopy, BankAccount, RMUserView
+
 @login_required
-def selldersummeryRM(request):
-    order_id = request.GET.get('order_id')
+def selldersummeryRM(request, order_id):
+    # Get the base transaction from SellTransaction only
+    base_transaction = get_object_or_404(SellTransaction, order_id=order_id)
+    
+    user_profile = base_transaction.user.profile
 
-    if not order_id:
-        return render(request, 'selldersummeryRM.html', {'order': None})
+    # Related data
+    cmr = CMRCopy.objects.filter(user_profile=user_profile).first()
+    bank_accounts = BankAccount.objects.filter(user_profile=user_profile)
+    rm_view = RMUserView.objects.filter(order_id=order_id).first()
 
-    # Get the sell transaction
-    order = get_object_or_404(SellTransaction, order_id=order_id)
+    # Get all transactions with this order_id (if multiples exist)
+    sell_txns = SellTransaction.objects.filter(order_id=order_id)
 
-    # Get the user's profile
-    try:
-        profile = order.user.profile
-    except UserProfile.DoesNotExist:
-        profile = None
+    # Annotate each with model name (optional, if used in template logic)
+    for txn in sell_txns:
+        txn.model_name = "SellTransaction"
 
-    # Get the CMR copy for this user (assuming latest or first)
-    cmr = CMRCopy.objects.filter(user_profile=profile).first() if profile else None
-
-    # Get all bank accounts for this user
-    bank_accounts = BankAccount.objects.filter(user_profile=profile) if profile else None
+    # Calculate total paid and remaining
+    total_paid = rm_view.payment_records.aggregate(Sum('amount'))['amount__sum'] if rm_view and rm_view.payment_records.exists() else 0
+    total_order_value = sum([txn.total_value or 0 for txn in sell_txns])
+    remaining_amount = total_order_value - total_paid
 
     context = {
-        'order': order,
+        'order': base_transaction,
         'cmr': cmr,
         'bank_accounts': bank_accounts,
+        'rm_view': rm_view,
+        'TransactionDetails': sell_txns,
+        'remaining_amount': remaining_amount,
     }
 
     return render(request, 'selldersummeryRM.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @login_required
@@ -554,14 +746,14 @@ def angelInvestRM(request):
 # 
 # 
 # ---------------------------------------------------------------------
-# ------------------ Edit Delete Transactions -------------
+# ------------------ Edit Delete  BUY Transactions -------------
 # ------------------------------------------------------------------
 # 
 # 
 # views.py
 from django.shortcuts import render, get_object_or_404, redirect
-from user_portfolio.models import BuyTransaction
-from user_portfolio.forms import BuyTransactionEditForm
+from user_portfolio.models import *
+from user_portfolio.forms import *
 from django.contrib.auth.decorators import login_required
 
 # @login_required
@@ -621,3 +813,46 @@ def delete_buy_transaction(request, pk):
     order_id = transaction.order_id  # Capture before deleting
     transaction.delete()
     return redirect('RM_User:buyordersummery', order_id=order_id)  # Change as per your URL name
+
+
+# 
+# 
+# ---------------------------------------------------------------------
+# ------------------ Edit Delete  SELL Transactions -------------
+# ------------------------------------------------------------------
+# 
+# 
+# views.py
+
+@login_required
+def edit_sell_transaction(request, pk):
+    transaction = get_object_or_404(SellTransaction, pk=pk)
+    order_id = transaction.order_id
+
+    old_rm_status = transaction.RM_status
+    old_ac_status = transaction.AC_status
+    old_status = transaction.status
+
+    if request.method == 'POST':
+        form = SellTransactionEditForm(request.POST, instance=transaction, user=request.user)
+        if form.is_valid():
+            tx = form.save(commit=False)
+
+            user_type = getattr(request.user, 'user_type', None)
+
+            if user_type == 'RM' and old_rm_status != 'completed' and tx.RM_status == 'completed':
+                tx.RMApproved = request.user
+            elif user_type == 'AC' and old_ac_status != 'completed' and tx.AC_status == 'completed':
+                tx.ACApproved = request.user
+            elif user_type == 'ST' and old_status != 'completed' and tx.status == 'completed':
+                tx.STApproved = request.user
+
+            tx.save()
+            return redirect('RM_User:selldersummeryRM', order_id=order_id)
+    else:
+        form = SellTransactionEditForm(instance=transaction, user=request.user)
+
+    return render(request, 'transaction/edit_sell_transaction.html', {
+        'form': form,
+        'transaction': transaction,
+    })

@@ -2,10 +2,10 @@
 {% block title %}Shares List{% endblock %}
 
 
-{% block subtitle %}Buy Order Summary{% endblock %}
+{% block Accsubtitle %}Accounts - Buy Order Summary{% endblock %}
 
 {% block Accprofile_content %}
-            <div class="Accorder-details">
+            <div class="order-details-transaction">
                 <table class="Accbuyorder-table">
                     <thead>
                         <tr>
@@ -28,6 +28,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <h6 style="padding-top: 2%;">Customer Details</h6>
                 <table class="Accbuyorder-table">
                     <thead>
                         <tr>
@@ -49,6 +50,7 @@
                     </tbody>
                 </table>
                 {% if cmr %}
+                <h6 style="padding-top: 2%;">CMR Details</h6>
                     <table class="Accbuyorder-table">
                         <thead>
                             <tr>
@@ -76,6 +78,7 @@
                 {% endif %}
 
                 {% if bank_accounts %}
+                <h6 style="padding-top: 2%;">Bank Details</h6>
                     <table class="Accbuyorder-table">
                         <thead>
                             <tr>
@@ -103,6 +106,7 @@
                 {% endif %}
             </div>
             <div class="order-details-transaction">
+                <h6 style="padding-top: 2%;">Payment Details</h6>
                 <table class="Accbuyorder-table">
                     <thead>
                         <tr>
@@ -113,7 +117,9 @@
                             <th>Remaining Amount</th>
                             <th>Upload Screenshot</th>
                             <th>Remark</th>
-                            <th>Status</th>
+                            <th>RM Status</th>
+                            <th>AM Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -141,6 +147,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <h6 style="padding-top: 2%;">Transaction Details</h6>
                 <table class="Accbuyorder-table">
                     <thead>
                         <tr>
@@ -171,7 +178,7 @@
                             <td>{{ item.total_amount }}</td>
                             <td>{{ item.AC_status }}</td>
                             <td>
-                            <a href="{% url 'Acc_User:edit_transaction' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
+                            <a href="{% url 'Acc_User:edit_transactionAcc' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
 
                             <!-- <a href="{% url 'RM_User:delete_transaction' pk=item.id %}"
                                 onclick="return confirm('Are you sure you want to delete this transaction?');"

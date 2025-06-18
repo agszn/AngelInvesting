@@ -107,6 +107,15 @@
         .RMbuyorder-table  tbody tr:nth-child(even) {
             background-color: #f7fbff;
         }
+        .view {
+            display: inline-block;
+            padding: 6px 10px;
+            background-color: #3a456d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+        }
         .stock-page-header {
             text-align: center;
             margin-bottom: 20px;
@@ -244,7 +253,7 @@
                 <div class="RMheading">
                     <h3>{% block SubTitleRM %}{% endblock %}</h3>
                     <div class="RMsearch-bar">
-
+                        
                         {% block RMSearch_content %}
 
                         {% endblock %}
@@ -252,6 +261,13 @@
                     </div>
                 </div>
                 <div class="RMtable-scroll-container">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages|slice:"-2:" %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     {% block RMprofile_content %}
 
                     {% endblock %}
