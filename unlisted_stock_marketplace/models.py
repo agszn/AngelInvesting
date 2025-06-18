@@ -560,7 +560,7 @@ class CustomFieldValue(models.Model):
     description = models.TextField(max_length=775, blank=True, null=True)
 
     int_value = models.IntegerField(blank=True, null=True)
-    dec_value = models.DecimalField(max_digits=20, decimal_places=4, blank=True, null=True)
+    dec_value = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
     char_value = models.TextField(blank=True, null=True)
     date_value = models.DateField(blank=True, null=True)
 

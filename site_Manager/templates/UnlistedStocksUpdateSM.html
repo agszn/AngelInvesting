@@ -59,6 +59,7 @@
                     <th>Sl.no</th>
                     <th>Company Name</th>
                     <th>Industry</th>
+                    <th>Scrip Name</th>
                     <th>Conviction Level</th>
                     <th>Current Price</th>
                     <th>Last Price</th>
@@ -85,6 +86,12 @@
                                         <td>
                                             <input type="text" name="sector" value="{{ snapshot.stock.sector|default_if_none:'' }}"  readonly/>
                                         </td>
+
+                                        <!-- Editable scrip_name -->
+                                        <td>
+                                            <input type="text" name="sector" value="{{ snapshot.stock.scrip_name|default_if_none:'' }}"  readonly/>
+                                        </td>
+
 
                                         <!-- Conviction Dropdown -->
                                         <td>
