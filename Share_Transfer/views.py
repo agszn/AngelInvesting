@@ -73,10 +73,69 @@ def buyOrderSummaryST(request, order_id):
         'TransactionDetails': BuyTransaction.objects.filter(order_id=order_id),
         'remaining_amount': remaining_amount,
         'user_type': user_type,
+        'st_status_choices': [(k, ST_STATUS_LABELS[k]) for k, _ in BuyTransaction._meta.get_field('status').choices],
     }
 
     return render(request, 'buyOrderSummaryST.html', context)
 
+
+# @login_required
+# def edit_transaction_st_status(request, transaction_id):
+#     if request.method == 'POST':
+#         transaction = get_object_or_404(BuyTransaction, id=transaction_id)
+#         if request.user.user_type == 'ST':
+#             transaction.status = request.POST.get('status')
+#             transaction.save()
+#             messages.success(request, "Share Transfer Status updated successfully.")
+#         else:
+#             messages.error(request, "Unauthorized access.")
+#     return redirect(request.META.get('HTTP_REFERER', '/'))
+# ST buy
+@login_required
+def edit_transaction_st_status(request, transaction_id):
+    if request.method == 'POST':
+        transaction = get_object_or_404(BuyTransaction, id=transaction_id)
+        
+        if request.user.user_type == 'ST':
+            new_status = request.POST.get('status')
+            transaction.status = new_status
+            
+            if new_status == 'completed':
+                transaction.STApproved = request.user
+            
+            transaction.save()
+            messages.success(request, "Share Transfer Status updated successfully.")
+        else:
+            messages.error(request, "Unauthorized access.")
+            
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+# ST sell
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
+@csrf_exempt
+@login_required
+def edit_sell_transaction_st_status(request, transaction_id):
+    if request.method == 'POST':
+        transaction = get_object_or_404(SellTransaction, id=transaction_id)
+
+        if request.user.user_type == 'ST':
+            new_status = request.POST.get('status')
+            transaction.status = new_status
+
+            if new_status == 'completed':
+                transaction.STApproved = request.user
+
+            transaction.save()
+            messages.success(request, "Sell Transaction Share Transfer Status updated successfully.")
+        else:
+            messages.error(request, "Unauthorized access.")
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -190,6 +249,7 @@ def SellerSummaryST(request, order_id):
         'TransactionDetails': sell_txns,
         'remaining_amount': remaining_amount,
         'user_type': user_type,
+        'st_status_choices': [(k, ST_STATUS_LABELS[k]) for k, _ in BuyTransaction._meta.get_field('status').choices],
     }
 
     return render(request, 'SellSummaryST.html', context)

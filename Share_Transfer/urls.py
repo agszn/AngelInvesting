@@ -29,6 +29,10 @@ urlpatterns = [
         
         path('transaction/<int:pk>/edit/', edit_buy_transactionST, name='edit_transactionST'),
         
+        path('transaction/st_status/edit/<int:transaction_id>/', edit_transaction_st_status, name='edit_transaction_st_status'),
+        
+        path('edit-sell-st-status/<int:transaction_id>/', edit_sell_transaction_st_status, name='edit_sell_transaction_st_status'),
+
     ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

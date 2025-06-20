@@ -49,6 +49,21 @@ def stock_list(request):
     stocks = StockData.objects.filter(company_name__icontains=query) if query else StockData.objects.all()
     return render(request, 'stocks/stock_list.html', {'stocks': stocks, 'query': query})
 
+def all_stocks_ajax(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        stocks = StockData.objects.all()
+        data = []
+
+        for stock in stocks:
+            data.append({
+                'id': stock.id,
+                'company_name': stock.company_name,
+                'logo': request.build_absolute_uri(stock.logo.url) if stock.logo else '',
+            })
+
+        return JsonResponse(data, safe=False)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
 from .models import CustomFieldDefinition, CustomFieldValue, TableHeader
 
 # balance Sheet chash flow etc

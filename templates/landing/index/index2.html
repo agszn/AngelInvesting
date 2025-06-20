@@ -56,24 +56,19 @@
       <div class="hero-headers">
         <h1 class="heading">Companies Listed On Our Platform</h1>
       </div>
-      <div class="listed-row1">
-        <a href=""><img src="{%  static 'Media/images/hdb.png' %}" alt=""></a>
-        <a href=""><img src="{%  static 'Media/images/cap.png' %}" alt=""></a>
-        <a href=""><img src="{%  static 'Media/images/apb.png' %}" alt=""></a>
-        <a href=""><img src="{%  static 'Media/images/abib.png' %}" alt=""></a>
-      </div>
-      <div class="listed-row2">
-        <a href=""><img src="{%  static 'Media/images/tac.png' %}" alt=""></a>
-        <a href=""><img src="{%  static 'Media/images/nyr.png' %}" alt=""></a>
-        <a href=""><img src="{%  static 'Media/images/oyo.png' %}" alt=""></a>
-        <a href=""><img src="{%  static 'Media/images/hexa.png' %}" alt=""></a>
-      </div>
-      <div class="listed-row3">
-        <a href=""><img src="{%  static 'Media/images/sbif.png' %}" alt=""></a>
-        <a href=""><img src="{%  static 'Media/images/nse.png' %}" alt=""></a>
+      <div class="logos-grid" id="logoContainer">
+        {% for stock in stocks|slice:":18" %}
+              {% if stock.logo %}
+              <div class="logo-cell">
+                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">
+                  <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
+                </a>
+              </div>
+              {% endif %}
+        {% endfor %}
       </div>
       <div class="viewall3">
-        <button class="viewallbtn3">View All Listings</button>
+        <button class="viewallbtn3" id="toggleBtn">View All Listings</button>
       </div>
     </div>
 
@@ -135,140 +130,6 @@
         an informed investment decision. Our platform also makes it easy for you to invest in Pre-IPO shares with just a
         few clicks.</p>
     </div>
-
-
-    <!-- <div class="accordion-overall" id="accordionOverall">
-      <div class="accordionc1">
-        <div class="accordion" id="accordionLeft">
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="leftHeading1">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#leftCollapse1"
-                aria-expanded="true" aria-controls="leftCollapse1">
-                What is unlisted Share?
-              </button>
-            </h2>
-            <div id="leftCollapse1" class="accordion-collapse collapse show" aria-labelledby="leftHeading1"
-              data-bs-parent="#accordionLeft">
-              <div class="accordion-body">An unlisted share is a stock of a company that is not traded on formal stock
-                exchanges but can be bought or sold through over-the-counter (OTC) markets. These shares often belong to
-                startups or private firms.</div>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="leftHeading2">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#leftCollapse2" aria-expanded="false" aria-controls="leftCollapse2">
-                What is pre ipo?
-              </button>
-            </h2>
-            <div id="leftCollapse2" class="accordion-collapse collapse" aria-labelledby="leftHeading2"
-              data-bs-parent="#accordionLeft">
-              <div class="accordion-body">Pre-IPO shares are company stocks offered to investors before the company goes
-                public. They allow early access at potentially lower prices but come with higher risk.</div>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="leftHeading3">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#leftCollapse3" aria-expanded="false" aria-controls="leftCollapse3">
-                What is delisted stocks?
-              </button>
-            </h2>
-            <div id="leftCollapse3" class="accordion-collapse collapse" aria-labelledby="leftHeading3"
-              data-bs-parent="#accordionLeft">
-              <div class="accordion-body">Delisted stocks are shares removed from a stock exchange, often due to
-                non-compliance or voluntary action. They can still be traded OTC but with less liquidity and more risk.
-              </div>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="leftHeading4">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#leftCollapse4" aria-expanded="false" aria-controls="leftCollapse4">
-                Is it legal to buy pre ipo shares?
-              </button>
-            </h2>
-            <div id="leftCollapse4" class="accordion-collapse collapse" aria-labelledby="leftHeading4"
-              data-bs-parent="#accordionLeft">
-              <div class="accordion-body">Yes, buying pre-IPO shares is legal if done through authorized platforms or
-                intermediaries. However, it involves higher risk and limited regulatory oversight.</div>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="leftHeading5">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#leftCollapse5" aria-expanded="false" aria-controls="leftCollapse5">
-                Can i buy and sell Share?
-              </button>
-            </h2>
-            <div id="leftCollapse5" class="accordion-collapse collapse" aria-labelledby="leftHeading5"
-              data-bs-parent="#accordionLeft">
-              <div class="accordion-body">Yes, you can buy and sell shares through a registered broker or trading
-                platform. It's important to have a Demat and trading account to do so legally.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="accordionc2">
-        <div class="accordion" id="accordionRight">
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="rightHeading1">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#rightCollapse1"
-                aria-expanded="true" aria-controls="rightCollapse1">
-                Can unlisted shares be sold?
-              </button>
-            </h2>
-            <div id="rightCollapse1" class="accordion-collapse collapse show" aria-labelledby="rightHeading1"
-              data-bs-parent="#accordionRight">
-              <div class="accordion-body">Yes, unlisted shares can be sold through private deals or platforms dealing in
-                unlisted securities, though with less liquidity and regulatory oversight than listed ones.</div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="rightHeading2">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#rightCollapse2" aria-expanded="false" aria-controls="rightCollapse2">
-                How do ESOP shares work?
-              </button>
-            </h2>
-            <div id="rightCollapse2" class="accordion-collapse collapse" aria-labelledby="rightHeading2"
-              data-bs-parent="#accordionRight">
-              <div class="accordion-body">ESOP (Employee Stock Ownership Plan) shares allow employees to earn company
-                stock, often at a discounted rate, as part of their compensation—vesting over time to encourage
-                retention.</div>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="rightHeading3">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#rightCollapse3" aria-expanded="false" aria-controls="rightCollapse3">
-                What are Illiquid Shares?
-              </button>
-            </h2>
-            <div id="rightCollapse3" class="accordion-collapse collapse" aria-labelledby="rightHeading3"
-              data-bs-parent="#accordionRight">
-              <div class="accordion-body">Illiquid shares are stocks that cannot be easily sold or exchanged for cash
-                due to low trading volume—making it hard to find buyers quickly.</div>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="rightHeading4">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#rightCollapse4" aria-expanded="false" aria-controls="rightCollapse4">
-                What happens if a stock gets delisted?
-              </button>
-            </h2>
-            <div id="rightCollapse4" class="accordion-collapse collapse" aria-labelledby="rightHeading4"
-              data-bs-parent="#accordionRight">
-              <div class="accordion-body">If a stock gets delisted, it stops trading on major exchanges and can only be
-                sold over-the-counter, often leading to reduced liquidity and lower investor confidence.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
     <div class="read-more">
       <button class="read-btn"><a href="{%  url 'faq' %}" class="custom-btnM">Read More</a></button>
     </div>
@@ -417,6 +278,41 @@
   </section>
 
 
+<script>
+  const toggleBtn = document.getElementById('toggleBtn');
+  const logoContainer = document.getElementById('logoContainer');
+  let showingAll = false;
+  let originalHTML = logoContainer.innerHTML;
+  toggleBtn.addEventListener('click', function () {
+    if (!showingAll) {
+      fetch("{% url 'unlisted_stock_marketplace:all_stocks_ajax' %}", {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(response => response.json())
+        .then(data => {
+          logoContainer.innerHTML = '';
+          console.log(data);
+          data.forEach(stock => {
+            if (stock.logo) 
+            {
+              logoContainer.innerHTML += `
+                <div class="logo-cell">
+                  <a href="/marketplace/stock/${stock.id}/">
+                    <img src="${stock.logo}" alt="${stock.company_name} Logo">
+                  </a>
+                </div>`;
+            }
+          });
+          toggleBtn.textContent = "View Less";
+          showingAll = true;
+        });
+    } else {
+      logoContainer.innerHTML = originalHTML;
+      toggleBtn.textContent = "View All Listings";
+      showingAll = false;
+    }
+  });
+</script>
 
   <div id="footer"></div>
 

@@ -40,6 +40,7 @@ urlpatterns = [
 
         path('edit-sell-transaction/<int:pk>/', edit_sell_transaction, name='edit_sell_transaction'),
 
+
             
     ]
 

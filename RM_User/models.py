@@ -103,7 +103,19 @@ class RMUserView(models.Model):
         self.auto_populate_from_sources()
         super().save(*args, **kwargs)
 
+RM_Payment_Status_options = [
+    ('pending', 'Pending'),
+    ('partial', 'Partial Payment'),
+    ('approved', 'Payment Received'),
+    ('rejected', 'Rejected'),
+]
             
+AC_Payment_Status_options = [
+    ('pending', 'Pending'),
+    ('partial', 'Partial Payment'),
+    ('approved', 'Payment Received'),
+    ('rejected', 'Rejected'),
+]
 class RMPaymentRecord(models.Model):
     rm_user_view = models.ForeignKey(RMUserView, on_delete=models.CASCADE, related_name='payment_records')
     date = models.DateField()
@@ -113,7 +125,12 @@ class RMPaymentRecord(models.Model):
     remaining_amount = models.DecimalField(max_digits=12, decimal_places=2)
     screenshot = models.ImageField(upload_to='payment_screenshots/', blank=True, null=True)
     remark = models.TextField(blank=True, null=True)
-    payment_status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed')])
+    payment_status = models.CharField(
+        max_length=20,
+        choices=RM_Payment_Status_options,
+        default='pending'
+    )
+    AC_Payment_Status = models.CharField(max_length=15, choices=AC_Payment_Status_options, default='pending')
 
     def __str__(self):
         return f"Payment - {self.rm_user_view.order_id} - {self.amount}"

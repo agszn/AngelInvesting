@@ -29,6 +29,8 @@
                             <td>{{ order.user.profile.user.assigned_rm }}</td>
                     </tbody>
                 </table>
+
+                <h6 style="padding-top: 2%;">Customer Details</h6>
                 <table class="STbuyorder-table">
                     <thead>
                         <tr>
@@ -49,6 +51,8 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <h6 style="padding-top: 2%;">CMR Details</h6>
                 {% if cmr %}
                     <table class="STbuyorder-table">
                         <thead>
@@ -75,34 +79,36 @@
                 {% else %}
                     <p>No broker details found.</p>
                 {% endif %}
+
+                <h6 style="padding-top: 2%;">Bank Account Details</h6>
                 {% if bank_accounts %}
-                    <table class="STbuyorder-table">
-                        <thead>
-                            <tr>
-                                <th>Customer_name</th>
-                                <th>Customer_Id</th>
-                                <th>Pan Number</th>
-                                <th>Email_id</th>
-                                <th>MObile Number</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for account in bank_accounts %}
-                            <tr>
-                                <td>{{ account.bank_name }}</td>
-                                <td>{{ account.account_holder_name }}</td>
-                                <td>{{ account.account_number }}</td>
-                                <td>{{ account.ifsc_code }}</td>
-                                <td>{{ account.account_type }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                <table class="STbuyorder-table">
+                    <thead>
+                    <tr>
+                        <th>Bank Name</th>
+                        <th>Account Holder Name</th>
+                        <th>Account Number</th>
+                        <th>IFSC Code</th>
+                        <th>Account Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for account in bank_accounts %}
+                    <tr>
+                        <td>{{ account.bank_name }}</td>
+                        <td>{{ account.account_holder_name }}</td>
+                        <td>{{ account.account_number }}</td>
+                        <td>{{ account.ifsc_code }}</td>
+                        <td>{{ account.account_type }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
                 {% else %}
-                    <p>No bank account details found.</p>
+                <p>No bank account details found.</p>
                 {% endif %}
                 
-            <div class="STorder-details-transaction">
+                <h6 style="padding-top: 2%;">Transaction Details</h6>
                 <table class="STbuyorder-table">
                     <thead>
                         <tr>
@@ -115,7 +121,8 @@
                                 <th>Selling Price</th>
                                 <th>Qty</th>
                                 <th>Total Value</th>
-                                <th>Status</th>
+                                <!-- <th>RM Status</th> -->
+                                <td>Ac</td>
                                 <th>Actions</th>
                         </tr>
                     </thead>
@@ -133,10 +140,24 @@
                             <td>{{ item.selling_price }}</td>
                             <td>{{ item.quantity }}</td>
                             <td>{{ item.total_value }}</td>
-                            <td>{{ item.status }}</td>
+                            <!-- <td>{{ item.get_RM_status_display }}</td> -->
+                            <td>{{ item.ACApproved.username }}</td> 
                             <td>
-                            <a href="{% url 'ST_User:edit_sell_transactionST' item.id %}" class="btn btn-sm btn-outline-primary">✏️</a>
+                                {% if user_type == 'ST' %}
+                                    <form method="post" action="{% url 'ST_User:edit_sell_transaction_st_status' item.id %}">
+                                        {% csrf_token %}
+                                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                            {% for key, label in st_status_choices %}
+                                                <option value="{{ key }}" {% if item.status == key %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                {% else %}
+                                    {{ item.get_status_display }}
+                                {% endif %}
                             </td>
+
+
                         </tr>
                         {% empty %}
                         <tr><td colspan="11">No records found.</td></tr>
@@ -147,7 +168,7 @@
                     <h4><strong>Total Amount: </strong> {{ order.total_value }}</h4>
                     <button class="STpayment-button">Generate Deal Letter</button>
                 </div>
-            </div>
+
         {% else %}
             <p>No order details found.</p>
         {% endif %}

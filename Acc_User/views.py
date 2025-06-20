@@ -163,10 +163,91 @@ def buyOrderSummaryAcc(request, order_id):
         'TransactionDetails': BuyTransaction.objects.filter(order_id=order_id),
         'remaining_amount': remaining_amount,
         'user_type': user_type,
+        'ac_payment_choices': RMPaymentRecord._meta.get_field('AC_Payment_Status').choices,
+        'ac_status_choices': [(k, AC_STATUS_LABELS[k]) for k in dict(BuyTransaction._meta.get_field('AC_status').choices)],
+
     }
 
     return render(request, 'buyOrderSummaryAcc.html', context)
 
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponseBadRequest
+from RM_User.models import RMPaymentRecord
+
+@csrf_exempt
+@login_required
+def edit_payment_ac_status(request, payment_id):
+    if request.method == 'POST' and request.user.user_type == 'AC':
+        payment = get_object_or_404(RMPaymentRecord, id=payment_id)
+
+        # Get valid choices from model field
+        valid_choices = dict(RMPaymentRecord._meta.get_field('AC_Payment_Status').choices).keys()
+
+        new_status = request.POST.get('AC_Payment_Status')
+        if new_status not in valid_choices:
+            return HttpResponseBadRequest("Invalid status")
+
+        payment.AC_Payment_Status = new_status
+        payment.save()
+
+        return redirect('Acc_User:buyOrderSummaryAcc', order_id=payment.rm_user_view.order_id)
+
+    return HttpResponseBadRequest("Invalid request")
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
+
+@csrf_exempt
+@login_required
+def edit_transaction_ac_status(request, transaction_id):
+    if request.method == 'POST':
+        transaction = get_object_or_404(BuyTransaction, id=transaction_id)
+        
+        if request.user.user_type == 'AC':
+            new_status = request.POST.get('AC_status')
+            transaction.AC_status = new_status
+            
+            if new_status == 'completed':
+                transaction.ACApproved = request.user
+            
+            transaction.save()
+            messages.success(request, "Accounts Approval Status updated successfully.")
+        else:
+            messages.error(request, "Unauthorized access.")
+            
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+
+@csrf_exempt
+@login_required
+def edit_sell_transaction_ac_status(request, transaction_id):
+    if request.method == 'POST':
+        transaction = get_object_or_404(SellTransaction, id=transaction_id)
+
+        if request.user.user_type == 'AC':
+            new_status = request.POST.get('AC_status')
+            transaction.AC_status = new_status
+
+            if new_status == 'completed':
+                transaction.ACApproved = request.user
+
+            transaction.save()
+            messages.success(request, "Accounts Approval Status updated successfully.")
+        else:
+            messages.error(request, "Unauthorized access.")
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -344,6 +425,7 @@ def SellerSummaryAcc(request, order_id):
         'TransactionDetails': sell_txns,
         'remaining_amount': remaining_amount,
         'user_type': user_type,
+        'ac_status_choices': [(k, AC_STATUS_LABELS[k]) for k in dict(BuyTransaction._meta.get_field('AC_status').choices)],
     }
 
     return render(request, 'SellSummaryAcc.html', context)

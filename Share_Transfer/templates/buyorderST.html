@@ -2,7 +2,7 @@
 {% block title %}Buy Orders{% endblock %}
 
 
-{% block STsubtitle %} Stock Transfer Buy Orders List{% endblock %}
+{% block STsubtitle %} Stock Transfer - Buy Orders List{% endblock %}
 
 {% block STprofile_content %}
             <table class="STbuyorder-table">
@@ -31,7 +31,7 @@
                         <td>{{ order.user.profile.user.username }}</td>
                         <td>{{ order.user.profile.custom_user_id }}</td>
                         <td>
-                        <a class="AccView" href="{% url 'ST_User:buyOrderSummaryST' order.order_id %}">view</a>
+                        <a class="STview" href="{% url 'ST_User:buyOrderSummaryST' order.order_id %}">View</a>
                         </td>
 
                     </tr>

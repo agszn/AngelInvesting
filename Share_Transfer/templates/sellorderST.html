@@ -26,7 +26,7 @@
                             <td>{{ order.timestamp|date:"h:i A" }}</td>
                             <td>{{ order.user.profile.full_name }}</td>
                             <td>{{ order.user.profile.custom_user_id }}</td>
-                            <td><a class="view" href="{% url 'ST_User:SellerSummaryST' order.order_id %}">view</a></td>
+                            <td><a class="STview" href="{% url 'ST_User:SellerSummaryST' order.order_id %}">View</a></td>
                         </tr>
                     {% empty %}
                         <tr><td colspan="7">No sell orders found.</td></tr>

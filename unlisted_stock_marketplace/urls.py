@@ -12,6 +12,7 @@ app_name = 'unlisted_stock_marketplace'
 urlpatterns = [
 
     path('', stock_list, name='stock_list'),
+    path('ajax/all-stocks/', all_stocks_ajax, name='all_stocks_ajax'),
     path('stocks/suggestions/', stock_suggestions, name='stock_suggestions'),
     
     path('stock/<int:stock_id>/', stock_detail, name='stock_detail'),

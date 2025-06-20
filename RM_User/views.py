@@ -177,7 +177,6 @@ from django.shortcuts import render
 from user_portfolio.models import BuyTransaction
 from user_auth.models import CustomUser
 from site_Manager.models import Advisor, Broker
-
 @login_required
 def AllbuyTransactionSummary(request):
     # Step 1: Restrict users to those assigned to the logged-in RM
@@ -216,6 +215,9 @@ def AllbuyTransactionSummary(request):
     if timestamp:
         transactions = transactions.filter(timestamp__date=timestamp)
 
+    # Step 3.5: Sort transactions by latest first
+    transactions = transactions.order_by('-timestamp')
+
     # Step 4: Limit dropdowns to assigned users' data
     company_names = transactions.values_list('stock__company_name', flat=True).distinct()
     order_ids = transactions.values_list('order_id', flat=True).distinct()
@@ -229,7 +231,6 @@ def AllbuyTransactionSummary(request):
         'order_ids': order_ids,
     }
     return render(request, 'AllbuyTransactionSummary.html', context)
-
 
 
 from django.contrib.auth.decorators import login_required
@@ -276,6 +277,8 @@ def AllsellTransactionSummary(request):
         transactions = transactions.filter(order_id__icontains=order_id)
     if timestamp:
         transactions = transactions.filter(timestamp__date=timestamp)
+
+    transactions = transactions.order_by('-timestamp')
 
     # Step 4: Limit dropdowns to assigned users' data
     company_names = transactions.values_list('stock__company_name', flat=True).distinct()
@@ -770,6 +773,7 @@ from django.contrib.auth.decorators import login_required
 #         form = BuyTransactionEditForm(instance=transaction, user=request.user)
 
 #     return render(request, 'transaction/edit_transaction.html', {'form': form})
+# RM_User/views.py
 
 @login_required
 def edit_buy_transaction(request, pk):
@@ -823,7 +827,7 @@ def delete_buy_transaction(request, pk):
 # 
 # 
 # views.py
-
+# RM_User/views.py
 @login_required
 def edit_sell_transaction(request, pk):
     transaction = get_object_or_404(SellTransaction, pk=pk)

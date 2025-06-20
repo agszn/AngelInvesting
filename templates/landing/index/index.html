@@ -1,9 +1,21 @@
 {% load static %}  
 <style>
-          .stock-card-image {
-              max-width: 50px;
+          .logo-box {
+            width: 100px;           
+            /* height: 80px; */
+            max-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
           }
-                    .stock-card-info {
+
+          .stock-card-image {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+          }
+          .stock-card-info {
               display: flex;
               align-items: center;
               position: relative;
@@ -65,20 +77,12 @@
       {% for stock in stocks|slice:":6" %}
         <div class="card">
           <div class="info-first">
-            <span>
               {% if stock.logo %}
-                <!-- <a href="{{ stock.description }}">
-                  <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
-                </a> -->
-
-                  <!-- <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="padding-left: 2%;"><img src="{%  static 'Media/images/circle-info.svg' %}" alt=""></a> -->
-
-                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">
-                  <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
-                </a>
-
-            </span>
-
+                <div class="logo-box">
+                  <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">
+                    <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
+                  </a>
+                </div>
                 <p style="font-size: 16px; font-weight: 600;">
                   <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">
                   <div class="stock-card-info">
@@ -149,7 +153,7 @@
         </div>
         <div class="viewall3">
             <button class="viewallbtn3">
-              <a style="color: white;" href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="custom-btnM">View All Listings</a>
+              <a style="color: white; text-decoration: none;" href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="custom-btnM">View All Listings</a>
             </button>
         </div>
     </div>

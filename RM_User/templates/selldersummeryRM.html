@@ -32,7 +32,6 @@
     </table>
 
     <h6 style="padding-top: 2%;">Customer Details</h6>
-
     <table class="RMbuyorder-table">
       <thead>
         <tr>
@@ -54,8 +53,8 @@
       </tbody>
     </table>
 
-    {% if cmr %}
     <h6 style="padding-top: 2%;">CMR Details</h6>
+    {% if cmr %}
       <table class="RMbuyorder-table">
         <thead>
           <tr>
@@ -82,9 +81,8 @@
       <p>No broker details found.</p>
     {% endif %}
 
-    {% if bank_accounts %}
-
     <h6 style="padding-top: 2%;">Bank Account Details</h6>
+    {% if bank_accounts %}
       <table class="RMbuyorder-table">
         <thead>
           <tr>
@@ -112,7 +110,6 @@
     {% endif %}
 
     <h6 style="padding-top: 2%;">Transaction Details</h6>
-
     <table class="RMbuyorder-table">
       <thead>
         <tr>
@@ -143,7 +140,7 @@
             <td>{{ item.selling_price }}</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.total_value }}</td>
-            <td>{{ item.RM_status }}</td>
+            <td>{{ item.get_RM_status_display }}</td>
             <td>
               <a href="{% url 'RM_User:edit_sell_transaction' item.id %}" class="btn btn-sm btn-outline-primary">✏️</a>
             </td>

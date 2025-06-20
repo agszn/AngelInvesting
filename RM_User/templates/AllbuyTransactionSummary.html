@@ -1,5 +1,4 @@
 {% extends "baseStructureRM.html" %}
-
 {% block title %}Buy Order Transaction{% endblock %}
 {% block SubTitleRM %}Buy Order Transaction{% endblock %}
 
@@ -73,7 +72,10 @@
         <th>Buy Price</th>
         <th>Qty</th>
         <th>Amount</th>
-        <th>Status</th>
+        <th>RM Status</th>
+        <th>AC Status</th>
+        <th>ST Status</th>
+
       </tr>
     </thead>
     <tbody>
@@ -90,7 +92,9 @@
           <td>{{ item.price_per_share }}</td>
           <td>{{ item.quantity }}</td>
           <td>{{ item.total_amount }}</td>
-          <td>{{ item.status }}</td>
+          <td>{{ item.get_RM_status_display }}</td>
+          <td>{{ item.get_AC_status_display }}</td>
+          <td>{{ item.get_status_display }}</td>
         </tr>
       {% empty %}
         <tr>

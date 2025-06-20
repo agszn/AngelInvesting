@@ -1,6 +1,6 @@
 {% extends "baseStructureAcc.html" %}
 {% block title %}Shares List{% endblock %}
-
+{% load role_status_filters %}
 
 {% block Accsubtitle %} Accounts Sell Order Summary{% endblock %}
 
@@ -29,6 +29,7 @@
                         <td>{{ order.user.profile.user.assigned_rm }}</td>
                 </tbody>
             </table>
+
             <h6 style="padding-top: 2%;">Customer Details</h6>
             <table class="Accbuyorder-table">
                 <thead>
@@ -122,7 +123,7 @@
                                 <th>Qty</th>
                                 <th>Total Value</th>
                                 <th>Status</th>
-                                <th>Actions</th>
+                                <!-- <th>Actions</th> -->
                                 </tr>
                         </thead>
                         <tbody>
@@ -139,10 +140,23 @@
                                 <td>{{ item.selling_price }}</td>
                                 <td>{{ item.quantity }}</td>
                                 <td>{{ item.total_value }}</td>
-                                <td>{{ item.AC_status }}</td>
                                 <td>
-                                <a href="{% url 'Acc_User:edit_sell_transactionAcc' item.id %}" class="btn btn-sm btn-outline-primary">✏️</a>
+                                    {% if user_type == 'AC' %}
+                                        <form method="post" action="{% url 'Acc_User:edit_sell_transaction_ac_status' item.id %}">
+                                        {% csrf_token %}
+                                        <select name="AC_status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                            {% for key, label in ac_status_choices %}
+                                            <option value="{{ key }}" {% if item.AC_status == key %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        </form>
+                                    {% else %}
+                                        {{ item.get_AC_status_display }}
+                                    {% endif %}
                                 </td>
+                                <!-- <td>
+                                <a href="{% url 'Acc_User:edit_sell_transactionAcc' item.id %}" class="btn btn-sm btn-outline-primary">✏️</a>
+                                </td> -->
                             </tr>
                             {% empty %}
                             <tr><td colspan="11">No records found.</td></tr>

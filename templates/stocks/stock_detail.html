@@ -243,57 +243,71 @@
     text-align: center;
   }
 
-  .carousel-container
-  {
-    max-width: none;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 40px 50px;
-    width: 100%;
-    min-height: 477px;
-    border-bottom: 2px solid #fff;
-    background-color: #0e213f;
-  }
-  .carousel-title
-  {
-    color: #fff;
-    font-family: &quot;Outfit&quot;, sans-serif;
-    font-size: 40px;
-    font-weight: 700;
-    line-height: 60px;
-    margin-bottom: 30px;
-    text-align: center;
-  }
-  .carousel-content
-  {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    position: relative;
-  }
-  .scroll-container
-  {
-    display: flex;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    gap: 20px;
-    padding: 10px 0;
-    max-width: 100%;
-  }
-  .company-card
-  {
-    border-radius: 10px;
-    padding: 28px 21px;
-    background-color: #fefefe;
-  }
-  .company-logo
-  {
-    width: 80%; 
-    height: 40px;
-    margin-bottom: 21px
+/* Arrow styles */
+.nav-arrow {
+  cursor: pointer;
+  z-index: 2;
+}
+
+@media screen and (max-width: 1200px) {
+  .nav-arrow {
+    width: 35px;
+    height: 35px;
   }
 
+  .nav-arrow.left {
+    left: -35px;
+  }
+
+  .nav-arrow.right {
+    right: -35px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .nav-arrow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .nav-arrow.left {
+    left: -30px;
+  }
+
+  .nav-arrow.right {
+    right: -30px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .nav-arrow {
+    width: 26px;
+    height: 26px;
+  }
+
+  .nav-arrow.left {
+    left: -20px;
+  }
+
+  .nav-arrow.right {
+    right: -20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+   .nav-arrow {
+    width: 22px;
+    height: 22px;
+  }
+
+  .nav-arrow.left {
+    left: -10px;
+  }
+
+  .nav-arrow.right {
+    right: -10px;
+  }
+}
 </style>
 
 
@@ -2059,315 +2073,115 @@
               <!-- most searched  start -->
               <!-- a -->
                 <!-- a -->
-                <div class="carousel-container">
-                    <div class="carousel-title">
+              <div class="carousel-container-main">
+                  <div class="carousel-title-main">
                       Most Searched Unlisted &amp; Pre IPO Companies Stocks in India
-                    </div>
-                    <div
-                      class="carousel-content">
-                      <!-- Left Navigation Arrow -->
-                      <div class="nav-arrow left" onclick="scrollLeft()">
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-arrow left"
-                          style="width: 40px; height: 40px; cursor: pointer"
-                        >
-                            <path
-                              d="M19.9052 14.8528L17.3342 12.2818L9.61789 19.9964L17.3324 27.7109L19.9033 25.1382L16.5815 21.8146H30.2852V18.1782H16.5815L19.9052 14.8528Z"
-                              fill="white"
-                            >
-                            </path>
-                            <path
-                              fill-rule="evenodd"
-                              clip-rule="evenodd"
-                              d="M5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818ZM8.42909 8.42909C6.90958 9.9486 5.70424 11.7525 4.88188 13.7379C4.05952 15.7232 3.63626 17.8511 3.63626 20C3.63626 22.1489 4.05952 24.2768 4.88188 26.2621C5.70424 28.2475 6.90958 30.0514 8.42909 31.5709C9.9486 33.0904 11.7525 34.2958 13.7379 35.1181C15.7232 35.9405 17.8511 36.3637 20 36.3637C22.1489 36.3637 24.2768 35.9405 26.2621 35.1181C28.2475 34.2958 30.0514 33.0904 31.5709 31.5709C34.6397 28.5021 36.3637 24.3399 36.3637 20C36.3637 15.6601 34.6397 11.4979 31.5709 8.42909C28.5021 5.36029 24.3399 3.63626 20 3.63626C15.6601 3.63626 11.4979 5.36029 8.42909 8.42909Z"
-                              fill="white"
-                            ></path>
+                  </div>
+                  <div class="carousel-content">
+                      <div class="nav-arrow left" onclick="scrollLeftsroll()">
+                          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-arrow left" style="width: 40px; height: 40px; cursor: pointer">
+                              <path d="M19.9052 14.8528L17.3342 12.2818L9.61789 19.9964L17.3324 27.7109L19.9033 25.1382L16.5815 21.8146H30.2852V18.1782H16.5815L19.9052 14.8528Z" fill="white"></path>
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818ZM8.42909 8.42909C6.90958 9.9486 5.70424 11.7525 4.88188 13.7379C4.05952 15.7232 3.63626 17.8511 3.63626 20C3.63626 22.1489 4.05952 24.2768 4.88188 26.2621C5.70424 28.2475 6.90958 30.0514 8.42909 31.5709C9.9486 33.0904 11.7525 34.2958 13.7379 35.1181C15.7232 35.9405 17.8511 36.3637 20 36.3637C22.1489 36.3637 24.2768 35.9405 26.2621 35.1181C28.2475 34.2958 30.0514 33.0904 31.5709 31.5709C34.6397 28.5021 36.3637 24.3399 36.3637 20C36.3637 15.6601 34.6397 11.4979 31.5709 8.42909C28.5021 5.36029 24.3399 3.63626 20 3.63626C15.6601 3.63626 11.4979 5.36029 8.42909 8.42909Z" fill="white"></path>
+                          </svg>
+                      </div>
+                      <div class="scroll-container-main" id="scrollContainer1">
+                        {% for stock in all_stocks %}
+                          <div class="company-card-main">
+                              <div class="logo-main">
+                                {% if stock.logo %}
+                                    <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo-main">
+                                {% endif %}
+                              </div>
+                              <div class="company-name-main">{{ stock.company_name }}</div>
+                              <div class="company-sector-main"><span>Sector:</span>&nbsp;&nbsp;{{stock.sector}}</div>
+                              <div class="company-ltp-main">
+                                <span>LTP:</span>
+                                {% if stock.ltp and stock.share_price %}
+                                    {{ stock.ltp }}
+                                    {% if stock.profit > 0 %}
+                                        <p>
+                                          <span style="color: green;">
+                                            &#9650; ₹00{{ stock.profit }} ({{ stock.profit_percentage }}%)
+                                          </span>
+                                        </p>
+                                    {% elif stock.profit < 0 %}
+                                        <p>
+                                          <span style="color: red;">
+                                            &#9660; ₹{{ stock.profit }} ({{ stock.profit_percentage }}%)
+                                          </span>
+                                        </p>
+                                    {% else %}
+                                        <p>
+                                          <span style="color: rgb(0, 0, 0);">
+                                            ₹{{ stock.profit }} ({{ stock.profit_percentage }}%)
+                                          </span>
+                                        </p>
+                                    {% endif %}
+                                {% else %}
+                                    <span>No LTP data available</span>
+                                {% endif %}
+                              </div>
+                              <div class="market-cap-main"><span>Market Cap:</span>&nbsp;&nbsp;₹{{stock.market_capitalization}} Crore</div>
+                              <div class="details-company-main">
+                                  <div class="company-eps-div"><span>EPS:</span>₹{{stock.eps}}</div>
+                                  <div class="company-eps-div"><span>PE Ratio:</span>{{stock.pe_ratio}}</div>
+                              </div>
+                              <div class="details-company-main">
+                                  <div class="company-eps-div"><span>BV:</span>₹{{stock.book_value}}</div>
+                                  <div class="company-eps-div"><span>P/BV:</span>{{stock.pbv}}</div>
+                              </div>
+                              <div class="details-company-main">
+                                  <div class="company-eps-div"><span>FV:</span>₹{{stock.face_value}}</div>
+                                  <div class="company-eps-div"><span>Shares:</span>{{stock.outstanding_shares}}</div>
+                              </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                      <div class="nav-arrow right" onclick="scrollRightscroll()">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-arrow right" style="width: 40px; height: 40px; cursor: pointer">
+                            <path d="M20.0948 25.1472L22.6658 27.7182L30.3821 20.0036L22.6676 12.2891L20.0967 14.8618L23.4185 18.1854H9.71484V21.8218H23.4185L20.0948 25.1472Z" fill="white"></path>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418ZM31.5709 31.5709C33.0904 30.0514 34.2958 28.2475 35.1181 26.2621C35.9405 24.2768 36.3637 22.1489 36.3637 20C36.3637 17.8511 35.9405 15.7232 35.1181 13.7379C34.2958 11.7525 33.0904 9.9486 31.5709 8.42909C30.0514 6.90958 28.2475 5.70423 26.2621 4.88188C24.2768 4.05952 22.1489 3.63626 20 3.63626C17.8511 3.63626 15.7232 4.05952 13.7379 4.88188C11.7525 5.70423 9.9486 6.90958 8.42909 8.42909C5.3603 11.4979 3.63626 15.6601 3.63626 20C3.63626 24.3399 5.3603 28.5021 8.42909 31.5709C11.4979 34.6397 15.6601 36.3637 20 36.3637C24.3399 36.3637 28.5021 34.6397 31.5709 31.5709Z" fill="white"></path>
                         </svg>
                       </div>
-                      <!-- Compapny Detail Card -->
-                      <div class="scroll-container" id="scrollContainer">
-                      {% for stock in all_stocks %}
-                        <div class="company-card">
-                          {% if stock.logo %}
-                              <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo">
-                          {% endif %}
-                          <div
-                            style="
-                              color: #000;
-                              font-family: &quot;Outfit&quot;, sans-serif;
-                              font-size: 14px;
-                              font-weight: 400;
-                              margin-bottom: 12px;
-                            "
-                          >
-                            {{ stock.company_name }}
-                          </div>
-                          <div
-                            style="
-                              color: #000;
-                              font-family: &quot;Outfit&quot;, sans-serif;
-                              font-size: 14px;
-                              margin-bottom: 12px;
-                            "
-                          >
-                            <span
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                                font-weight: 700;
-                              "
-                              >Sector:</span
-                            >
-                            <span>{{stock.sector}}</span>
-                          </div>
-                          <div
-                            style="
-                              font-family: &quot;Outfit&quot;, sans-serif;
-                              font-size: 14px;
-                              margin-bottom: 12px;
-                            "
-                          >
-                            <span
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                                font-weight: 700;
-                              "
-                              >LTP:</span
-                            >
-                            <!-- <span>{{stock_searched.ltp}}</span> -->
-                            {% if stock.ltp and stock.share_price %}
-                                <span>{{ stock.ltp }}</span>
-                                <!-- {% if percentage_diff > 0 %}
-                                    <span style="color: #008000;">(+{{ percentage_diff|floatformat:2 }}%)</span>  
-                                {% elif percentage_diff < 0 %}
-                                    <span style="color: #f00;">({{ percentage_diff|floatformat:2 }}%)</span>  
-                                {% else %}
-                                    <span style="color: #000;">(0%)</span>  
-                                {% endif %} -->
-                                <!--  -->
-                                {% if stock.profit > 0 %}
-                                  <p>
-                                    <span style="color: green;">
-                                      &#9650; ₹00{{ stock.profit }} ({{ stock.profit_percentage }}%)
-                                    </span>
-                                  </p>
-                                {% elif stock.profit < 0 %}
-                                  <p>
-                                    <span style="color: red;">
-                                      &#9660; ₹{{ stock.profit }} ({{ stock.profit_percentage }}%)
-                                    </span>
-                                  </p>
-                                {% else %}
-                                  <p>
-                                    <span style="color: rgb(0, 0, 0);">
-                                      ₹{{ stock.profit }} ({{ stock.profit_percentage }}%)
-                                    </span>
-                                  </p>
-                                {% endif %}
-                            {% else %}
-                                <span>No LTP data available</span>
-                            {% endif %}
-                            
-                            
-
-                          </div>
-                          <div
-                            style="
-                              color: #363636;
-                              font-family: &quot;Outfit&quot;, sans-serif;
-                              font-size: 14px;
-                              margin-bottom: 12px;
-                            "
-                          >
-                            <span
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                                font-weight: 700;
-                              "
-                              >Market Cap:</span
-                            >
-                            <span>₹{{stock.market_capitalization}} Crore</span>
-                          </div>
-                          <div
-                            style="
-                              display: flex;
-                              justify-content: flex-start;
-                              gap: 25px;
-                              margin-bottom: 12px;
-                            "
-                          >
-                            <div
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                              "
-                            >
-                              <span
-                                style="
-                                  color: #363636;
-                                  font-family: &quot;Outfit&quot;, sans-serif;
-                                  font-size: 14px;
-                                  font-weight: 700;
-                                "
-                                >EPS:</span
-                              >
-                              <span>₹{{stock.eps}}</span>
-                            </div>
-                            <div
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                              "
-                            >
-                              <span
-                                style="
-                                  color: #363636;
-                                  font-family: &quot;Outfit&quot;, sans-serif;
-                                  font-size: 14px;
-                                  font-weight: 700;
-                                "
-                                >PE Ratio:</span
-                              >
-                              <span>{{stock.pe_ratio}}</span>
-                            </div>
-                          </div>
-                          <div
-                            style="
-                              display: flex;
-                              justify-content: flex-start;
-                              gap: 25px;
-                              margin-bottom: 12px;
-                            "
-                          >
-                            <div
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                              "
-                            >
-                              <span
-                                style="
-                                  color: #363636;
-                                  font-family: &quot;Outfit&quot;, sans-serif;
-                                  font-size: 14px;
-                                  font-weight: 700;
-                                "
-                                >BV:</span
-                              >
-                              <span>₹{{stock.book_value}}</span>
-                            </div>
-                            <div
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                              "
-                            >
-                              <span
-                                style="
-                                  color: #363636;
-                                  font-family: &quot;Outfit&quot;, sans-serif;
-                                  font-size: 14px;
-                                  font-weight: 700;
-                                "
-                                >P/BV:</span
-                              >
-                              <span>₹{{stock.pbv}}</span>
-                            </div>
-                          </div>
-                          <div
-                            style="
-                              display: flex;
-                              justify-content: flex-start;
-                              gap: 25px;
-                              margin-bottom: 12px;
-                            "
-                          >
-                            <div
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                              "
-                            >
-                              <span
-                                style="
-                                  color: #363636;
-                                  font-family: &quot;Outfit&quot;, sans-serif;
-                                  font-size: 14px;
-                                  font-weight: 700;
-                                "
-                                >FV:</span
-                              >
-                              <span>₹{{stock.face_value}}</span>
-                            </div>
-                            <div
-                              style="
-                                color: #363636;
-                                font-family: &quot;Outfit&quot;, sans-serif;
-                                font-size: 14px;
-                              "
-                            >
-                              <span
-                                style="
-                                  color: #363636;
-                                  font-family: &quot;Outfit&quot;, sans-serif;
-                                  font-size: 14px;
-                                  font-weight: 700;
-                                "
-                                >Shares:</span
-                              >
-                              <span>{{stock.outstanding_shares}}</span>
-                            </div>
-                          </div>
-                        </div>
-                      {% endfor %}
-                    </div>
-
-                  <!-- Right Navigation Arrow -->
-                  <div class="nav-arrow right" onclick="scrollRight()">
-                    <svg
-                      width="40"
-                      height="40"
-                      viewBox="0 0 40 40"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="nav-arrow right"
-                      style="width: 40px; height: 40px; cursor: pointer">
-                        <path
-                          d="M20.0948 25.1472L22.6658 27.7182L30.3821 20.0036L22.6676 12.2891L20.0967 14.8618L23.4185 18.1854H9.71484V21.8218H23.4185L20.0948 25.1472Z"
-                          fill="white"
-                        ></path>
-                        <path
-                          fill-rule="evenodd"
-                          clip-rule="evenodd"
-                          d="M34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418ZM31.5709 31.5709C33.0904 30.0514 34.2958 28.2475 35.1181 26.2621C35.9405 24.2768 36.3637 22.1489 36.3637 20C36.3637 17.8511 35.9405 15.7232 35.1181 13.7379C34.2958 11.7525 33.0904 9.9486 31.5709 8.42909C30.0514 6.90958 28.2475 5.70423 26.2621 4.88188C24.2768 4.05952 22.1489 3.63626 20 3.63626C17.8511 3.63626 15.7232 4.05952 13.7379 4.88188C11.7525 5.70423 9.9486 6.90958 8.42909 8.42909C5.3603 11.4979 3.63626 15.6601 3.63626 20C3.63626 24.3399 5.3603 28.5021 8.42909 31.5709C11.4979 34.6397 15.6601 36.3637 20 36.3637C24.3399 36.3637 28.5021 34.6397 31.5709 31.5709Z"
-                          fill="white"
-                        ></path>
-                    </svg>
                   </div>
-                </div>
               </div>
-
         </main>
 
 
     <!-- js for most searched start -->
     <script>
-      function scrollLeft() {
-        document.getElementById("scrollContainer").scrollBy({ left: -300, behavior: 'smooth' });
-      }
+          function getVisibleCards() {
+              const container = document.getElementById('scrollContainer1');
+              const containerWidth = container.offsetWidth;
+              const card = document.querySelector('.company-card-main');
+              const cardWidth = card.offsetWidth + 15; // width + gap
+              
+              return Math.floor(containerWidth / cardWidth);
+          }
 
-      function scrollRight() {
-        document.getElementById("scrollContainer").scrollBy({ left: 300, behavior: 'smooth' });
-      }
-    </script>
+          function scrollLeftsroll() {
+              const container = document.getElementById('scrollContainer1');
+              const cardsToScroll = getVisibleCards();
+              const card = document.querySelector('.company-card-main');
+              const scrollAmount = (card.offsetWidth + 15) * cardsToScroll;
+              
+              container.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+              });
+          }
+            
+          function scrollRightscroll() {
+              const container = document.getElementById('scrollContainer1');
+              const cardsToScroll = getVisibleCards();
+              const card = document.querySelector('.company-card-main');
+              const scrollAmount = (card.offsetWidth + 15) * cardsToScroll;
+              
+              container.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+              });
+          }
+      </script>
     <!-- js for most searched end -->
 {% endblock %}

@@ -24,6 +24,31 @@ ORDER_STATUS_CHOICES = [
     ('cancelled', 'Cancelled'),
 ]
 
+
+
+
+RM_STATUS_LABELS = {
+    'processing': 'Processing',
+    'completed': 'Process to Accounts team',
+    'on_hold': 'On Hold',
+    'cancelled': 'Rejected by RM',
+}
+
+AC_STATUS_LABELS = {
+    'processing': 'Processing',
+    'completed': 'Process to Share Transfer team',
+    'on_hold': 'On Hold',
+    'cancelled': 'Rejected by AC',
+}
+
+ST_STATUS_LABELS = {
+    'processing': 'Processing',
+    'completed': 'Transfer Share',
+    'on_hold': 'On Hold',
+    'cancelled': 'Rejected by ST',
+}
+
+
 class BuyTransaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     stock = models.ForeignKey(StockData, on_delete=models.CASCADE)
@@ -35,7 +60,7 @@ class BuyTransaction(models.Model):
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
     
-    RM_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    RM_status = models.CharField(max_length=15, choices=RM_STATUS_LABELS, default='processing')
     RMApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -43,8 +68,9 @@ class BuyTransaction(models.Model):
         blank=True, 
         related_name='rm_approved_transactions'
     )
-    
-    AC_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+
+
+    AC_status = models.CharField(max_length=15, choices=AC_STATUS_LABELS, default='processing')
     ACApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -54,7 +80,7 @@ class BuyTransaction(models.Model):
     )
 
     
-    status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    status = models.CharField(max_length=15, choices=ST_STATUS_LABELS, default='processing')
     STApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -111,7 +137,7 @@ class BuyTransactionOtherAdvisor(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     # Optional: keep status if you still want transaction tracking
-    status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='completed')
+    status = models.CharField(max_length=15, choices=ST_STATUS_LABELS, default='completed')
     order_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
 
     # Calculated and stored values
@@ -143,6 +169,31 @@ class BuyTransactionOtherAdvisor(models.Model):
 
 from decimal import Decimal
 from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+
+
+@csrf_exempt
+@login_required
+def edit_sell_transaction_ac_status(request, transaction_id):
+    if request.method == 'POST':
+        transaction = get_object_or_404(SellTransaction, id=transaction_id)
+
+        if request.user.user_type == 'AC':
+            new_status = request.POST.get('AC_status')
+            transaction.AC_status = new_status
+
+            if new_status == 'completed':
+                transaction.ACApproved = request.user
+
+            transaction.save()
+            messages.success(request, "Accounts Approval Status updated successfully.")
+        else:
+            messages.error(request, "Unauthorized access.")
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 class SellTransaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -155,7 +206,7 @@ class SellTransaction(models.Model):
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
 
-    status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    status = models.CharField(max_length=15, choices=ST_STATUS_LABELS, default='processing')
     STApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -164,7 +215,7 @@ class SellTransaction(models.Model):
         related_name='st_approved_sell_transactions'
     )
     
-    RM_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    RM_status = models.CharField(max_length=15, choices=RM_STATUS_LABELS, default='processing')
     RMApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -173,7 +224,7 @@ class SellTransaction(models.Model):
         related_name='rm_approved_sell_transactions'
     )
     
-    AC_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    AC_status = models.CharField(max_length=15, choices=AC_STATUS_LABELS, default='processing')
     ACApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -216,7 +267,7 @@ class SellTransactionOtherAdvisor(models.Model):
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
 
-    status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    status = models.CharField(max_length=15, choices=ST_STATUS_LABELS, default='processing')
     STApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -225,7 +276,7 @@ class SellTransactionOtherAdvisor(models.Model):
         related_name='st_approved_sell_otherAdvisor_transactions'
     )
     
-    RM_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    RM_status = models.CharField(max_length=15, choices=RM_STATUS_LABELS, default='processing')
     RMApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -233,7 +284,7 @@ class SellTransactionOtherAdvisor(models.Model):
         blank=True, 
         related_name='rm_approved_sell_otherAdvisor_transactions'
     )
-    AC_status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='processing')
+    AC_status = models.CharField(max_length=15, choices=AC_STATUS_LABELS, default='processing')
     ACApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 

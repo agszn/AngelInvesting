@@ -2,10 +2,11 @@
 {% block title %}Buy Order Summary{% endblock %}
 
 
-{% block STsubtitle %}Stock Transfer Buy Order Summary{% endblock %}
+{% block STsubtitle %}Stock Transfer - Buy Order Summary{% endblock %}
 
 {% block STprofile_content %}
         {% if order %}
+            <div class="order-details-transaction">
                 <table class="STbuyorder-table">
                     <thead>
                         <tr>
@@ -30,6 +31,9 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            <div class="order-details-transaction">
+                <h6 style="padding-top: 2%;">Customer Details</h6>
                 <table class="STbuyorder-table">
                     <thead>
                         <tr>
@@ -50,6 +54,10 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="order-details-transaction">
+                <h6 style="padding-top: 2%;">CMR Details</h6>
                 {% if cmr %}
                     <table class="STbuyorder-table">
                         <thead>
@@ -76,8 +84,10 @@
                 {% else %}
                 <p>No broker details found.</p>
                 {% endif %}
+            </div>
 
-
+            <div class="order-details-transaction">
+                <h6 style="padding-top: 2%;">Bank Details</h6>
                 {% if bank_accounts %}
                     <table class="STbuyorder-table">
                         <thead>
@@ -104,9 +114,11 @@
                 {% else %}
                 <p>No bank account details found.</p>
                 {% endif %}
+            </div>
 
-            <div class="STorder-details-transaction">
-                <!-- <table class="STbuyorder-table">
+            <div class="order-details-transaction">
+                <h6 style="padding-top: 2%;">Payment Details</h6>
+                <table class="STbuyorder-table">
                     <thead>
                        <tr>
                             <th>SLNO</th>
@@ -115,18 +127,25 @@
                             <th>Amount</th>
                             <th>Balance Amount</th>
                             <th>Screenshot</th>
-                            <th>Amount</th>
-                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>RM Status</th>
+                            <th>AM Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for payment in rm_view.payment_records.all %}
                         <tr>
+
                         <td>{{ forloop.counter }}</td>
+
                         <td>{{ payment.date|date:"d-m-Y" }}</td>
+
                         <td>{{ payment.bank_name }}</td>
+
                         <td>{{ payment.amount }}</td>
+
                         <td>{{ payment.remaining_amount }}</td>
+
                         <td>
                             {% if payment.screenshot %}
                             <a href="{{ payment.screenshot.url }}" target="_blank">👁️‍🗨️</a>
@@ -134,8 +153,13 @@
                             N/A
                             {% endif %}
                         </td>
+
                         <td>{{ payment.remark }}</td>
-                        <td>{{ payment.payment_status|capfirst }}</td>
+
+                        <td>{{ payment.get_payment_status_display }}</td>
+
+                        <td>{{ payment.get_AC_Payment_Status_display }}</td>
+
                         </tr>
                         {% empty %}
                         <tr>
@@ -143,7 +167,12 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-                </table> -->
+                </table>
+            </div>
+
+            <!-- transaction details -->
+            <div class="order-details-transaction">
+                <h6 style="padding-top: 2%;">Transaction Details</h6>
                 <table class="STbuyorder-table">
                     <thead>
                         <tr>
@@ -156,8 +185,9 @@
                             <th>Buy Price</th>
                             <th>Qty</th>
                             <th>Amount</th>
+                            <th>AM</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <!-- <th>Actions</th> -->
                         </tr>
                     </thead>
                     <tbody>
@@ -172,11 +202,26 @@
                             <td>{{ item.price_per_share }}</td>
                             <td>{{ item.quantity }}</td>
                             <td>{{ item.total_amount }}</td>
-                            <td>{{ item.status }}</td>
-                            <td>
+                            <td>{{ item.ACApproved.username }}</td> 
+                           <td>
+                            {% if user_type == 'ST' %}
+                                <form method="post" action="{% url 'ST_User:edit_transaction_st_status' item.id %}">
+                                    {% csrf_token %}
+                                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        {% for key, label in st_status_choices %}
+                                            <option value="{{ key }}" {% if item.status == key %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            {% else %}
+                                {{ item.get_status_display }}
+                            {% endif %}
+                            </td>
+
+                            <!-- <td>
                             <a href="{% url 'ST_User:edit_transactionST' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
 
-                            </td>
+                            </td> -->
 
                         </tr>
                         {% empty %}

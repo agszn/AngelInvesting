@@ -66,7 +66,7 @@
         <th>Broker</th>
         <th>ISIN Number</th>
         <th>Stock</th>
-        <th>Order Type</th>
+        <!-- <th>Order Type</th> -->
         <th>Order ID</th>
         <th>Share Price</th>
         <th>Buy Price</th>
@@ -83,13 +83,13 @@
           <td>{{ item.broker.name }}</td>
           <td>{{ item.stock.isin_no }}</td>
           <td>{{ item.stock.company_name }}</td>
-          <td>{{ item.order_type }}</td>
+          <!-- <td>{{ item.order_type }}</td> -->
           <td>{{ item.order_id }}</td>
           <td>{{ item.stock.share_price }}</td>
-          <td>{{ item.price_per_share }}</td>
+          <td>{{ item.selling_price }}</td>
           <td>{{ item.quantity }}</td>
-          <td>{{ item.total_amount }}</td>
-          <td>{{ item.status }}</td>
+          <td>{{ item.total_value }}</td>
+          <td>{{ item.get_RM_status_display }}</td>
         </tr>
       {% empty %}
         <tr>
