@@ -40,7 +40,7 @@ urlpatterns = [
     path('about/', about, name='about'),
 
     # faq
-    path('faq/',faq,name='faq'),
+    path('faq/',Gendral_User_FAQ, name='faq'),
     
     # blog
     path('blog/',blog,name='blog'),

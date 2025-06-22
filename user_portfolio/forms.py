@@ -15,6 +15,9 @@ class BuyTransactionEditForm(forms.ModelForm):
             'AC_status': forms.Select(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
+        labels = {
+            'status': 'ST Status',  
+        }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -44,6 +47,9 @@ class SellTransactionEditForm(forms.ModelForm):
             'RM_status': forms.Select(attrs={'class': 'form-control'}),
             'AC_status': forms.Select(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'status': 'ST Status',  
         }
 
     def __init__(self, *args, **kwargs):

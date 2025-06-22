@@ -36,82 +36,130 @@ class MyAdminSite(admin.AdminSite):
 # Create an instance of the custom admin site
 admin_site = MyAdminSite(name='myadmin')
 
+from django.contrib import admin
+from django.utils.html import format_html
+from .models import *
+
 @admin.register(StockPeriod)
 class StockPeriodAdmin(admin.ModelAdmin):
     list_display = ('get_display_period', 'year', 'month', 'day')
     list_filter = ('year', 'month')
     search_fields = ('year',)
-
-    # Optional: order by latest period first
     ordering = ('-year', '-month', '-day')
+
 
 class DirectorInline(admin.TabularInline):
     model = Director
-    extra = 1  # Allows adding new directors directly
+    extra = 1
+    classes = ['collapse']
+
 
 class StockHistoryInline(admin.TabularInline):
     model = StockHistory
     extra = 1
     readonly_fields = ('price', 'timestamp')
+    can_delete = False
+    show_change_link = False
+    classes = ['collapse']
 
 
 class CompanyRelationInline(admin.TabularInline):
     model = CompanyRelation
     extra = 1
+    classes = ['collapse']
 
 
-class PrincipalBusinessActivityInline(admin.TabularInline):  # or admin.StackedInline
+class PrincipalBusinessActivityInline(admin.TabularInline):
     model = PrincipalBusinessActivity
-    extra = 1  # Number of empty forms shown
+    extra = 1
+    classes = ['collapse']
+
 
 class FAQAdmin(admin.TabularInline):
     model = FAQ
     extra = 1
+    classes = ['collapse']
+
 
 class ReportAdmin(admin.TabularInline):
     model = Report
     extra = 1
+    classes = ['collapse']
+
 
 class ShareholdingPatternAdmin(admin.TabularInline):
     model = ShareholdingPattern
     extra = 1
+    classes = ['collapse']
+
 
 
 class StockDataAdmin(admin.ModelAdmin):
     list_display = ('company_name', 'scrip_name', 'isin_no', 'formatted_share_price', 'conviction_level', 'stock_type')
-    search_fields = ('company_name', 'scrip_name', 'isin_no', 'sector', 'industry', 'cin', 'stock_type')
+    search_fields = ('company_name', 'scrip_name', 'isin_no', 'sector', 'category', 'cin', 'stock_type')
     list_filter = ('sector', 'conviction_level', 'drhp_filed', 'rofr_require', 'stock_type')
+    save_on_top = True
 
-    inlines = [DirectorInline,CompanyRelationInline, PrincipalBusinessActivityInline,FAQAdmin,ReportAdmin, ShareholdingPatternAdmin, StockHistoryInline]  
+    inlines = [
+        DirectorInline,
+        CompanyRelationInline,
+        PrincipalBusinessActivityInline,
+        FAQAdmin,
+        ReportAdmin,
+        ShareholdingPatternAdmin,
+        StockHistoryInline
+    ]
 
     fieldsets = (
-        (None, {
-            'fields': ('company_name', 'scrip_name', 'isin_no', 'cin', 'sector', 'category', 'registration_date', 'drhp_filed', 'available_on', 'rofr_require', 'stock_type'),
-            'description': format_html('<h3 style="color:white;">Basic Information</h3>'),
+        ('📌 Basic Information', {
+            'fields': (
+                'company_name', 'scrip_name', 'isin_no', 'cin',
+                'sector', 'category', 'registration_date', 'drhp_filed',
+                'available_on', 'rofr_require', 'stock_type'
+            ),
+            'description': 'Essential identification and classification of the company.'
         }),
-        (None, {
-            'fields': ('outstanding_shares', 'face_value', 'book_value', 'market_capitalization', 'profit', 'profit_percentage', 'eps', 'pe_ratio', 'ps_ratio', 'pbv'),
-            'description': format_html('<h3 style="color:white;">Financial Data</h3>'),
+        ('💰 Financial Data', {
+            'fields': (
+                'outstanding_shares', 'face_value', 'book_value',
+                'market_capitalization', 'profit', 'profit_percentage',
+                'eps', 'pe_ratio', 'ps_ratio', 'pbv'
+            ),
+            'description': 'Core financial metrics and ratios.'
         }),
-        (None, {
-            'fields': ('share_price', 'ltp', 'week_52_high', 'week_52_low', 'lifetime_high', 'lifetime_high_date', 'lifetime_low', 'lifetime_low_date', 'day_high', 'day_low'),
-            'description': format_html('<h3 style="color:white;">Stock Performance</h3>'),
+        ('📈 Stock Performance', {
+            'fields': (
+                'share_price', 'ltp', 'week_52_high', 'week_52_low',
+                'lifetime_high', 'lifetime_high_date',
+                'lifetime_low', 'lifetime_low_date',
+                'day_high', 'day_low'
+            ),
+            'description': 'Price history and volatility metrics.'
         }),
-        (None, {
-            'fields': ('lot', 'quantity', 'conviction_level', 'number_of_times_searched', 'pan_no', 'gst_no'),
-            'description': format_html('<h3 style="color:white;">Other Information</h3>'),
+        ('📦 Stock Configuration', {
+            'fields': (
+                'lot', 'quantity', 'conviction_level',
+                'number_of_times_searched', 'pan_no', 'gst_no'
+            ),
+            'description': 'Administrative and market positioning settings.'
         }),
-        (None, {
-            'fields': ('registered_office_address', 'transfer_agent_address', 'description', 'company_overview', 'logo'),
-            'description': format_html('<h3 style="color:white;">Company Details</h3>'),
+        ('🏢 Company Description', {
+            'fields': (
+                'registered_office_address', 'transfer_agent_address',
+                'description', 'company_overview', 'logo'
+            ),
+            'description': 'Narrative and visual branding of the company.'
         }),
     )
 
     def formatted_share_price(self, obj):
-        return format_html('<span style="color: green;">₹{}</span>', obj.share_price)
+        if obj.share_price:
+            return format_html('<span style="color: green; font-weight: bold;">₹{}</span>', obj.share_price)
+        return "N/A"
 
     formatted_share_price.admin_order_field = 'share_price'
     formatted_share_price.short_description = "Share Price (₹)"
+
     
     # def formatted_registration_date(self, obj):
     #     return obj.registration_date.strftime('%d-%m-%Y') if obj.registration_date else '-'
@@ -508,6 +556,8 @@ class StockDailySnapshotAdmin(admin.ModelAdmin):
             "title": "Upload CSV for Daily Snapshots"
         }
         return render(request, "admin/csv_form.html", context)
+
+
 
 # Register models with admin site
 admin.site.register(StockData, StockDataAdmin)

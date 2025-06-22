@@ -64,8 +64,7 @@
         {% for stock in stock_list %}
           <div style="background-color: #dee7f2; padding: 10px; margin-bottom: 5px; border-radius: 6px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div style="font-weight: bold;">
-                {{ stock.company_name }}
+              <div style="font-weight: bold;">{{ stock.company_name }}
                 <div style="display: inline-flex; align-items: center; gap: 4px; margin-left: 8px;">
                   {% if stock.in_group %}
                     <form method="POST" action="{% url 'unlisted_stock_marketplace:remove_from_group' stock.wishlist_id %}" style="display: inline;">
@@ -105,7 +104,7 @@
                       "{{ stock.quantity }}",
                       "{% url 'user_portfolio:sell_stock' stock.id %}"
                     )' style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
-                        </div>
+                  </div>
 
               </div>
 

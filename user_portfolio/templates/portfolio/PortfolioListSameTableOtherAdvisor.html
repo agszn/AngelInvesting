@@ -65,7 +65,6 @@
     </div>
 
     <!-- Table Header -->
-    {% if holdings %}
     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; background-color: #cbd9f6; padding: 10px; font-weight: bold;">
         <div>Stock Name</div>
         <div>Quantity</div>
@@ -76,30 +75,33 @@
         <div>Overall G/L</div>
         <div>Day’s G/L</div>
     </div>
-    {% endif %}
+
     <!-- Table Rows -->
+    <!-- Table Rows {% if h.is_other_sell %} background-color: #fff5e6; {% endif %}-->
     {% for h in holdings %}
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding: 10px; border-bottom: 1px solid #ddd;">
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding: 10px; border-bottom: 1px solid #ddd; ">
         <div>
             {{ h.stock.company_name }}
-                    <span title="Buy {{ stock.company_name }}"
-                      onclick='openBuyModal(
+            {% if not h.is_other_sell %}
+                <span title="Buy {{ h.stock.company_name }}"
+                    onclick='openBuyModal(
                         "{{ h.stock.id }}",
                         "{{ h.stock.company_name|escapejs }}",
                         "{{ h.stock.share_price }}",
                         "{{ h.stock.quantity }}",
                         "{% url 'user_portfolio:buy_stock' h.stock.id %}"
-                      )' style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
+                    )' style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
 
-                  <span onclick='openSellModal(
-                      "{{ h.stock.id }}",
-                      "{{ h.stock.company_name|escapejs }}",
-                      "{{ h.stock.share_price }}",
-                      "{{ h.stock.quantity }}",
-                      "{% url 'user_portfolio:sell_stock' h.stock.id %}"
+                <span onclick='openSellModal(
+                    "{{ h.stock.id }}",
+                    "{{ h.stock.company_name|escapejs }}",
+                    "{{ h.stock.share_price }}",
+                    "{{ h.stock.quantity }}",
+                    "{% url 'user_portfolio:sell_stock' h.stock.id %}"
                     )' style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
+            {% endif %}
         </div>
-        <div>{{ h.quantity_held }}</div>
+        <div>{{ h.quantity }}</div>
         <div>{{ h.avg_price }}</div>
         <div>{{ h.ltp }}</div>
         <div>{{ h.investment_amount }}</div>
@@ -107,50 +109,14 @@
         <div style="color: {% if h.total_gain_loss >= 0 %}green{% else %}red{% endif %};">
             {{ h.overall_gain_loss }}<br><span style="font-size: 12px;">{{ h.total_gain_loss_percent }}%</span>
         </div>
-        <div style="color: {% if h.daily_gain_loss >= 0 %}green{% else %}red{% endif %};">
+        <div style="color: {% if h.day_gain_loss >= 0 %}green{% else %}red{% endif %};">
             {{ h.day_gain_loss }}<br><span style="font-size: 12px;">{{ h.daily_gain_loss_percent }}%</span>
         </div>
     </div>
-
+    {% empty %}
+        <div class="text-center py-4">No matching records found.</div>
     {% endfor %}
 
-    <!-- other Advisor -->
-    {% if other_sells %}
-
-        <!-- <h5 style="font-weight: bold; color: #8a6d3b;">Sell Transactions (Advisor Type: Other)</h5> -->
-
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; background-color: #cbd9f6; padding: 10px; font-weight: bold;">
-            <div>Stock Name</div>
-            <div>Quantity</div>
-            <div>Selling Price</div>
-            <div>Total Value</div>
-            <div>Advisor</div>
-            <div>Broker</div>
-            <div>Timestamp</div>
-        </div>
-
-        {% for sell in other_sells %}
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding: 10px; border-bottom: 1px solid #ddd;">
-            <div>{{ sell.stock.company_name }}                   
-                    <span onclick='openSellModal(
-                      "{{ sell.stock.id }}",
-                      "{{ sell.stock.company_name|escapejs }}",
-                      "{{ sell.stock.share_price }}",
-                      "{{ sell.stock.quantity }}",
-                      "{% url 'user_portfolio:sell_stock' sell.stock.id %}"
-                    )' style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span></div>
-            <div>{{ sell.quantity }}</div>
-            <div>{{ sell.selling_price }}</div>
-            <div>{{ sell.total_value }}</div>
-            <div>{{ sell.advisor.advisor_type }}</div>
-            <div>{{ sell.broker.name }}</div>
-            <div>{{ sell.timestamp|date:"Y-m-d H:i" }}</div>
-        </div>
-        {% empty %}
-        <div style="padding: 10px;">No "Other" advisor sell transactions found.</div>
-        {% endfor %}
-
-    {% endif %}
 
     <!-- Pagination -->
     <div style="text-align: right; padding-top: 10px;">

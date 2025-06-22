@@ -1,0 +1,8 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h2>📁 Quick Links</h2>
+  <ul>
+      <li><a href="{% url 'admin:unlisted_stock_marketplace_customfielddefinition_add' %}">Add Custom Field Definition</a></li>
+  </ul>
+  {{ block.super }}
+{% endblock %}

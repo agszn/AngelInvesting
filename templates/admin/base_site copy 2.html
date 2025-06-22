@@ -1,0 +1,21 @@
+
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}📊 Custom Admin{% endblock %}
+
+{% block branding %}
+  <h1 id="site-name"><a href="{% url 'admin:index' %}">📊 Custom Admin Panel</a></h1>
+{% endblock %}
+
+{% block nav-global %}
+  {{ block.super }}
+  <style>
+    body {
+      background-color: #f5f6fa;
+    }
+    #site-name a {
+      color: #2c3e50;
+    }
+  </style>
+{% endblock %}

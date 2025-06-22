@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>FAQs</h2>
+    {% for faqG in faqs_G %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>{{ faqG.title }}</h4>
+                {% if faqG.subtitle %}
+                    <h6>{{ faqG.subtitle }}</h6>
+                {% endif %}
+                {% if faqG.image %}
+                    <img src="{{ faqG.image.url }}" alt="FAQ Image" class="img-fluid my-2" />
+                {% endif %}
+                <div class="faq-description mt-2">
+                    {{ faqG.description|safe }}
+                </div>
+                {% if faqG.link %}
+                    <p><a href="{{ faqG.link }}" target="_blank">Learn more</a></p>
+                {% endif %}
+                <small class="text-muted">{{ faqG.created_at }}</small>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

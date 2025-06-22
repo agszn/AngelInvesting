@@ -164,3 +164,16 @@ class ContactForm(forms.ModelForm):
         }
 
 
+# ------------- G User FAQ -------------
+
+from django import forms
+from .models import FAQ_G
+
+class FAQForm(forms.ModelForm):
+    class Meta:
+        model = FAQ_G
+        fields = '__all__'
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 6, 'id': 'id_description'}),
+            'style': forms.Select(attrs={'id': 'id_style'}),
+        }

@@ -653,6 +653,7 @@ class CompanyRelation(models.Model):
         ('WhollyOwnedSubsidiary', 'Wholly Owned Subsidiary'),
         ('StepDownSubsidiary', 'Step Down Subsidiary'),
         ('JointVenture','Joint Venture'),
+        ('Holding','Holding'),
     ]
 
     company_name = models.CharField(max_length=775,blank=True, null=True)

@@ -185,3 +185,24 @@ class Contact(models.Model):
         return self.name
 
 
+# ------------- G User FAQ -------------
+from django.db import models
+
+STYLE_CHOICES = [
+    ('paragraph', 'Paragraph'),
+    ('ul', 'Unordered List'),
+    ('ol_number', 'Ordered List (Numbered)'),
+    ('ol_alpha', 'Ordered List (Alphabetical)'),
+]
+
+class FAQ_G(models.Model):
+    title = models.CharField(max_length=255)
+    subtitle = models.TextField( blank=True, null=True)
+    description = models.TextField(help_text="Use '--' before each point for lists.")
+    style = models.CharField(max_length=20, choices=STYLE_CHOICES, default='paragraph')
+    image = models.ImageField(upload_to='faq_images/', blank=True, null=True)
+    link = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

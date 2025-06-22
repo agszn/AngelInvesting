@@ -23,6 +23,8 @@ urlpatterns = [
     path('sell_stock/<int:stock_id>/', sell_stock, name='sell_stock'),
     
     path('load-advisors-brokers/', load_advisors_brokers, name='load_advisors_brokers'),
+    
+    path('statementpaper/', statement_paper, name='statement_paper'),
 
     
 ]

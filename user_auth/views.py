@@ -743,9 +743,9 @@ def about(request):
     return render(request, 'about/about.html')
 
 # FAQ
-def faq(request):
-    return render(request, 'FAQ/faq.html')
-
+def Gendral_User_FAQ(request):
+    faqs_G = FAQ_G.objects.all()
+    return render(request, 'FAQ/faqG.html', {'faqs_G': faqs_G})
 
 # blog
 def blog(request):

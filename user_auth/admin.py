@@ -49,3 +49,16 @@ from .models import Broker
 class BrokerAdmin(admin.ModelAdmin):
     list_display = ('broker_id', 'name')
     search_fields = ('broker_id', 'name')
+
+
+from django.contrib import admin
+from .models import FAQ_G
+# ------------- G User FAQ -------------
+@admin.register(FAQ_G)
+class FAQGUser(admin.ModelAdmin):
+    list_display = ['title', 'style', 'created_at']
+    search_fields = ['title', 'subtitle']
+    list_filter = ['style', 'created_at']
+
+    class Media:
+        js = ('js/faq_style.js',)
