@@ -13,10 +13,59 @@ from django.contrib import messages
 def dashboardST(request):
     return render(request, 'dashboardST.html')
 
+
+
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.utils.dateparse import parse_date
+from django.contrib.auth.decorators import login_required
+from datetime import datetime
+from RM_User.models import BuyTransaction, SellTransaction
+
+@login_required
+def ReportsST(request):
+    buy_orders_qs = BuyTransaction.objects.filter(status__in=['completed', 'cancelled']).order_by('-timestamp')
+    sell_orders_qs = SellTransaction.objects.filter(status__in=['completed', 'cancelled']).order_by('-timestamp')
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
+    order_id = request.GET.get('order_id')
+
+    if from_date:
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date__gte=from_date)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date__gte=from_date)
+    if to_date:
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date__lte=to_date)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date__lte=to_date)
+    if order_id:
+        buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
+        sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
+
+    buy_orders_qs = buy_orders_qs.order_by('-timestamp')
+    sell_orders_qs = sell_orders_qs.order_by('-timestamp')
+
+    # PAGINATION
+    buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
+    sell_paginator = Paginator(sell_orders_qs, 10)
+
+    buy_page_number = request.GET.get('buy_page')
+    sell_page_number = request.GET.get('sell_page')
+
+    buy_orders_ReportsST = buy_paginator.get_page(buy_page_number)
+    sell_orders_ReportsST = sell_paginator.get_page(sell_page_number)
+
+    return render(request, 'ReportsST.html', {
+        'buy_orders_ReportsST': buy_orders_ReportsST,
+        'sell_orders_ReportsST': sell_orders_ReportsST,
+        'from_date': from_date,
+        'to_date': to_date,
+        'order_id': order_id
+    })
+
+
 @login_required
 def buyorderST(request):
-    # Fetch BuyTransactions of those users
-    buy_orders = BuyTransaction.objects.filter(RM_status='completed').order_by('-timestamp')
+    # Show only non-completed BuyTransactions
+    buy_orders = BuyTransaction.objects.exclude(status__in=['completed', 'cancelled']).order_by('-timestamp')
     
     return render(request, 'buyorderST.html', {'buy_orders': buy_orders})
 
@@ -192,13 +241,18 @@ def edit_buy_transactionST(request, pk):
 
 
 
-def buyDealLetterrST(request):
-    return render(request, 'buyDealLetterrST.html')
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 @login_required
 def sellorderST(request):
-    sell_orders = SellTransaction.objects.all().order_by('-timestamp')
+    # Exclude both 'completed' and 'cancelled' statuses
+    sell_orders = SellTransaction.objects.exclude(status__in=['completed', 'cancelled']).order_by('-timestamp')
+    
     return render(request, 'sellorderST.html', {'sell_orders': sell_orders})
+
 
 def SellerSummaryST(request, order_id):
     # Get the base sell transaction
@@ -296,8 +350,257 @@ def edit_sell_transactionST(request, pk):
     })
 
 
+
+# 
+# 
+# 
+# ---------------------------------------------------------------------
+# ------------------ DealLetters Start -------------
+# ------------------------------------------------------------------
+# 
+# 
+
+
 def sellDealLetterrST(request):
     return render(request, 'sellDealLetterST.html')
+
+def buyDealLetterrST(request):
+    return render(request, 'buyDealLetterrST.html')
+
+# views.py
+import base64
+import os
+import tempfile
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.contrib import messages
+from django.conf import settings
+from weasyprint import HTML
+
+def generate_invoice_no(prefix, order_id):
+    return f"INV-{prefix}-{order_id[-6:]}"
+
+
+def get_client_details(user):
+    profile = getattr(user, 'profile', None)
+    cmr = CMRCopy.objects.filter(user_profile=profile).first()
+    return {
+        'full_name': profile.full_name() if profile else user.get_full_name(),
+        'pan_number': profile.pan_number if profile else '-',
+        'email': user.email,
+        'phone': profile.mobile_number if profile else '-',
+        'client_id': cmr.client_id_input if cmr else '-',
+    }
+
+
+def render_to_pdf(request, template_src, context_dict, filename):
+    html_string = render_to_string(template_src, context_dict)
+    html = HTML(string=html_string)
+    result = tempfile.NamedTemporaryFile(delete=True)
+    html.write_pdf(target=result.name)
+
+    with open(result.name, 'rb') as pdf:
+        response = HttpResponse(pdf.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+
+def get_logo_base64():
+    logo_path = os.path.join(settings.BASE_DIR, 'static/Media/images/site-logo.png')
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode('utf-8')
+    return ""
+
+
+# @login_required
+# def buyDealLetterrST(request):
+#     order_id = request.GET.get('order_id')
+#     if not order_id:
+#         messages.error(request, "Order ID is missing.")
+#         return redirect("ST_User:dashboard")
+
+#     transaction = get_object_or_404(BuyTransaction, order_id=order_id)
+#     invoice_no = generate_invoice_no("BUY", order_id)
+
+#     buyer = get_client_details(transaction.user)
+#     seller = {
+#         'full_name': 'AngelInvesting.com',
+#         'pan_number': 'NA',
+#         'email': 'support@angelinvesting.com',
+#         'phone': '+91-XXXXXXXXXX',
+#         'client_id': 'NA',
+#     }
+
+#     context = {
+#         'invoice_no': invoice_no,
+#         'transaction_date': transaction.timestamp,
+#         'to_user': transaction.user.get_full_name(),
+#         'transaction': transaction,
+#         'stock': transaction.stock,
+#         'buyer': buyer,
+#         'seller': seller,
+#         'mode_of_delivery': 'Demat',
+#         'logo_base64': get_logo_base64(),
+#     }
+
+#     if request.GET.get('download') == 'pdf':
+#         return render_to_pdf(request, 'buyDealLetterrST.html', context, f'{invoice_no}.pdf')
+
+#     return render(request, 'buyDealLetterrST.html', context)
+
+
+# @login_required
+# def sellDealLetterrST(request):
+#     order_id = request.GET.get("order_id")
+#     if not order_id:
+#         messages.error(request, "Order ID is missing.")
+#         return redirect("ST_User:dashboard")
+
+#     transaction = get_object_or_404(SellTransaction, order_id=order_id)
+#     stock = transaction.stock
+
+#     seller = get_client_details(transaction.user)
+
+#     # Simulate AngelInvesting.com as buyer
+#     buyer = {
+#         'full_name': 'AngelInvesting.com',
+#         'pan_number': 'NA',
+#         'email': 'support@angelinvesting.com',
+#         'phone': '+91-XXXXXXXXXX',
+#         'client_id': 'NA',
+#     }
+
+#     context = {
+#         'invoice_no': generate_invoice_no("SELL", order_id),
+#         'transaction_date': transaction.timestamp,
+#         'transaction': transaction,
+#         'stock': stock,
+#         'buyer': buyer,
+#         'seller': seller,
+#         'mode_of_delivery': "Demat",
+#         'logo_base64': get_logo_base64(),
+#     }
+
+#     if request.GET.get("download") == "pdf":
+#         return render_to_pdf(request, "sellDealLetterST.html", context, f"{context['invoice_no']}.pdf")
+
+#     return render(request, "sellDealLetterST.html", context)
+
+from .models import DealLetterRecord  # Import
+
+@login_required
+def buyDealLetterrST(request):
+    order_id = request.GET.get('order_id')
+    if not order_id:
+        messages.error(request, "Order ID is missing.")
+        return redirect("ST_User:dashboard")
+
+    transaction = get_object_or_404(BuyTransaction, order_id=order_id)
+    invoice_no = generate_invoice_no("BUY", order_id)
+
+    buyer = get_client_details(transaction.user)
+    seller = {
+        'full_name': 'AngelInvesting.com',
+        'pan_number': 'NA',
+        'email': 'support@angelinvesting.com',
+        'phone': '+91-XXXXXXXXXX',
+        'client_id': 'NA',
+    }
+
+    # Save deal letter record if not exists
+    DealLetterRecord.objects.get_or_create(
+        user=transaction.user,
+        transaction_id=order_id,
+        deal_type='BUY',
+        defaults={
+            'invoice_no': invoice_no,
+            'stock_name': transaction.stock.company_name,
+            'quantity': transaction.quantity,
+            'price_per_share': transaction.price_per_share,
+            'total_amount': transaction.total_amount
+        }
+    )
+
+    context = {
+        'invoice_no': invoice_no,
+        'transaction_date': transaction.timestamp,
+        'to_user': transaction.user.get_full_name(),
+        'transaction': transaction,
+        'stock': transaction.stock,
+        'buyer': buyer,
+        'seller': seller,
+        'mode_of_delivery': 'Demat',
+        'logo_base64': get_logo_base64(),
+    }
+
+    if request.GET.get('download') == 'pdf':
+        return render_to_pdf(request, 'buyDealLetterrST.html', context, f'{invoice_no}.pdf')
+
+    return render(request, 'buyDealLetterrST.html', context)
+
+
+@login_required
+def sellDealLetterrST(request):
+    order_id = request.GET.get("order_id")
+    if not order_id:
+        messages.error(request, "Order ID is missing.")
+        return redirect("ST_User:dashboard")
+
+    transaction = get_object_or_404(SellTransaction, order_id=order_id)
+    stock = transaction.stock
+    seller = get_client_details(transaction.user)
+
+    buyer = {
+        'full_name': 'AngelInvesting.com',
+        'pan_number': 'NA',
+        'email': 'support@angelinvesting.com',
+        'phone': '+91-XXXXXXXXXX',
+        'client_id': 'NA',
+    }
+
+    invoice_no = generate_invoice_no("SELL", order_id)
+
+    # Save deal letter record if not exists
+    DealLetterRecord.objects.get_or_create(
+        user=transaction.user,
+        transaction_id=order_id,
+        deal_type='SELL',
+        defaults={
+            'invoice_no': invoice_no,
+            'stock_name': stock.company_name,
+            'quantity': transaction.quantity,
+            'price_per_share': transaction.price_per_share,
+            'total_amount': transaction.total_amount
+        }
+    )
+
+    context = {
+        'invoice_no': invoice_no,
+        'transaction_date': transaction.timestamp,
+        'transaction': transaction,
+        'stock': stock,
+        'buyer': buyer,
+        'seller': seller,
+        'mode_of_delivery': "Demat",
+        'logo_base64': get_logo_base64(),
+    }
+
+    if request.GET.get("download") == "pdf":
+        return render_to_pdf(request, "sellDealLetterST.html", context, f"{invoice_no}.pdf")
+
+    return render(request, "sellDealLetterST.html", context)
+
+
+# 
+# 
+# 
+# ---------------------------------------------------------------------
+# ------------------ DealLetters End -------------
+# ------------------------------------------------------------------
+# 
+# 
 
 def clientST(request):
     return render(request, 'clientST.html')

@@ -106,9 +106,8 @@ def ordersAcc(request):
 @login_required
 def buyorderAcc(request):
     # Fetch BuyTransactions of those users
-    buy_orders = BuyTransaction.objects.all().order_by('-timestamp')
-
-    return render(request, 'buyorderAcc.html', {'buy_orders': buy_orders})
+    buy_ordersAcc = BuyTransaction.objects.exclude(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
+    return render(request, 'buyorderAcc.html', {'buy_orders': buy_ordersAcc})
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
@@ -350,9 +349,9 @@ def edit_sell_transactionAcc(request, pk):
 def sellorderAcc(request):
 
     # Fetch both types of sell transactions
-    sell_orders = SellTransaction.objects.all().order_by('-timestamp')
+    sell_ordersAcc = SellTransaction.objects.exclude(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
 
-    return render(request, 'sellorderAcc.html', {'sell_orders': sell_orders})
+    return render(request, 'sellorderAcc.html', {'sell_orders': sell_ordersAcc})
 
 def unlistedSharesAcc(request):
     return render(request, 'unlistedSharesAcc.html')
@@ -363,8 +362,46 @@ def ShareListAcc(request):
 def clientAcc(request):
     return render(request, 'clientAcc.html')
 
+from django.core.paginator import Paginator
 def reportsAcc(request):
-    return render(request, 'reportsAcc.html')
+    
+    buy_orders_qs = BuyTransaction.objects.filter(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
+    sell_orders_qs = SellTransaction.objects.filter(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
+
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
+    order_id = request.GET.get('order_id')
+
+    if from_date:
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date__gte=from_date)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date__gte=from_date)
+    if to_date:
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date__lte=to_date)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date__lte=to_date)
+    if order_id:
+        buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
+        sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
+
+    buy_orders_qs = buy_orders_qs.order_by('-timestamp')
+    sell_orders_qs = sell_orders_qs.order_by('-timestamp')
+
+    # PAGINATION
+    buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
+    sell_paginator = Paginator(sell_orders_qs, 10)
+
+    buy_page_number = request.GET.get('buy_page')
+    sell_page_number = request.GET.get('sell_page')
+
+    buy_orders_ReportsAcc = buy_paginator.get_page(buy_page_number)
+    sell_orders_ReportsAcc = sell_paginator.get_page(sell_page_number)
+
+    return render(request, 'reportsAcc.html', {
+        'buy_orders_ReportsAcc': buy_orders_ReportsAcc,
+        'sell_orders_ReportsAcc': sell_orders_ReportsAcc,
+        'from_date': from_date,
+        'to_date': to_date,
+        'order_id': order_id
+    })
 
 
 

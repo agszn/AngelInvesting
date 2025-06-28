@@ -46,6 +46,49 @@ def unlistedSharesRM(request):
 
     return render(request, 'unlistedSharesRM.html', {'stocks': stocks, 'query': query})
 
+
+from django.core.paginator import Paginator
+@login_required
+def ReportRM(request):
+    
+    buy_orders_qs = BuyTransaction.objects.filter(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
+    sell_orders_qs = SellTransaction.objects.filter(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
+
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
+    order_id = request.GET.get('order_id')
+
+    if from_date:
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date__gte=from_date)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date__gte=from_date)
+    if to_date:
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date__lte=to_date)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date__lte=to_date)
+    if order_id:
+        buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
+        sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
+
+    buy_orders_qs = buy_orders_qs.order_by('-timestamp')
+    sell_orders_qs = sell_orders_qs.order_by('-timestamp')
+
+    # PAGINATION
+    buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
+    sell_paginator = Paginator(sell_orders_qs, 10)
+
+    buy_page_number = request.GET.get('buy_page')
+    sell_page_number = request.GET.get('sell_page')
+
+    buy_orders_ReportsRM = buy_paginator.get_page(buy_page_number)
+    sell_orders_ReportsRM = sell_paginator.get_page(sell_page_number)
+
+    return render(request, 'ReportRM.html', {
+        'buy_orders_ReportsRM': buy_orders_ReportsRM,
+        'sell_orders_ReportsRM': sell_orders_ReportsRM,
+        'from_date': from_date,
+        'to_date': to_date,
+        'order_id': order_id
+    })
+
 @login_required
 def buyorderRM(request):
     rm_user = request.user
@@ -53,8 +96,10 @@ def buyorderRM(request):
     # Get users assigned to this RM
     assigned_users = CustomUser.objects.filter(assigned_rm=rm_user)
 
-    # Fetch BuyTransactions of those users
-    buy_orders = BuyTransaction.objects.filter(user__in=assigned_users).order_by('-timestamp')
+    # Fetch BuyTransactions of those users, excluding 'completed'
+    buy_orders = BuyTransaction.objects.filter(
+        user__in=assigned_users
+    ).exclude(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
 
     return render(request, 'buyorderRM.html', {'buy_orders': buy_orders})
 
@@ -563,7 +608,7 @@ def sellorderRM(request):
     assigned_users = CustomUser.objects.filter(assigned_rm=rm_user)
 
     # Fetch both types of sell transactions
-    sell_orders_main = SellTransaction.objects.filter(user__in=assigned_users).order_by('-timestamp')
+    sell_orders_main = SellTransaction.objects.filter(user__in=assigned_users).exclude(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
     # sell_orders_other = SellTransactionOtherAdvisor.objects.filter(user__in=assigned_users)
 
     # Combine and sort them by timestamp (most recent first)
@@ -774,7 +819,6 @@ from django.contrib.auth.decorators import login_required
 
 #     return render(request, 'transaction/edit_transaction.html', {'form': form})
 # RM_User/views.py
-
 @login_required
 def edit_buy_transaction(request, pk):
     transaction = get_object_or_404(BuyTransaction, pk=pk)
@@ -805,6 +849,62 @@ def edit_buy_transaction(request, pk):
         form = BuyTransactionEditForm(instance=transaction, user=request.user)
 
     return render(request, 'transaction/edit_transaction.html', {'form': form})
+
+
+
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+@login_required
+@csrf_exempt
+def ajax_transaction_handler(request, pk):
+    transaction = get_object_or_404(BuyTransaction, pk=pk)
+    order_id = transaction.order_id
+
+    if request.method == 'GET':
+        form = BuyTransactionEditForm(instance=transaction, user=request.user)
+        return render(request, 'partials/transaction_edit_form.html', {'form': form, 'transaction': transaction})
+
+    elif request.method == 'POST':
+        form = BuyTransactionEditForm(request.POST, instance=transaction, user=request.user)
+        if form.is_valid():
+            tx = form.save(commit=False)
+
+            # ✅ Recalculate total_amount
+            try:
+                tx.total_amount = tx.price_per_share * tx.quantity
+            except Exception as e:
+                print("Error calculating total amount:", e)
+
+            print("Before Save:")
+            print("Qty:", tx.quantity)
+            print("Price:", tx.price_per_share)
+            print("Total Amount:", tx.total_amount)
+            print("RM Status:", tx.RM_status)
+
+            user_type = getattr(request.user, 'user_type', None)
+            if user_type == 'RM' and transaction.RM_status != 'completed' and tx.RM_status == 'completed':
+                tx.RMApproved = request.user
+            elif user_type == 'AC' and transaction.AC_status != 'completed' and tx.AC_status == 'completed':
+                tx.ACApproved = request.user
+            elif user_type == 'ST' and transaction.status != 'completed' and tx.status == 'completed':
+                tx.STApproved = request.user
+
+            tx.save()
+
+            print("After Save:")
+            print("Qty:", tx.quantity)
+            print("Price:", tx.price_per_share)
+            print("Total Amount:", tx.total_amount)
+            print("RM Status:", tx.RM_status)
+
+            # ✅ If this is via AJAX, use JsonResponse. If redirecting, client must handle it.
+            # return JsonResponse({'success': True})
+            # Or use redirect only if you're not in modal AJAX:
+            return redirect('RM_User:buyordersummery', order_id=order_id)
+
+        else:
+            html = render_to_string('partials/transaction_edit_form.html', {'form': form, 'transaction': transaction})
+            return JsonResponse({'success': False, 'html': html})
 
 
 # views.py

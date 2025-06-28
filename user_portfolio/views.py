@@ -457,11 +457,7 @@ def sell_orders(request):
     return render(request, 'portfolio/SellOrdersList.html',{'Sell_orders_value':Sell_orders_value, 'page_obj':page_obj,**stock_context})
 
 
-@login_required
-def statement_paper(request):
-    user = request.user
-    stock_context = get_user_stock_context(user, request)
-    return render(request, 'statementpaper/statementpaper.html',{**stock_context})
+
 
 # testing
 
@@ -843,4 +839,15 @@ def sell_stock(request, stock_id):
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
+from Share_Transfer.models import DealLetterRecord
 
+# view_deal_letters
+
+
+
+@login_required
+def view_deal_letters(request):
+    user = request.user
+    stock_context = get_user_stock_context(user, request)
+    records = DealLetterRecord.objects.filter(user=request.user).order_by('-generated_on')
+    return render(request, 'portfolio/view_deal_letters.html', {'records': records,**stock_context})

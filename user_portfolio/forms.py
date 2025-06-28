@@ -1,4 +1,4 @@
-# forms.py
+# user_portfolio/forms.py
 from django import forms
 from .models import BuyTransaction, SellTransaction
 

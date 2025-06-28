@@ -139,6 +139,12 @@ class StockDailySnapshot(models.Model):
             original = StockDailySnapshot.objects.filter(pk=self.pk).first()
             if original and original.share_price != self.share_price:
                 self.ltp = original.share_price
+                
+        # if not is_new and (self.ltp is None or self.ltp == Decimal('0.00')):
+        #     original = StockDailySnapshot.objects.filter(pk=self.pk).first()
+        #     if original and original.share_price != self.share_price:
+        #         self.ltp = original.share_price
+
 
         # Get previous day's snapshot if ltp is missing
         if self.ltp is None:

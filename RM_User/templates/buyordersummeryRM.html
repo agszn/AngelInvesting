@@ -123,6 +123,7 @@
       <button class="RMpaymentAdd btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal">Add Payment</button> Total Balance - {{ remaining_amount }}
     </div>
 
+<!-- RM_User/templates/buyordersummeryRM.html -->
     <!-- Payment Records Table -->
       <div class="order-details-transaction">
           <table class="RMbuyorder-table">
@@ -269,7 +270,7 @@
       </div>
 
 
-
+<!-- RM_User/templates/buyordersummeryRM.html -->
   <!-- Order Transaction Details -->
     <div class="order-details-transaction">
       <h6 style="padding-top: 2%;">Order Transaction Details</h6>
@@ -307,7 +308,13 @@
 
 
               <td>
-                <a href="{% url 'RM_User:edit_transaction' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a>
+                <!-- <a href="{% url 'RM_User:edit_transaction' item.id %}" class="btn btn-sm btn-outline-primary"> ✏️</a> -->
+
+                <button type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  onclick='openTransactionEditModal({{ item.id }})'>
+                  ✏️
+                </button>
 
                 <!-- <a href="{% url 'RM_User:delete_transaction' pk=item.id %}"
                   onclick="return confirm('Are you sure you want to delete this transaction?');"
@@ -337,11 +344,30 @@
       </div>
     </div>
 
+    <!-- edit status form  -->
+    <div class="modal fade" id="transactionEditModal" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="transactionEditModalLabel">Edit Buy Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="transactionEditFormContainer">
+            <!-- Form will be loaded here by AJAX -->
+            <div class="text-center">
+              <span class="spinner-border"></span> Loading...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
   {% else %}
     <p>No order details found.</p>
   {% endif %}
 
-<!-- JavaScript -->
+<!-- JavaScript payment -->
 <script>
   // Reset form for Add Payment
   document.querySelector('.RMpaymentAdd').addEventListener('click', function () {
@@ -385,6 +411,24 @@
     const modal = new bootstrap.Modal(document.getElementById('buyModal'));
     modal.show();
   }
+</script>
+
+<!-- status  Transfer to Accounts -->
+<script>
+function openTransactionEditModal(id) {
+  const container = document.getElementById('transactionEditFormContainer');
+  container.innerHTML = '<div class="text-center"><span class="spinner-border"></span> Loading...</div>';
+
+  fetch(`/RM_User/transaction/${id}/edit/ajax/`)
+    .then(response => response.text())
+    .then(html => {
+      container.innerHTML = html;
+      const modal = new bootstrap.Modal(document.getElementById('transactionEditModal'));
+      modal.show();
+    });
+}
+
+
 </script>
 
 {% endblock %}

@@ -1,9 +1,263 @@
-{% extends "baseStructureST.html" %}
-{% block title %}Buy Orders{% endblock %}
+  {% load static %}  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Buy Deal Confirmation - {{ invoice_no }}</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      margin: 40px;
+      line-height: 1.6;
+      color: #000;
+    }
+
+    .letter-wrapper {
+      max-width: 850px;
+      margin: auto;
+      padding: 40px;
+      border: 1px solid #aaa;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header img {
+      height: 80px;
+    }
+
+    .invoice-block {
+      text-align: right;
+      font-size: 14px;
+    }
+
+    .invoice-block h3 {
+      margin: 0;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+
+    .invoice-block p {
+      margin: 4px 0;
+    }
+
+    .contact-block {
+      text-align: right;
+      margin-top: 20px;
+      font-size: 13px;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 30px 0 10px;
+      text-transform: uppercase;
+      font-size: 20px;
+    }
+
+    .section-title {
+      font-weight: bold;
+      padding: 8px 12px;
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      margin-top: 30px;
+    }
+
+    .detail-row {
+      padding: 6px 0;
+    }
+
+    table.client-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 15px;
+    }
+
+    table.client-table th, table.client-table td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ccc;
+    }
+
+    .signature {
+      margin-top: 50px;
+    }
+
+    .download-button {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .download-button a {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .terms {
+      margin-top: 50px;
+      font-size: 13px;
+    }
+
+    .terms h4 {
+      text-decoration: underline;
+      margin-bottom: 10px;
+    }
+
+    .terms ol {
+      padding-left: 20px;
+    }
+
+    @media print {
+      .download-button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="letter-wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <!-- <img src="{% static 'Media/images/site-logo.png' %}" alt="Company Logo">  -->
+              <img src="data:image/png;base64,{{ logo_base64 }}" alt="Company Logo">
 
 
-{% block STsubtitle %}Buy Letter Deal{% endblock %}
+    <!-- Replace with correct logo path -->
+    </div>
+    <div class="invoice-block">
+      <h1>INVOICE</h1>
+      <p><strong>Invoice No:</strong> {{ invoice_no }}</p>
+      <p><strong>Date:</strong> {{ transaction_date|date:"d-m-Y" }}</p>
+      <div class="contact-block">
+        <p><strong>Phone:</strong> +91-XXXXXXXXXX</p>
+        <p><strong>Email:</strong> support@angelinvesting.com</p>
+        <p><strong>Website:</strong> www.angelinvesting.com</p>
+      </div>
+    </div>
+  </div>
 
-{% block STprofile_content %}
-Coming Soon
-{% endblock %}
+  <h2>Deal Confirmation Letter</h2>
+
+  <p>To,<br>
+  {{ buyer.full_name }}<br>
+  {{ buyer.email }}<br>
+  {{ buyer.phone }}</p>
+
+  <p>Dear {{ buyer.full_name }},</p>
+
+  <p>We are pleased to confirm the successful completion of the following stock purchase transaction between you and AngelInvesting.com.</p>
+
+<!-- Transaction Details -->
+<div class="section-title" style="text-align: center;">Transaction Details</div>
+<table style="margin: 0 auto; margin-top: 15px; border-collapse: collapse; font-size: 16px;">
+  <tbody>
+    <tr>
+      <td style="padding: 8px 20px; font-weight: bold; text-align: right;">Company Name:</td>
+      <td style="padding: 8px 20px; text-align: left;">{{ stock.company_name }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 20px; font-weight: bold; text-align: right;">Scrip Name:</td>
+      <td style="padding: 8px 20px; text-align: left;">{{ stock.scrip_name }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 20px; font-weight: bold; text-align: right;">Quantity Purchased:</td>
+      <td style="padding: 8px 20px; text-align: left;">{{ transaction.quantity }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 20px; font-weight: bold; text-align: right;">Price per Share:</td>
+      <td style="padding: 8px 20px; text-align: left;">₹{{ transaction.price_per_share }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 20px; font-weight: bold; text-align: right;">Total Purchase Amount:</td>
+      <td style="padding: 8px 20px; text-align: left;">₹{{ transaction.total_amount }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 20px; font-weight: bold; text-align: right;">Mode of Delivery:</td>
+      <td style="padding: 8px 20px; text-align: left;">{{ mode_of_delivery }}</td>
+    </tr>
+  </tbody>
+</table>
+
+
+  <!-- Client Information -->
+  <div class="section-title" style="text-align: center;">Client Information</div>
+  <table class="client-table">
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Buyer (You)</th>
+        <th>Seller (AngelInvesting.com)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Name</td>
+        <td>{{ buyer.full_name }}</td>
+        <td>{{ seller.full_name }}</td>
+      </tr>
+      <tr>
+        <td>PAN Number</td>
+        <td>{{ buyer.pan_number }}</td>
+        <td>{{ seller.pan_number }}</td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>{{ buyer.email }}</td>
+        <td>{{ seller.email }}</td>
+      </tr>
+      <tr>
+        <td>Phone</td>
+        <td>{{ buyer.phone }}</td>
+        <td>{{ seller.phone }}</td>
+      </tr>
+      <tr>
+        <td>Client ID</td>
+        <td>{{ buyer.client_id }}</td>
+        <td>{{ seller.client_id }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Closing -->
+<div class="signature" style="text-align: right;">
+  <p>Thank you for your trust in AngelInvesting.com.</p>
+  <p><strong>Authorized Signatory</strong><br>AngelInvesting.com</p>
+</div>
+
+
+<!-- Terms and Conditions -->
+<div class="terms" style="margin-top: 80px;">
+  <h4>Terms and Conditions:</h4>
+  <ol>
+    <li><strong>Non-Listed Share Acknowledgment:</strong> By proceeding with the specified transaction or transferring funds to our account, you confirm awareness and acceptance that the unlisted shares are not listed on any stock exchange.</li>
+    <li><strong>Listing Contingency:</strong> Listing of shares is at the discretion of the company’s management and subject to regulatory approvals.</li>
+    <li><strong>Regulatory Compliance - Lock-in Period:</strong> SEBI mandates a 6-month lock-in post-listing (Mainboard) and 1 year for SME listings.</li>
+    <li><strong>NRI Payment and Transfer Requirements:</strong> NRIs must pay through their NRO bank account and shares will be transferred to their NRO Demat account.</li>
+    <li><strong>Investment Risks Disclosure:</strong> Investment in such securities involves risks, including potential capital loss.</li>
+    <li><strong>Pre-Listing Share Valuation:</strong> Shares will appear at face value in your Demat account until listed.</li>
+    <li><strong>Share Transfer to Buyer's DEMAT:</strong> Shares are transferred to the Purchaser’s Demat post verification of CML. No third-party transactions allowed.</li>
+    <li><strong>No Guarantee on Exit Opportunities:</strong> No assurance is provided for exit opportunities or IPO listing timelines.</li>
+    <li><strong>Buyer's Due Diligence:</strong> You confirm this transaction aligns with your financial capability and you’ve verified all relevant details independently.</li>
+    <li><strong>Receipt of Shares Responsibility:</strong> You must confirm receipt of shares within 48 hours. Seller reserves the right to refund or transfer as deemed fit.</li>
+    <li><strong>Indemnification and Liability:</strong> You agree to indemnify UnlistedZone and its affiliates against any liabilities. No guarantee of returns or capital protection is offered.</li>
+  </ol>
+</div>
+
+
+  <!-- Download PDF -->
+  <div class="download-button">
+    <a href="?order_id={{ transaction.order_id }}&download=pdf">⬇️ Download Deal Letter (PDF)</a>
+  </div>
+
+</div>
+</body>
+</html>

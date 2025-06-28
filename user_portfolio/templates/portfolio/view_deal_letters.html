@@ -1,0 +1,47 @@
+{% extends "accounts/profile.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block profile_content %}
+<div style="max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px;">
+    <h3 style="color: #1a3e6e; margin-bottom: 10px;">Deal Letters Generated</h3>
+    <p style="margin-bottom: 20px; font-size: 15px; color: #555;">Below is the list of your generated Buy/Sell deal confirmation letters.</p>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <thead>
+            <tr style="background-color: #1a3e6e; color: white;">
+                <th style="padding: 10px;">Invoice</th>
+                <th style="padding: 10px;">Type</th>
+                <th style="padding: 10px;">Stock</th>
+                <th style="padding: 10px;">Qty</th>
+                <th style="padding: 10px;">Total</th>
+                <th style="padding: 10px;">Date</th>
+                <th style="padding: 10px;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in records %}
+            <tr style="border-bottom: 1px solid #ddd; text-align: center;">
+                <td style="padding: 10px;">{{ r.invoice_no }}</td>
+                <td style="padding: 10px;">{{ r.get_deal_type_display }}</td>
+                <td style="padding: 10px;">{{ r.stock_name }}</td>
+                <td style="padding: 10px;">{{ r.quantity }}</td>
+                <td style="padding: 10px;">₹{{ r.total_amount|floatformat:2 }}</td>
+                <td style="padding: 10px;">{{ r.generated_on|date:"d M Y, H:i" }}</td>
+                <td style="padding: 10px;">
+                    <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ r.transaction_id }}&download=pdf" 
+                       style="color: #007bff; text-decoration: none; font-weight: bold;">
+                         View
+                    </a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="7" style="padding: 20px; text-align: center; color: #999;">
+                    No deal letters generated yet.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

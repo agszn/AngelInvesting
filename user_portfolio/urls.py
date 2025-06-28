@@ -24,7 +24,7 @@ urlpatterns = [
     
     path('load-advisors-brokers/', load_advisors_brokers, name='load_advisors_brokers'),
     
-    path('statementpaper/', statement_paper, name='statement_paper'),
+    path('view_deal_letters/', view_deal_letters, name='view_deal_letters'),
 
     
 ]

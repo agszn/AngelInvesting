@@ -33,6 +33,7 @@ urlpatterns = [
         
         path('edit-sell-st-status/<int:transaction_id>/', edit_sell_transaction_st_status, name='edit_sell_transaction_st_status'),
 
+        path('ReportsST/', ReportsST, name='ReportsST'),
     ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

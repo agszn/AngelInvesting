@@ -38,19 +38,77 @@
         </div>
     {% endif %}
 
-    {% if upload_result.pending_additions %}
-        <div class="alert alert-warning">
-            ⚠️ The following stocks did not match any existing company_name or scrip_name.<br>
-            Please confirm if you want to add them manually:
-            <ul>
-                {% for stock in upload_result.pending_additions %}
-                    <li>
-                        {{ stock.company_name }} – Price: {{ stock.price }}, Conviction: {{ stock.conviction_level }}, Lot: {{ stock.lot }}
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
+{% if upload_result %}
+    {% if upload_result.success %}
+        <p style="color: green;"><strong>{{ upload_result.success }}</strong></p>
     {% endif %}
+    {% if upload_result.error %}
+        <p style="color: red;"><strong>{{ upload_result.error }}</strong></p>
+    {% endif %}
+
+    {% if upload_result.updated_ids %}
+        <h4 style="color: green;">✅ Updated Stocks</h4>
+        <ul>
+            {% for name in upload_result.updated_ids %}
+                <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if upload_result.newly_added %}
+        <h4 style="color: blue;">➕ Newly Added Stocks</h4>
+        <ul>
+            {% for name in upload_result.newly_added %}
+                <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if upload_result.skipped_names %}
+        <h4 style="color: orange;">⚠️ Skipped Due to Similar Matches</h4>
+        <ul>
+            {% for name in upload_result.skipped_names %}
+                <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if upload_result.fallback_ids %}
+        <h4 style="color: purple;">🟣 Fallbacks (invalid price or lot)</h4>
+        <ul>
+            {% for name in upload_result.fallback_ids %}
+                <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if upload_result.failed_updates %}
+        <h4 style="color: red;">❌ Failed Updates</h4>
+        <ul>
+            {% for fail in upload_result.failed_updates %}
+                <li>{{ fail }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endif %}
+
+{% if upload_result.debug_logs %}
+    <h4>Debug Logs:</h4>
+    <ul>
+        {% for log in upload_result.debug_logs %}
+            <li style="font-family: monospace;">{{ log }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if upload_result.debug_logs %}
+  <h4>Debug Logs:</h4>
+  <ul>
+    {% for log in upload_result.debug_logs %}
+      <li style="font-family: monospace;">{{ log }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 
     <div class="SMtable-scroll-container">
         <table class="SMbuyorder-table">

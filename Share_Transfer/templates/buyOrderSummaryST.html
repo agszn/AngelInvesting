@@ -233,8 +233,11 @@
                 </table>
                 <div class="STpayment-process">
                     <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
-                    <button class="STpayment-button">Generate Deal Letter</button>
+                    <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ order.order_id }}" class="STpayment-button">
+                        Generate Deal Letter
+                    </a>
                 </div>
+
             </div>
         {% else %}
             <p>No order details found.</p>

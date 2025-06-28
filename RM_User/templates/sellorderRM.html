@@ -12,6 +12,7 @@
                 <th>Time</th>
                 <th>Customer Name</th>
                 <th>Customer Id</th>
+                <th>Status</th>
                 <th>Stock Details</th>
             </tr>
         </thead>
@@ -24,6 +25,7 @@
                     <td>{{ order.timestamp|date:"h:i A" }}</td>
                     <td>{{ order.user.profile.full_name }}</td>
                     <td>{{ order.user.profile.custom_user_id }}</td>
+                    <td>{{ order.RM_status }}</td>
                     <td><a class="view" href="{% url 'RM_User:selldersummeryRM' order.order_id %}">view</a></td>
                 </tr>
             {% empty %}
