@@ -107,11 +107,17 @@ def stock_detail(request, stock_id):
     if not price_history.exists():
         print("❌ No stock history found for this stock.")
 
+    # stock_dates = [
+    #     localtime(timestamp).strftime('%Y-%m-%d')
+    #     for timestamp in price_history.values_list('timestamp', flat=True)
+    #     if timestamp is not None
+    # ]
     stock_dates = [
-        localtime(timestamp).strftime('%Y-%m-%d')
-        for timestamp in price_history.values_list('timestamp', flat=True)
-        if timestamp is not None
+        ts.isoformat()
+        for ts in price_history.values_list('timestamp', flat=True)
+        if ts is not None
     ]
+
     
     stock_prices = [float(price) for price in price_history.values_list('price', flat=True)]
 

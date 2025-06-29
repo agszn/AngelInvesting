@@ -81,20 +81,32 @@ class StockData(models.Model):
         null=True,
         help_text="Type of stock: Unlisted, Angel, or Listed"
     )
+    _disable_history = False
     def formatted_share_price(self):
         return f"₹{self.share_price:,.2f}" if self.share_price else "N/A"
 
-    def save(self, *args, **kwargs):
-        """Automatically log price changes to StockHistory before updating"""
-        if self.pk:  # Ensure it's an existing instance
+    # def save(self, *args, **kwargs):
+    #     """Automatically log price changes to StockHistory before updating"""
+    #     if self.pk:  # Ensure it's an existing instance
+    #         old_stock = StockData.objects.filter(pk=self.pk).first()
+    #         if old_stock and old_stock.share_price != self.share_price and self.share_price is not None:
+    #             StockHistory.objects.create(stock=self, price=self.share_price)
+    #     super().save(*args, **kwargs)
+
+    def save(self, *args, suppress_history=False, **kwargs):
+        if self.pk and not suppress_history and not getattr(self, '_disable_history', False):
             old_stock = StockData.objects.filter(pk=self.pk).first()
             if old_stock and old_stock.share_price != self.share_price and self.share_price is not None:
-                StockHistory.objects.create(stock=self, price=self.share_price)
+                from unlisted_stock_marketplace.models import StockHistory
+                StockHistory.objects.create(
+                    stock=self,
+                    price=self.share_price,
+                    timestamp=timezone.now()
+                )
         super().save(*args, **kwargs)
 
-
     def __str__(self):
-        return f"{self.company_name} - ₹{self.share_price}" 
+        return f"{self.company_name} - ₹{self.share_price}"
     
     def set_custom_field(self, field_name, value):
         field_def, created = CustomFieldDefinition.objects.get_or_create(name=field_name)
@@ -131,32 +143,80 @@ class StockDailySnapshot(models.Model):
     lot = models.PositiveIntegerField(default=100, blank=True, null=True)
     class Meta:
         unique_together = ('stock', 'date')
+    # def save(self, *args, update_stockdata=False, **kwargs):
+    #     from decimal import Decimal, InvalidOperation
 
+    #     # ✅ Always get previous snapshot for ltp
+    #     previous_snapshot = (
+    #         StockDailySnapshot.objects
+    #         .filter(stock=self.stock, date__lt=self.date)
+    #         .order_by('-date')
+    #         .first()
+    #     )
+    #     self.ltp = (
+    #         previous_snapshot.share_price
+    #         if previous_snapshot and previous_snapshot.share_price is not None
+    #         else Decimal('0.00')
+    #     )
+
+    #     # Ensure ltp and share_price are Decimal
+    #     try:
+    #         self.ltp = Decimal(self.ltp) if self.ltp is not None else Decimal('0.00')
+    #     except InvalidOperation:
+    #         self.ltp = Decimal('0.00')
+
+    #     try:
+    #         self.share_price = Decimal(self.share_price) if self.share_price is not None else Decimal('0.00')
+    #     except InvalidOperation:
+    #         self.share_price = Decimal('0.00')
+
+    #     # Calculate profit
+    #     try:
+    #         self.profit = self.share_price - self.ltp
+    #         self.profit_percentage = (self.profit / self.ltp * 100) if self.ltp != 0 else Decimal('0.00')
+    #     except Exception:
+    #         self.profit = Decimal('0.00')
+    #         self.profit_percentage = Decimal('0.00')
+
+    #     # Sync sector
+    #     if not self.sector:
+    #         self.sector = self.stock.sector
+    #     elif self.stock.sector != self.sector:
+    #         self.stock.sector = self.sector
+    #         self.stock.save()
+
+    #     super().save(*args, **kwargs)
+
+    #     # ✅ Sync back to StockData
+    #     self.stock.ltp = self.ltp
+    #     self.stock.share_price = self.share_price
+    #     self.stock.profit = self.profit
+    #     self.stock.profit_percentage = self.profit_percentage
+    #     if self.conviction_level:
+    #         self.stock.conviction_level = self.conviction_level
+    #     self.stock.save()
+    
+    # save directly to StockHistory
     def save(self, *args, update_stockdata=False, **kwargs):
-        is_new = self._state.adding
+        from decimal import Decimal, InvalidOperation
+        from unlisted_stock_marketplace.models import StockHistory
 
-        if not is_new:
-            original = StockDailySnapshot.objects.filter(pk=self.pk).first()
-            if original and original.share_price != self.share_price:
-                self.ltp = original.share_price
-                
-        # if not is_new and (self.ltp is None or self.ltp == Decimal('0.00')):
-        #     original = StockDailySnapshot.objects.filter(pk=self.pk).first()
-        #     if original and original.share_price != self.share_price:
-        #         self.ltp = original.share_price
+        is_new = self._state.adding  # to detect if this is a new snapshot
 
+        # ✅ Always get previous snapshot for LTP
+        previous_snapshot = (
+            StockDailySnapshot.objects
+            .filter(stock=self.stock, date__lt=self.date)
+            .order_by('-date')
+            .first()
+        )
+        self.ltp = (
+            previous_snapshot.share_price
+            if previous_snapshot and previous_snapshot.share_price is not None
+            else Decimal('0.00')
+        )
 
-        # Get previous day's snapshot if ltp is missing
-        if self.ltp is None:
-            previous_snapshot = (
-                StockDailySnapshot.objects
-                .filter(stock=self.stock, date__lt=self.date)
-                .order_by('-date')
-                .first()
-            )
-            self.ltp = previous_snapshot.share_price if previous_snapshot and previous_snapshot.share_price is not None else Decimal('0.00')
-
-        # Ensure ltp and share_price are not None
+        # Ensure ltp and share_price are Decimal
         try:
             self.ltp = Decimal(self.ltp) if self.ltp is not None else Decimal('0.00')
         except InvalidOperation:
@@ -167,7 +227,7 @@ class StockDailySnapshot(models.Model):
         except InvalidOperation:
             self.share_price = Decimal('0.00')
 
-        # Safely calculate profit and profit %
+        # Calculate profit
         try:
             self.profit = self.share_price - self.ltp
             self.profit_percentage = (self.profit / self.ltp * 100) if self.ltp != 0 else Decimal('0.00')
@@ -175,26 +235,42 @@ class StockDailySnapshot(models.Model):
             self.profit = Decimal('0.00')
             self.profit_percentage = Decimal('0.00')
 
-        # Sync sector if needed
+        # Sync sector
         if not self.sector:
             self.sector = self.stock.sector
         elif self.stock.sector != self.sector:
             self.stock.sector = self.sector
             self.stock.save()
 
+        # Save snapshot first
         super().save(*args, **kwargs)
 
-        # Sync to StockData (ltp is yesterday's, share_price is today’s)
+        from decimal import Decimal, InvalidOperation
+        from datetime import datetime
+        from django.utils.timezone import make_aware
+        from unlisted_stock_marketplace.models import StockHistory
+        # Sync to StockData
+        previous_price = self.stock.share_price
         self.stock.ltp = self.ltp
         self.stock.share_price = self.share_price
         self.stock.profit = self.profit
         self.stock.profit_percentage = self.profit_percentage
-
-        # Keep previous conviction_level if new one is missing (must be handled externally)
         if self.conviction_level:
             self.stock.conviction_level = self.conviction_level
 
+        # ✅ Skip StockData history logging here
+        self.stock._disable_history = True
         self.stock.save()
+        self.stock._disable_history = False
+
+        # ✅ Log history (once) if changed
+        if previous_price != self.share_price:
+            aware_timestamp = make_aware(datetime.combine(self.date, datetime.min.time()))
+            StockHistory.objects.update_or_create(
+                stock=self.stock,
+                timestamp=aware_timestamp,
+                defaults={'price': self.share_price}
+            )
 
     def __str__(self):
         return f"{self.stock.company_name} - {self.date} - ₹{self.share_price} - {self.conviction_level}"
@@ -212,10 +288,11 @@ class Director(models.Model):
 class StockHistory(models.Model):
     stock = models.ForeignKey(StockData, on_delete=models.CASCADE, related_name='history')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateField()  
 
     def __str__(self):
-        return f"{self.stock.company_name} - ₹{self.price} ({self.timestamp.strftime('%Y-%m-%d %H:%M:%S')})"
+        return f"{self.stock.company_name} - ₹{self.price} ({self.timestamp.strftime('%Y-%m-%d')})"
+
 
 class StockPeriod(models.Model):
     # Separate fields for date components
