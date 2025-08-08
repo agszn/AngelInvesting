@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ blog.heading }}{% endblock %}
+
+{% block content %}
+<div class="stock-page-header">
+    <h2>Blogs</h2>
+</div>
+<div class="Main-blogs-details">
+    <div class="blog-details-banner-img">
+        {% if blog.banner %}
+            <img src="{{ blog.banner.url }}" alt="Banner">
+        {% endif %}
+    </div>
+    <div class="blog-meta">
+        <div>Date: {{ blog.date }}</div>
+        <div>Time: {{ blog.time|time:"h:i A" }}</div>
+        <div><a href="#">Read More</a></div>
+    </div>
+    <div class="blog-detail-content">
+        <!-- <h1>{{ blog.heading }}</h1> -->
+        <!-- {% if blog.subtitle %}
+        <h2>{{ blog.subtitle }}</h2>
+        {% endif %} -->
+        <p>{{ blog.full_description|safe }}</p>
+    </div>
+    <div class="related-blogs">
+        <div class="hero-headers">
+            <h1 class="heading">Related <span class="highlight">Blogs</span></h1>
+        </div>
+        <div class="blog-AllBlogs">
+        <div class="allBlogs-container">
+            {% for related in related_blogs %}
+                <div class="blog-detail-card">
+                    <div class="blog-details-card-img">
+                        {% if related.banner %}
+                            <a href="{% url 'user_blog_detail' related.id %}">
+                                <img src="{{ related.banner.url }}" alt="Blog Image">
+                            </a>
+                        {% else %}
+                            <a href="{% url 'user_blog_detail' related.id %}">
+                                <img src="{% static 'Media/images/default-blog.jpg' %}" alt="Default Image">
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="blog-details-cardHead">
+                        <a href="{% url 'user_blog_detail' related.id %}">
+                            <h3>{{ related.heading }}</h3>
+                        </a>
+                        <p>{{ related.short_description|truncatechars:150 }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+</div>
+<section class="contact-section">
+    <img src="{% static 'Media/images/contact-banner.jpg' %}" class="contact-bg" alt="Contact background">
+    <div class="contact-content">
+        <h1 class="contact-heading">Contact Us</h1>
+        <p class="contact-description">
+            If you'd like to learn more about The Angel Investing and how we can assist
+            you in navigating your unlisted share investment journey, please get
+            in touch with us.
+        </p>
+    </div>
+    <div class="contact-info">
+        <p class="contact-info-label">Reach out to us</p>
+        <p class="contact-info-details">
+        <b>Email:</b> info@theangelinvesting.com, <b>Phone:</b> 9740940369
+        </p>
+        <p class="contact-assistance">
+        Our expert would be happy to provide you personal assistance for your queries.
+    </p>
+    </div>
+</section>
+{% endblock %}

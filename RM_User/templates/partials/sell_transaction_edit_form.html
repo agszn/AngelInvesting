@@ -1,0 +1,63 @@
+<h5 class="modal-title" id="transactionEditModalLabel">Edit Sell Transaction</h5>
+
+<form method="post" id="transactionEditForm" action="{% url 'RM_User:ajax_sell_transaction_handler' transaction.pk %}">
+  {% csrf_token %}
+  <div class="row">
+    <div class="col-md-4">{{ form.stock_display.label_tag }}{{ form.stock_display }}</div>
+    <div class="col-md-4">{{ form.broker_display.label_tag }}{{ form.broker_display }}</div>
+    <div class="col-md-4">{{ form.advisor_display.label_tag }}{{ form.advisor_display }}</div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-md-4">{{ form.selling_price.label_tag }}{{ form.selling_price }}</div>
+  </div>
+
+  <div class="row mt-2">
+    {% if form.RM_status %}
+      <div class="col-md-4">{{ form.RM_status.label_tag }}{{ form.RM_status }}</div>
+    {% endif %}
+    {% if form.AC_status %}
+      <div class="col-md-4">{{ form.AC_status.label_tag }}{{ form.AC_status }}</div>
+    {% endif %}
+    {% if form.status %}
+      <div class="col-md-4">{{ form.status.label_tag }}{{ form.status }}</div>
+    {% endif %}
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-12">
+      <button type="submit" class="btn btn-success w-100">✔️ Save</button>
+    </div>
+  </div>
+</form>
+
+<script>
+function bindTransactionFormSubmit() {
+  const form = document.getElementById("transactionEditForm");
+  if (!form) return;
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: "POST",
+      body: formData,
+      headers: {
+        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload(); // Success
+      } else {
+        // Replace form and rebind submit event
+        document.getElementById("transactionEditFormContainer").innerHTML = data.html;
+        bindTransactionFormSubmit(); // rebind after AJAX update
+      }
+    });
+  });
+}
+bindTransactionFormSubmit();
+</script>

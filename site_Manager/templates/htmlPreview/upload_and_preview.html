@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Upload and Convert Word File{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: auto;">
+    <!-- Card wrapper -->
+    <div style="box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 10px; padding: 20px; background-color: #fff;">
+
+        <h2 style="margin-bottom: 20px;">Upload Word Document</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="word_file" required style="margin-bottom: 10px;">
+            <br>
+            <button type="submit" style="margin-top: 10px;">Convert</button>
+        </form>
+
+        {% if converted_html %}
+            <hr>
+            <h2 style="margin-top: 20px;">Converted HTML Code</h2>
+
+            <!-- Editable textarea -->
+            <textarea id="htmlOutput" rows="20" style="width: 100%; padding: 10px; font-family: monospace; border: 1px solid #ccc; border-radius: 5px;">{{ converted_html }}</textarea>
+            <br>
+
+            <!-- Copy button -->
+            <button onclick="copyToClipboard()" style="margin-top: 10px;">Copy to Clipboard</button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard() {
+        const textarea = document.getElementById("htmlOutput");
+        textarea.select();
+        textarea.setSelectionRange(0, 99999); // For mobile devices
+        document.execCommand("copy");
+        alert("HTML code copied to clipboard!");
+    }
+</script>
+{% endblock %}

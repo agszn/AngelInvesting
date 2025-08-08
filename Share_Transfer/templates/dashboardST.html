@@ -5,5 +5,124 @@
 {% block STsubtitle %}Deal Letter List{% endblock %}
 
 {% block STprofile_content %}
-Coming Soon
+
+<form method="get" class="row g-3 mb-3">
+<!-- Deal Type Filter -->
+<div class="col-md-2">
+  <select name="deal_type" class="form-select">
+    <option value="">All Types</option>
+    <option value="BUY" {% if request.GET.deal_type == 'BUY' %}selected{% endif %}>Buy</option>
+    <option value="SELL" {% if request.GET.deal_type == 'SELL' %}selected{% endif %}>Sell</option>
+  </select>
+</div>
+
+<!-- User Filter -->
+<div class="col-md-2">
+  <select name="user" class="form-select">
+    <option value="">All Users</option>
+    {% for username in user_options %}
+      <option value="{{ username }}" {% if request.GET.user == username %}selected{% endif %}>{{ username }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<!-- Stock Filter -->
+<div class="col-md-2">
+  <select name="stock" class="form-select">
+    <option value="">All Stocks</option>
+    {% for stock in stock_options %}
+      <option value="{{ stock }}" {% if request.GET.stock == stock %}selected{% endif %}>{{ stock }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<!-- From Date -->
+<div class="col-md-2">
+  <select name="from" class="form-select">
+    <option value="">From Date</option>
+    {% for date in date_options %}
+      <option value="{{ date }}" {% if request.GET.from == date|stringformat:"s" %}selected{% endif %}>{{ date }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<!-- To Date -->
+<div class="col-md-2">
+  <select name="to" class="form-select">
+    <option value="">To Date</option>
+    {% for date in date_options %}
+      <option value="{{ date }}" {% if request.GET.to == date|stringformat:"s" %}selected{% endif %}>{{ date }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+  <!-- To Date -->
+  <div class="col-md-2">
+    <select name="to" class="form-select">
+      <option value="">To Date</option>
+      {% for date in date_options %}
+        <option value="{{ date }}" {% if request.GET.to == date|stringformat:"s" %}selected{% endif %}>{{ date }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Sort -->
+  <div class="col-md-2">
+    <select name="sort" class="form-select">
+      <option value="-generated_on" {% if request.GET.sort == '-generated_on' %}selected{% endif %}>Newest First</option>
+      <option value="generated_on" {% if request.GET.sort == 'generated_on' %}selected{% endif %}>Oldest First</option>
+      <option value="stock_name" {% if request.GET.sort == 'stock_name' %}selected{% endif %}>Stock A-Z</option>
+      <option value="-stock_name" {% if request.GET.sort == '-stock_name' %}selected{% endif %}>Stock Z-A</option>
+    </select>
+  </div>
+
+  <div class="col-md-12">
+    <button class="btn btn-primary">Apply Filters</button>
+  </div>
+</form>
+
+<!-- Deal Letter Table -->
+<table class="table table-bordered table-striped mt-2">
+  <thead class="table-dark">
+    <tr>
+      <th>#</th>
+      <th>Type</th>
+      <th>User</th>
+      <th>Stock</th>
+      <th>Qty</th>
+      <th>Price/Share</th>
+      <th>Total</th>
+      <th>Generated On</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for record in records %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ record.deal_type }}</td>
+      <td>{{ record.user.username }}</td>
+      <td>{{ record.stock_name }}</td>
+      <td>{{ record.quantity }}</td>
+      <td>₹{{ record.price_per_share }}</td>
+      <td>₹{{ record.total_amount }}</td>
+      <td>{{ record.generated_on|date:"d M Y, H:i" }}</td>
+      <td>
+        {% if record.deal_type == 'BUY' %}
+          <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ record.transaction_id }}" class="btn btn-sm btn-success">View</a>
+          <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ record.transaction_id }}&download=pdf" class="btn btn-sm btn-secondary">PDF</a>
+        {% else %}
+          <a href="{% url 'ST_User:sellDealLetterrST' %}?order_id={{ record.transaction_id }}" class="btn btn-sm btn-warning">View</a>
+          <a href="{% url 'ST_User:sellDealLetterrST' %}?order_id={{ record.transaction_id }}&download=pdf" class="btn btn-sm btn-secondary">PDF</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="9" class="text-center">No deal letters found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
 {% endblock %}

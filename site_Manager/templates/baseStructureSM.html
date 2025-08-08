@@ -159,7 +159,15 @@
             }
     </style>
     <div class="SM-stock-page-header">
-        <h2>{% block headerContent %}Site Manager Profile{% endblock %}</h2>
+        <h2>
+            {% block headerContent %}
+                {% if user.is_superuser %}
+                    Admin Profile
+                {% else %}
+                    Site Manager Profile
+                {% endif %}
+            {% endblock %}
+        </h2>
     </div>
     <div class="SMmain">
         <div class="SMsidebar">
@@ -167,11 +175,27 @@
                 <a class="nav-link" href="{% url 'SM_User:HomepageBannerSM' %}">Homepage Banner</a>
                 <a class="nav-link" href="{% url 'SM_User:UnlistedStocksUpdateSM' %}">Unlisted Price Update</a>
                 <a class="nav-link" href="{% url 'SM_User:BlogSM' %}">Blogs</a>
-                <a class="nav-link" href="{% url 'manage_user_types' %}">Users</a>
-                <a class="nav-link" href="{% url 'SM_User:custom_field_list' %}">Custom Field</a>
-                <a class="nav-link" href="{% url 'SM_User:broker-list' %}"> Broker</a>
-                <a class="nav-link" href="{% url 'SM_User:advisor-type-list' %}">Advisors</a>
+
+                <a class="nav-link" href="{% url 'contactView' %}">Contacted Users</a>
                 <a class="nav-link" href="{% url 'SM_User:stockdata_crud' %}">Stock Data</a>
+                <!-- <a class="nav-link" href="{% url 'SM_User:custom_field_list' %}">Custom Field</a> -->
+                {% if user.is_superuser %}
+                    <a class="nav-link" href="{% url 'manage_user_types' %}">Users</a>
+                    <a class="nav-link" href="{% url 'SM_User:broker-list' %}">Broker</a>
+                    <a class="nav-link" href="{% url 'SM_User:advisor-type-list' %}">Advisors</a>
+
+
+                    <a class="nav-link" href="{% url 'SM_User:stockdata_crud' %}" style="background: #0e213f;color: white;">stockData_crud</a> 
+
+
+                    <a class="nav-link" href="{% url 'SM_User:convert_docx_to_html' %}" style="background: #0e213f;color: white;">Docx to html</a>
+
+                    <a class="nav-link" href="{% url 'SM_User:custom_value_list' %}" style="background: #0e213f;color: white;">Custom Values</a>
+
+
+
+                {% endif %}
+
             </nav>
         </div>
         <div class="SMdashboard">

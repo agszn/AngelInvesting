@@ -1,0 +1,172 @@
+<!-- user_portfolio/templates/portfolio/PortfolioList.html -->
+{% extends "accounts/profile.html" %}
+{% block title %}My Profile{% endblock %}
+{% load label_tags %}
+
+{% block profile_content %}
+<div style="background-color: #eef4ff; border-radius: 10px; padding: 15px;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap;">
+        <div>
+            <strong style="font-size: 18px;">Holdings</strong>
+            <div style="display: flex; align-items: center; gap: 20px; margin-top: 10px; margin-left: 10px; flex-wrap: wrap;">
+                <!-- Advisor Dropdown -->
+                <div class="dropdown">
+                    {% get_label advisors current_filters.advisor as advisor_label %}
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- {{ advisor_label|default:"Advisor" }} -->
+                        {{ selected_advisor.advisor_type|default:"Advisor" }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="?{% if current_filters.broker %}broker={{ current_filters.broker }}&{% endif %}{% if current_filters.type %}type={{ current_filters.type }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}">All Advisors</a></li>
+                        {% for adv in advisors %}
+                            <li><a class="dropdown-item" href="?advisor={{ adv.id }}{% if current_filters.broker %}&broker={{ current_filters.broker }}{% endif %}{% if current_filters.type %}&type={{ current_filters.type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">{{ adv.advisor_type }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Broker Dropdown -->
+                <div class="dropdown">
+                    {% get_label brokers current_filters.broker as broker_label %}
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- {{ broker_label|default:"Broker" }} -->            
+                        {{ selected_broker.name|default:"Broker" }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="?{% if current_filters.advisor %}advisor={{ current_filters.advisor }}&{% endif %}{% if current_filters.type %}type={{ current_filters.type }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}">All Brokers</a></li>
+                        {% for bro in brokers %}
+                            <li><a class="dropdown-item" href="?broker={{ bro.id }}{% if current_filters.advisor %}&advisor={{ current_filters.advisor }}{% endif %}{% if current_filters.type %}&type={{ current_filters.type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">{{ bro.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Buttons -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+<form method="get" class="d-flex" style="gap: 10px;">
+    {% if current_filters.advisor %}
+        <input type="hidden" name="advisor" value="{{ current_filters.advisor }}">
+    {% endif %}
+    {% if current_filters.broker %}
+        <input type="hidden" name="broker" value="{{ current_filters.broker }}">
+    {% endif %}
+    {% if current_filters.type %}
+        <input type="hidden" name="type" value="{{ current_filters.type }}">
+    {% endif %}
+    <input type="text" name="search" value="{{ current_filters.search }}" placeholder="Search or type command..." 
+           style="padding: 6px 12px; border-radius: 8px; border: 1px solid #ccc; width: 250px;">
+    <button type="submit" style="padding: 6px 10px; border: none; background: none; font-size: 16px;">🔍</button>
+</form>
+
+
+        </div>
+
+    </div>
+
+    <!-- Table Header -->
+    {% if holdings %}
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; background-color: #cbd9f6; padding: 10px; font-weight: bold;">
+        <div>Stock Name</div>
+        <div>Quantity</div>
+        <div>Avg. Price</div>
+        <div>LTP</div>
+        <div>Inv. Amt</div>
+        <div>Mkt Value</div>
+        <div>Overall G/L</div>
+        <div>Day’s G/L</div>
+    </div>
+    {% endif %}
+    <!-- Table Rows -->
+    {% for h in holdings %}
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding: 10px; border-bottom: 1px solid #ddd;">
+        <div>
+            {{ h.stock.company_name }}
+                    <span title="Buy {{ stock.company_name }}"
+                      onclick='openBuyModal(
+                        "{{ h.stock.id }}",
+                        "{{ h.stock.company_name|escapejs }}",
+                        "{{ h.stock.share_price }}",
+                        "{{ h.stock.quantity }}",
+                        "{% url 'user_portfolio:buy_stock' h.stock.id %}"
+                      )' style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
+
+                  <span onclick='openSellModal(
+                      "{{ h.stock.id }}",
+                      "{{ h.stock.company_name|escapejs }}",
+                      "{{ h.stock.share_price }}",
+                      "{{ h.stock.quantity }}",
+                      "{% url 'user_portfolio:sell_stock' h.stock.id %}"
+                    )' style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
+        </div>
+        <div>{{ h.quantity_held }}</div>
+        <div>{{ h.avg_price }}</div>
+        <div>{{ h.ltp }}</div>
+        <div>{{ h.investment_amount }}</div>
+        <div>{{ h.market_value }}</div>
+        <div style="color: {% if h.total_gain_loss >= 0 %}green{% else %}red{% endif %};">
+            {{ h.overall_gain_loss }}<br><span style="font-size: 12px;">{{ h.total_gain_loss_percent }}%</span>
+        </div>
+        <div style="color: {% if h.daily_gain_loss >= 0 %}green{% else %}red{% endif %};">
+            {{ h.day_gain_loss }}<br><span style="font-size: 12px;">{{ h.daily_gain_loss_percent }}%</span>
+        </div>
+    </div>
+
+    {% endfor %}
+
+    <!-- other Advisor -->
+    {% if other_sells %}
+
+        <h5 style="font-weight: bold; color: #000000;">Sell Transactions (Advisor Type: Other)</h5>
+        
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; background-color: #cbd9f6; padding: 10px; font-weight: bold;">
+
+            <div>Stock Name</div>
+            <div>Quantity</div>
+            <div>Sell Price</div>
+            <div>Total Value</div>
+            <!-- <div>Advisor</div> -->
+            <div>Broker</div>
+            <!-- <div>Timestamp</div> -->
+        </div>
+
+        {% for sell in other_sells %}
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding: 10px; border-bottom: 1px solid #ddd;">
+            <div>{{ sell.stock.company_name }}                   
+                    <span onclick='openSellModal(
+                      "{{ sell.stock.id }}",
+                      "{{ sell.stock.company_name|escapejs }}",
+                      "{{ sell.stock.share_price }}",
+                      "{{ sell.stock.quantity }}",
+                      "{% url 'user_portfolio:sell_stock' sell.stock.id %}"
+                    )' style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span></div>
+            <div>{{ sell.quantity }}</div>
+            <div>{{ sell.selling_price }}</div>
+            <div>{{ sell.total_value }}</div>
+            <!-- <div>{{ sell.advisor.advisor_type }}</div> -->
+            <div>{{ sell.broker.name }}</div>
+            <!-- <div>{{ sell.timestamp|date:"Y-m-d H:i" }}</div> -->
+        </div>
+        {% empty %}
+        <div style="padding: 10px;">No "Other" advisor sell transactions found.</div>
+        {% endfor %}
+
+    {% endif %}
+
+    <!-- Pagination -->
+    <div style="text-align: right; padding-top: 10px;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|cut:'page='|cut:'&' %}{% endif %}" class="btn btn-sm btn-outline-secondary me-1">‹ Prev</a>
+        {% endif %}
+
+        <span class="mx-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|cut:'page='|cut:'&' %}{% endif %}" class="btn btn-sm btn-outline-secondary ms-1">Next ›</a>
+        {% endif %}
+    </div>
+</div>
+
+
+
+{% endblock %}

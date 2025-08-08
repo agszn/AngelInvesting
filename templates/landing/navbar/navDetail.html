@@ -1,32 +1,30 @@
 {% load static %} 
  <section class="overall">
-   
-    <!-- <div class="hero-section1">
-        <img src="{% static 'images/banner.png' %}" alt="" style="height: 100%;width: 100%;">
-    </div> -->
-
     <div class="hero-section1">
       {% if banner %}
-        <img src="{{ banner.image.url }}" alt="Banner" style="height: 100%; width: 100%;">
+        <img src="{{ banner.image.url }}" alt="Banner" style="height: 100%; width: 100%;" class="banner-desktop">
+        <img src="{% static 'images/banner-mobile.png' %}" class="banner-mobile" alt="Mobile Banner">
       {% else %}
-        <img src="{% static 'images/banner.png' %}" alt="Default Banner" style="height: 100%; width: 100%;">
+        <img src="{% static 'images/banner.png' %}" alt="Default Banner" style="height: 100%; width: 100%;" class="banner-desktop">
+        <img src="{% static 'images/banner-mobile.png' %}" class="banner-mobile" alt="Mobile Banner">
       {% endif %}
     </div>
 
     <div class="hero-section2">
       <div class="hero-section2-containers">
-        <h1 class="number">50L+</h1>
+        <h1 class="number">1,000Cr+</h1>
         <p class="content">Transaction Value</p>
       </div>
       <div class="hero-section2-containers">
-        <h1 class="number">250+</h1>
+        <h1 class="number">150+</h1>
         <p class="content">Companies Listed</p>
       </div>
       <div class="hero-section2-containers">
-        <h1 class="number">100+</h1>
+        <h1 class="number">50+</h1>
         <p class="content">Partner Network</p>
       </div>
     </div>
+ </section>
    
  <!-- <div class="hero-section1">
       <div class="hero-section1-container1">

@@ -1,38 +1,51 @@
 <!-- user_portfolio/templates/portfolio/overview.html -->
 {% extends "accounts/profile.html" %}
 {% block title %}My Profile{% endblock %}
-
-
+{% load math_filters %}
+{% load static%}
 {% block profile_content %}
-    <div style="display:flex; justify-content:space-between; background:#f2f7ff; padding:20px; border-radius:12px; margin-bottom:20px;">
-        <div style="text-align:center; flex:1;">
-            <!-- <div style="font-size:28px;">💰</div> -->
-            <div style="font-weight:600; font-size:14px;">Invested Amount</div>
-            <div style="font-size:18px; font-weight:600;">₹{{ total_invested|floatformat:2 }}</div>
+<div class="user-login-overview">
+    <div class="user-overview-feilds">
+        <div class="user-overview-icons">
+            <img src="{% static 'Media/images/overview1.png' %}" alt="overview-login">
         </div>
-        <div style="text-align:center; flex:1;">
-            <!-- <div style="font-size:28px;">💵</div> -->
-            <div style="font-weight:600; font-size:14px;">Current Value</div>
-            <div style="font-size:18px; font-weight:600;">₹{{ total_market_value|floatformat:2 }}</div>
-        </div>
-        <div style="text-align:center; flex:1;">
-            <!-- <div style="font-size:28px;">🎯</div> -->
-            <div style="font-weight:600; font-size:14px;">Overall Loss/Gain</div>
-            <div style="font-size:18px; font-weight:600; color:{% if total_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
-                ₹{{ total_gain_loss|floatformat:2 }} <span style="font-size:12px;">{{ overall_gain_loss_percent }}%</span>
-            </div>
-        </div>
-        <div style="text-align:center; flex:1;">
-            <!-- <div style="font-size:28px;">🟢</div> -->
-            <div style="font-weight:600; font-size:14px;">Today's Gain</div>
-            <div style="font-size:18px; font-weight:600; color:{% if todays_gain >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
-                ₹{{ todays_gain|floatformat:2 }} <span style="font-size:12px;">{{ todays_gain_percent }}%</span>
-            </div>
+        <div class="user-overview-details">
+            <h3>Invested Amount</h3>
+            <p>₹{{ total_invested|floatformat:2 }}</p>
         </div>
     </div>
-
+    <div class="user-overview-feilds">
+        <div class="user-overview-icons">
+            <img src="{% static 'Media/images/overview2.png' %}" alt="overview-login">
+        </div>
+        <div class="user-overview-details">
+            <h3>Current Value</h3>
+            <p>₹{{ total_market_value|floatformat:2 }}</p>
+        </div>
+    </div>
+    <div class="user-overview-feilds">
+        <div class="user-overview-icons">
+            <img src="{% static 'Media/images/overview3.png' %}" alt="overview-login">
+        </div>
+        <div class="user-overview-details">
+            <h3>Overall Loss/Gain</h3>
+            <p class="{% if total_gain_loss >= 0 %}overviewgain{% else %}overviewloss{% endif %}">₹{{ total_gain_loss|floatformat:2 }} <span>{{ overall_gain_loss_percent }}%</span></p>
+        </div>
+    </div>
+    <div class="user-overview-feilds">
+        <div class="user-overview-icons">
+            <img src="{% static 'Media/images/overview4.png' %}" alt="overview-login">
+        </div>
+        <div class="user-overview-details">
+            <h3>Today's Gain</h3>
+            <p class="{% if total_gain_loss >= 0 %}overviewgain{% else %}overviewloss{% endif %}">₹{{ todays_gain|floatformat:2 }} <span>{{ todays_gain_percent }}%</span></p>
+        </div>
+    </div>
+</div>
+<div style="overflow-x: auto;">
+<div style="min-width: 800px;">
     <!-- Table Header -->
-    <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; padding:10px 20px; font-weight:600; font-size:14px; color:#344767;">
+    <div class="user-login-overview2">
         <div></div>
         <div>Invested Amt</div>
         <div>Market Value</div>
@@ -40,33 +53,37 @@
         <div>Today's G/L</div>
     </div>
 
-    <!-- Row 1 -->
-    <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; background:#eaf2ff; padding:16px 20px; margin-bottom:12px; border-radius:10px;">
+    <!-- Row 1: Unlisted Combined -->
+    <div class="user-login-overview3">
         <div>Unlisted Shares</div>
-        <div>₹{{ portfolio_summary.total_invested|default:0|floatformat:2 }}</div>
-        <div>₹{{ portfolio_summary.total_market_value|default:0|floatformat:2 }}</div>
-        <div style="color:{% if portfolio_summary.overall_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
-            ₹{{ portfolio_summary.overall_gain_loss|floatformat:2 }} 
+        <div>₹{{ unlisted_summary.total_invested|floatformat:2 }}</div>
+        <div>₹{{ unlisted_summary.market_value|floatformat:2 }}</div>
+        <div style="color:{% if unlisted_summary.overall_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
+            ₹{{ unlisted_summary.overall_gain_loss|floatformat:2 }} 
             <span style="font-size:12px;">{{ unlisted_overall_percent }}%</span>
         </div>
-        <div style="color:{% if portfolio_summary.todays_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
-            ₹{{ portfolio_summary.todays_gain_loss|floatformat:2 }} 
+        <div style="color:{% if unlisted_summary.todays_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
+            ₹{{ unlisted_summary.todays_gain_loss|floatformat:2 }} 
             <span style="font-size:12px;">{{ unlisted_today_percent }}%</span>
         </div>
     </div>
 
+
+
     <!-- Row 2 -->
-    <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; background:#eaf2ff; padding:16px 20px; border-radius:10px;">
-        <div>Other Advisor</div>
-        <div>₹{{ advisor_summary.total_invested|floatformat:2 }}</div>
-        <div>₹{{ advisor_summary.market_value|floatformat:2 }}</div>
-        <div style="color:{% if advisor_summary.overall_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
-            ₹{{ advisor_summary.overall_gain_loss|floatformat:2 }}
-            <span style="font-size:12px;">{{ advisor_overall_percent }}%</span>
+    <div class="user-login-overview3">
+        <div>Angel Investing</div>
+        <div>₹{{ angel_summary.total_invested|floatformat:2 }}</div>
+        <div>₹{{ angel_summary.market_value|floatformat:2 }}</div>
+        <div style="color:{% if angel_summary.overall_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
+            ₹{{ angel_summary.overall_gain_loss|floatformat:2 }}
+            <span style="font-size:12px;">{{ angel_overall_percent }}%</span>
         </div>
-        <div style="color:{% if advisor_summary.todays_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
-            ₹{{ advisor_summary.todays_gain_loss|floatformat:2 }}
-            <span style="font-size:12px;">{{ advisor_today_percent }}%</span>
+        <div style="color:{% if angel_summary.todays_gain_loss >= 0 %}#26ba71{% else %}#ff4d4f{% endif %};">
+            ₹{{ angel_summary.todays_gain_loss|floatformat:2 }}
+            <span style="font-size:12px;">{{ angel_today_percent }}%</span>
         </div>
     </div>
+</div>
+</div>
 {% endblock %}

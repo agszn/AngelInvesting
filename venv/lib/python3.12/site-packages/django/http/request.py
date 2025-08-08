@@ -90,7 +90,7 @@ class HttpRequest:
 
     @cached_property
     def accepted_types(self):
-        """Return a list of MediaType instances, in order of preference."""
+        """Return a list of MediaType instances, in order of preference (quality)."""
         header_value = self.headers.get("Accept", "*/*")
         return sorted(
             (
@@ -98,19 +98,30 @@ class HttpRequest:
                 for token in header_value.split(",")
                 if token.strip() and (media_type := MediaType(token)).quality != 0
             ),
+            key=operator.attrgetter("quality", "specificity"),
+            reverse=True,
+        )
+
+    @cached_property
+    def accepted_types_by_precedence(self):
+        """
+        Return a list of MediaType instances, in order of precedence (specificity).
+        """
+        return sorted(
+            self.accepted_types,
             key=operator.attrgetter("specificity", "quality"),
             reverse=True,
         )
 
     def accepted_type(self, media_type):
         """
-        Return the preferred MediaType instance which matches the given media type.
+        Return the MediaType instance which best matches the given media type.
         """
         media_type = MediaType(media_type)
         return next(
             (
                 accepted_type
-                for accepted_type in self.accepted_types
+                for accepted_type in self.accepted_types_by_precedence
                 if media_type.match(accepted_type)
             ),
             None,
@@ -130,7 +141,7 @@ class HttpRequest:
         if not desired_types:
             return None
 
-        # Of the desired media types, select the one which is most desirable.
+        # Of the desired media types, select the one which is preferred.
         return min(desired_types, key=lambda t: self.accepted_types.index(t[0]))[1]
 
     def accepts(self, media_type):
@@ -694,13 +705,13 @@ class QueryDict(MultiValueDict):
 
 class MediaType:
     def __init__(self, media_type_raw_line):
-        full_type, self._params = parse_header_parameters(
+        full_type, self.params = parse_header_parameters(
             media_type_raw_line if media_type_raw_line else ""
         )
         self.main_type, _, self.sub_type = full_type.partition("/")
 
     def __str__(self):
-        params_str = "".join("; %s=%s" % (k, v) for k, v in self._params.items())
+        params_str = "".join("; %s=%s" % (k, v) for k, v in self.params.items())
         return "%s%s%s" % (
             self.main_type,
             ("/%s" % self.sub_type) if self.sub_type else "",
@@ -711,8 +722,8 @@ class MediaType:
         return "<%s: %s>" % (self.__class__.__qualname__, self)
 
     @cached_property
-    def params(self):
-        params = self._params.copy()
+    def range_params(self):
+        params = self.params.copy()
         params.pop("q", None)
         return params
 
@@ -735,20 +746,19 @@ class MediaType:
             if this_type != other_type and this_type != "*" and other_type != "*":
                 return False
 
-        if bool(self.params) == bool(other.params):
+        if bool(self.range_params) == bool(other.range_params):
             # If both have params or neither have params, they must be identical.
-            result = self.params == other.params
+            result = self.range_params == other.range_params
         else:
             # If self has params and other does not, it's a match.
             # If other has params and self does not, don't match.
-            result = bool(self.params or not other.params)
-
+            result = bool(self.range_params or not other.range_params)
         return result
 
     @cached_property
     def quality(self):
         try:
-            quality = float(self._params.get("q", 1))
+            quality = float(self.params.get("q", 1))
         except ValueError:
             # Discard invalid values.
             return 1
@@ -768,7 +778,7 @@ class MediaType:
             return 0
         elif self.sub_type == "*":
             return 1
-        elif not self.params:
+        elif not self.range_params:
             return 2
         return 3
 

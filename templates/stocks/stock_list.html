@@ -1,93 +1,16 @@
 {% extends 'base.html' %}
-
+<!-- templates/stocks/stock_list.html -->
 {% block title %}Stock Details{% endblock %}
 {% load custom_filters %}
 {% block content %}
 {% load static %}  
 <style>
-          .stock-card-image {
-              width: 100px;
-              max-height: 50px;
+   .stock-card-image {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+              border-radius: 6px;
           }
-          .stock-card-info {
-              display: flex;
-              align-items: center;
-              position: relative;
-              flex-direction: column;
-              gap: 5px;
-          }
-          
-          .stock-card-info i {
-              cursor: pointer;
-              font-size: 18px;
-              color: black;
-              background: #fff;
-              border-radius: 50%;
-              padding: 5px;
-              width: 24px;
-              height: 24px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-          }
-          
-          .stock-tooltip {
-              display: none;
-              position: absolute;
-              top: 30px;
-              right: 0;
-              width: 300px;
-              background: white;
-              border: 1px solid #ccc;
-              padding: 10px;
-              border-radius: 5px;
-              box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-              font-size: 14px;
-              z-index: 10;
-          }
-          
-          .stock-card-info:hover .stock-tooltip {
-              display: block;
-          }
-
-.search-bar-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
-}
-.search-bar-wrapper form{
-  display: flex; 
-  width: 100%; 
-  justify-content: center;
-}
-
-.search-bar-input {
-    padding: 12px;
-    width: 1100px;
-    height: 50px;
-    border: 1px solid #000;
-    border-radius: 5px;
-    font-size: 16px;
-    margin-right: 10px;
-}
-
-.search-bar-button {
-    width: 200px;
-    height: 50px;
-    background: transparent;
-    color: black;
-    border: 1px solid #000;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-
-  .wishlist-btn {
-    display: block;
-    margin-top: 10px;
-    width: 50%;
-  }
   .wishlist-modal {
     display: none; 
     position: fixed; 
@@ -132,172 +55,35 @@
   }
 
 @media (min-width: 320px) and (max-width: 767px) {
-  .search-bar-wrapper form{
-    margin-bottom: 30px;
-    display:flex;
-    flex-direction:column;
-    justify-content: center;
-    align-items: center;
-  }
-  .search-bar-input {
-    padding: 10px 15px;  
-    width: 90%;
-    height: 50px;
-    border: 1px solid #000;
-    border-radius: 5px;
-    font-size: 16px;
-    box-sizing: border-box;
-    margin-bottom:5px;
-    margin-right: 0;
-  }
-  .search-bar-button
-  {
-    padding: 10px 15px;  
-    width: 90%;
-    height: 50px;
-    border: 1px solid #000;
-    border-radius: 5px;
-    font-size: 16px;
-    box-sizing: border-box;
-    margin-bottom:5px;
-    margin-right: 0;
-  }
-  .suggestion-box {
-    position: absolute;
-    background: white;
-    border: 1px solid #ccc;
-    width: 100%;
-    z-index: 10;
-  }
-  .suggestion-box div {
-    padding: 8px;
-    cursor: pointer;
-  }
-  .suggestion-box div:hover {
-    background-color: #f0f0f0;
-  }
+
 }
 </style>  
-    <div class="hero-section3">
-        <div class="hero-headers">
-            <h1 class="heading">Explore Unlisted Shares</h1>
-        </div>
 
-        <!-- <div class="search-bar-wrapper">
-            <form method="GET" style="">
-                <input class="search-bar-input" type="text" name="q" placeholder="Search here..." value="{{ query }}">
-                <button class="search-bar-button" type="submit">SEARCH</button>
-            </form>
-        </div> -->
+<section class="unlisted-share-section" style="margin-top: 50px;">
+  <div class="hero-headers">
+    <h1 class="heading">Explore <span class="highlight">Unlisted Shares</span></h1>
+  </div>
 
-        <div class="search-bar-wrapper" style="position: relative;">
-            <form method="GET">
-                <input id="searchInput" class="search-bar-input" type="text" name="q" placeholder="Search here..." value="{{ query }}" autocomplete="off">
-                <button class="search-bar-button" type="submit">SEARCH</button>
-            </form>
-            <div id="suggestions" class="suggestion-box" style="display: none;"></div>
-        </div>
+  <!-- templates/stocks/stock_list.html -->
+  <div class="search-bar-wrapper" style="position: relative;">
+    <form method="GET">
+      <input id="searchInput" class="search-bar-input" type="text" name="q" placeholder="Search here..." value="{{ query }}" autocomplete="off">
+      <button class="search-bar-button" type="submit">SEARCH</button>
+    </form>
+  </div>
+
+  <div class="unlisted-share-boxex" id="stock-cards">
+    {% include "stocks/partials/stock_cards.html" %}
+  </div>
+
+  <div>
+    <div class="viewall3" style="margin-top: 40px;">
+      <button class="viewallbtn3">
+        <a style="color: black; text-decoration: none;" href="{% url 'unlisted_stock_marketplace:StockListingTableFormat' %}">View All Listings</a>
+      </button>
     </div>
-
-
-    <div class="grid-container">
-    {% for stock in stocks %}
-      <div class="card">
-        <div class="info-first">
-          <span>
-             {% if stock.logo %}
-              <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">
-                <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo"></span>
-              </a>
-
-              <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="padding-left: 2%;">
-                <div class="stock-card-info">
-                  <img src="{%  static 'Media/images/circle-info.svg' %}" alt="">
-                  <div class="stock-tooltip">
-                      <span>
-
-                          <p>{{ stock.company_overview }}</p>
-                      </span>
-                  </div>
-                </div>
-              </a>
-<!--    
-              <p style="font-size: 16px; font-weight: 600;">
-                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">
-                <div class="stock-card-info">
-                    {{ stock.company_name }}
-                    <div class="stock-tooltip">
-                        <p>{{ stock.description }}</p>
-                    </div>
-                </div>
-                </a>
-              </p> -->
-            {% endif %}
-        </div>
-
-        <div class="info-second">
-          <span class="spantext"><strong>{{ stock.sector }} </strong></span>
-          <div>
-            <span class="spantext">Conviction level</span>
-            <strong class="conviction">{{ stock.conviction_level }}</strong>
-          </div>
-
-        </div>
-        <div class="info-third">
-          <span class="spantext">Lot:<strong> {{ stock.lot }}</strong></span>
-          <!-- <span class="spantext">Qty:<strong>{{ stock.quantity }}</strong></span> -->
-          <span class="spantext">Share Price:<strong> ₹{{ stock.share_price }}</strong></span>
-        </div>
-        <div class="actions">
-          <button type="button"
-            title="Buy {{ stock.company_name }}"
-            onclick='openBuyModal(
-              "{{ stock.id }}",
-              "{{ stock.company_name|escapejs }}",
-              "{{ stock.share_price }}",
-              "{{ stock.quantity }}",
-              "{% url 'user_portfolio:buy_stock' stock.id %}"
-            )'>
-            Buy
-          </button>
-
-          <button type="button"
-            onclick='openSellModal(
-              "{{ stock.id }}",
-              "{{ stock.company_name|escapejs }}",
-              "{{ stock.share_price }}",
-              "{{ stock.quantity }}",
-              "{% url 'user_portfolio:sell_stock' stock.id %}"
-            )'>
-            Sell
-          </button>
-
-        </div>
-        <!-- Wishlist Button (used in 5 places) -->
-        <button 
-          class="stock-btn yellow-btn wishlist-btn wishlist" 
-          data-stock-id="{{ stock.id }}" 
-          data-stock-name="{{ stock.company_name }}" 
-          data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
-          style="width: 100%;">
-          Wishlist 🛒
-        </button>
-
-      </div>
-
-
-
-
-
-
-      {% endfor %}
-              
-    </div>
-        <div class="viewall1">
-         <a href="{% url 'unlisted_stock_marketplace:StockListingTableFormat' %}"><button class="viewallbtn1">View All Listings</button></a>
-        </div>
-
-        <!-- below is the start of search bar auto complete-->
+  </div>
+</section>
 
 
 
@@ -342,5 +128,4 @@
       });
   });
 </script>
-<!-- end of searchbar auto complete -->
-{% endblock %}
+{% endblock %}  

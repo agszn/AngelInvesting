@@ -10,8 +10,44 @@ from site_Manager.models import *
 from RM_User.models import RMUserView, RMPaymentRecord
 
 from django.contrib import messages
+
+@login_required
 def dashboardST(request):
-    return render(request, 'dashboardST.html')
+    all_deals = DealLetterRecord.objects.all()
+
+    # Distinct values for dropdowns
+    user_options = DealLetterRecord.objects.values_list('user__username', flat=True).distinct()
+    stock_options = DealLetterRecord.objects.values_list('stock_name', flat=True).distinct()
+    date_options = DealLetterRecord.objects.dates('generated_on', 'day')
+
+    # Filters
+    type_filter = request.GET.get('deal_type')
+    user_filter = request.GET.get('user')
+    stock_filter = request.GET.get('stock')
+    date_from = request.GET.get('from')
+    date_to = request.GET.get('to')
+    sort_by = request.GET.get('sort', '-generated_on')
+
+    query = all_deals
+    if type_filter:
+        query = query.filter(deal_type=type_filter)
+    if user_filter:
+        query = query.filter(user__username=user_filter)
+    if stock_filter:
+        query = query.filter(stock_name=stock_filter)
+    if date_from:
+        query = query.filter(generated_on__date__gte=date_from)
+    if date_to:
+        query = query.filter(generated_on__date__lte=date_to)
+
+    query = query.order_by(sort_by)
+
+    return render(request, 'dashboardST.html', {
+        'records': query,
+        'user_options': user_options,
+        'stock_options': stock_options,
+        'date_options': date_options,
+    })
 
 
 
@@ -407,7 +443,7 @@ def render_to_pdf(request, template_src, context_dict, filename):
 
 
 def get_logo_base64():
-    logo_path = os.path.join(settings.BASE_DIR, 'static/Media/images/site-logo.png')
+    logo_path = os.path.join(settings.BASE_DIR, 'static/Media/images/headerlogo2.png')
     if os.path.exists(logo_path):
         with open(logo_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
@@ -495,16 +531,16 @@ def buyDealLetterrST(request):
     order_id = request.GET.get('order_id')
     if not order_id:
         messages.error(request, "Order ID is missing.")
-        return redirect("ST_User:dashboard")
+        return redirect("ST_User:dashboardST")
 
     transaction = get_object_or_404(BuyTransaction, order_id=order_id)
     invoice_no = generate_invoice_no("BUY", order_id)
 
     buyer = get_client_details(transaction.user)
     seller = {
-        'full_name': 'AngelInvesting.com',
+        'full_name': 'theangelinvesting.com',
         'pan_number': 'NA',
-        'email': 'support@angelinvesting.com',
+        'email': 'info@theangelinvesting.com',
         'phone': '+91-XXXXXXXXXX',
         'client_id': 'NA',
     }
@@ -546,16 +582,16 @@ def sellDealLetterrST(request):
     order_id = request.GET.get("order_id")
     if not order_id:
         messages.error(request, "Order ID is missing.")
-        return redirect("ST_User:dashboard")
+        return redirect("ST_User:dashboardST")
 
     transaction = get_object_or_404(SellTransaction, order_id=order_id)
     stock = transaction.stock
     seller = get_client_details(transaction.user)
 
     buyer = {
-        'full_name': 'AngelInvesting.com',
+        'full_name': 'theangelinvesting.com',
         'pan_number': 'NA',
-        'email': 'support@angelinvesting.com',
+        'email': 'info@theangelinvesting.com',
         'phone': '+91-XXXXXXXXXX',
         'client_id': 'NA',
     }
@@ -569,10 +605,10 @@ def sellDealLetterrST(request):
         deal_type='SELL',
         defaults={
             'invoice_no': invoice_no,
-            'stock_name': stock.company_name,
+            'stock_name': transaction.stock.company_name,
             'quantity': transaction.quantity,
-            'price_per_share': transaction.price_per_share,
-            'total_amount': transaction.total_amount
+            'price_per_share': transaction.selling_price,
+            'total_amount': transaction.total_value  
         }
     )
 

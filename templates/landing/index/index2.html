@@ -1,26 +1,41 @@
 
 {% load static %}  
-<div id="header"></div>
-
-
   <section class="overall">
-
+    <div class="listed">
+      <div class="hero-headers">
+        <h1 class="heading">Companies <span class="highlight">Listed</span> On Our Platform</h1>
+      </div>
+      <div class="logos-grid" id="logoContainer">
+        {% for stock in stocks|slice:":18" %}
+          {% if stock.company_name|lower != 'hdb financial service ltd' and stock.scrip_name|lower != 'hdb finance ltd' %}
+              {% if stock.logo %}
+              <div class="logo-cell">
+                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">
+                  <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
+                </a>
+              </div>
+              {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="viewall3">
+        <button class="CompanyLogviewallbtn3" id="toggleBtn">View All Listings</button>
+      </div>
+    </div>
 
     <div class="why-trade-section">
       <div class="why-trade-header">
-        <h1 class="section-title">Why Trade With Us?</h1>
+        <h1 class="section-title">Why <span class="highlight">Trade</span> With Us?</h1>
         <p class="section-description">
           We offer a secure, transparent, and hassle-free platform for buying and selling unlisted shares and ESOPs.
           With expert guidance, fair pricing, and a strong investor network, we ensure smooth transactions and high
           liquidity for a seamless trading experience.
         </p>
       </div>
-
-
       <div class="why-trade-overall">
         <div class="why-trade-row">
           <div class="trade-card">
-            <h6 class="trade-card-header">Buyer-Seller Interaction</h6>
+            <h6 class="trade-card-header">Buyer Seller Interaction</h6>
             <p class="trade-card-content">Our unique plateform ensures a
               transparent interactiom/negotiation
               between buyers and sellers.</p>
@@ -31,11 +46,9 @@
               our platform</p>
           </div>
         </div>
-
         <div class="why-trade-image">
-          <img src="{%  static 'Media/images/trade-img.png' %}" alt="Trading platform illustration">
+          <img src="{%  static 'Media/images/whytradelogo.png' %}" alt="Trading platform illustration">
         </div>
-
         <div class="why-trade-row bottom-row">
           <div class="trade-card">
             <h6 class="trade-card-header">Secured via Bank Escrow</h6>
@@ -49,69 +62,36 @@
           </div>
         </div>
       </div>
-    </div>
+      <div class="why-trade-few-steps">
+        <h1 class="section-title">
+          Start Investing in <span class="highlight">Unlisted Companies</span> In <br class="hide-on-mobile">Few Easy Steps
+        </h1>
 
+        <div class="steps-wrapper">
+          <div class="why-trade-step">
+            <span class="step-number">1</span>
+            <h3>Contact Us</h3>
+            <p>Connect with our RMs and get the best unlisted share price</p>
+          </div>
+          <i class="bi bi-arrow-right step-arrow"></i>
+          <div class="why-trade-step">
+            <span class="step-number">2</span>
+            <h3>Deal Processing</h3>
+            <p>First, the buyer sends payment to our bank then Angel Investing Team starts processing</p>
+          </div>
 
-    <div class="listed">
-      <div class="hero-headers">
-        <h1 class="heading">Companies Listed On Our Platform</h1>
-      </div>
-      <div class="logos-grid" id="logoContainer">
-        {% for stock in stocks|slice:":18" %}
-              {% if stock.logo %}
-              <div class="logo-cell">
-                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">
-                  <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
-                </a>
-              </div>
-              {% endif %}
-        {% endfor %}
-      </div>
-      <div class="viewall3">
-        <button class="viewallbtn3" id="toggleBtn">View All Listings</button>
-      </div>
-    </div>
+          <i class="bi bi-arrow-right step-arrow"></i>
 
-    <div class="investing-steps">
-      <h1 class="investing-title">Start Investing in Unlisted Companies In Few Easy steps</h1>
-      <div class="investing-cards">
-        <div class="investing-card">
-          <img src="{% static 'Media/images/user-plus.png' %}" alt="">
-          <h1 class="investing-card-heading">Join Our Plateform</h1>
-          <p class="investing-card-paragraph">Sign up and fill out the necessary details
-            Complete your KYC details and be Trade ready</p>
-        </div>
-        <div class="investing-card">
-          <img src="{% static 'Media/images/box.png' %}" alt="">
-          <h1 class="investing-card-heading">Join Our Plateform</h1>
-          <p class="investing-card-paragraph">Sign up and fill out the necessary details
-            Complete your KYC details and be Trade ready</p>
-        </div>
-        <div class="investing-card">
-          <img src="{% static 'Media/images/high-arrow.png' %}" alt="">
-          <h1 class="investing-card-heading">Join Our Plateform</h1>
-          <p class="investing-card-paragraph">Sign up and fill out the necessary details
-            Complete your KYC details and be Trade ready</p>
-        </div>
-        <div class="investing-card">
-          <img src="{% static 'Media/images/bank.png' %}" alt="">
-          <h1 class="investing-card-heading">Join Our Plateform</h1>
-          <p class="investing-card-paragraph">Sign up and fill out the necessary details
-            Complete your KYC details and be Trade ready</p>
-        </div>
-        <div class="investing-card">
-          <img src="{% static 'Media/images/transaction.png' %}" alt="">
-          <h1 class="investing-card-heading">Join Our Plateform</h1>
-          <p class="investing-card-paragraph">Sign up and fill out the necessary details
-            Complete your KYC details and be Trade ready</p>
+          <div class="why-trade-step">
+            <span class="step-number">3</span>
+            <h3>Deal Completion</h3>
+            <p>After getting the payment, our team transfers shares within 24 hours</p>
+          </div>
         </div>
       </div>
     </div>
-
-
     <div class="faq-section">
-      <h1 class="faq-title">Frequently Asked Questions</h1>
-
+      <h1 class="faq-title">Frequently Asked <span class="highlight">Questions</span> </h1>
       <p class="faq-paragraph">Welcome to company name, your one-stop destination for all Pre-IPO shares in India.
         Here's everything you need to know about Pre-IPO shares, how to invest in them, and the top Pre-IPO shares
         available in India.</p>
@@ -131,37 +111,39 @@
         few clicks.</p>
     </div>
     <div class="read-more">
-      <button class="read-btn"><a href="{%  url 'faq' %}" class="custom-btnM">Read More</a></button>
+      <button class="read-btn"><a href="{%  url 'faq' %}" class="custom-btnM">Explore More</a></button>
     </div>
     <div class="blogs">
-      <div class="blog-title-section">
+      <div class="blog-title-section"> 
         <h1 class="blog-title">Blogs</h1>
       </div>
       <div class="all-blogs">
-        <div class="blog-container">
-          <a href="{%  url 'blog' %}"><img class="blog-img" src="{%  static 'Media/images/unlistedstock-blog.jpg' %}" alt=""></a>
-          <h1 class="blog-head">📈 Benefits of Investing in Unlisted Shares</h1>
-          <p class="blog-para">Early-Stage Investment Get in early on promising companies before they go public. High Growth Potential Once listed, the valuation of such stocks can surge dramatically. </p>
+        {% for blog in latest_blogs %}
+        <div class="blog-container">  
+          <div class="blog-image-box">
+            <a href="{% url 'user_blog_detail' blog.id %}">
+              {% if blog.banner %}
+              <img class="blog-img" src="{{ blog.banner.url }}" alt="">
+              {% else %}
+              <img class="blog-img" src="{% static 'Media/images/default-blog.jpg' %}" alt="">
+              {% endif %}
+            </a>
+          </div>
+          <h2 class="blog-head">
+            <a href="{% url 'user_blog_detail' blog.id %}" class="blog-card-link">
+              {{ blog.heading }}
+            </a>
+          </h2>
+          <p class="blog-para">{{ blog.short_description|truncatechars:200 }}</p>
         </div>
-        <div class="blog-container">
-          <a href="{%  url 'blog' %}"><img class="blog-img" src="{%  static 'Media/images/csk-blog.jpg' %}" alt=""></a>
-          <h1 class="blog-head">🟡 What Are CSK Unlisted Shares?</h1>
-          <p class="blog-para">Chennai Super Kings Cricket Ltd (CSKCL) is the company that owns the CSK IPL franchise. After being demerged from India Cements Ltd in 2015, CSK became a separate entity.</p>
-        </div>
-        <div class="blog-container">
-          <a href="{%  url 'blog' %}"><img class="blog-img" src="{%  static 'Media/images/hdfc-blog.jpg' %}" alt=""></a>
-          <h1 class="blog-head">🟡 What Are CSK Unlisted Shares?</h1>
-          <p class="blog-para">HDFC Securities Ltd is a leading stock broking and financial services company in India. It is a subsidiary of HDFC Bank, one of the country’s most respected and profitable private banks.</p>
-        </div>
-      </div>
-      <div class="read-more">
-        <a href="{%  url 'blog' %}"><button class="read-btn">Read More</button></a>
-      </div>
+        {% endfor %}
     </div>
-
+    <div class="read-more">
+      <button class="read-btn"><a href="{% url 'blog' %}" class="custom-btnM">View More</a></button>
+    </div>
     <div class="carasoul">
       <div class="carasoul-title-section">
-        <h1 class="carasoul-title ">Trusted By Investors</h1>
+        <h1 class="carasoul-title">Trusted By <span class="highlight">Investors</span></h1>
       </div>
       <div class="carousel-container">
         <div class="carousel-track" id="carouselTrack">
@@ -270,11 +252,12 @@
 
     <div class="started">
       <div class="started-title-section">
-        <h1 class="started-title">Lets Get You Started</h1>
+        <h1 class="started-title">Lets Get You <span class="highlight">Started</span></h1>
         <p class="started-paragraph">Excellent plateform and very easy and takes less than few minutes to “Sell” and
           “Buy” Unlisted Shares</p>
         <button class="started-btn">Join Our Platform</button>
       </div>
+    </div>
   </section>
 
 
@@ -314,7 +297,7 @@
   });
 </script>
 
-  <div id="footer"></div>
+<div id="footer"></div>
 
 
 

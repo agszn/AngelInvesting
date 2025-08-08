@@ -46,6 +46,8 @@ class CustomUser(AbstractUser):
             related_name='assigned_users'
         )
 
+
+
 from django.db import models
 from django.conf import settings
 
@@ -176,13 +178,26 @@ class CMRCopy(models.Model):
 
 
     
+from django.db import models
+from django.conf import settings
+
 class Contact(models.Model):
-    name = models.CharField(max_length=100)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Optional. Set only if the user is logged in."
+    )
+    name = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField()
+    subject = models.CharField(max_length=200, null=True, blank=True)
     message = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return f"Message from {self.name} - {self.subject}"
+
 
 
 # ------------- G User FAQ -------------

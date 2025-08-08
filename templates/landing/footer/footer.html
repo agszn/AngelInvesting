@@ -1,100 +1,47 @@
+{% load static %}
 <style>
     /* Footer Styles */
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inknut+Antiqua&display=swap");
 
+
 .footer {
   background-color: rgba(14, 33, 63, 1);
-  display: flex;
+  color: white;
+  font-family: 'Newsreader', serif;
   width: 100%;
-  padding: 87px 70px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family:
-    Outfit,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  color: rgba(255, 255, 255, 1);
-
-  
 }
 
 .footer-container {
-  width: 100%;
-  max-width: 1023px;
+  /* max-width: 1200px; */
+  margin: 0 auto;
+  padding: 40px 50px;
 }
 
 .footer-content {
   display: flex;
-  gap: 20px;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
-/* Logo Column */
-.logo-column {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 33%;
-  font-size: 16px;
+.footer-column {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 10px;
+}
+.footer-logo-full
+{
+  width: 200px;
 }
 
-.logo {
-  font-size: 40px;
-  font-family:
-    "Inknut Antiqua",
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  font-weight: 400;
-  margin: 0;
-}
-
-.copyright {
-  font-weight: 300;
-  align-self: stretch;
-  margin-top: 32px;
-  margin-bottom: 0;
-}
-
-.contact-info {
-  display: flex;
-  margin-top: 82px;
-  align-items: stretch;
-  gap: 1px;
-  font-style: normal;
-}
-
-.contact-label {
-  font-weight: 600;
-}
-
-.contact-number {
-  font-weight: 300;
-}
-
-/* Quick Links Column */
-.quick-links-column {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 17%;
-  margin-left: 20px;
-  font-size: 16px;
-  font-weight: 300;
+.footer-logo-full img {
+  width: 100%;
+  height: auto;
 }
 
 .column-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  align-self: stretch;
-  margin: 0 0 37px 0;
-}
-
-.footer-nav {
-  width: 100%;
+  margin-bottom: 15px;
 }
 
 .footer-links {
@@ -103,82 +50,116 @@
   margin: 0;
 }
 
-.footer-links li {
-  margin-bottom: 16px;
-}
-
-.footer-links li:last-child {
-  margin-bottom: 0;
-}
-
 .footer-link {
-  color: rgba(255, 255, 255, 1);
+  color: #ffffff;
   text-decoration: none;
-  font-weight: 300;
+  display: block;
+  margin-bottom: 10px;
+  font-size: 18px;
 }
 
 .footer-link:hover {
+  color: #ffffff;
+}
+
+.highlight-head {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 15px;
+}
+
+/* Style for address, email, phone */
+.footer-contact {
+  font-size: 16px;
+  color: #ffffff;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.footer-contact strong {
+  color: #ffffff;
+}
+
+
+@media (min-width: 320px) and (max-width: 767px) {
+  .footer {
+
+  }
+  .footer-container{
+    padding: 40px 20px;
+  }
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 40px 20px;
+  }
+
+  .footer-column {
+    width: 100%;
+    margin-bottom: 25px;
+  }
+
+  .footer-logo-full {
+    margin-bottom: 20px;
+    /* text-align: center; */
+    width: 100%;
+  }
+
+  .footer-logo-full img {
+    width: 130px;
+  }
+
+  .column-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .footer-link {
+    font-size: 16px;
+  }
+
+  .footer-column address,
+  .footer-column p {
+    font-size: 16px;
+  }
+}
+
+.social-iocons-footer a
+{
+  margin-right: 2px;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+  color: #ffffff;
+  padding: 15px 50px;
+  border-top: 1px solid #2a2a2a;
+  background-color: #081831;
+  flex-wrap: wrap;
+}
+.footer-bottom a {
+  color: #39B54A;
+  text-decoration: none;
+}
+
+.footer-bottom a:hover {
   text-decoration: underline;
 }
 
-/* Company Column */
-.company-column {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 34%;
-  margin-left: 20px;
-  font-size: 16px;
-  font-weight: 300;
+.footer-left,
+.footer-right {
+  font-family: 'Newsreader', serif;
 }
-
-/* Legal Column */
-.legal-column {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 16%;
-  margin-left: 20px;
-  font-size: 16px;
-  font-weight: 300;
-}
-
-/* Responsive Styles */
-@media (max-width: 991px) {
-  .footer {
-    max-width: 100%;
-    padding: 87px 20px;
-  }
-
-  .footer-container {
-    max-width: 100%;
-  }
-
-  .footer-content {
+@media (max-width: 576px) {
+  .footer-bottom {
     flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .logo-column,
-  .quick-links-column,
-  .company-column,
-  .legal-column {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 40px;
-  }
-
-  .logo-column {
-    margin-top: 0;
-  }
-
-  .contact-info {
-    margin-top: 40px;
-  }
-
-  .termsof-use {
-    margin-right: 6px;
+    text-align: center;
+    gap: 5px;
+    font-size: 12px;
   }
 }
 
@@ -187,23 +168,16 @@
     <div class="footer-container">
       <div class="footer-content">
         <section class="footer-column logo-column">
-          <h2 class="logo">LOGO</h2>
-          <p class="copyright">
-            2020-2024, Unlisted Assets
-            <br>
-            All rights reserved.
-          </p>
-          <address class="contact-info">
-            <span class="contact-label">Call Us:</span>
-            <span class="contact-number">+91 9658458955</span>
-          </address>
+          <div class="footer-logo-full">
+            <img src="{% static 'Media/images/footer-logo.png' %}" alt="logo">
+          </div>
         </section>
   
         <section class="footer-column quick-links-column">
           <h3 class="column-title">Quick Links</h3>
           <nav class="footer-nav">
             <ul class="footer-links">
-              <li><a href="#" class="footer-link">Home</a></li>
+              <li><a href="/" class="footer-link">Home</a></li>
               <li><a href="#" class="footer-link">Companies</a></li>
               <li><a href="#" class="footer-link">Blog</a></li>
               <li><a href="#" class="footer-link">Services</a></li>
@@ -216,26 +190,43 @@
           <h3 class="column-title">Company</h3>
           <nav class="footer-nav">
             <ul class="footer-links">
-              <li><a href="#" class="footer-link">About</a></li>
+              <li><a href="{%  url 'about' %}" class="footer-link">About</a></li>
               <li><a href="#" class="footer-link">Types of Unlisted Companies</a></li>
               <li><a href="#" class="footer-link">Solutions</a></li>
               <li><a href="#" class="footer-link">Why Us</a></li>
-              <li><a href="#" class="footer-link">FAQ</a></li>
+              <li><a href="{%  url 'faq' %}" class="footer-link">FAQ</a></li>
               <li><a href="#" class="footer-link">Refund and Cancellation</a></li>
             </ul>
           </nav>
         </section>
   
         <section class="footer-column legal-column">
-          <h3 class="column-title">Legal</h3>
-          <nav class="footer-nav">
-            <ul class="footer-links">
-              <li><a href="#" class="footer-link">Disclamer</a></li>
-              <li><a href="#" class="footer-link">Terms of Use</a></li>
-              <li><a href="#" class="footer-link">Privacy Policy</a></li>
-            </ul>
-          </nav>
+          <h3 class="column-title highlight-head">Thangiv Consultancy Pvt Ltd</h3>
+          <address class="footer-contact">
+            No 3543/02, Marsur Village, Anekal, Bangalore, Anekal, Karnataka, India, 562106
+          </address>
+          <p class="footer-contact"><strong>Email:</strong> info@theangelinvesting.com</p>
+          <p class="footer-contact"><strong>Phone:</strong> 9740940369</p>
+          <div class="social-iocons-footer">
+            <a><img src="{% static 'Media/images/tweeter.png' %}" alt="tweeter"></a>
+            <a><img src="{% static 'Media/images/instagram.png' %}" alt="instagram"></a>
+            <a><img src="{% static 'Media/images/youtube.png' %}" alt="youtube"></a>
+            <a><img src="{% static 'Media/images/facebook.png' %}" alt="facebook"></a>
+          </div>
         </section>
+      </div>
+    </div>
+    <!-- <div style="text-align:center; font-size:12px; color:#aaa; margin-top: 20px;">
+      © 2025 The Angel Investing. All rights reserved. <br>
+      Designed & Developed by <a href="https://evonitsolution.com" target="_blank" style="color:#39B54A; text-decoration: none;">Evon IT Solution</a>
+    </div> -->
+    <div class="footer-bottom">
+      <div class="footer-left">
+        © 2025 Thangiv Consultancy Pvt Ltd. All Rights Reserved.
+      </div>
+      <div class="footer-right">
+        Designed & Developed by 
+        <a href="https://evonitsolution.com" target="_blank">Evon IT Solution</a>
       </div>
     </div>
   </footer>

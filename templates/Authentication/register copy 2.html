@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .ai-register-container {
+    display: flex;
+    flex-wrap: wrap;
+    width: 90%;
+    max-width: 900px;
+    background-color: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    margin: 40px auto;
+  }
+
+  .ai-register-left {
+    background-color: #0b1a35;
+    color: white;
+    flex: 0 0 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-right: 1px solid #1fffac2f;
+    padding: 20px;
+  }
+
+  .ai-register-logo img {
+    width: 80px;
+    margin-bottom: 15px;
+  }
+
+  .ai-register-title {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .ai-register-title .ai-register-green {
+    color: #1bcf76;
+  }
+
+  .ai-register-right {
+    flex: 1;
+    padding: 40px 30px;
+    background-color: white;
+  }
+
+  .ai-register-right h2 {
+    margin-bottom: 30px;
+    text-align: center;
+    color: #333;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+  }
+
+  .ai-register-note {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  .ai-register-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0b1a35;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .ai-register-login-link {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .ai-register-login-link a {
+    color: green;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .ai-register-login-link a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .ai-register-container {
+      flex-direction: column;
+    }
+
+    .ai-register-left,
+    .ai-register-right {
+      width: 100%;
+      max-width: 100%;
+      border-right: none;
+      text-align: center;
+    }
+  }
+</style>
+
+<div class="ai-register-container">
+  <!-- Left Section -->
+  <div class="ai-register-left">
+    <div class="ai-register-logo">
+      <img src="{% static 'Media/images/footer-logo.png' %}" alt="Logo" style="height: 175px; width: 175px;" />
+    </div>
+  </div>
+
+  <!-- Right Section -->
+  <div class="ai-register-right">
+    <h2>Create Your Account</h2>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Username -->
+      <div>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div style="color: red;">{{ form.username.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Email -->
+      <div>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div style="color: red;">{{ form.email.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Phone Number -->
+      <div>
+        {{ form.phone_number }}
+        {% if form.phone_number.errors %}
+          <div style="color: red;">{{ form.phone_number.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Note -->
+      <div class="ai-register-note">
+        Note : Mobile Number Is Your Password
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="ai-register-button">Sign Up</button>
+
+      <!-- Login Redirect -->
+      <div class="ai-register-login-link">
+        Already Have an Account?
+        <a href="{% url 'login' %}">Login!</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

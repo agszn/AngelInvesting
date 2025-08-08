@@ -2,46 +2,77 @@
 {% block title %}My Profile{% endblock %}
 
 {% block profile_content %}
-<div style="max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px;">
-    <h3 style="color: #1a3e6e; margin-bottom: 10px;">Deal Letters Generated</h3>
-    <p style="margin-bottom: 20px; font-size: 15px; color: #555;">Below is the list of your generated Buy/Sell deal confirmation letters.</p>
+<div class="user-porfolio-dashboard">
+    <div class="user-portfolio-top">
+        <div class="user-dashboard-heading">
+            <h3>Deal Letters Generated</h3>
+            <p style="margin-bottom: 10px; font-size: 15px; color: #ffffff;">Below is the list of your generated Buy/Sell deal confirmation letters.</p>
+        </div>
+    </div>
+    <div class="user-portfolio-second">
+         <form method="get" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <select name="deal_type" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc;">
+                <option value="">All Types</option>
+                <option value="buy" {% if selected_deal_type == 'BUY' %}selected{% endif %}>Buy</option>
+                <option value="sell" {% if selected_deal_type == 'SELL' %}selected{% endif %}>Sell</option>
+            </select>
 
-    <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
-        <thead>
-            <tr style="background-color: #1a3e6e; color: white;">
-                <th style="padding: 10px;">Invoice</th>
-                <th style="padding: 10px;">Type</th>
-                <th style="padding: 10px;">Stock</th>
-                <th style="padding: 10px;">Qty</th>
-                <th style="padding: 10px;">Total</th>
-                <th style="padding: 10px;">Date</th>
-                <th style="padding: 10px;">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for r in records %}
-            <tr style="border-bottom: 1px solid #ddd; text-align: center;">
-                <td style="padding: 10px;">{{ r.invoice_no }}</td>
-                <td style="padding: 10px;">{{ r.get_deal_type_display }}</td>
-                <td style="padding: 10px;">{{ r.stock_name }}</td>
-                <td style="padding: 10px;">{{ r.quantity }}</td>
-                <td style="padding: 10px;">₹{{ r.total_amount|floatformat:2 }}</td>
-                <td style="padding: 10px;">{{ r.generated_on|date:"d M Y, H:i" }}</td>
-                <td style="padding: 10px;">
-                    <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ r.transaction_id }}&download=pdf" 
-                       style="color: #007bff; text-decoration: none; font-weight: bold;">
-                         View
-                    </a>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="7" style="padding: 20px; text-align: center; color: #999;">
-                    No deal letters generated yet.
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <select name="sort_by" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc;">
+                <option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Date (Newest First)</option>
+                <option value="date_asc" {% if selected_sort == 'date_asc' %}selected{% endif %}>Date (Oldest First)</option>
+                <option value="amount_desc" {% if selected_sort == 'amount_desc' %}selected{% endif %}>Amount (High to Low)</option>
+                <option value="amount_asc" {% if selected_sort == 'amount_asc' %}selected{% endif %}>Amount (Low to High)</option>
+            </select>
+
+            <button type="submit" style="padding: 6px 15px; background-color: #1a3e6e; color: white; border: none; border-radius: 5px;">
+                Apply
+            </button>
+        </form>
+    </div>
+    <div style="overflow-x: auto;">
+    <div style="min-width: 800px;">
+    <div class="user-portfolio-table" style="padding-bottom: 30px;">
+        <table  class="user-portfolio-toptable">
+            <thead class="user-portfolio-head1">
+                <tr>
+                    <th>Invoice</th>
+                    <th>Type</th>
+                    <th>Stock</th>
+                    <th>Qty</th>
+                    <th>Share Price</th>
+                    <th>Total</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody style="background-color: white;">
+            {% for r in records %}
+                <tr>
+                    <td>{{ r.invoice_no }}</td>
+                    <td>{{ r.get_deal_type_display }}</td>
+                    <td>{{ r.stock_name }}</td>
+                    <td>{{ r.quantity }}</td>
+                    <td>{{ r.price_per_share }}</td>
+                    <td>₹{{ r.total_amount|floatformat:2 }}</td>
+                    <td>{{ r.generated_on|date:"d M Y, H:i" }}</td>
+                    <td>
+                        <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ r.transaction_id }}&download=pdf" 
+                        style="color: #007bff; text-decoration: none; font-weight: bold;">
+                            Download Invoice
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" style="padding: 20px; text-align: center; color: #999;">
+                        No deal letters generated yet.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+    </div>
 </div>
 {% endblock %}

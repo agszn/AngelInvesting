@@ -30,6 +30,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import CustomUser
 from .forms import UserTypeUpdateForm
 
+from .otp_delivery import send_otp
+
 def is_admin_or_site_manager(user):
     return user.user_type in ['AD', 'SM']
 
@@ -44,6 +46,16 @@ def tst(request):
         'global_brokers_json': json.dumps(list(brokers)),
         'global_advisors_json': json.dumps(list(advisors)),
     })
+
+from django.http import JsonResponse
+
+def stock_autocomplete(request):
+    query = request.GET.get('term', '')
+    results = list(
+        StockData.objects.filter(company_name__icontains=query)
+        .values_list('company_name', flat=True)[:10]
+    )
+    return JsonResponse(results, safe=False)
 
 # @login_required
 # @user_passes_test(is_admin_or_site_manager)
@@ -95,18 +107,34 @@ def manage_user_types(request):
         'query': query,
     })
 
+from django.shortcuts import render
+from site_Manager.models import HeroSectionBanner, Blog
+from unlisted_stock_marketplace.models import StockData
+
 def base(request):
-    # homepage banner
+    # Homepage banner
     banner = HeroSectionBanner.objects.filter(is_active=True).first()
     
-    # Base.html Stocks Displayed
+    # Stocks data with percentage diff
     stocks = StockData.objects.all()
     for stock in stocks:
         if stock.ltp and stock.share_price and stock.share_price > 0:
             stock.percentage_diff = ((stock.ltp - stock.share_price) / stock.share_price) * 100
         else:
-            stock.percentage_diff = None  # Handle missing or zero share price
-    return render(request, "base.html", {"stocks": stocks,"banner": banner})
+            stock.percentage_diff = None
+
+    # Fetch latest 3 blogs
+    latest_blogs = Blog.objects.all().order_by('-date', '-time')[:3]
+
+    rms = CustomUser.objects.filter(user_type='RM', phone_number__isnull=False)
+    
+    return render(request, "base.html", {
+        "stocks": stocks,
+        "banner": banner,
+        "latest_blogs": latest_blogs,
+        'rms': rms
+    })
+
 
 # 
 # 
@@ -134,13 +162,16 @@ def register_view(request):
             user.save()
 
             # Send OTP to email
-            send_mail(
-                'Verify Your Account',
-                f'Your OTP for verification is: {user.otp}',
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
+            # send_mail(
+            #     'Verify Your Account',
+            #     f'Your OTP for verification is: {user.otp}',
+            #     settings.EMAIL_HOST_USER,
+            #     [user.email],
+            #     fail_silently=False,
+            # )
+            
+            # Send OTP via Twilio
+            send_otp(user, f'Your OTP for verification is: {user.otp}')
 
             messages.success(request, "Check your email for the OTP to verify your account.")
             return redirect('verify_email', user_id=user.id)
@@ -161,13 +192,16 @@ def resend_otp(request, user_id):
     user.save()
 
     # Send OTP to email
-    send_mail(
-        'Your New OTP for Account Verification',
-        f'Your new OTP is: {user.otp}',
-        settings.EMAIL_HOST_USER,
-        [user.email],
-        fail_silently=False,
-    )
+    # send_mail(
+    #     'Verify Your Account',
+    #     f'Your OTP for verification is: {user.otp}',
+    #     settings.EMAIL_HOST_USER,
+    #     [user.email],
+    #     fail_silently=False,
+    # )
+    
+    # Send OTP via Twilio
+    send_otp(user, f'Your OTP for verification is: {user.otp}')
 
     messages.success(request, "A new OTP has been sent to your email.")
     return redirect('verify_email', user_id=user.id)
@@ -239,6 +273,155 @@ def logout_view(request):
     logout(request)
     messages.success(request, "Logged out successfully.")
     return redirect('login')
+
+# the below form is for the user to update their user type
+# and it is not used in the admin panel
+# and the below is test and temporary updates
+# start - 02082025 => secure "Forgot Password" flow using OTP delivered via email.
+
+from .forms import ForgotPasswordForm, OTPVerificationForm, ResetPasswordForm
+from django.utils import timezone
+import uuid
+
+# Forgot Password - Step 1
+def forgot_password_view(request):
+    if request.method == 'POST':
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            value = form.cleaned_data['email_or_username']
+            user = CustomUser.objects.filter(email=value).first() or CustomUser.objects.filter(username=value).first()
+            if user:
+                user.otp = str(uuid.uuid4().int)[:6]
+                user.otp_created_at = timezone.now()
+                user.save()
+
+                # Send OTP to email
+                # send_mail(
+                #     'Verify Your Account',
+                #     f'Your OTP for verification is: {user.otp}',
+                #     settings.EMAIL_HOST_USER,
+                #     [user.email],
+                #     fail_silently=False,
+                # )
+                
+                # Send OTP via Twilio
+                send_otp(user, f'Your OTP for verification is: {user.otp}')
+                
+                messages.success(request, "An OTP has been sent to your Number.")
+                return redirect('verify_otp_reset', user_id=user.id)
+            else:
+                form.add_error(None, "No user found with this email or username.")
+    else:
+        form = ForgotPasswordForm()
+
+    return render(request, 'Authentication/ForgotPassword/forgot_password.html', {'form': form})
+
+# OTP Verification - Step 2
+def verify_otp_for_reset_view(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    if request.method == 'POST':
+        form = OTPVerificationForm(request.POST)
+        if form.is_valid():
+            otp_entered = form.cleaned_data['otp']
+            if otp_entered == user.otp:
+                messages.success(request, "OTP verified. Now set a new password.")
+                return redirect('reset_password', user_id=user.id)
+            else:
+                messages.error(request, "Invalid OTP.")
+    else:
+        form = OTPVerificationForm()
+    return render(request, 'Authentication/ForgotPassword/verify_otp_reset.html', {'form': form})
+
+# Password Reset - Step 3
+def reset_password_view(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            new_phone = form.cleaned_data['new_phone_number']
+            user.phone_number = new_phone
+            user.set_password(new_phone)
+            user.otp = None
+            user.save()
+            messages.success(request, "Password reset successfully. You can now log in.")
+            return redirect('login')
+    else:
+        form = ResetPasswordForm()
+    return render(request, 'Authentication/ForgotPassword/reset_password.html', {'form': form})
+
+# end - 02082025 => secure "Forgot Password" flow using OTP delivered via email.
+
+#  -------------------------------------------
+#  -------------------------------------------
+
+
+# start - 02082025 -> Phase 2: Change Password (Phone Number) from Profile Page, with OTP verification via email for now.
+
+
+from .forms import ChangePhoneNumberForm, OTPConfirmationForm
+from django.contrib.auth.decorators import login_required
+import uuid
+
+# Step 1 – initiate phone number change
+@login_required
+def initiate_phone_change(request):
+    if request.method == 'POST':
+        form = ChangePhoneNumberForm(request.POST)
+        if form.is_valid():
+            phone = form.cleaned_data['new_phone_number']
+            request.session['new_phone'] = phone
+            otp = str(uuid.uuid4().int)[:6]
+            request.session['phone_change_otp'] = otp
+
+            # Send OTP to current user email for now
+            # send_mail(
+            #     "OTP to Confirm New Phone Number",
+            #     f"Your OTP to change your phone number is: {otp}",
+            #     settings.EMAIL_HOST_USER,
+            #     [request.user.email],
+            #     fail_silently=False,
+            # )
+            
+            send_otp(request.user, f"Your OTP to confirm phone number change is: {otp}")
+
+            messages.success(request, "OTP sent to your registered email.")
+            return redirect('verify_phone_otp')
+    else:
+        form = ChangePhoneNumberForm()
+    return render(request, 'Authentication/updatePassword/change_phone.html', {'form': form})
+
+
+# Step 2 – verify OTP and update phone/password
+@login_required
+def verify_phone_change_otp(request):
+    if request.method == 'POST':
+        form = OTPConfirmationForm(request.POST)
+        if form.is_valid():
+            entered_otp = form.cleaned_data['otp']
+            correct_otp = request.session.get('phone_change_otp')
+            new_phone = request.session.get('new_phone')
+
+            if entered_otp == correct_otp:
+                user = request.user
+                user.phone_number = new_phone
+                user.set_password(new_phone)
+                user.save()
+
+                # Cleanup
+                request.session.pop('phone_change_otp', None)
+                request.session.pop('new_phone', None)
+
+                messages.success(request, "Phone number & password updated successfully.")
+                return redirect('login')
+            else:
+                messages.error(request, "Invalid OTP.")
+    else:
+        form = OTPConfirmationForm()
+    return render(request, 'Authentication/updatePassword/verify_phone_otp.html', {'form': form})
+
+
+# end - 02082025 -> Phase 2: Change Password (Phone Number) from Profile Page, with OTP verification via email for now.
+
 
 # 
 # ---------------------------------------
@@ -571,6 +754,7 @@ def view_profile(request):
         'brokers': brokers,
         'cmr_copies': cmr_copies,
         'profile': profile,
+        
 
         # Stock data
         **stock_context,
@@ -669,7 +853,6 @@ def delete_bank_account(request, bank_id):
         return redirect('profile')
     return redirect('profile')
 
-
 # 
 # ------------------------------------------
 # -------------------------- CMR ---------------
@@ -710,18 +893,47 @@ def download_cmr_file(request, cmr_id):
 # ------------------------------------------
 # 
 
-# contact
-@login_required
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from .forms import ContactForm
+from .forms import ContactForm
+from .models import Contact, UserProfile
+
 def contact(request):
+    initial_data = {}
+    is_authenticated = request.user.is_authenticated
+
+    if is_authenticated:
+        profile = getattr(request.user, 'profile', None)
+        if profile:
+            name = profile.full_name()
+            email = profile.email or request.user.email  # fallback to CustomUser.email if profile email not set
+        else:
+            name = request.user.get_full_name()
+            email = request.user.email
+
+        initial_data = {
+            'name': name,
+            'email': email,
+        }
+
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            form.save()  
+            contact_instance = form.save(commit=False)
+            if is_authenticated:
+                contact_instance.user = request.user
+            contact_instance.save()
             messages.success(request, 'Your message has been sent successfully!')
-            return redirect('contact')  
+            return redirect('contact')
     else:
-        form = ContactForm()
-    return render(request, 'contact/contact.html', {'form': form})
+        form = ContactForm(initial=initial_data)
+
+    return render(request, 'contact/contact.html', {
+        'form': form,
+        'user_is_authenticated': is_authenticated,
+    })
 
 
 @login_required
@@ -748,6 +960,12 @@ def Gendral_User_FAQ(request):
     return render(request, 'FAQ/faqG.html', {'faqs_G': faqs_G})
 
 # blog
+# user_auth/views.py
 def blog(request):
-    return render(request, 'blog/blog.html')
+    blogs = Blog.objects.all().order_by('-date')
+    return render(request, 'blog/blog.html', {'blogs': blogs})
 
+def user_blog_detail_view(request, blog_id):
+    blog = get_object_or_404(Blog, pk=blog_id)
+    related_blogs = Blog.objects.exclude(id=blog_id).order_by('-date')[:3]
+    return render(request, 'blog/blog_detail.html', {'blog': blog, 'related_blogs': related_blogs})

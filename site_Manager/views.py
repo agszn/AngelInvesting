@@ -1,7 +1,94 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+
+from django.shortcuts import render, redirect
+from .models import *
+from django.contrib import messages
+from django.db.models import Q
+
 def BlogSM(request):
-    return render(request, 'BlogSM.html')
+    blogs = Blog.objects.all().order_by('-date')  # default: show all
+
+    # === FILTER LOGIC ===
+    filter_date = request.GET.get('filter_date')
+    filter_heading = request.GET.get('filter_heading')
+
+    if filter_date:
+        blogs = blogs.filter(date=filter_date)
+
+    if filter_heading:
+        blogs = blogs.filter(heading__icontains=filter_heading)
+
+    # === CREATE BLOG ===
+    if request.method == 'POST':
+        banner = request.FILES.get('banner')
+        date = request.POST.get('date')
+        heading = request.POST.get('heading')
+        description = request.POST.get('description')
+
+        blog = Blog(
+            date=date,
+            heading=heading,
+            description=description,
+        )
+        if banner:
+            blog.banner = banner
+        blog.save()
+        messages.success(request, "Blog created successfully!")
+        return redirect('SM_User:BlogSM')  # replace with your URL name
+
+    context = {
+        'blogs': blogs,
+        'filter_date': filter_date or '',
+        'filter_heading': filter_heading or '',
+    }
+
+    return render(request, 'blogs/BlogSM.html', context)
+
+from django.shortcuts import render, get_object_or_404
+from .models import Blog
+
+def blog_detail_view_SM(request, blog_id):
+    blog = get_object_or_404(Blog, pk=blog_id)
+    related_blogs = Blog.objects.exclude(id=blog_id).order_by('-date')[:3]
+    return render(request, 'blogs/blog_detailST.html', {'blog': blog, 'related_blogs': related_blogs})
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Blog
+from .forms import BlogForm
+from django.contrib import messages
+
+def create_blog(request):
+    if request.method == 'POST':
+        form = BlogForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Blog created successfully!")
+            return redirect('SM_User:BlogSM')
+    else:
+        form = BlogForm()
+    return render(request, 'blogs/blog_form.html', {'form': form, 'title': 'Create Blog'})
+
+def edit_blog(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    if request.method == 'POST':
+        form = BlogForm(request.POST, request.FILES, instance=blog)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Blog updated successfully!")
+            return redirect('SM_User:BlogSM')
+    else:
+        form = BlogForm(instance=blog)
+    return render(request, 'blogs/blog_form.html', {'form': form, 'title': 'Edit Blog'})
+
+def delete_blog(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    if request.method == 'POST':
+        blog.delete()
+        messages.success(request, "Blog deleted successfully!")
+        return redirect('SM_User:BlogSM')
+    return redirect('SM_User:BlogSM')
 
 # views.py
 
@@ -746,15 +833,570 @@ def stockdata_crud(request):
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-@csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render, get_object_or_404, redirect
+from .forms import (
+    StockDataForm,
+    ReportFormSet,
+    ShareholdingPatternFormSet,
+    CompanyRelationFormSet,
+    PrincipalBusinessActivityFormSet
+)
+
+# @csrf_exempt
+# def edit_stockdata(request, pk):
+#     stock = get_object_or_404(StockData, pk=pk)
+
+#     if request.method == 'POST':
+#         form = StockDataForm(request.POST, request.FILES, instance=stock)
+#         report_formset = ReportFormSet(request.POST, instance=stock, prefix='report')
+#         shareholding_formset = ShareholdingPatternFormSet(request.POST, instance=stock, prefix='shareholding')
+#         relation_formset = CompanyRelationFormSet(request.POST, instance=stock, prefix='relation')
+#         business_formset = PrincipalBusinessActivityFormSet(request.POST, instance=stock, prefix='business')
+
+#         if all([
+#             form.is_valid(),
+#             report_formset.is_valid(),
+#             shareholding_formset.is_valid(),
+#             relation_formset.is_valid(),
+#             business_formset.is_valid()
+#         ]):
+#             form.save()
+#             report_formset.save()
+#             shareholding_formset.save()
+#             relation_formset.save()
+#             business_formset.save()
+#             return redirect('SM_User:stockdata_crud')  # Adjust redirect as needed
+#     else:
+#         form = StockDataForm(instance=stock)
+#         report_formset = ReportFormSet(instance=stock, prefix='report')
+#         shareholding_formset = ShareholdingPatternFormSet(instance=stock, prefix='shareholding')
+#         relation_formset = CompanyRelationFormSet(instance=stock, prefix='relation')
+#         business_formset = PrincipalBusinessActivityFormSet(instance=stock, prefix='business')
+
+#     return render(request, 'stockData_edit_modal.html', {
+#         'form': form,
+#         'report_formset': report_formset,
+#         'shareholding_formset': shareholding_formset,
+#         'relation_formset': relation_formset,
+#         'business_formset': business_formset,
+#         'title': 'Edit Stock'
+#     })
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .forms import (
+    StockDataForm,
+    ReportFormSet,
+    ShareholdingPatternFormSet,
+    CompanyRelationFormSet,
+    PrincipalBusinessActivityFormSet
+)
+
 def edit_stockdata(request, pk):
     stock = get_object_or_404(StockData, pk=pk)
+
     if request.method == 'POST':
         form = StockDataForm(request.POST, request.FILES, instance=stock)
-        if form.is_valid():
+        report_formset = ReportFormSet(request.POST, instance=stock, prefix='report')
+        shareholding_formset = ShareholdingPatternFormSet(request.POST, instance=stock, prefix='shareholding')
+        relation_formset = CompanyRelationFormSet(request.POST, instance=stock, prefix='relation')
+        business_formset = PrincipalBusinessActivityFormSet(request.POST, instance=stock, prefix='business')
+
+        if all([
+            form.is_valid(),
+            report_formset.is_valid(),
+            shareholding_formset.is_valid(),
+            relation_formset.is_valid(),
+            business_formset.is_valid()
+        ]):
             form.save()
+            report_formset.save()
+            shareholding_formset.save()
+            relation_formset.save()
+            business_formset.save()
             return redirect('SM_User:stockdata_crud')
+        else:
+            # Debug output (you can remove these in production)
+            print("Form valid?", form.is_valid(), form.errors)
+            print("Report formset valid?", report_formset.is_valid(), report_formset.errors)
+            print("Shareholding formset valid?", shareholding_formset.is_valid(), shareholding_formset.errors)
+            print("Relation formset valid?", relation_formset.is_valid(), relation_formset.errors)
+            print("Business formset valid?", business_formset.is_valid(), business_formset.errors)
+
     else:
         form = StockDataForm(instance=stock)
-    return render(request, 'stockData_edit_modal.html', {'form': form, 'title': 'Edit Stock'})
+        report_formset = ReportFormSet(instance=stock, prefix='report')
+        shareholding_formset = ShareholdingPatternFormSet(instance=stock, prefix='shareholding')
+        relation_formset = CompanyRelationFormSet(instance=stock, prefix='relation')
+        business_formset = PrincipalBusinessActivityFormSet(instance=stock, prefix='business')
 
+    return render(request, 'stockData_edit_modal.html', {
+        'form': form,
+        'report_formset': report_formset,
+        'shareholding_formset': shareholding_formset,
+        'relation_formset': relation_formset,
+        'business_formset': business_formset,
+        'title': 'Edit Stock',
+    })
+
+
+
+# from django.shortcuts import render
+# from django.views.decorators.csrf import csrf_exempt
+# from docx import Document
+# from django.utils.html import format_html
+# import re
+
+# @csrf_exempt
+# def convert_docx_to_html(request):
+#     above_outlook = ""
+#     between_outlook_and_shareholding = ""
+#     below_shareholding = ""
+
+#     if request.method == 'POST' and request.FILES.get('word_file'):
+#         docx_file = request.FILES['word_file']
+#         document = Document(docx_file)
+
+#         html_output = ""
+
+#         for para in document.paragraphs:
+#             style = para.style.name.lower()
+#             line_html = ""
+
+#             # Lists
+#             if 'list paragraph' in style:
+#                 text = para.text.strip()
+#                 if text.startswith('-'):
+#                     line_html = f"<ul><li>{text[1:].strip()}</li></ul>"
+#                 elif re.match(r'^\d+[\.\)]', text):
+#                     line_html = f"<ol><li>{text[2:].strip()}</li></ol>"
+#                 else:
+#                     line_html = f"<p>{text}</p>"
+
+#             # Headings
+#             elif 'heading 1' in style:
+#                 line_html = f'<h1>{para.text}</h1>'
+#             elif 'heading 2' in style:
+#                 line_html = f'<h2>{para.text}</h2>'
+#             else:
+#                 for run in para.runs:
+#                     run_text = run.text
+#                     if not run_text:
+#                         continue
+#                     if run.bold:
+#                         run_text = f"<strong>{run_text}</strong>"
+#                     if run.italic:
+#                         run_text = f"<em>{run_text}</em>"
+#                     if run.underline:
+#                         run_text = f"<u>{run_text}</u>"
+#                     line_html += run_text
+
+#                 if line_html.strip():
+#                     line_html = f"<p>{line_html}</p>"
+
+#             html_output += line_html
+
+#         # === SECTION SPLIT LOGIC ===
+#         outlook_marker = '<strong>INDUSTRY OUTLOOK</strong></p>'
+#         shareholding_marker = 'Latest shareholding pattern'
+
+#         outlook_idx = html_output.find(outlook_marker)
+#         shareholding_idx = html_output.find(shareholding_marker)
+
+#         # if outlook_idx != -1:
+#         #     outlook_end = outlook_idx + len(outlook_marker)
+#         #     above_outlook = html_output[:outlook_end]
+#         #     if shareholding_idx != -1:
+#         #         between_outlook_and_shareholding = html_output[outlook_end:shareholding_idx]
+#         #         below_shareholding = html_output[shareholding_idx:]
+#         #     else:
+#         #         between_outlook_and_shareholding = html_output[outlook_end:]
+#         # else:
+#         #     above_outlook = html_output
+        
+#         if outlook_idx != -1:
+#             outlook_break = '<br><br>\n\n' + outlook_marker
+#             html_output = html_output.replace(outlook_marker, outlook_break, 1)
+
+#             outlook_idx = html_output.find(outlook_break)
+#             outlook_end = outlook_idx + len(outlook_break)
+
+#             above_outlook = html_output[:outlook_end] + '\n'
+#             if shareholding_idx != -1:
+#                 between_outlook_and_shareholding = html_output[outlook_end:shareholding_idx]
+#                 below_shareholding = html_output[shareholding_idx:]
+#             else:
+#                 between_outlook_and_shareholding = html_output[outlook_end:]
+#         else:
+#             above_outlook = html_output + '\n'
+
+#         raw_html_combined = (
+#             f"{above_outlook}"
+#             f"\n\n<!-- === SECTION: INDUSTRY OUTLOOK STARTS HERE === -->\n\n"
+#             f"{between_outlook_and_shareholding}"
+#             f"\n\n<!-- === SECTION: LATEST SHAREHOLDING STARTS HERE === -->\n\n"
+#             f"{below_shareholding}"
+#         )
+
+#         context = {
+#             'above_outlook': format_html(above_outlook),
+#             'between_outlook_and_shareholding': format_html(between_outlook_and_shareholding),
+#             'below_shareholding': format_html(below_shareholding),
+#             'converted_html': raw_html_combined,
+#         }
+#         return render(request, 'htmlPreview/upload_and_preview.html', context)
+
+#     return render(request, 'htmlPreview/upload_and_preview.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import re
+from docx import Document
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.utils.html import format_html
+
+# Store latest HTML in-memory for download (for demo only)
+last_converted_html = ""
+
+import re
+from docx import Document
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from django.utils.html import escape
+
+@csrf_exempt
+def convert_docx_to_html(request):
+    converted_html = ""
+
+    if request.method == 'POST' and request.FILES.get('word_file'):
+        document = Document(request.FILES['word_file'])
+        html_output = ""
+
+        # Convert paragraphs
+        for para in document.paragraphs:
+            text = para.text.strip()
+            style = para.style.name.lower()
+
+            # Use <h2> for headings
+            if 'heading' in style:
+                html_output += f"<h2>{escape(text)}</h2>\n"
+            else:
+                paragraph_content = ""
+                for run in para.runs:
+                    run_text = escape(run.text)
+                    if not run_text.strip():
+                        continue
+
+                    # Wrap styled text in <span>
+                    if run.bold or run.italic or run.underline:
+                        paragraph_content += f"<span>{run_text}</span>"
+                    else:
+                        paragraph_content += run_text
+
+                if paragraph_content.strip():
+                    html_output += f"<p>{paragraph_content}</p>\n"
+
+        # Convert tables
+        for table in document.tables:
+            html_output += "<table>\n"
+            for row in table.rows:
+                html_output += "<p>"
+                for cell in row.cells:
+                    html_output += f"<span>{escape(cell.text.strip())}</span> "
+                html_output += "</p>\n"
+            html_output += "</table>\n"
+
+        converted_html = html_output
+
+    return render(request, 'htmlPreview/upload_and_preview.html', {
+        'converted_html': converted_html
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from unlisted_stock_marketplace.models import CustomFieldDefinition, CustomFieldValue, TableHeader
+from decimal import Decimal
+import json
+
+
+def assign_next_order(definition):
+    max_order = CustomFieldValue.objects.filter(field_definition=definition).aggregate(Max('order'))['order__max']
+    return (max_order or 0) + 1
+
+
+def shift_order_if_needed(definition, target_order):
+    affected = CustomFieldValue.objects.filter(field_definition=definition, order__gte=target_order).order_by('-order')
+    for obj in affected:
+        obj.order += 1
+        obj.save()
+
+
+def values_for_definition(request, def_id):
+    definition = get_object_or_404(CustomFieldDefinition, pk=def_id)
+    all_values = CustomFieldValue.objects.filter(field_definition=definition).select_related('table_header', 'parent_field_value').order_by('order')
+
+    grouped = []
+    parent_map = {}
+
+    for val in all_values:
+        if val.parent_field_value_id is None:
+            parent_map[val.pk] = {'parent': val, 'children': []}
+        else:
+            if val.parent_field_value_id in parent_map:
+                parent_map[val.parent_field_value_id]['children'].append(val)
+
+    grouped = list(parent_map.values())
+    headers = TableHeader.objects.all().order_by('order')
+
+    return render(request, 'contect/definition_values.html', {
+        'definition': definition,
+        'grouped': grouped,
+        'headers': headers
+    })
+
+
+@csrf_exempt
+def add_custom_value(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        def_id = data.get('definition_id')
+        definition = CustomFieldDefinition.objects.get(id=def_id)
+
+        value = CustomFieldValue(
+            field_definition=definition,
+            name=data.get('name'),
+            description=data.get('description'),
+            table_header_id=data.get('table_header'),
+            parent_field_value_id=data.get('parent_id'),
+            text_style=data.get('text_style', 'normal')
+        )
+
+        val_type = definition.field_type
+        if val_type == 'dec':
+            value.dec_value = Decimal(data.get('value')) if data.get('value') else None
+        elif val_type == 'int':
+            value.int_value = int(data.get('value')) if data.get('value') else None
+        elif val_type == 'char':
+            value.char_value = data.get('value')
+        elif val_type == 'date':
+            value.date_value = data.get('value')
+
+        value.order = assign_next_order(definition)
+        value.save()
+        return JsonResponse({'status': 'ok'})
+
+
+@csrf_exempt
+def update_custom_value(request, pk):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        value = get_object_or_404(CustomFieldValue, pk=pk)
+
+        value.name = data.get('name')
+        value.description = data.get('description')
+        value.table_header_id = data.get('table_header')
+        value.parent_field_value_id = data.get('parent_id')
+        value.text_style = data.get('text_style', 'normal')
+
+
+        val_type = value.field_definition.field_type
+        if val_type == 'dec':
+            value.dec_value = Decimal(data.get('value')) if data.get('value') else None
+        elif val_type == 'int':
+            value.int_value = int(data.get('value')) if data.get('value') else None
+        elif val_type == 'char':
+            value.char_value = data.get('value')
+        elif val_type == 'date':
+            value.date_value = data.get('value')
+
+        value.save()
+        return JsonResponse({'status': 'updated'})
+
+
+@csrf_exempt
+def delete_custom_value(request, pk):
+    if request.method == 'POST':
+        value = get_object_or_404(CustomFieldValue, pk=pk)
+        value.delete()
+        return JsonResponse({'status': 'deleted'})
+@csrf_exempt
+def bulk_upload_values(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            def_id = int(data.get('definition_id'))
+            definition = get_object_or_404(CustomFieldDefinition, id=def_id)
+
+            raw = data.get('bulk_data', '')
+            header_id = int(data.get('starting_header'))
+
+            table_headers = list(TableHeader.objects.all().order_by('id'))  # order by ID for consistent alignment
+
+            try:
+                start_index = [th.id for th in table_headers].index(header_id)
+            except ValueError:
+                return JsonResponse({'status': 'invalid_header'})
+
+            lines = [line.strip() for line in raw.strip().splitlines() if line.strip()]
+
+            for line in lines:
+                parts = line.split()
+                name_parts = [x for x in parts if not is_number(x)]
+                val_parts = [x for x in parts if is_number(x)]
+
+                name = ' '.join(name_parts)
+                try:
+                    values = [Decimal(v) for v in val_parts]
+                except Exception:
+                    continue  # skip invalid line
+
+                headers = table_headers[start_index:start_index + len(values)]
+                if len(headers) < len(values) or not values or not name:
+                    continue  # skip invalid rows
+
+                # Create parent
+                parent = CustomFieldValue.objects.create(
+                    field_definition=definition,
+                    name=name,
+                    dec_value=values[0] if definition.field_type == 'dec' else None,
+                    table_header=headers[0],
+                    order=assign_next_order(definition),
+                    text_style=data.get('text_style', 'normal')
+                )
+
+                # Create children
+                for idx in range(1, len(values)):
+                    CustomFieldValue.objects.create(
+                        field_definition=definition,
+                        name=None,
+                        dec_value=values[idx] if definition.field_type == 'dec' else None,
+                        table_header=headers[idx],
+                        parent_field_value=parent,
+                        order=assign_next_order(definition)
+                    )
+
+            return JsonResponse({'status': 'bulk_uploaded'})
+
+        except Exception as e:
+            return JsonResponse({'status': f'error: {str(e)}'})
+
+
+
+@csrf_exempt
+def reorder_custom_values(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        order_list = data.get('order')
+
+        for idx, val_id in enumerate(order_list):
+            CustomFieldValue.objects.filter(id=val_id).update(order=idx + 1)
+
+        return JsonResponse({'status': 'reordered'})
+
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except Exception:
+        return False
+
+
+# views.py
+from django.shortcuts import render
+from unlisted_stock_marketplace.models import *
+
+def stock_model_overview(request):
+    selected_stock_id = request.GET.get("stock")
+    grouped_data = {}
+    stocks = StockData.objects.all().order_by("company_name")
+
+    # Filter by selected stock if present
+    definitions = CustomFieldDefinition.objects.select_related('stock').order_by('stock__company_name', 'model_type')
+    if selected_stock_id:
+        definitions = definitions.filter(stock_id=selected_stock_id)
+
+    for defn in definitions:
+        stock = defn.stock
+        if stock not in grouped_data:
+            grouped_data[stock] = []
+        grouped_data[stock].append(defn)
+
+    return render(request, 'contect/stock_model_overview.html', {
+        'grouped_data': grouped_data,
+        'stocks': stocks,
+        'selected_stock_id': int(selected_stock_id) if selected_stock_id else None
+    })

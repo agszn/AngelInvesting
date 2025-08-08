@@ -1,0 +1,35 @@
+<!-- site_Manager/templates/blogs/BlogSM.html -->
+{% extends "baseStructureSM.html" %}
+{% block title %}Blogs{% endblock %}
+{% block subtitle %} Blogs {% endblock %}
+{% load static %}
+{% block SMprofile_content %}
+
+<h2 class="text-center my-4"><span style="color:green;">Blogs</span></h2>
+<div class="text-end mb-3 me-4">
+    <a href="{% url 'SM_User:create_blog' %}" class="btn btn-success">➕ Create New Blog</a>
+</div>
+
+<div class="container">
+    <div class="row">
+        {% for blog in blogs %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if blog.banner %}
+                <img src="{{ blog.banner.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <img src="{% static 'default.png' %}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{% url 'SM_User:SM_blog_detail' blog.id %}">{{ blog.heading }}</a>
+                    </h5>
+                    <p class="card-text">{{ blog.short_description|truncatechars:100 }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

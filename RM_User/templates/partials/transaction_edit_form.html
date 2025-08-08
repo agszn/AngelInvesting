@@ -1,4 +1,8 @@
 <!-- RM_User/templates/partials/transaction_edit_form.html -->
+<!-- <h5 class="modal-title" id="transactionEditModalLabel">
+  {% if is_sell %}Edit Sell Transaction{% else %}Edit Buy Transaction{% endif %}
+</h5> -->
+
 <form method="post" id="transactionEditForm" action="{% url 'RM_User:ajax_transaction_handler' transaction.pk %}">
   {% csrf_token %}
   <div class="row">

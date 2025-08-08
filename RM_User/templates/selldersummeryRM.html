@@ -143,6 +143,12 @@
             <td>{{ item.get_RM_status_display }}</td>
             <td>
               <a href="{% url 'RM_User:edit_sell_transaction' item.id %}" class="btn btn-sm btn-outline-primary">✏️</a>
+
+              <button type="button"
+                class="btn btn-sm btn-outline-warning"
+                onclick='openSellTransactionEditModal({{ item.id }})'>
+                ✏️
+              </button>
             </td>
           </tr>
         {% empty %}
@@ -156,8 +162,43 @@
       <!-- <button class="RMpayment-button">Processed To Account Department</button> -->
     </div>
 
+
+    <!-- edit status form  -->
+    <div class="modal fade" id="transactionEditModal" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="transactionEditModalLabel">Edit Sell Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="transactionEditFormContainer">
+            <!-- Form will be loaded here by AJAX -->
+            <div class="text-center">
+              <span class="spinner-border"></span> Loading...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     {% else %}
       <p>No order details found.</p>
     {% endif %}
+
+<!-- Edit Sell Transaction -->
+<script>
+function openSellTransactionEditModal(id) {
+  const container = document.getElementById('transactionEditFormContainer');
+  container.innerHTML = '<div class="text-center"><span class="spinner-border"></span> Loading...</div>';
+
+  fetch(`/RM_User/sell-transaction/${id}/edit/ajax/`)
+    .then(response => response.text())
+    .then(html => {
+      container.innerHTML = html;
+      const modal = new bootstrap.Modal(document.getElementById('transactionEditModal'));
+      modal.show();
+    });
+}
+</script>
 
 {% endblock %}

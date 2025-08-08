@@ -13,7 +13,7 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Accounts</th>
-                        <th>RM</th>
+                        <!-- <th>RM</th> -->
                         <th>Customer_Name</th>
                         <th>Customer_ID</th>
                         <th>Stock Details</th>
@@ -27,7 +27,7 @@
                         <td>{{ order.timestamp|date:"d-m-Y" }}</td>
                         <td>{{ order.timestamp|time:"h:i A" }}</td>
                         <td>{{ order.ACApproved }}</td>
-                        <td>{{ order.RMApproved }}</td>
+                        <!-- <td>{{ order.RMApproved }}</td> -->
                         <td>{{ order.user.profile.user.username }}</td>
                         <td>{{ order.user.profile.custom_user_id }}</td>
                         <td>

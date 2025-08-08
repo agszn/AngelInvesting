@@ -907,6 +907,46 @@ def ajax_transaction_handler(request, pk):
             return JsonResponse({'success': False, 'html': html})
 
 
+# sell Handeler
+@login_required
+@csrf_exempt
+def ajax_sell_transaction_handler(request, pk):
+    transaction = get_object_or_404(SellTransaction, pk=pk)
+    order_id = transaction.order_id
+
+    if request.method == 'GET':
+        form = SellTransactionEditForm(instance=transaction, user=request.user)
+        return render(request, 'partials/sell_transaction_edit_form.html', {
+            'form': form,
+            'transaction': transaction,
+            'is_sell': True  # optional flag for template
+        })
+
+    elif request.method == 'POST':
+        form = SellTransactionEditForm(request.POST, instance=transaction, user=request.user)
+        if form.is_valid():
+            tx = form.save(commit=False)
+
+            user_type = getattr(request.user, 'user_type', None)
+            if user_type == 'RM' and transaction.RM_status != 'completed' and tx.RM_status == 'completed':
+                tx.RMApproved = request.user
+            elif user_type == 'AC' and transaction.AC_status != 'completed' and tx.AC_status == 'completed':
+                tx.ACApproved = request.user
+            elif user_type == 'ST' and transaction.status != 'completed' and tx.status == 'completed':
+                tx.STApproved = request.user
+
+            tx.save()
+            return redirect('RM_User:selldersummeryRM', order_id=order_id)
+
+        else:
+            html = render_to_string('partials/sell_transaction_edit_form.html', {
+                'form': form,
+                'transaction': transaction,
+                'is_sell': True
+            })
+            return JsonResponse({'success': False, 'html': html})
+
+
 # views.py
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect

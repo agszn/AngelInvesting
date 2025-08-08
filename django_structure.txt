@@ -1,0 +1,887 @@
+.
+├── .git
+│   ├── COMMIT_EDITMSG
+│   ├── FETCH_HEAD
+│   ├── HEAD
+│   ├── ORIG_HEAD
+│   ├── branches
+│   ├── config
+│   ├── description
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   ├── sendemail-validate.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   ├── exclude
+│   │   └── refs
+│   ├── logs
+│   │   ├── HEAD
+│   │   └── refs
+│   ├── objects
+│   │   ├── 00
+│   │   ├── 01
+│   │   ├── 02
+│   │   ├── 03
+│   │   ├── 04
+│   │   ├── 05
+│   │   ├── 06
+│   │   ├── 07
+│   │   ├── 08
+│   │   ├── 09
+│   │   ├── 0a
+│   │   ├── 0b
+│   │   ├── 0c
+│   │   ├── 0d
+│   │   ├── 0e
+│   │   ├── 0f
+│   │   ├── 10
+│   │   ├── 11
+│   │   ├── 12
+│   │   ├── 13
+│   │   ├── 14
+│   │   ├── 15
+│   │   ├── 16
+│   │   ├── 17
+│   │   ├── 18
+│   │   ├── 19
+│   │   ├── 1a
+│   │   ├── 1b
+│   │   ├── 1c
+│   │   ├── 1d
+│   │   ├── 1e
+│   │   ├── 1f
+│   │   ├── 20
+│   │   ├── 21
+│   │   ├── 22
+│   │   ├── 23
+│   │   ├── 24
+│   │   ├── 25
+│   │   ├── 26
+│   │   ├── 27
+│   │   ├── 28
+│   │   ├── 29
+│   │   ├── 2a
+│   │   ├── 2b
+│   │   ├── 2c
+│   │   ├── 2d
+│   │   ├── 2e
+│   │   ├── 2f
+│   │   ├── 30
+│   │   ├── 31
+│   │   ├── 32
+│   │   ├── 33
+│   │   ├── 34
+│   │   ├── 35
+│   │   ├── 36
+│   │   ├── 37
+│   │   ├── 38
+│   │   ├── 39
+│   │   ├── 3a
+│   │   ├── 3b
+│   │   ├── 3c
+│   │   ├── 3d
+│   │   ├── 3e
+│   │   ├── 3f
+│   │   ├── 40
+│   │   ├── 41
+│   │   ├── 42
+│   │   ├── 43
+│   │   ├── 44
+│   │   ├── 45
+│   │   ├── 46
+│   │   ├── 47
+│   │   ├── 48
+│   │   ├── 49
+│   │   ├── 4a
+│   │   ├── 4b
+│   │   ├── 4c
+│   │   ├── 4d
+│   │   ├── 4e
+│   │   ├── 4f
+│   │   ├── 50
+│   │   ├── 51
+│   │   ├── 52
+│   │   ├── 53
+│   │   ├── 54
+│   │   ├── 55
+│   │   ├── 56
+│   │   ├── 57
+│   │   ├── 58
+│   │   ├── 59
+│   │   ├── 5a
+│   │   ├── 5b
+│   │   ├── 5c
+│   │   ├── 5d
+│   │   ├── 5e
+│   │   ├── 5f
+│   │   ├── 60
+│   │   ├── 61
+│   │   ├── 62
+│   │   ├── 63
+│   │   ├── 64
+│   │   ├── 65
+│   │   ├── 66
+│   │   ├── 67
+│   │   ├── 68
+│   │   ├── 69
+│   │   ├── 6a
+│   │   ├── 6b
+│   │   ├── 6c
+│   │   ├── 6d
+│   │   ├── 6e
+│   │   ├── 6f
+│   │   ├── 70
+│   │   ├── 71
+│   │   ├── 72
+│   │   ├── 73
+│   │   ├── 74
+│   │   ├── 75
+│   │   ├── 76
+│   │   ├── 77
+│   │   ├── 78
+│   │   ├── 79
+│   │   ├── 7a
+│   │   ├── 7b
+│   │   ├── 7c
+│   │   ├── 7d
+│   │   ├── 7e
+│   │   ├── 7f
+│   │   ├── 80
+│   │   ├── 81
+│   │   ├── 82
+│   │   ├── 83
+│   │   ├── 84
+│   │   ├── 85
+│   │   ├── 86
+│   │   ├── 87
+│   │   ├── 88
+│   │   ├── 89
+│   │   ├── 8a
+│   │   ├── 8b
+│   │   ├── 8c
+│   │   ├── 8d
+│   │   ├── 8e
+│   │   ├── 8f
+│   │   ├── 90
+│   │   ├── 91
+│   │   ├── 92
+│   │   ├── 93
+│   │   ├── 94
+│   │   ├── 95
+│   │   ├── 96
+│   │   ├── 97
+│   │   ├── 98
+│   │   ├── 99
+│   │   ├── 9a
+│   │   ├── 9b
+│   │   ├── 9c
+│   │   ├── 9d
+│   │   ├── 9e
+│   │   ├── 9f
+│   │   ├── a0
+│   │   ├── a1
+│   │   ├── a2
+│   │   ├── a3
+│   │   ├── a4
+│   │   ├── a5
+│   │   ├── a6
+│   │   ├── a7
+│   │   ├── a8
+│   │   ├── a9
+│   │   ├── aa
+│   │   ├── ab
+│   │   ├── ac
+│   │   ├── ad
+│   │   ├── ae
+│   │   ├── af
+│   │   ├── b0
+│   │   ├── b1
+│   │   ├── b2
+│   │   ├── b3
+│   │   ├── b4
+│   │   ├── b5
+│   │   ├── b6
+│   │   ├── b7
+│   │   ├── b8
+│   │   ├── b9
+│   │   ├── ba
+│   │   ├── bb
+│   │   ├── bc
+│   │   ├── bd
+│   │   ├── be
+│   │   ├── bf
+│   │   ├── c0
+│   │   ├── c1
+│   │   ├── c2
+│   │   ├── c3
+│   │   ├── c4
+│   │   ├── c5
+│   │   ├── c6
+│   │   ├── c7
+│   │   ├── c8
+│   │   ├── c9
+│   │   ├── ca
+│   │   ├── cb
+│   │   ├── cc
+│   │   ├── cd
+│   │   ├── ce
+│   │   ├── cf
+│   │   ├── d0
+│   │   ├── d1
+│   │   ├── d2
+│   │   ├── d3
+│   │   ├── d4
+│   │   ├── d5
+│   │   ├── d6
+│   │   ├── d7
+│   │   ├── d8
+│   │   ├── d9
+│   │   ├── da
+│   │   ├── db
+│   │   ├── dc
+│   │   ├── dd
+│   │   ├── de
+│   │   ├── df
+│   │   ├── e0
+│   │   ├── e1
+│   │   ├── e2
+│   │   ├── e3
+│   │   ├── e4
+│   │   ├── e5
+│   │   ├── e6
+│   │   ├── e7
+│   │   ├── e8
+│   │   ├── e9
+│   │   ├── ea
+│   │   ├── eb
+│   │   ├── ec
+│   │   ├── ed
+│   │   ├── ee
+│   │   ├── ef
+│   │   ├── f0
+│   │   ├── f1
+│   │   ├── f2
+│   │   ├── f3
+│   │   ├── f4
+│   │   ├── f5
+│   │   ├── f6
+│   │   ├── f7
+│   │   ├── f8
+│   │   ├── f9
+│   │   ├── fa
+│   │   ├── fb
+│   │   ├── fc
+│   │   ├── fd
+│   │   ├── fe
+│   │   ├── ff
+│   │   ├── info
+│   │   └── pack
+│   ├── packed-refs
+│   └── refs
+│       ├── heads
+│       ├── remotes
+│       └── tags
+├── .gitignore
+├── .venv
+│   ├── .gitignore
+│   ├── bin
+│   │   ├── Activate.ps1
+│   │   ├── activate
+│   │   ├── activate.csh
+│   │   ├── activate.fish
+│   │   ├── mod_wsgi-express
+│   │   ├── pip
+│   │   ├── pip3
+│   │   ├── pip3.12
+│   │   ├── python -> python3
+│   │   ├── python3 -> /usr/bin/python3
+│   │   └── python3.12 -> python3
+│   ├── include
+│   │   └── python3.12
+│   ├── lib
+│   │   └── python3.12
+│   ├── lib64 -> lib
+│   └── pyvenv.cfg
+├── Acc_User
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── templates
+│   │   ├── AngelInvestAcc.html
+│   │   ├── SellSummaryAcc.html
+│   │   ├── ShareListAcc.html
+│   │   ├── baseStructureAcc.html
+│   │   ├── buyOrderSummaryAcc copy.html
+│   │   ├── buyOrderSummaryAcc.html
+│   │   ├── buyorderAcc copy.html
+│   │   ├── buyorderAcc.html
+│   │   ├── clientAcc.html
+│   │   ├── dashboardAcc.html
+│   │   ├── ordersAcc.html
+│   │   ├── reportsAcc.html
+│   │   ├── sellorderAcc.html
+│   │   ├── transaction
+│   │   └── unlistedSharesAcc.html
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── DB_Structure.txt
+├── README.md
+├── RM_User
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── templates
+│   │   ├── AllbuyTransactionSummary.html
+│   │   ├── AllsellTransactionSummary.html
+│   │   ├── ReportRM.html
+│   │   ├── ShareListRM.html
+│   │   ├── angelInvestRM.html
+│   │   ├── baseStructureRM.html
+│   │   ├── buyorderRM.html
+│   │   ├── buyordersummeryRM copy 2.html
+│   │   ├── buyordersummeryRM copy 3.html
+│   │   ├── buyordersummeryRM copy.html
+│   │   ├── buyordersummeryRM.html
+│   │   ├── clientRM copy.html
+│   │   ├── clientRM.html
+│   │   ├── dashboardRM.html
+│   │   ├── ordersRM.html
+│   │   ├── partials
+│   │   ├── selldersummeryRM.html
+│   │   ├── sellorderRM.html
+│   │   ├── transaction
+│   │   └── unlistedSharesRM.html
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── Share_Transfer
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── templates
+│   │   ├── DealLetter
+│   │   ├── ReportsST.html
+│   │   ├── SellSummaryST.html
+│   │   ├── baseStructureST.html
+│   │   ├── buyDealLetterrST.html
+│   │   ├── buyOrderSummaryST.html
+│   │   ├── buyorderST.html
+│   │   ├── clientST.html
+│   │   ├── dashboardST.html
+│   │   ├── sellDealLetterST.html
+│   │   ├── sellorderST.html
+│   │   └── transactionST
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── angel_investor
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── django_structure.txt
+├── env
+│   ├── Lib
+│   │   └── site-packages
+│   ├── Scripts
+│   │   ├── Activate.ps1
+│   │   ├── activate
+│   │   ├── activate.bat
+│   │   ├── deactivate.bat
+│   │   ├── django-admin.exe
+│   │   ├── pip.exe
+│   │   ├── pip3.12.exe
+│   │   ├── pip3.exe
+│   │   ├── python.exe
+│   │   ├── pythonw.exe
+│   │   └── sqlformat.exe
+│   └── pyvenv.cfg
+├── manage.py
+├── media
+│   ├── adhar_cards
+│   │   ├── Group_1000006012.png
+│   │   ├── OIP.jpeg
+│   │   ├── OIP_2TqGDsk.jpeg
+│   │   ├── OIP_PqW9Q4e.jpeg
+│   │   ├── OIP_XGNDyVV.jpeg
+│   │   ├── OIP_fnYoMWK.jpeg
+│   │   ├── OIP_h3ilNrH.jpeg
+│   │   ├── OIP_mZl5Qre.jpeg
+│   │   └── Y96_m82uNfC.jpg
+│   ├── bank_statements
+│   │   ├── KYC-Ashmita_Ben.pdf
+│   │   ├── KYC-Ashmita_Ben_1QdOG3C.pdf
+│   │   └── KYC-Ashmita_Ben_zn9P5zS.pdf
+│   ├── banners
+│   │   ├── OIP_3.jpeg
+│   │   ├── OIP_5.jpeg
+│   │   ├── OIP_5_3dzkBHj.jpeg
+│   │   ├── OIP_5_IUkcCPW.jpeg
+│   │   ├── OIP_5_Svb9n6B.jpeg
+│   │   ├── OIP_5_nU6J45l.jpeg
+│   │   └── banner_2.jpg
+│   ├── cmr_files
+│   │   ├── KYC-Ashmita_Ben.pdf
+│   │   ├── KYC-Ashmita_Ben_5r3zy1Z.pdf
+│   │   ├── KYC-Ashmita_Ben_9Xjivy5.pdf
+│   │   ├── KYC-Ashmita_Ben_VCBpXQy.pdf
+│   │   ├── ROBOTIC_SURVEILLANCE_FOR_MONITORING1.pdf
+│   │   ├── ROBOTIC_SURVEILLANCE_FOR_MONITORING1_MEpdqF3.pdf
+│   │   ├── ROBOTIC_SURVEILLANCE_FOR_MONITORING1_MEpdqF3_1.pdf
+│   │   ├── ROBOTIC_SURVEILLANCE_FOR_MONITORING1_ZYxG53O.pdf
+│   │   ├── ROBOTIC_SURVEILLANCE_FOR_MONITORING1_dXLCAqJ.pdf
+│   │   ├── Y96.jpg
+│   │   ├── Y96_m82uNfC.jpg
+│   │   └── no_98.jpg
+│   ├── pan_cards
+│   │   ├── Group_1000006073.png
+│   │   ├── OIP_1.jpeg
+│   │   ├── OIP_1_3ocgt6g.jpeg
+│   │   ├── OIP_1_4bT6Mj1.jpeg
+│   │   ├── OIP_1_8QovK6s.jpeg
+│   │   ├── OIP_1_FMZIGB5.jpeg
+│   │   ├── OIP_1_TPZq5Pm.jpeg
+│   │   ├── OIP_1_gRjr0eB.jpeg
+│   │   ├── Y96.jpg
+│   │   └── logo_subdesk.jpg
+│   ├── payment_screenshots
+│   │   ├── WhatsApp_Image_2025-06-15_at_9.27.55_PM.jpeg
+│   │   ├── WhatsApp_Image_2025-06-15_at_9_06NqErH.27.55_PM.jpeg
+│   │   ├── WhatsApp_Image_2025-06-15_at_9_AodsiX1.27.55_PM.jpeg
+│   │   ├── gpay-2.png
+│   │   ├── gpay-2_51u9HBD.png
+│   │   ├── gpay-2_BkLG87m.png
+│   │   ├── gpay-2_Ru3AixJ.png
+│   │   ├── gpay-2_TSJkNY3.png
+│   │   ├── gpay-2_Y89GMom.png
+│   │   ├── gpay-2_i3xqfT7.png
+│   │   ├── gpay-2_j3Qii7j.png
+│   │   ├── gpay-2_pfVLsVx.png
+│   │   ├── gpay-2_vhcZacl.png
+│   │   └── gpay-2_yBZ0Hsx.png
+│   ├── stock_logos
+│   │   ├── API-HOLDINGS-LIMITED_1.png
+│   │   ├── APOLLO-GREEN-ENERGY-LIMITED.jpeg
+│   │   ├── ASK-INVESTMENT-MANAGERS-LIMITED.png
+│   │   ├── B9-BEVERAGES-PRIVATE-LIMITED-_1.png
+│   │   ├── CAPGEMINI-TECHNOLOGY-SERVICES-INDIA-LIMITED-.png
+│   │   ├── CARE-HEALTH-INSURANCE-LIMITED.png
+│   │   ├── CARRIER-AIRCONDITIONING--REFRIGERATION-LIMITED_1.png
+│   │   ├── CHENNAI-SUPER-KINGS-CRICKET-LIMITED-.png
+│   │   ├── COCHIN-INTERNATIONAL-AIRPORT-LIMITED_1.png
+│   │   ├── DALMIA-REFRACTORIES-LIMITED-_1.png
+│   │   ├── DEEPAK-HOUSEWARE-AND-TOYS-PRIVATE-LIMITED.jpeg
+│   │   ├── DELTA-GALAXY-ENGINEERING-SERVICES-PRIVATE-LIMITED.jpeg
+│   │   ├── FLYSBS-AVIATION-LIMITED.png
+│   │   ├── GOODLUCK-DEFENCE-AND-AEROSPACE-LIMITED_1.jpeg
+│   │   ├── GREENZO-ENERGY-INDIA-LIMITED_2.jpeg
+│   │   ├── HDB-FINANCIAL-SERVICES-LIMITED.png
+│   │   ├── HDFC-SECURITIES-LIMITED-.png
+│   │   ├── HERO-FINCORP-LIMITED.png
+│   │   ├── HINDUJA-LEYLAND-FINANCE-LIMITED.png
+│   │   ├── IMAGINE-MARKETING-LIMITED.png
+│   │   ├── INDIAN-POTASH-LIMITED-.png
+│   │   ├── KURLON-ENTERPRISE-LIMITED.jpeg
+│   │   ├── LAVA-INTERNATIONAL-LIMITED.png
+│   │   ├── MANJUSHREE-TECHNOPACK-LIMITED-.png
+│   │   ├── MATRIX-GAS-AND-RENEWABLES-LIMITED.png
+│   │   ├── MERINO-INDUSTRIES-LIMITED-.png
+│   │   ├── METROPOLITAN-STOCK-EXCHANGE-OF-INDIA-LIMITED-_1.png
+│   │   ├── MOHAN-MEAKIN-LIMITED.jpeg
+│   │   ├── MOHAN-MEAKIN-LIMITED_6DGUb3m.jpeg
+│   │   ├── NATIONAL-COMMODITY--DERIVATIVES-EXCHANGE-LIMITED_1.png
+│   │   ├── NATIONAL-SECURITIES-DEPOSITORY-LIMITED.png
+│   │   ├── NATIONAL-STOCK-EXCHANGE-OF-INDIA-LIMITED.jpeg
+│   │   ├── NCL-BUILDTEK-LIMITED.png
+│   │   ├── ORBIS-FINANCIAL-CORPORATION-LIMITED.png
+│   │   ├── OTIS-ELEVATOR-COMPANY-INDIA-LIMITED.jpeg
+│   │   ├── POLYMATECH-ELECTRONICS-PRIVATE-LIMITED.png
+│   │   ├── Phillips-Logo-2008-768x432.png
+│   │   ├── RRP-S4E-INNOVATION-PRIVATE-LIMITED_1.png
+│   │   ├── SBI-FUNDS-MANAGEMENT-LIMITED.png
+│   │   ├── SPRAY-ENGINEERING-DEVICES-LIMITED.png
+│   │   ├── STERLING-ESTATES-AND-PROPERTIES-LIMITED.jpeg
+│   │   ├── STERLITE-POWER-TRANSMISSION-LIMITED.png
+│   │   ├── STUDDS-ACCESSORIES-LIMITED-_1.jpeg
+│   │   ├── TATA-CAPITAL-LIMITED.png
+│   │   ├── TATA-CAPITAL-LIMITED_74kjz6Y.png
+│   │   ├── UTKARSH-COREINVEST-LIMITED.jpeg
+│   │   ├── VEEDA-CLINICAL-RESEARCH-LIMITED_1.png
+│   │   ├── VIKRAM-SOLAR-LIMITED_1.png
+│   │   ├── bigbasket.jpg
+│   │   ├── bigbasket_4Q6bAxt.jpg
+│   │   ├── bigbasket_B4ihYWI.jpg
+│   │   ├── bigbasket_GoWW7yP.jpg
+│   │   ├── bigbasket_IXqeyGi.jpg
+│   │   ├── bigbasket_YfZ5Dt7.jpg
+│   │   ├── bigbasket_bGmP9y0.jpg
+│   │   ├── bigbasket_d9fGyW9.jpg
+│   │   ├── bigbasket_h0PqzpX.jpg
+│   │   ├── oyo_share_price.png
+│   │   └── tatarefact.jpg
+│   └── user_photos
+│       ├── OIP_5.jpeg
+│       ├── Y75.JPG
+│       └── Y96_m82uNfC.jpg
+├── site_Manager
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── templates
+│   │   ├── BlogSM.html
+│   │   ├── HomepageBannerSM.html
+│   │   ├── StockDataTemplate.html
+│   │   ├── UnlistedStocksUpdateSM copy.html
+│   │   ├── UnlistedStocksUpdateSM.html
+│   │   ├── advisor
+│   │   ├── baseStructureSM.html
+│   │   ├── broker
+│   │   ├── custom_fields
+│   │   ├── stockData_edit_modal copy.html
+│   │   └── stockData_edit_modal.html
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   ├── views copy.py
+│   └── views.py
+├── static
+│   ├── Media
+│   │   └── images
+│   ├── admin
+│   │   └── customfieldvalue.css
+│   ├── css
+│   │   ├── Style.css
+│   │   ├── aboutus.css
+│   │   ├── admin.css
+│   │   ├── admin_custom.css
+│   │   ├── blogs.css
+│   │   ├── bootstrap.min.css
+│   │   ├── faq.css
+│   │   ├── footer.css
+│   │   ├── header.css
+│   │   ├── listing.css
+│   │   ├── listingview.css
+│   │   └── style.css
+│   ├── css_backup
+│   │   ├── aboutus.css
+│   │   ├── admin.css
+│   │   ├── admin_custom.css
+│   │   ├── blogs.css
+│   │   ├── bootstrap.min.css
+│   │   ├── faq.css
+│   │   ├── footer.css
+│   │   ├── header.css
+│   │   ├── listing.css
+│   │   ├── listingview.css
+│   │   └── style.css
+│   ├── default_user.png
+│   ├── images
+│   │   ├── StrtInvesting.png
+│   │   ├── Trilogo.png
+│   │   ├── TrustedInvestors.png
+│   │   ├── banner.png
+│   │   ├── compy.png
+│   │   ├── default_profile.png
+│   │   ├── headleft.png
+│   │   ├── headright.png
+│   │   ├── headvelow.png
+│   │   └── logo.png
+│   └── js
+│       ├── bootstrap-4.6.0.min.js
+│       ├── bootstrap.bundle-5.3.5.min.js
+│       ├── bootstrap.bundle.min.js
+│       ├── custom_scroll.js
+│       ├── customfieldvalue_form.js
+│       ├── faq_style.js
+│       ├── jquery-3.6.0.min.js
+│       └── modals.js
+├── staticfiles
+│   ├── Csss
+│   │   ├── Style.css
+│   │   ├── aboutus.css
+│   │   ├── blogs.css
+│   │   ├── faq.css
+│   │   ├── footer.css
+│   │   ├── header.css
+│   │   ├── listing.css
+│   │   └── listingview.css
+│   ├── Media
+│   │   └── images
+│   ├── Style.css
+│   ├── aboutus.css
+│   ├── admin
+│   │   ├── css
+│   │   ├── customfieldvalue.css
+│   │   ├── img
+│   │   └── js
+│   ├── blogs.css
+│   ├── css
+│   │   ├── Style.css
+│   │   ├── aboutus.css
+│   │   ├── admin.css
+│   │   ├── admin_custom.css
+│   │   ├── blogs.css
+│   │   ├── bootstrap.min.css
+│   │   ├── faq.css
+│   │   ├── footer.css
+│   │   ├── header.css
+│   │   ├── listing.css
+│   │   ├── listingview.css
+│   │   └── style.css
+│   ├── css_backup
+│   │   ├── aboutus.css
+│   │   ├── admin.css
+│   │   ├── admin_custom.css
+│   │   ├── blogs.css
+│   │   ├── bootstrap.min.css
+│   │   ├── faq.css
+│   │   ├── footer.css
+│   │   ├── header.css
+│   │   ├── listing.css
+│   │   ├── listingview.css
+│   │   └── style.css
+│   ├── default_user.png
+│   ├── faq.css
+│   ├── footer.css
+│   ├── header.css
+│   ├── images
+│   │   ├── StrtInvesting.png
+│   │   ├── Trilogo.png
+│   │   ├── TrustedInvestors.png
+│   │   ├── banner.png
+│   │   ├── compy.png
+│   │   ├── default_profile.png
+│   │   ├── headleft.png
+│   │   ├── headright.png
+│   │   ├── headvelow.png
+│   │   └── logo.png
+│   ├── js
+│   │   ├── bootstrap-4.6.0.min.js
+│   │   ├── bootstrap.bundle-5.3.5.min.js
+│   │   ├── bootstrap.bundle.min.js
+│   │   ├── custom_scroll.js
+│   │   ├── customfieldvalue_form.js
+│   │   ├── faq_style.js
+│   │   ├── jquery-3.6.0.min.js
+│   │   ├── modals.js
+│   │   └── toggle_description.js
+│   ├── listing.css
+│   └── listingview.css
+├── templates
+│   ├── Authentication
+│   │   ├── login.html
+│   │   ├── register.html
+│   │   └── verify_email.html
+│   ├── FAQ
+│   │   ├── faqG.html
+│   │   └── faqG2.html
+│   ├── SiteManageUsers
+│   │   ├── ManageUserAuth copy.html
+│   │   └── ManageUserAuth.html
+│   ├── about
+│   │   └── about.html
+│   ├── accounts
+│   │   ├── edit_profile.html
+│   │   ├── profile.html
+│   │   ├── profileSidebar copy 2.html
+│   │   ├── profileSidebar copy.html
+│   │   └── profileSidebar.html
+│   ├── admin
+│   │   ├── base1.html
+│   │   ├── base_site copy 2.html
+│   │   ├── base_site copy.html
+│   │   ├── base_site.html
+│   │   ├── csv_form.html
+│   │   ├── customfielddefinition
+│   │   ├── dashboard.html
+│   │   ├── index copy 2.html
+│   │   ├── index copy.html
+│   │   ├── index.html
+│   │   ├── login.html
+│   │   └── stock_snapshot_changelist.html
+│   ├── base.html
+│   ├── blog
+│   │   └── blog.html
+│   ├── contact
+│   │   ├── contact.html
+│   │   └── contactView.html
+│   ├── landing
+│   │   ├── footer
+│   │   ├── heading
+│   │   ├── index
+│   │   └── navbar
+│   └── stocks
+│       ├── stockListTable copy.html
+│       ├── stockListTable.html
+│       ├── stock_detail copy.html
+│       ├── stock_detail.html
+│       ├── stock_list copy.html
+│       └── stock_list.html
+├── test.py
+├── test.xlsx
+├── udo systemctl status apache2
+├── unlisted_stock_marketplace
+│   ├── __init__.py
+│   ├── admin copy.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── forms copy 2.py
+│   ├── forms copy 3.py
+│   ├── forms copy.py
+│   ├── forms.py
+│   ├── models copy 2.py
+│   ├── models copy.py
+│   ├── models.py
+│   ├── templatetags
+│   │   ├── custom_filter_overviewDetailedStock.py
+│   │   ├── custom_filters.py
+│   │   ├── custom_tags.py
+│   │   └── sidebar_tags.py
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── user_auth
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── decorators.py
+│   ├── forms copy.py
+│   ├── forms.py
+│   ├── management
+│   │   └── commands
+│   ├── models.py
+│   ├── signals.py
+│   ├── templatetags
+│   │   └── custom_filters.py
+│   ├── tests.py
+│   ├── urls copy.py
+│   ├── urls.py
+│   ├── utils.py
+│   ├── views copy 2.py
+│   ├── views copy.py
+│   └── views.py
+├── user_portfolio
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── forms copy.py
+│   ├── forms.py
+│   ├── models copy.py
+│   ├── models.py
+│   ├── order_status.py
+│   ├── signals copy.py
+│   ├── signals.py
+│   ├── templates
+│   │   ├── buy.html
+│   │   ├── includes
+│   │   ├── portfolio
+│   │   ├── portfolio copy
+│   │   ├── sell.html
+│   │   └── statementpaper
+│   ├── templatetags
+│   │   ├── __init__.py
+│   │   ├── custom_filters.py
+│   │   ├── label_tags.py
+│   │   ├── math_filters.py
+│   │   └── role_status_filters.py
+│   ├── tests.py
+│   ├── urls copy.py
+│   ├── urls.py
+│   ├── utils copy.py
+│   ├── utils.py
+│   ├── views copy.py
+│   ├── views.py
+│   └── viewsSameTableOtherAdvisor.py
+├── user_portfolio copy
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── forms.py
+│   ├── models copy.py
+│   ├── models.py
+│   ├── signals copy.py
+│   ├── signals.py
+│   ├── templates
+│   │   ├── buy.html
+│   │   ├── includes
+│   │   ├── portfolio
+│   │   ├── portfolio copy
+│   │   └── sell.html
+│   ├── templatetags
+│   │   ├── __init__.py
+│   │   ├── custom_filters.py
+│   │   ├── label_tags.py
+│   │   └── math_filters.py
+│   ├── tests.py
+│   ├── urls copy.py
+│   ├── urls.py
+│   ├── utils.py
+│   ├── views copy.py
+│   └── views.py
+└── venv
+    ├── bin
+    │   ├── Activate.ps1
+    │   ├── activate
+    │   ├── activate.csh
+    │   ├── activate.fish
+    │   ├── django-admin
+    │   ├── f2py
+    │   ├── fonttools
+    │   ├── gunicorn
+    │   ├── mod_wsgi-express
+    │   ├── numpy-config
+    │   ├── pip
+    │   ├── pip3
+    │   ├── pip3.12
+    │   ├── pyftmerge
+    │   ├── pyftsubset
+    │   ├── python -> python3
+    │   ├── python3 -> /usr/bin/python3
+    │   ├── python3.12 -> python3
+    │   ├── sqlformat
+    │   ├── ttx
+    │   └── weasyprint
+    ├── include
+    │   └── python3.12
+    ├── lib
+    │   └── python3.12
+    ├── lib64 -> lib
+    ├── pyvenv.cfg
+    └── share
+        └── man
+
+371 directories, 514 files

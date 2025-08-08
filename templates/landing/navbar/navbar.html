@@ -1,7 +1,9 @@
+{% load static %}
+
 
 <style>
     /* Base styles */
-* {
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -10,10 +12,10 @@
 body {
   font-family: "Outfit", sans-serif;
   font-size: 14px; 
-}
+} */
 
 /* Page container */
-.page-container {
+/* .page-container {
   width: 100%;
   min-height: 77px;
   position: relative;
@@ -24,7 +26,7 @@ body {
     #341a47 68.59%,
     #0e213f 100%
   );
-}
+} */
 
 .ticker-bar {
   width: 100%;
@@ -131,12 +133,12 @@ body {
   gap: 30px;
 }
 
-.nav-link {
+/* .nav-link{
   color: #fff;
   font-family: Bitter, serif;
   font-size: 20px;
   text-decoration: none;
-}
+} */
 
 .login-button {
   color: #fff;
@@ -371,84 +373,95 @@ body {
 }
 
   </style>
-</head>
-<body>
-  <main class="page-container">
-
-  {% load static %}  
+<main class="page-container">
   <header class="header">
-    <nav class="navbar navbar-expand-lg">
-      <div class="container-fluid">
-        <a href="/" class="navbar-brand"><img src="{% static 'Media/images/site-logo.png' %}" alt=""></a>
-        <button class="navbar-toggler"  style="border-color: white;" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-              <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-            {% if user.is_authenticated %}
-              <li class="nav-item">
-                <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="nav-link">Unlisted Share</a>
-              </li>
-              <li class="nav-item">
-                <a href="/" class="nav-link">Angel Investing</a>
-              </li>
-               <li class="nav-item">
-                <a href="{%  url 'about' %}" class="nav-link">About Us</a>
-              </li>
-              <li class="nav-item">
-                <a href="{%  url 'blog' %}" class="nav-link">Blogs</a>
-              </li>
-              <li class="nav-item">
-                <a href="{%  url 'faq' %}" class="nav-link">FAQ's</a>
-              </li>
-              {% if user.user_type == 'RM' %}
-               <li class="nav-item"><a href="{% url 'RM_User:dashboardRM' %}" class="nav-link" style="color: #c0e0f1;">RM</a></li>
-              {% elif user.user_type == 'AC' %}
-                <li class="nav-item"><a href="{% url 'Acc_User:dashboardAcc' %}" class="nav-link">Acc</a></li>
-              {% elif user.user_type == 'ST' %}
-                <li class="nav-item"><a href="{% url 'ST_User:dashboardST' %}" class="nav-link">Transfer</a></li>    
-              {% elif user.user_type == 'SM' or user.user_type == 'AD' %}
-                <li class="nav-item">
-                  <a href="{% url 'SM_User:UnlistedStocksUpdateSM' %}" class="nav-link" style="color: #8ee0ea;">Admin</a>
-                </li>
-              {% endif %}
-              <li class="nav-item" style="color: #ffd400;">
-                <a class="nav-link" href="{% url 'profile' %}" style="color: #ffd400;">
-                  Welcome, {{ user.username }}
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a href="{% url 'logout' %}" class="nav-link">Logout</a>
-              </li>
-            {% else %}
-              <li class="nav-item">
-                <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="nav-link">Unlisted Share</a>
-              </li>
-
-              <li class="nav-item">
-                <a href="/" class="nav-link">Angel Investing</a>
-              </li>
-              <li class="nav-item">
-                <a href="{%  url 'about' %}" class="nav-link">About Us</a>
-              </li>
-              <li class="nav-item">
-                <a href="{%  url 'blog' %}" class="nav-link">Blogs</a>
-              </li>
-              <li class="nav-item">
-                <a href="{%  url 'faq' %}" class="nav-link">FAQ's</a>
-              </li>
-
-              <li class="nav-item">
-                  <a href="{% url 'login' %}" class="nav-link" style="text-decoration: none;">Login/Sign up</a>
-              </li>
-            {% endif %}
-          </ul>
+      <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <div class="brand-logo">
+              <a href="/" class="navbar-brand"><img src="{% static 'Media/images/headerlogo2.png' %}" alt="logo"></a>
+            </div>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarNav"
+              aria-controls="navbarNav"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                {% if user.is_authenticated %}
+                  {% if user.user_type == 'DF' %}
+                    <li class="nav-item">
+                      <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="nav-link">Unlisted Shares</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="/" class="nav-link">Angel Investing</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'about' %}" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'faq' %}" class="nav-link">FAQ's</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'contact' %}" class="nav-link">Contact Us</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link"href="{% url 'user_portfolio:portfolio_view' %}" >
+                        Portfolio
+                      </a>
+                    </li>
+                    <li class="nav-item" style="color: #39B54A;">
+                      <a class="nav-link"href="{% url 'profile' %}" style="color: #39B54A;">
+                        Welcome, {{ user.username }}
+                      </a>
+                    </li>
+                 {% elif user.user_type == 'RM' %}
+                    <li class="nav-item"><a href="{% url 'RM_User:dashboardRM' %}" class="nav-link">Relation Manager</a></li>
+                {% elif user.user_type == 'AC' %}
+                  <li class="nav-item"><a href="{% url 'Acc_User:dashboardAcc' %}" class="nav-link">Accounts Team</a></li>
+                {% elif user.user_type == 'ST' %}
+                  <li class="nav-item"><a href="{% url 'ST_User:dashboardST' %}" class="nav-link">Share Transfer Team  </a></li> 
+                {% elif user.user_type == 'SM' or user.user_type == 'AD' %}
+                  <li class="nav-item">
+                    <a href="{% url 'SM_User:UnlistedStocksUpdateSM' %}" class="nav-link" style="color: #8ee0ea;">Admin</a>
+                  </li>
+                {% endif %}
+                  <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="nav-link" style="color:white; background-color: #39B54A; border-radius: 5px;">Logout</a>
+                  </li>
+                {% else %}
+                    <li class="nav-item">
+                      <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="nav-link">Unlisted Share</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="/" class="nav-link">Angel Investing</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'about' %}" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'blog' %}" class="nav-link">Blogs</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'faq' %}" class="nav-link">FAQ's</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'contact' %}" class="nav-link">Contact Us</a>
+                    </li>
+                    <li class="nav-item d-flex gap-2 mt-2 mt-lg-0">
+                      <a href="{% url 'register' %}" class="btn btn-success px-3 py-1">Sign Up</a>
+                      <a href="{% url 'login' %}" class="btn btn-success px-3 py-1">Login</a>
+                    </li>
+                {% endif %}
+              </ul>
+            </div>
         </div>
-      </div>
-    </nav>
+      </nav>
   </header>
 </main>

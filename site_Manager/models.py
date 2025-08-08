@@ -50,5 +50,20 @@ class Advisor(models.Model):
         return f"{self.advisor_type}"
 
 
+from django.db import models
+
+class Blog(models.Model):
+    banner = models.ImageField(upload_to='blog_banners/', blank=True, null=True)
+    date = models.DateField()
+    time = models.TimeField(auto_now_add=True)
+    heading = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255, blank=True)
+    short_description = models.TextField()
+    full_description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.heading
+    
+
 
 

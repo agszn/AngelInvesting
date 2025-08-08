@@ -1,6 +1,8 @@
-{% extends 'base.html' %}
+{% extends "baseStructureSM.html" %}
+{% block title %}Users{% endblock %}
+{% block subtitle %} Users {% endblock %}
 
-{% block content %}
+{% block SMprofile_content %}
 <style>
     .table-container {
         background-color: #f8f9fa;
@@ -52,7 +54,9 @@
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Subject</th>
                     <th>Message</th>
+                    <th>Sent At</th>
                 </tr>
             </thead>
             <tbody>
@@ -60,7 +64,9 @@
                 <tr>
                     <td>{{ contact.name }}</td>
                     <td>{{ contact.email }}</td>
+                    <td>{{ contact.subject }}</td>
                     <td>{{ contact.message }}</td>
+                    <td>{{ contact.sent_at }}</td>
                 </tr>
                 {% empty %}
                 <tr>

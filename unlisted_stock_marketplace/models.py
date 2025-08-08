@@ -7,6 +7,8 @@ from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from decimal import Decimal
+from .format_utils import render_custom_format
+
 CONVICTION_CHOICES = [
     ('Very High', 'Very High'),
     ('High', 'High'),
@@ -23,6 +25,7 @@ STOCK_TYPE_CHOICES = [
 
 
 class StockData(models.Model):
+    hide_company_overview = models.BooleanField(default=False)
     company_name = models.CharField(max_length=775, blank=True, null=True)
     scrip_name = models.CharField(max_length=775, blank=True, null=True)
     isin_no = models.CharField(max_length=20, unique=True, blank=True, null=True)
@@ -123,6 +126,8 @@ class StockData(models.Model):
         except CustomFieldValue.DoesNotExist:
             return None
 
+    # def formatted_overview(self):
+    #     return render_custom_format(self.company_overview)
 
 from decimal import Decimal, InvalidOperation
 
@@ -564,8 +569,30 @@ class TableHeader(models.Model):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from django.db import models
 from django.core.exceptions import ValidationError
+
+# --------------------
+# Choices Definitions
+# --------------------
 
 TEXT_STYLE_CHOICES = [
     ('normal', 'Normal'),
@@ -604,6 +631,9 @@ FIELD_TYPE_CHOICES = [
     ('date', 'Date'),
 ]
 
+# ----------------------------
+# CustomFieldDefinition Model
+# ----------------------------
 
 class CustomFieldDefinition(models.Model):
     stock = models.ForeignKey(
@@ -617,8 +647,19 @@ class CustomFieldDefinition(models.Model):
     model_type = models.CharField(max_length=50, choices=MODEL_TYPE_CHOICES, blank=True, null=True)
     custom_model_name = models.CharField(max_length=100, blank=True, null=True)
     unit = models.CharField(max_length=10, choices=UNIT_CHOICES, blank=True, null=True)
-    field_type = models.CharField(max_length=10, choices=FIELD_TYPE_CHOICES, 
-    default='dec', help_text="Determines which input type to show in admin")
+
+    field_type = models.CharField(
+        max_length=10,
+        choices=FIELD_TYPE_CHOICES,
+        default='dec',
+        help_text="Determines which value field (int, dec, char, date) to use"
+    )
+
+    gap = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text="Number of rows per group. First row is the parent."
+    )
 
     def clean(self):
         if not self.model_type and not self.custom_model_name:
@@ -631,10 +672,15 @@ class CustomFieldDefinition(models.Model):
         stock_name = f" [{self.stock.company_name}]" if self.stock and self.stock.company_name else ""
         return f"{self.get_model_display_name()}{stock_name}"
 
+# -------------------------
+# CustomFieldValue Model
+# -------------------------
 
 class CustomFieldValue(models.Model):
+    order = models.PositiveIntegerField(default=0)
+
     field_definition = models.ForeignKey(
-        'CustomFieldDefinition', 
+        CustomFieldDefinition,
         on_delete=models.CASCADE,
         related_name='custom_values'
     )
@@ -666,6 +712,7 @@ class CustomFieldValue(models.Model):
     )
 
     class Meta:
+        ordering = ['order']
         verbose_name = "Custom Field Value"
         verbose_name_plural = "Custom Field Values"
         indexes = [
@@ -678,6 +725,7 @@ class CustomFieldValue(models.Model):
         return self.name or self.char_value or str(self.dec_value) or f"Value #{self.pk}"
 
     def display_value(self):
+        """Returns formatted value with unit."""
         unit = getattr(self.field_definition, 'unit', '') or ''
         if self.int_value is not None:
             return f"{self.int_value}{unit}"
@@ -690,8 +738,8 @@ class CustomFieldValue(models.Model):
         return self.name or ''
 
     def get_raw_value(self):
+        """Used for ordering/sorting and comparisons."""
         return self.int_value if self.int_value is not None else self.dec_value
-
 
 
 
@@ -772,6 +820,9 @@ class Report(models.Model):
 
     def __str__(self):
         return self.title
+    
+    # def formatted_summary(self):
+    #     return render_custom_format(self.summary)
     
 # FAQ
 class FAQ(models.Model):

@@ -25,6 +25,7 @@ urlpatterns = [
         path('edit-sell-transaction/<int:pk>/', edit_sell_transactionST, name='edit_sell_transactionST'),
         
         path('sellDealLetterrST/', sellDealLetterrST, name='sellDealLetterrST'),
+        
         path('clientST/', clientST, name='clientST'),
         
         path('transaction/<int:pk>/edit/', edit_buy_transactionST, name='edit_transactionST'),

@@ -1,11 +1,158 @@
 @import url('https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&display=swap');
 
+/* home page unlisted share section */
+
+.unlisted-share-section {
+  margin: 0px 100px 60px;
+}
+.unlisted-share-boxex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  justify-content: space-between;
+}
+
+.card-boxes {
+  width: 32%;
+}
+
+.cards {
+  background-color: #F9FCF4;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  /* gap: 15px; */
+  font-family: "Outfit", sans-serif;
+  height: 250px;
+  justify-content: space-between;
+}
+
+.cards-first-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.logo-wrapper {
+  width: 150px;
+  max-height: 100px;
+  overflow: hidden;
+  overflow: hidden;             
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-wrapper>.stock-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.card-icons {
+  display: flex;
+  gap: 8px;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+}
+.card-icons i:hover {
+  color: #39B54A;
+}
+
+.cards-second-info,
+.cards-third-info,
+.cards-fourth-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cards-share-name {
+  font-size: 14px;
+  /* font-weight: 600; */
+  color: #39B54A;
+
+}
+
+.cards-share-level {
+  font-size: 14px;
+  text-align: right;
+}
+
+.cards-share-level strong {
+  display: block;
+  color: #39B54A;
+}
+
+.cards-third-info {
+  font-size: 14px;
+  color: #333;
+}
+
+.cards-fourth-info button {
+  padding: 6px 20px;
+  border: none;
+  /* background-color: #0E213F; */
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 49%;
+}
+.cards-buy-button
+{
+    background-color: #0B9444;
+}
+.cards-sell-button
+{
+    background-color: #FF4F48;
+}
+/* all list stock */
+.search-bar-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.search-bar-wrapper form{
+  display: flex; 
+  width: 100%; 
+  justify-content: center;
+}
+
+.search-bar-input {
+    padding: 12px;
+    width: 1100px;
+    height: 50px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.search-bar-button {
+    width: 200px;
+    height: 50px;
+    background: transparent;
+    color: black;
+    border: 1px solid #000;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+
 .overall {
     font-family: "Outfit", sans-serif;
     margin: 0;
     padding: 0;
     font-optical-sizing: auto;
     font-style: normal;
+    width: 100%;
 }
 
 .hero-section1 {
@@ -92,17 +239,7 @@
     color: #363636;
 }
 
-.hero-headers {
-    text-align: center;
-}
 
-.heading {
-    font-size: 45px;
-    font-weight: 700;
-    font-family: "Outfit", sans-serif;
-    margin-bottom: 40px;
-    margin-top:20px;
-}
 
 .search-wrapper {
     display: flex;
@@ -302,26 +439,21 @@
     border-radius: 5px;
 }
 
-.why-trade-overall {
-    display: flex;
-    justify-content: space-between;
-}
+/* why trade with us */
 
 .why-trade-section {
+    /* height: 600px; */
     background-color: #0E213F;
-    height: 600px;
     width: 100%;
     padding: 50px 100px;
     margin-bottom: 50px;
 }
-
 .section-title {
     color: white;
     font-size: 45px;
     font-family: "Outfit", sans-serif;
     font-weight: 800;
     text-align: center;
-
 }
 
 .section-description {
@@ -333,6 +465,16 @@
     padding: 0px 170px;
     margin-bottom: 50px;
 }
+
+.highlight {
+  color: #39B54A;
+}
+
+.why-trade-overall {
+    display: flex;
+    justify-content: space-between;
+}
+
 
 .trade-card {
     background-color: white;
@@ -359,9 +501,49 @@
     width: 100%;
 }
 
-.listed {
-    margin: 0px 100px 50px;
+.why-trade-few-steps {
+  /* padding: 50px 100px; */
+  text-align: center;
 }
+
+.steps-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.why-trade-step {
+  border-radius: 10px;
+  padding: 20px;
+  width: 250px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.why-trade-step h3 {
+  font-size: 18px;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color:white;
+}
+
+.why-trade-step p {
+  font-size: 14px;
+  font-family: "Outfit", sans-serif;
+  font-weight: 300;
+  color: white;
+}
+
+.step-arrow {
+  font-size: 24px;
+  color: #39B54A;
+}
+
+/* why trade end */
+
 
 .listed-row1 {
     text-align: center;
@@ -394,6 +576,23 @@
 }
 
 /* home page logos */
+
+.listed {
+    margin: 0px 100px 50px;
+}
+
+.hero-headers {
+    text-align: center;
+}
+
+.heading {
+    font-size: 45px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 40px;
+    margin-top:20px;
+}
+
 .logos-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -463,14 +662,30 @@
     font-family: "Outfit", sans-serif;
     font-size: 18px;
     font-weight: 600;
-    color: white;
-    background-color: #0E213F;
+    color: black;
+    background-color: #F9FCF4;
     padding: 10px 60px;
     border: none;
     border-radius: 5px;
+    border: 1px solid black;
 }
 
-.investing-steps {
+.CompanyLogviewallbtn3 {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: black;
+    background-color: #F9FCF4;
+    padding: 10px 60px;
+    border: none;
+    border-radius: 5px;
+    border: 1px solid black;
+}
+
+
+/* logos end */
+
+/* .investing-steps {
     background-color: #0E213F;
     height: 515px;
     width: 100%;
@@ -516,10 +731,11 @@
     font-size: 16px;
     font-weight: 300;
     margin: 0px;
-}
+} */
 
 
 .faq-title {
+    text-align: center;
     font-size: 45px;
     font-weight: 700;
     font-family: "Outfit", sans-serif;
@@ -569,14 +785,6 @@
 
 .faq-section {
     margin: 0px 100px 50px;
-}
-
-.faq-title {
-    text-align: center;
-    font-size: 45px;
-    font-weight: 700;
-    font-family: "Outfit", sans-serif;
-    margin-bottom: 40px;
 }
 
 .accordion-overall {
@@ -704,7 +912,7 @@
 
 .carousel-container {
     width: 100%;
-    max-width: 1166px;
+    /* max-width: 1166px; */
     overflow-x: hidden;
     position: relative;
 }
@@ -767,6 +975,7 @@
     color: #777;
 }
 
+
 @media (min-width: 768px) {
     .testimonial-card {
         width: calc(33.33vw - 30px);
@@ -821,10 +1030,10 @@
 
 /* Individual Stock Details */
 
-.carousel-container-main
+/* .carousel-container-main
 {
     background-color: #555;
-}
+} */
 
 .carousel-container-main {
     width: 100%;
@@ -832,7 +1041,7 @@
     padding: 20px;
     box-sizing: border-box;
     border-bottom: 2px solid #fff;
-    background-color: #0e213f;  
+    background-color: #CFE2CE;  
     margin-left: auto;
     margin-right: auto;
 }
@@ -1119,4 +1328,377 @@
             height: 250px;
         }
     }
+}
+
+@media (min-width: 320px) and (max-width: 767px) {
+  .why-trade-section {
+    padding: 30px 20px;
+  }
+
+  .section-title {
+    font-size: 26px;
+    text-align: center;
+  }
+
+  .section-description {
+    font-size: 12px;
+    padding: 0 15px;
+    text-align: center;
+  }
+
+  .highlight {
+    color: #39B54A;
+  }
+
+  .why-trade-overall {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .why-trade-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .trade-card {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 30px;
+  }
+
+  .why-trade-image {
+    text-align: center;
+    margin: 30px 0;
+  }
+
+  .why-trade-image img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
+
+  /* home page logos */
+    .listed {
+    margin: 0 20px 40px;
+  }
+
+  .heading {
+    font-size: 26px;
+    margin-bottom: 25px;
+  }
+
+  .logos-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .logo-cell {
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    position: relative;
+  }
+
+  .logo-cell::after,
+  .logo-cell::before {
+    display: none !important;
+  }
+
+  .logo-cell img {
+    max-height: 50px;
+  }
+
+  .viewallbtn3 {
+    font-size: 16px;
+    padding: 8px 40px;
+  }
+  .why-trade-few-steps {
+    padding: 30px 20px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+
+  .steps-wrapper {
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .step-arrow {
+    transform: rotate(90deg);
+  }
+
+  .why-trade-step {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  /* faq home page*/
+  .faq-section {
+    margin: 0px 20px 40px;
+  }
+
+  .faq-title {
+    font-size: 26px;
+    text-align: center;
+  }
+
+  .faq-heading {
+    font-size: 18px;
+    text-align: left;
+  }
+
+  .faq-paragraph {
+    font-size: 14px;
+    line-height: 22px;
+    text-align: left;
+  }
+
+  .read-btn,
+  .read-btn > a {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+
+  .read-more {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  .blogs {
+    margin: 0px 20px 40px;
+  }
+
+  .blog-title {
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+
+  .all-blogs {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .blog-container {
+    margin: 0px;
+  }
+
+  .blog-img {
+    height: auto;
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .blog-head {
+    font-size: 16px;
+  }
+
+  .blog-para {
+    font-size: 14px;
+    line-height: 22px;
+    margin-bottom: 30px;
+  }
+
+  /* .read-btn {
+    font-size: 16px;
+    padding: 10px 40px;
+  } */
+
+  .carasoul {
+    margin: 0px 20px 40px;
+  }
+
+  .carasoul-title {
+    font-size: 26px;
+    margin-bottom: 30px;
+  }
+
+  .carousel-container {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .carousel-track {
+    gap: 12px;
+    padding: 0 10px;
+  }
+
+  .testimonial-card {
+    width: 280px;
+    padding: 20px;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .testimonial-text {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .author-name {
+    font-size: 16px;
+  }
+
+  .author-profession {
+    font-size: 13px;
+  }
+
+  .testimonial-icon img {
+    width: 60px;
+    height: auto;
+  }
+  .started {
+    margin: 0px 20px 40px;
+  }
+
+  .started-title {
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
+
+  .started-paragraph {
+    font-size: 14px;
+    line-height: 22px;
+    margin-bottom: 20px;
+    padding: 0 10px;
+  }
+
+  .started-btn {
+    font-size: 16px;
+    padding: 10px 30px;
+  }
+
+
+  .carousel-container {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    }
+
+    .testimonial-card {
+    scroll-snap-align: start;
+    }
+
+
+    /* home page unlisted shares */
+
+ .unlisted-share-section {
+    margin: 0px 15px 40px;
+  }
+
+  .hero-headers .heading {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .unlisted-share-boxex {
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .card-boxes {
+    width: 100%; /* Full width for single card layout */
+  }
+
+  .cards {
+    height: auto; /* Let height adapt to content */
+    padding: 15px;
+  }
+
+  .logo-wrapper {
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    overflow: hidden;             
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-wrapper > .stock-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+  }
+
+  .cards-first-info {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-icons {
+    font-size: 18px;
+  }
+
+  .cards-second-info,
+  .cards-third-info,
+  .cards-fourth-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  .cards-share-name,
+  .cards-share-level,
+  .cards-third-info div {
+    font-size: 13px;
+  }
+
+  .cards-share-level {
+    text-align: left;
+  }
+
+  .cards-share-level strong {
+    display: inline;
+  }
+
+  .cards-fourth-info {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .cards-fourth-info button {
+    width: 48%;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+
+
+
+  /* all list stock */
+  .search-bar-wrapper form{
+    margin-bottom: 30px;
+    display:flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: center;
+  }
+  .search-bar-input {
+    padding: 10px 15px;  
+    width: 90%;
+    height: 50px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    margin-bottom:5px;
+    margin-right: 0;
+  }
+  .search-bar-button
+  {
+    padding: 10px 15px;  
+    width: 90%;
+    height: 50px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    margin-bottom:5px;
+    margin-right: 0;
+  }
 }

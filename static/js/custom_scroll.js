@@ -1,3 +1,4 @@
+// static/js/custom_scroll.js
 window.addEventListener('load', function () {
     if (window.location.hash) {
         const element = document.getElementById(window.location.hash.substring(1));

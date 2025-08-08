@@ -1,35 +1,8 @@
-<!-- admin/index.html -->
-{% extends "admin/base.html" %}
-{% load i18n admin_urls log %}
-
-{% block header_title %}Dashboard{% endblock %}
-
+{% extends "admin/base_site.html" %}
 {% block content %}
-    <h2>📁 Quick Links</h2>
-    <ul>
-        <li><a href="{% url 'admin:unlisted_stock_marketplace_customfielddefinition_add' %}">Add Custom Field Definition</a></li>
-
-    </ul>
-
-
-    <h2>🕒 Recent Actions</h2>
-    {% if user.is_authenticated %}
-        {% get_admin_log 5 as admin_log for_user user %}
-        <ul>
-            {% for entry in admin_log %}
-                <li>
-                    {{ entry.action_time|date:"Y-m-d H:i" }} —
-                    {{ entry.get_change_message }} —
-                    <strong>{{ entry.content_type }}</strong>:
-                    {% with url_name='admin:'|add:entry.content_type.app_label|add:'_'|add:entry.content_type.model|add:'_change' %}
-                        <a href="{% url url_name entry.object_id %}">
-                            {{ entry.object_repr }}
-                        </a>
-                    {% endwith %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-
+  <h2>📁 Quick Links</h2>
+  <ul>
+      <li><a href="{% url 'admin:unlisted_stock_marketplace_customfielddefinition_add' %}">Add Custom Field Definition</a></li>
+  </ul>
+  {{ block.super }} 
 {% endblock %}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WhatsApp Contact Expand</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .whatsapp-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+    }
+
+    .main-whatsapp-btn {
+      background-color: #25d366;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      color: white;
+      font-size: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .contact-icon {
+      display: none;
+      margin-bottom: 10px;
+      background-color: #128C7E;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      color: white;
+      font-size: 20px;
+    }
+
+    .whatsapp-container:hover .contact-icon {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.8);}
+      to {opacity: 1; transform: scale(1);}
+    }
+  </style>
+</head>
+<body>
+
+<div class="whatsapp-container text-end">
+
+  <!-- Contact 3 -->
+  <button class="contact-icon" onclick="sendWhatsApp('919911112222', 'Hi Support Team 3!')">
+    <i class="bi bi-person-lines-fill"></i>
+  </button>
+
+  <!-- Contact 2 -->
+  <button class="contact-icon" onclick="sendWhatsApp('919922223333', 'Hi Support Team 2!')">
+    <i class="bi bi-person-circle"></i>
+  </button>
+
+  <!-- Contact 1 -->
+  <button class="contact-icon" onclick="sendWhatsApp('919933334444', 'Hi Support Team 1!')">
+    <i class="bi bi-headset"></i>
+  </button>
+
+  <!-- Main WhatsApp Button -->
+  <button class="main-whatsapp-btn">
+    <i class="bi bi-whatsapp"></i>
+  </button>
+</div>
+
+<script>
+  function sendWhatsApp(phone, message) {
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  }
+</script>
+
+</body>
+</html>

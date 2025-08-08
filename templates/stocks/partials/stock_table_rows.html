@@ -1,0 +1,84 @@
+          {% for stock in page_obj %}
+            {% if stock.company_name and not stock.hide_company_overview %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td class="clogo">
+                    {% if stock.logo %}
+                    <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">
+                        <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" style="max-width: 50px; max-height: 50px; object-fit: contain;">
+                    </a>
+                    {% else %}
+                    <span>No Logo</span>
+                    {% endif %}
+
+                  </td>
+
+                  <td>            
+                        <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">  {{ stock.company_name }}</a>
+                    </td>
+                  <td>{{ stock.sector }}</td>
+                  <td>₹ {{ stock.share_price }}</td>
+                  <td>{{ stock.market_capitalization }}</td>
+                  <td>₹ {{ stock.lifetime_high }}</td>
+                  <td>₹ {{ stock.lifetime_low }}</td>
+                  <td>
+                    <div class="chart-img">
+                      <canvas id="chart-{{ stock.id }}" width="200" height="100"></canvas>
+                    </div>
+                  </td>
+                  <td class="btns">
+                    <div class="buy-sell-btn">
+
+                        <button class="buy-btn" type="button"
+                          title="Buy {{ stock.company_name }}"
+                          onclick='openBuyModal(
+                            "{{ stock.id }}",
+                            "{{ stock.company_name|escapejs }}",
+                            "{{ stock.share_price }}",
+                            "{{ stock.quantity }}",
+                            "{% url 'user_portfolio:buy_stock' stock.id %}"
+                          )'>
+                          Buy
+                        </button>
+
+                        <button class="sell-btn"  type="button"
+                          onclick='openSellModal(
+                            "{{ stock.id }}",
+                            "{{ stock.company_name|escapejs }}",
+                            "{{ stock.share_price }}",
+                            "{{ stock.quantity }}",
+                            "{% url 'user_portfolio:sell_stock' stock.id %}"
+                          )'>
+                          Sell
+                        </button>
+                    </div>
+
+                    <button 
+                      class="stock-btn yellow-btn wishlist-btn wishlist" 
+                      data-stock-id="{{ stock.id }}" 
+                      data-stock-name="{{ stock.company_name }}" 
+                      data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
+                      style="width: 100%;">
+                      Wishlist 🛒
+                    </button>
+
+
+
+                    {% include 'includes/sell_modal.html' %}
+
+                    {% block scripts %}
+                      <script>
+                        function openBuyModal(stockId) {
+                          $('#buyModal' + stockId).modal('show');
+                        }
+                        function openSellModal(stockId) {
+                          $('#sellModal' + stockId).modal('show');
+                        }
+                      </script>
+                    {% endblock %}
+                  </td>
+                </tr>
+            {% endif %}
+          {% empty %}
+                <tr><td colspan="10">No stocks found.</td></tr>
+          {% endfor %}

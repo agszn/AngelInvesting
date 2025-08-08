@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3>{{ definition.stock.company_name }} — {{ definition.get_model_display_name }}</h3>
+
+  <div class="mb-3">
+    <a href="{% url 'SM_User:custom_value_list' %}" class="btn btn-secondary">← Back to All Models</a>
+  </div>
+
+  <!-- Add Entry -->
+  <div class="card mb-4">
+    <div class="card-header">Add New Entry</div>
+    <div class="card-body">
+      <form id="add-value-form">
+        <input type="hidden" name="definition_id" value="{{ definition.id }}">
+        <div class="row">
+          <div class="col">
+            <input type="text" name="name" placeholder="Name" class="form-control">
+          </div>
+          <div class="col">
+            <input type="number" step="0.0001" name="value" placeholder="Value" class="form-control">
+          </div>
+          <div class="col">
+            <select name="table_header" class="form-control">
+              {% for header in headers %}
+              <option value="{{ header.id }}">{{ header.title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col">
+            <select name="parent_id" class="form-control">
+              <option value="">-- No Parent --</option>
+              {% for group in grouped %}
+              <option value="{{ group.parent.id }}">{{ group.parent.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col">
+            <button class="btn btn-success" type="submit">Save</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bulk Entry -->
+  <div class="card mb-4">
+    <div class="card-header">Bulk Upload</div>
+    <div class="card-body">
+      <form id="bulk-upload-form">
+        <input type="hidden" name="definition_id" value="{{ definition.id }}">
+        <div class="row mb-2">
+        <div id="bulk-error" class="text-danger mt-2" style="display:none;"></div>
+          <div class="col-4">
+            <select name="starting_header" class="form-control">
+              {% for header in headers %}
+              <option value="{{ header.id }}">{{ header.title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col">
+            <button class="btn btn-primary" type="submit">Upload</button>
+          </div>
+        </div>
+        <textarea name="bulk_data" rows="5" class="form-control" placeholder="Example: Revenue 100 200 300"></textarea>
+      </form>
+    </div>
+  </div>
+
+  <!-- Value Table -->
+  <!-- <div class="card">
+    <div class="card-header">Custom Field Values</div>
+    <div class="card-body">
+      <ul id="value-list" class="list-group">
+        {% for group in grouped %}
+        <li class="list-group-item" data-id="{{ group.parent.id }}">
+          <strong>{{ group.parent.name }}:</strong>
+          {{ group.parent.dec_value }} ({{ group.parent.table_header.title }})
+          <button class="btn btn-sm btn-outline-danger float-end delete-btn" data-id="{{ group.parent.id }}">Delete</button>
+        </li>
+        {% for child in group.children %}
+        <li class="list-group-item ms-4" data-id="{{ child.id }}">
+          ↳ {{ child.dec_value }} ({{ child.table_header.title }})
+          <button class="btn btn-sm btn-outline-danger float-end delete-btn" data-id="{{ child.id }}">Delete</button>
+        </li>
+        {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div> -->
+    <!-- Value Table with Editable Fields -->
+    <div class="card">
+    <div class="card-header">Custom Field Values (Editable)</div>
+    <div class="card-body">
+        <ul id="value-list" class="list-group">
+        {% for group in grouped %}
+            <li class="list-group-item d-flex flex-column" data-id="{{ group.parent.id }}">
+            <div class="d-flex align-items-center">
+                <input type="text" class="form-control me-2 value-name" value="{{ group.parent.name }}" style="max-width: 200px;">
+                <input type="number" step="0.0001" class="form-control me-2 value-number" value="{{ group.parent.dec_value }}" style="max-width: 150px;">
+                <select class="form-control me-2 value-header" style="max-width: 150px;">
+                {% for header in headers %}
+                <option value="{{ header.id }}" {% if group.parent.table_header.id == header.id %}selected{% endif %}>{{ header.title }}</option>
+                {% endfor %}
+                </select>
+                <select class="form-control me-2 value-parent" style="max-width: 150px;">
+                <option value="">-- No Parent --</option>
+                {% for g in grouped %}
+                    {% if g.parent.id != group.parent.id %}
+                    <option value="{{ g.parent.id }}" {% if group.parent.parent_field_value and group.parent.parent_field_value.id == g.parent.id %}selected{% endif %}>{{ g.parent.name }}</option>
+                    {% endif %}
+                {% endfor %}
+                </select>
+                <button class="btn btn-sm btn-success me-2 save-btn" data-id="{{ group.parent.id }}">Save</button>
+                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="{{ group.parent.id }}">Delete</button>
+            </div>
+            </li>
+
+            {% for child in group.children %}
+            <li class="list-group-item ms-4 d-flex flex-column" data-id="{{ child.id }}">
+                <div class="d-flex align-items-center">
+                <span class="me-2">↳</span>
+                <input type="text" class="form-control me-2 value-name" value="{{ child.name }}" placeholder="(Optional)" style="max-width: 200px;">
+                <input type="number" step="0.0001" class="form-control me-2 value-number" value="{{ child.dec_value }}" style="max-width: 150px;">
+                <select class="form-control me-2 value-header" style="max-width: 150px;">
+                    {% for header in headers %}
+                    <option value="{{ header.id }}" {% if child.table_header.id == header.id %}selected{% endif %}>{{ header.title }}</option>
+                    {% endfor %}
+                </select>
+                <select class="form-control me-2 value-parent" style="max-width: 150px;">
+                    <option value="">-- No Parent --</option>
+                    {% for g in grouped %}
+                    <option value="{{ g.parent.id }}" {% if child.parent_field_value.id == g.parent.id %}selected{% endif %}>{{ g.parent.name }}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-sm btn-success me-2 save-btn" data-id="{{ child.id }}">Save</button>
+                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="{{ child.id }}">Delete</button>
+                </div>
+            </li>
+            {% endfor %}
+        {% endfor %}
+        </ul>
+    </div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script>
+  const addForm = document.getElementById("add-value-form");
+  const bulkForm = document.getElementById("bulk-upload-form");
+  const valueList = document.getElementById("value-list");
+
+  addForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(addForm);
+    const payload = Object.fromEntries(formData.entries());
+    const res = await fetch("{% url 'SM_User:add_custom_value' %}", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {"Content-Type": "application/json"}
+    });
+    if (res.ok) location.reload();
+  };
+
+    bulkForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(bulkForm);
+    const payload = Object.fromEntries(formData.entries());
+
+    // Ensure proper types
+    payload.definition_id = parseInt(payload.definition_id, 10);
+    payload.starting_header = parseInt(payload.starting_header, 10);
+
+    const res = await fetch("{% url 'SM_User:bulk_upload_values' %}", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+        alert("Bulk upload successful!");
+        location.reload();
+    } else {
+        alert("Bulk upload failed: " + (data.status || "Unknown error"));
+    }
+    };
+
+
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.onclick = async () => {
+        if (confirm("Delete this entry?")) {
+        const url = "{% url 'SM_User:delete_custom_value' 0 %}".replace("0", btn.dataset.id);
+        const res = await fetch(url, { method: "POST" });
+        if (res.ok) {
+            location.reload();
+        } else {
+            alert("Delete failed. Try again.");
+        }
+        }
+    };
+    });
+
+    document.querySelectorAll(".save-btn").forEach(btn => {
+    btn.onclick = async () => {
+        const li = btn.closest("li");
+        const id = btn.dataset.id;
+        const name = li.querySelector(".value-name").value;
+        const value = li.querySelector(".value-number").value;
+        const table_header = li.querySelector(".value-header").value;
+        const parent_id = li.querySelector(".value-parent").value || null;
+
+        const payload = {
+        name,
+        value,
+        table_header,
+        parent_id,
+        text_style,
+        description: ""  // You can add this field if required
+        };
+
+        const url = "{% url 'SM_User:update_custom_value' 0 %}".replace("0", id);
+        const res = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+        });
+
+        if (res.ok) {
+        alert("Saved!");
+        location.reload();  // Optional: you can remove if you want to keep it live
+        } else {
+        alert("Failed to save. Try again.");
+        }
+    };
+    });
+
+
+  new Sortable(valueList, {
+    animation: 150,
+    onEnd: async () => {
+      const ids = Array.from(valueList.children).map(li => li.dataset.id);
+      await fetch("{% url 'SM_User:reorder_custom_values' %}", {
+        method: "POST",
+        body: JSON.stringify({order: ids}),
+        headers: {"Content-Type": "application/json"}
+      });
+    }
+  });
+</script>
+{% endblock %}

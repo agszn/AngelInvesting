@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<style>
+
+  .ai-login-container {
+    display: flex;
+    flex-wrap: wrap;
+    width: 90%;
+    max-width: 900px;
+    background-color: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    margin: 40px auto;
+  }
+
+  .ai-login-left {
+    background-color: #0b1a35;
+    color: white;
+    width: 100%;
+    max-width: 40%;
+    min-width: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-right: 1px solid #1fffac2f;
+    padding: 20px;
+  }
+
+  .ai-login-logo img {
+    width: 80px;
+    margin-bottom: 15px;
+  }
+
+  .ai-login-title {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .ai-login-title .ai-login-green {
+    color: #1bcf76;
+  }
+
+  .ai-login-right {
+    flex: 1;
+    padding: 40px 30px;
+    background-color: white;
+  }
+
+  .ai-login-right h2 {
+    margin-bottom: 30px;
+    text-align: center;
+    color: #333;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="tel"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+  }
+
+  .ai-login-note {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  .ai-login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0b1a35;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .ai-login-signup {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .ai-login-signup a {
+    color: green;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .ai-login-signup a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .ai-login-container {
+      flex-direction: column;
+    }
+
+    .ai-login-left,
+    .ai-login-right {
+      width: 100%;
+      max-width: 100%;
+      border-right: none;
+      text-align: center;
+    }
+  }
+</style>
+
+<div class="ai-login-container">
+  <!-- Left Section -->
+  <div class="ai-login-left">
+    <div class="ai-login-logo">
+      <img src="{% static 'Media/images/footer-logo.png' %}" alt="Logo" style="height: 175px;width: 175px;"/>
+      <!-- <div class="ai-login-title">
+        THE <span class="ai-login-green">ANGEL</span><br />INVESTING
+      </div> -->
+    </div>
+  </div>
+
+  <!-- Right Section -->
+  <div class="ai-login-right">
+    <h2>Change Phone Number</h2>
+    <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="ai-login-button">Send OTP</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,6 +1,6 @@
-# forms.py
 from django import forms
 from .models import CustomFieldValue
+
 
 class CustomFieldValueForm(forms.ModelForm):
     class Meta:
@@ -31,19 +31,7 @@ class CustomFieldValueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Only show relevant parent values
-        instance = kwargs.get('instance')
-        if instance and instance.field_definition:
-            stock_id = instance.field_definition.stock_id
-            model_type = instance.field_definition.model_type
-            self.fields['parent_field_value'].queryset = CustomFieldValue.objects.filter(
-                field_definition__stock_id=stock_id,
-                field_definition__model_type=model_type,
-                parent_field_value__isnull=True
-            ).exclude(pk=instance.pk)
-        else:
-            self.fields['parent_field_value'].queryset = CustomFieldValue.objects.none()
-
+        # Hide all value fields by default
         for ft in ['int', 'dec', 'char', 'date']:
             self.fields[f"{ft}_value"].widget.attrs['style'] = 'display: none;'
             self.fields[f"{ft}_value"].label = ''
@@ -51,7 +39,17 @@ class CustomFieldValueForm(forms.ModelForm):
         self.fields['description'].widget.attrs['style'] = 'display: none;'
         self.fields['description'].label = ''
 
-        field_def = self.initial.get('field_definition') or getattr(self.instance, 'field_definition', None)
+        # SAFELY get field_definition from instance or initial
+        field_def = getattr(self.instance, 'field_definition', None)
+        if not field_def:
+            field_def_id = self.initial.get('field_definition') or self.data.get('field_definition')
+            if field_def_id:
+                from .models import CustomFieldDefinition
+                try:
+                    field_def = CustomFieldDefinition.objects.get(pk=field_def_id)
+                except CustomFieldDefinition.DoesNotExist:
+                    pass
+
         field_type = getattr(field_def, 'field_type', 'dec') if field_def else 'dec'
 
         if field_type in ['int', 'dec', 'char', 'date']:

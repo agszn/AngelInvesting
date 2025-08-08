@@ -1,96 +1,54 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Blogs{% endblock %}
 
 {% block content %}
-<style>
-        
-.stock-page-header {
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 75px;
-    background-color: #f8f9fa; /* Light gray background */
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    font-size: 2em;
-    color: aliceblue;
-    background: radial-gradient(
-    64.54% 23.63% at 69.24% 61.54%,
-    #271b3f 0%,
-    #271b3f 43.09%,
-    #341a47 68.59%,
-    #0e213f 100%
-  );
-} 
-  
-.blog-containerM {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        padding: 2rem 1rem;
-      }
-
-      .content-wrapper {
-        max-width: 1240px;
-        width: 100%;
-      }
-
-</style>
-
 <div class="stock-page-header">
     <h2>Blogs</h2>
-
 </div>
-    <link rel="stylesheet" href="{% static 'Csss/blogs.css' %}" />
-<main class="blog-containerM">
-    <article class="content-wrapper">
-
-    <div class="fullpage">
-        <div class="blog-section">
-            <div class="blog-section-img"><img src="{% static 'Media/images/unlistedstock-blog.jpg' %}" alt=""></div>
-            <div class="blog-section-ctn">
-                <div class="blog-date" id="date1"></div>
-                <h1 class="blog-section-head">✅ A Complete Guide for New-Age Investors</h1>
-                <p class="blog-section-para">most people are familiar with listed stocks traded on exchanges like NSE and BSE. But there's another lesser-known and potentially high-reward segment—unlisted shares. Let’s dive into what unlisted shares are, how they work, and whether they’re right for your investment strategy.</p>
-                <h1 class="blog-section-head">💼 How Can You Buy Unlisted Shares?</h1>
-                <p class="blog-section-para">Direct Purchase from Company Employees or Promoters Companies often offer ESOPs (Employee Stock Ownership Plans), and employees may choose to sell their shares. Through Unlisted Share Platforms Online platforms specialize in matching buyers and sellers of unlisted shares. Via Wealth Management FirmsMany firms offer unlisted shares as part of their alternate investment products. Pre-IPO Funds Some funds invest exclusively in pre-IPO companies and offer exposure to select investors.</p>
-                <h1 class="blog-section-head">📈 Benefits of Investing in Unlisted Shares</h1>
-                <p class="blog-section-para">Early-Stage Investment Get in early on promising companies before they go public. High Growth Potential Once listed, the valuation of such stocks can surge dramatically. Diversification Adds a new layer of exposure beyond traditional market instruments.</p>
-                <h1 class="blog-section-head">⚠️ Risks Involved</h1>
-                <p class="blog-section-para">Liquidity Issues,Selling unlisted shares is not easy, as there’s no open market. Lack of Transparency Financials may not be as publicly accessible or regulated. Valuation Uncertainty Without a market price, determining fair value can be challenging. Regulatory Risk SEBI and other regulatory bodies have limited oversight on private transactions.</p>
-                <h1 class="blog-section-head">🧠 Things to Keep in Mind</h1>
-                <p class="blog-section-para">Always conduct due diligence before investing. Prefer well-known companies or those planning an IPO soon. Consult a financial advisor if you're unsure about valuation or risks. Be prepared to hold long-term—unlisted shares are not for short-term trading.</p>
-                <h1 class="blog-section-head">📝 Final Thoughts</h1>
-                <p class="blog-section-para1">Unlisted shares offer a unique opportunity for investors willing to take calculated risks. With proper research and patience, these investments can yield substantial returns, especially when the company lists publicly. Whether you're eyeing startups, pre-IPO giants like Tata Technologies, or even rare stocks like Chennai Super Kings (CSK), the unlisted market opens doors to early-stage wealth creation.</p>
+<main class="blog-AllBlogs">
+    <div class="allBlogs-container">
+        {% for blog in blogs %}
+            <div class="blog-detail-card">
+                <div class="blog-details-card-img">
+                    {% if blog.banner %}
+                        <a href="{% url 'user_blog_detail' blog.id %}">
+                            <img src="{{ blog.banner.url }}" alt="Blog Image">
+                        </a>
+                    {% else %}
+                        <a href="{% url 'user_blog_detail' blog.id %}">
+                            <img src="{% static 'Media/images/default-blog.jpg' %}" alt="Default Image">
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="blog-details-cardHead">
+                    <a href="{% url 'user_blog_detail' blog.id %}">
+                        <h3>{{ blog.heading }}</h3>
+                    </a>
+                    <p>{{ blog.short_description|truncatechars:150 }}</p>
+                </div>
             </div>
-        </div>
-        <div class="blog-section">
-            <div class="blog-section-img"><img src="{% static 'Media/images/csk-blog.jpg' %}" alt=""></div>
-            <div class="blog-section-ctn">
-                <div class="blog-date" id="date2"></div>
-                <h1 class="blog-section-head">🟡 What Are CSK Unlisted Shares?</h1>
-                <p class="blog-section-para">Chennai Super Kings Cricket Ltd (CSKCL) is the company that owns the CSK IPL franchise. After being demerged from India Cements Ltd in 2015, CSK became a separate entity. However, it is not listed on NSE or BSE. That means its shares are not traded publicly—but they are available in the unlisted market, through private transactions or intermediaries.</p>
-                <h1 class="blog-section-head">🏆 Why Are CSK Unlisted Shares in Demand?</h1>
-                <p class="blog-section-para">Strong Brand Value CSK is one of the most successful and beloved teams in IPL history, with multiple championships and a massive fan base. Stable Management With MS Dhoni at the helm and a disciplined team culture, CSK has earned a reputation for consistency both on and off the field. Consistent Profits CSK has shown profitability and steady revenue growth, thanks to merchandise sales, sponsorships, and IPL earnings. Pre-IPO Buzz There have been rumors and expectations that CSK may go public in the future, which could result in significant valuation gains.</p>
-                <h1 class="blog-section-head">💼 How to Buy CSK Unlisted Shares?</h1>
-                <p class="blog-section-para1">Verified Brokers or Platforms Several online platforms specialize in unlisted shares and list CSK among their offerings. Private Deals Some shares may be available via existing shareholders like former employees or early investors. Wealth Advisors HNIs and family offices may access CSK shares through portfolio management or alternate investment deals.</p>
-            </div>
-        </div>
-        <div class="blog-section">
-            <div class="blog-section-img"><img src="{% static 'Media/images/hdfc-blog.jpg' %}" alt=""></div>
-            <div class="blog-section-ctn">
-                <div class="blog-date" id="date3"></div>
-                <h1 class="blog-section-head">💼 Investing in HDFC Securities Unlisted Shares</h1>
-                <p class="blog-section-para">When it comes to trust in the Indian financial services space, HDFC is a name that stands tall. And one of its key subsidiaries, HDFC Securities, has quietly become a hot pick in the unlisted shares market. In this blog, we’ll explore what makes HDFC Securities unlisted shares attractive, how to invest in them, and the key benefits and risks associated with this pre IPO gem.</p>
-                <h1 class="blog-section-head">🟢 About HDFC Securities</h1>
-                <p class="blog-section-para">HDFC Securities Ltd is a leading stock broking and financial services company in India. It is a subsidiary of HDFC Bank, one of the country’s most respected and profitable private banks.Stock and derivative trading, Mutual fund investment ,Research services, Digital investment platforms, It is known for its strong client base, robust digital infrastructure, and trusted brand reputation.</p>
-                <h1 class="blog-section-head">📊 Why Are HDFC Securities Unlisted Shares in Demand?</h1>
-                <p class="blog-section-para">As a subsidiary of HDFC Bank, the company benefits from strong parentage and operational stability. Consistent Profits HDFC Securities has been consistently profitable with healthy margins, even during volatile market conditions. Digital Growth With increasing investor participation and digital adoption, broking firms like HDFC Securities are seeing significant growth. IPO Potential There is speculation in the market that HDFC Securities may go public in the future, which has fueled demand for its unlisted shares.</p>
-                <h1 class="blog-section-head">💰 How to Buy HDFC Securities Unlisted Shares?</h1>
-                <p class="blog-section-para2">You can buy shares of HDFC Securities through the unlisted share market, typically via: Verified dealers/platforms who specialize in pre-IPO and unlisted equity Wealth management firms offering exclusive access to HNI investors Private investors or employees who hold company stock Before investing, it’s important to verify the source, check the current valuation, and ensure proper documentation.</p>
-            </div>
-        </div>
+        {% endfor %}
     </div>
-    </article>
 </main>
+<section class="contact-section">
+    <img src="{% static 'Media/images/contact-banner.jpg' %}" class="contact-bg" alt="Contact background">
+    <div class="contact-content">
+        <h1 class="contact-heading">Contact Us</h1>
+        <p class="contact-description">
+            If you'd like to learn more about The Angel Investing and how we can assist
+            you in navigating your unlisted share investment journey, please get
+            in touch with us.
+        </p>
+    </div>
+    <div class="contact-info">
+        <p class="contact-info-label">Reach out to us</p>
+        <p class="contact-info-details">
+        <b>Email:</b> info@theangelinvesting.com, <b>Phone:</b> 9740940369
+        </p>
+        <p class="contact-assistance">
+        Our expert would be happy to provide you personal assistance for your queries.
+    </p>
+    </div>
+</section>
 {% endblock %}

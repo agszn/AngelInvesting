@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Stock Model Overview{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Stock Models</h2>
+
+    <!-- Filter Dropdown -->
+    <form method="get" class="mb-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label for="stock" class="form-label mb-0">Filter by Stock:</label>
+            </div>
+            <div class="col">
+                <select id="stock" name="stock" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Stocks</option>
+                    {% for stock in stocks %}
+                        <option value="{{ stock.id }}" {% if stock.id == selected_stock_id %}selected{% endif %}>
+                            {{ stock.company_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- Grouped Models by Stock -->
+    {% for stock, defs in grouped_data.items %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>{{ stock.company_name }}</strong>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for defn in defs %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ defn.get_model_display_name }}
+                        <a href="{% url 'SM_User:custom_value_detail' defn.pk %}" class="btn btn-sm btn-outline-primary">Edit Values</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% empty %}
+        <p class="text-muted">No models found for selected stock.</p>
+    {% endfor %}
+</div>
+{% endblock %}

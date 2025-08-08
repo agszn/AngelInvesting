@@ -32,8 +32,10 @@ urlpatterns = [
         path('payment/delete/<int:payment_id>/',delete_payment, name='delete_payment'),
         
         path('transaction/<int:pk>/edit/', edit_buy_transaction, name='edit_transaction'),
+        
         path('transaction/<int:pk>/edit/ajax/', ajax_transaction_handler, name='ajax_transaction_handler'),
 
+        path('sell-transaction/<int:pk>/edit/ajax/', ajax_sell_transaction_handler, name='ajax_sell_transaction_handler'),
 
 
 

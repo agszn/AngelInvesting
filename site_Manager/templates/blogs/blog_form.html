@@ -1,0 +1,16 @@
+<!-- site_Manager/templates/blogs/blog_form.html -->
+{% extends "baseStructureSM.html" %}
+{% block title %}Blogs{% endblock %}
+{% block subtitle %} Blogs {% endblock %}
+{% load static %}
+{% block SMprofile_content %}
+<div class="container mt-4">
+    <h3>{{ title }}</h3>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'SM_User:BlogSM' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

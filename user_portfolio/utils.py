@@ -11,25 +11,68 @@
 #         summary.update_from_transactions()
 #         summary.save()
  
+
+
+
+
+
+
+
+
+
+
+# def update_user_holdings(user):
+#     from user_portfolio.models import BuyTransaction, SellTransaction, BuyTransactionOtherAdvisor
+#     from unlisted_stock_marketplace.models import StockData
+#     from .models import UserStockInvestmentSummary
+
+#     # Get stock IDs from all relevant sources
+#     buy_stock_ids = BuyTransaction.objects.filter(user=user, status='completed').values_list('stock_id', flat=True)
+    
+#     other_buy_stock_ids = BuyTransactionOtherAdvisor.objects.filter(user=user, status='completed').values_list('stock_id', flat=True)
+
+#     sell_stock_ids = SellTransaction.objects.filter(user=user,status='completed').values_list('stock_id', flat=True)
+
+#     # Union of all stock IDs
+#     stock_ids = set(list(buy_stock_ids) + list(other_buy_stock_ids) + list(sell_stock_ids))
+
+#     for stock_id in stock_ids:
+#         stock = StockData.objects.get(id=stock_id)
+#         summary, _ = UserStockInvestmentSummary.objects.get_or_create(user=user, stock=stock)
+#         summary.update_from_transactions()  
+#         summary.save()
+
+
 def update_user_holdings(user):
-    from user_portfolio.models import BuyTransaction, SellTransaction
+    from user_portfolio.models import BuyTransaction, BuyTransactionOtherAdvisor, SellTransaction
     from unlisted_stock_marketplace.models import StockData
     from .models import UserStockInvestmentSummary
 
-    # Get stock IDs from both buy and sell txns (excluding advisor_type='Other' in sell)
-    buy_stock_ids = BuyTransaction.objects.filter(user=user, status='completed').values_list('stock_id', flat=True)
-    sell_stock_ids = SellTransaction.objects.filter(
-        user=user,
-        status='completed'
-    ).exclude(advisor__advisor_type='Other').values_list('stock_id', flat=True)
+    # Normal BuyTransaction
+    buy_stock_ids = BuyTransaction.objects.filter(user=user, status='completed').values_list('stock_id', flat=True).distinct()
 
-    stock_ids = set(list(buy_stock_ids) + list(sell_stock_ids))
+    # BuyTransactionOtherAdvisor
+    other_buy_stock_ids = BuyTransactionOtherAdvisor.objects.filter(user=user, status='completed').values_list('stock_id', flat=True).distinct()
 
-    for stock_id in stock_ids:
-        stock = StockData.objects.get(id=stock_id)
-        summary, _ = UserStockInvestmentSummary.objects.get_or_create(user=user, stock=stock)
+    # ✅ Update non-Other advisor holdings
+    for stock_id in buy_stock_ids:
+        stock = StockData.objects.filter(id=stock_id).first()
+        if not stock:
+            continue
+        summary, _ = UserStockInvestmentSummary.objects.get_or_create(user=user, stock=stock, is_other_advisor=False)
         summary.update_from_transactions()
         summary.save()
+
+    # ✅ Update "Other" advisor holdings
+    for stock_id in other_buy_stock_ids:
+        stock = StockData.objects.filter(id=stock_id).first()
+        if not stock:
+            continue
+        summary, _ = UserStockInvestmentSummary.objects.get_or_create(user=user, stock=stock, is_other_advisor=True)
+        summary.update_from_transactions()
+        summary.save()
+
+
 
 
 # utils.py or a shared module like user_helpers.py
@@ -82,4 +125,5 @@ def get_user_stock_context(user, request):
         'show_all_unlisted': show_all_unlisted,
         'show_all_angel': show_all_angel,
         'search_query': search_query,
+        'current_group_id': int(group_id) if group_id else None, 
     }

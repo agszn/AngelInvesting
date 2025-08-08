@@ -115,10 +115,23 @@
     }
 
     @media print {
+        body {
+          width: 90%;
+          margin: 0;
+        }
+        .letter-wrapper {
+          width: 100%;
+          padding: 0;
+          border: none;
+        }
       .download-button {
         display: none;
       }
     }
+.page-break {
+  page-break-before: always;
+}
+
   </style>
 </head>
 <body>
@@ -133,7 +146,7 @@
 
     <!-- Replace with correct logo path -->
     </div>
-    <div class="invoice-block">
+    <div class="invoice-block" >
       <h1>INVOICE</h1>
       <p><strong>Invoice No:</strong> {{ invoice_no }}</p>
       <p><strong>Date:</strong> {{ transaction_date|date:"d-m-Y" }}</p>
@@ -157,6 +170,7 @@
   <p>We are pleased to confirm the successful completion of the following stock purchase transaction between you and AngelInvesting.com.</p>
 
 <!-- Transaction Details -->
+<!-- <div class="page-break"></div> -->
 <div class="section-title" style="text-align: center;">Transaction Details</div>
 <table style="margin: 0 auto; margin-top: 15px; border-collapse: collapse; font-size: 16px;">
   <tbody>
@@ -189,8 +203,9 @@
 
 
   <!-- Client Information -->
-  <div class="section-title" style="text-align: center;">Client Information</div>
-  <table class="client-table">
+<div class="page-break"></div>
+<div class="section-title" style="text-align: center;">Client Information</div>
+<table class="client-table">
     <thead>
       <tr>
         <th>Field</th>
@@ -235,6 +250,7 @@
 
 
 <!-- Terms and Conditions -->
+<div class="page-break"></div>
 <div class="terms" style="margin-top: 80px;">
   <h4>Terms and Conditions:</h4>
   <ol>

@@ -26,8 +26,11 @@ SECRET_KEY = 'django-insecure-z6fv(n05s3g%g^g=dc((3j-t+o@3dqi%-9w^4eq70kfbt&drfd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# (Recommended for Prod)
+# DEBUG = False
+# ALLOWED_HOSTS = ['theangelinvesting.com', 'www.theangelinvesting.com']
 ALLOWED_HOSTS = ['*']
-
+X_FRAME_OPTIONS = 'ALLOWALL'
 AUTH_USER_MODEL = 'user_auth.CustomUser'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 50000  # Or higher, depending on your needs
@@ -199,7 +202,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'   # <<<<<< Add this line
+STATIC_ROOT = BASE_DIR / 'staticfiles'   
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -209,7 +212,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 # LOGIN_REDIRECT_URL = 'base'
-LOGIN_REDIRECT_URL = '/admin/'
+LOGIN_REDIRECT_URL = '/adminDFRMACSTA/'
 
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
@@ -219,12 +222,22 @@ LOGOUT_REDIRECT_URL = 'login'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.theangelinvesting.com'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
 EMAIL_HOST_USER = 'info@theangelinvesting.com'
-EMAIL_HOST_PASSWORD = 'J69NTFjSfcVfYgrhSdfG'
+EMAIL_HOST_PASSWORD = 'jxhh musp mulz gvli'
 ADMIN_EMAIL = 'info@theangelinvesting.com'
+
+
+# Twilio
+TWILIO_ACCOUNT_SID = 'AC8837b5eea005cde6bac6544a19295184'
+TWILIO_AUTH_TOKEN = 'd2f25c6b5a61c805142b13c94d972283'
+TWILIO_PHONE_NUMBER = '+12705184223'
+TWILIO_WHATSAPP_NUMBER = 'whatsapp:+14155238886'
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -1,0 +1,31 @@
+<VirtualHost *:80>
+    ServerName theangelinvesting.com
+    ServerAlias www.theangelinvesting.com
+    ServerAdmin info@theangelinvesting.com
+
+    # Optional: Redirect HTTP to HTTPS
+    Redirect permanent / https://theangelinvesting.com/
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    Alias /static /var/www/AngelInvesting/static
+    <Directory /var/www/AngelInvesting/static>
+        Require all granted
+    </Directory>
+
+    Alias /media /var/www/AngelInvesting/media
+    <Directory /var/www/AngelInvesting/media>
+        Require all granted
+    </Directory>
+
+    <Directory /var/www/AngelInvesting/angel_investor>
+        <Files wsgi.py>
+            Require all granted
+        </Files>
+    </Directory>
+
+    WSGIDaemonProcess angelinvesting python-home=/var/www/AngelInvesting/venv python-path=/var/www/AngelInvesting
+    WSGIProcessGroup angelinvesting
+    WSGIScriptAlias / /var/www/AngelInvesting/angel_investor/wsgi.py
+</VirtualHost>

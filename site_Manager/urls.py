@@ -10,7 +10,12 @@ from django.conf.urls.static import static
 app_name = 'SM_User'
 
 urlpatterns = [
-        path('BlogSM/', BlogSM, name='BlogSM'),
+        path('blogs/', BlogSM, name='BlogSM'),
+        path('blogs/create/', create_blog, name='create_blog'),
+        path('blogs/<int:blog_id>/edit/', edit_blog, name='edit_blog'),
+        path('blogs/<int:blog_id>/delete/', delete_blog, name='delete_blog'),
+        path('blogs/<int:blog_id>/', blog_detail_view_SM, name='SM_blog_detail'),
+        
         path('HomepageBannerSM/upload/', HomepageBannerSM, name='HomepageBannerSM'),
         
         path('banner/delete/', delete_banner, name='delete_banner'),
@@ -39,6 +44,33 @@ urlpatterns = [
         
         path('stockdata/', stockdata_crud, name='stockdata_crud'),
         path('<int:pk>/edit/', edit_stockdata, name='edit_stockdata'),
+        # site_Manager/urls.py
+        path('convert/', convert_docx_to_html, name='convert_docx_to_html'),
+        
+
+
+
+
+
+
+
+
+
+        # View grouped stock + model overview
+        path('custom-values/', stock_model_overview, name='custom_value_list'),
+
+        # View all values for a definition
+        path('custom-values/<int:def_id>/', values_for_definition, name='custom_value_detail'),
+
+        
+        path('custom-values/add/', add_custom_value, name='add_custom_value'),
+        path('custom-values/update/<int:pk>/', update_custom_value, name='update_custom_value'),
+        
+        path('custom-values/delete/<int:pk>/', delete_custom_value, name='delete_custom_value'),
+        
+        path('custom-values/bulk/', bulk_upload_values, name='bulk_upload_values'),
+        
+        path('custom-values/reorder/', reorder_custom_values, name='reorder_custom_values'),
 
 
     ]

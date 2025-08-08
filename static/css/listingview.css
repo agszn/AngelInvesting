@@ -4,7 +4,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Outfit", sans-serif;
+    font-family: 'Newsreader', serif;
 }
 
 body {
@@ -19,8 +19,9 @@ body {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid white;
-    padding: 50px 0px 70px;
+    padding: 20px 0px 20px;
     gap: 10px;
+    margin-top: 20px;
 }
 
 .show-entries {
@@ -251,8 +252,8 @@ tr:nth-child(even) {
     }
 
     .chart-img {
-        width: 25px;
-        height: 18px;
+        /* width: 25px; */
+        /* height: 18px; */
     }
 
     .pagination {
