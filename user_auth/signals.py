@@ -22,3 +22,15 @@ def sync_user_to_profile(sender, instance, created, **kwargs):
                 email=instance.email,
                 mobile_number=instance.phone_number
             )
+
+# user_auth/signals.py
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
+from .models import LoginHistory
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    # Save login history
+    LoginHistory.objects.create(user=user)
+    # Update counters
+    user.update_login_stats()

@@ -3,6 +3,7 @@
 {% block subtitle %} Advisor {% endblock %}
 
 {% block SMprofile_content %}
+<div class="SMtable-head">
 <div style="max-width: 600px; margin: 30px auto; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
   <div style="background-color: #007bff; color: white; padding: 15px 20px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
     <h4 style="margin: 0;">{{ view.object.pk|yesno:"Edit Advisor,Add Advisor" }}</h4>
@@ -19,5 +20,6 @@
 
     </form>
   </div>
+</div>
 </div>
 {% endblock %}

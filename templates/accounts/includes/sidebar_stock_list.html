@@ -1,0 +1,56 @@
+<div class="user-stock-list-tab">
+  {% for stock in stock_list %}
+    {% if stock.company_name and not stock.hide_company_overview %}
+      <div class="user-stocks-sidebar">
+        <div class="user-sidebar-stockname"> 
+          <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">{{ stock.company_name }}</a>
+        </div>
+        <div class="user-sidebar-price">
+          <div>
+            <span style="color: {% if stock.profit > 0 %}green{% elif stock.profit < 0 %}red{% else %}white{% endif %}; font-weight: bold;">
+              ₹ {{ stock.share_price }}
+            </span>
+          </div>
+          <div><span>{{ stock.profit }}₹ ({{ stock.profit_percentage }}%)</span></div>
+        </div>
+        <div class="stock-action-buttons">
+          {% if stock.in_group %}
+            <form method="POST" action="{% url 'unlisted_stock_marketplace:remove_from_group' stock.wishlist_id %}">
+              {% csrf_token %}
+              <span style="background-color: #f7c948; margin-right: 10px;" class="group-button-user">
+                G - {{ stock.group_number }}
+              </span>
+              <button type="submit" title="Remove from Group" style="background-color: #e74c3c;">✖</button>
+            </form>
+          {% else %}
+            <button class="wishlist-btn plus-btn"
+              data-stock-id="{{ stock.id }}"
+              data-stock-name="{{ stock.company_name }}"
+              data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}">
+              ➕
+            </button>
+          {% endif %}
+          <button class="buy-btn"
+            title="Buy {{ stock.company_name }}"
+            onclick='openBuyModal(
+              "{{ stock.id }}",
+              "{{ stock.company_name|escapejs }}",
+              "{{ stock.share_price }}",
+              "{{ stock.quantity }}",
+              "{% url 'user_portfolio:buy_stock' stock.id %}"
+            )'>B</button>
+          <button class="sell-btn"
+            onclick='openSellModal(
+              "{{ stock.id }}",
+              "{{ stock.company_name|escapejs }}",
+              "{{ stock.share_price }}",
+              "{{ stock.quantity }}",
+              "{% url 'user_portfolio:sell_stock' stock.id %}"
+            )'>S</button>
+        </div>
+      </div>
+    {% endif %}
+  {% empty %}
+    <p style="color: white; text-align: center;">No stocks found.</p>
+  {% endfor %}
+</div>

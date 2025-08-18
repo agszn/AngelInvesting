@@ -3,23 +3,22 @@
 {% block subtitle %} Unlisted Stock Update {% endblock %}
 
 {% block SMprofile_content %}
-<div class="SMtable-head">
-    <div class="SMheading">
-        <h3>Unlisted Share List </h3>
-        <div class="SMsearch-bar">
-            <form method="GET" style="display: flex; gap: 10px;">
-                <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name or industry..." />
-                <button type="submit" class="view">Search</button>
-            </form>
+<div class="user-portfolio-top">
+    <div class="user-dashboard-heading"><h3>Unlisted Share List</h3></div>
+    <div class="SMsearch-bar">
+        <form method="GET" style="display: flex; gap: 10px;">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name or industry..." />
+            <button type="submit" class="view">Search</button>
+        </form>
 
-            <form method="POST" action="{% url 'SM_User:upload_unlisted_stocks_excel' %}" enctype="multipart/form-data"  style="display: flex; gap: 10px;">
-                {% csrf_token %}
-                <input type="file" name="excel_file" accept=".xlsx">
-                <button type="submit"  class="view">Upload</button>
-            </form>
-        </div>
+        <form method="POST" action="{% url 'SM_User:upload_unlisted_stocks_excel' %}" enctype="multipart/form-data"  style="display: flex; gap: 10px;">
+            {% csrf_token %}
+            <input type="file" name="excel_file" accept=".xlsx">
+            <button type="submit"  class="view">Upload</button>
+        </form>
     </div>
-
+</div>
+<div class="SMtable-head">
     {% if upload_result %}
         <div class="alert alert-info">
             ✅ {{ upload_result.updated_ids|length }} stock{{ upload_result.updated_ids|length|pluralize }} updated.<br>
@@ -111,8 +110,8 @@
 {% endif %}
 
     <div class="SMtable-scroll-container">
-        <table class="SMbuyorder-table">
-            <thead>
+        <table class="user-portfolio-toptable1">
+            <thead class="user-portfolio-head-admin">
                 <tr>
                     <th>Sl.no</th>
                     <th>Company Name</th>
@@ -133,8 +132,7 @@
                                 <tr class="{% if sid in updated_ids %}row-success{% endif %}">
                                     <form method="POST" action="{% url 'SM_User:UnlistedStocksUpdateSM' %}">
                                         {% csrf_token %}
-                                        <td>{{ forloop.counter }}</td>
-
+                                        <td style="color: #000;">{{ forloop.counter }}</td>
                                         <!-- Editable Company Name -->
                                         <td>
                                             <input type="text" name="company_name" value="{{ snapshot.stock.company_name }}" required  readonly/>

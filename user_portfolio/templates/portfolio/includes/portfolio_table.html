@@ -1,0 +1,65 @@
+<!-- user_portfolio/templates/portfolio/includes/portfolio_table.html -->
+ <div class="user-portfolio-toptable">
+                        <!-- Table Header -->
+                        {% if holdings %}
+                        <div class="user-portfolio-head">
+                            <div>Stock Name</div>
+                            <div>Quantity</div>
+                            <div>Avg. Price</div>
+                            <div>LTP</div>
+                            <div>Inv. Amt</div>
+                            <div>Mkt Value</div>
+                            <div>Overall G/L</div>
+                            <div>Day’s G/L</div>
+                        </div>
+                        {% endif %}
+                        <!-- Table Rows -->
+                        {% for h in holdings %}
+                        <div class="user-portfolio-tbody">
+                            <div>
+                                {{ h.stock.company_name }}
+                                        <span title="Buy {{ stock.company_name }}"
+                                        onclick='openBuyModal(
+                                            "{{ h.stock.id }}",
+                                            "{{ h.stock.company_name|escapejs }}",
+                                            "{{ h.stock.share_price }}",
+                                            "{{ h.stock.quantity }}",
+                                            "{% url 'user_portfolio:buy_stock' h.stock.id %}"
+                                        )' style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
+
+                                    <span onclick='openSellModal(
+                                        "{{ h.stock.id }}",
+                                        "{{ h.stock.company_name|escapejs }}",
+                                        "{{ h.stock.share_price }}",
+                                        "{{ h.stock.quantity }}",
+                                        "{% url 'user_portfolio:sell_stock' h.stock.id %}"
+                                        )' style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
+                            </div>
+                            <div>{{ h.quantity_held }}</div>
+                            <div>{{ h.avg_price }}</div>
+                            <div>{{ h.ltp }}</div>
+                            <div>{{ h.investment_amount }}</div>
+                            <div>{{ h.market_value }}</div>
+                            <div style="color: {% if h.total_gain_loss >= 0 %}green{% else %}red{% endif %};">
+                                {{ h.overall_gain_loss }}<br><span style="font-size: 12px;">{{ h.total_gain_loss_percent }}%</span>
+                            </div>
+                            <div style="color: {% if h.daily_gain_loss >= 0 %}green{% else %}red{% endif %};">
+                                {{ h.day_gain_loss }}<br><span style="font-size: 12px;">{{ h.daily_gain_loss_percent }}%</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <!-- other Advisor -->
+
+                        <!-- Pagination -->
+                        <div class="user-portfolio-tpaginatioin">
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|cut:'page='|cut:'&' %}{% endif %}" class="btn btn-sm btn-outline-secondary me-1">‹ Prev</a>
+                            {% endif %}
+
+                            <span class="mx-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|cut:'page='|cut:'&' %}{% endif %}" class="btn btn-sm btn-outline-secondary ms-1">Next ›</a>
+                            {% endif %}
+                        </div>
+                    </div>

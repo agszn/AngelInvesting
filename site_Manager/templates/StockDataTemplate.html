@@ -4,9 +4,27 @@
 {% block subtitle %}Homepage Banner{% endblock %}
 
 {% block SMprofile_content %}
-    <h4>StockDate</h4>
-
-<form method="get" class="row g-3 mb-3">
+<style>
+  .user-portfolio-toptable1 td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        vertical-align: top;
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+    .user-portfolio-toptable1 td:nth-child(1) { width: 30%; }
+    .user-portfolio-toptable1 td:nth-child(2) { width: 20%; } 
+    .user-portfolio-toptable1 td:nth-child(3) { width: 20%; } 
+    .user-portfolio-toptable1 td:nth-child(4) { width: 10%; } 
+    .user-portfolio-toptable1 td:nth-child(5) { width: 10%; }
+    .user-portfolio-toptable1 td:nth-child(5) { width: 10%; }
+</style>
+<div class="user-portfolio-top">
+  <div class="user-dashboard-heading"><h3>StockDate</h3></div>
+</div>
+<div class="user-portfolio-top">
+<form method="get" class="row g-3 mb-3" style="padding:0 10px;">
   <div class="col-md-3">
     <input type="text" name="search" class="form-control" placeholder="Search by Company / Scrip / ISIN" value="{{ filters.search_query }}">
   </div>
@@ -51,16 +69,19 @@
     <button type="submit" class="btn btn-primary w-100">Filter</button>
   </div>
 </form>
-<table class="table table-striped table-hover">
-    <thead>
-        <tr>
-            <th>Company</th>
-            <th>Scrip</th>
-            <th>Sector</th>
-            <th>Conviction</th>
-            <th>Share Price</th>
-            <th>Actions</th>
-        </tr>
+</div>
+<div class="SMtable-head">
+<div class="SMtable-scroll-container">
+  <table class="user-portfolio-toptable1">
+    <thead class="user-portfolio-head-admin">
+      <tr>
+          <th>Company</th>
+          <th>Scrip</th>
+          <th>Sector</th>
+          <th>Conviction</th>
+          <th>Share Price</th>
+          <th>Actions</th>
+      </tr>
     </thead>
     <tbody>
         {% for stock in stocks %}
@@ -71,10 +92,7 @@
                 <td>{{ stock.conviction_level }}</td>
                 <td>{{ stock.share_price }}</td>
                 <td>
-                    <td>
-                        <a href="{% url 'SM_User:edit_stockdata' stock.pk %}" class="btn btn-sm btn-warning">Edit</a>
-                    </td>
-
+                    <a href="{% url 'SM_User:edit_stockdata' stock.pk %}" class="btn btn-sm btn-warning">Edit</a>
                     <!-- <a href="#" class="btn btn-sm btn-danger">Delete</a> -->
                 </td>
             </tr>
@@ -83,5 +101,6 @@
         {% endfor %}
     </tbody>
 </table>
-
+</div>
+</div>
 {% endblock %}

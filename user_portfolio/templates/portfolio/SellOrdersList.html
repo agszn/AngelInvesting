@@ -4,80 +4,87 @@
 {% block profile_content %}
 <div class="user-porfolio-dashboard">
   <div class="user-portfolio-top">
-    <div class="user-dashboard-heading"><h3>Order Summary</h3></div>
-    <div class="search-details-user">
-      <form method="get" style="margin-right: 20px;">
-        <input type="text" placeholder="Search or type command...">
-        <!-- <button type="submit" style="margin-left: 10px; margin-right: 50px; padding: 8px 12px; border: none; background-color: #1a3e6e; color: white; border-radius: 5px;">Search</button> -->
-      </form>
-    </div>
+    <div class="user-dashboard-heading"><h3>Sell Order Summary</h3></div>
+
+      <div class="search-details-user">
+        <form method="get" class="d-flex" style="gap: 10px;">
+          <input id="sell-search-input" type="text"
+                name="search"
+                value="{{ current_filters.search|default_if_none:'' }}"
+                placeholder="Search or type command..."
+                autocomplete="off" />
+        </form>
+      </div>
+
+      <div class="search-details-dropdown">
+        <!-- Advisor Filter -->
+        <div class="dropdown">
+          <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            {{ selected_advisor.advisor_type|default:"Advisor" }}
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="?{% if current_filters.broker %}broker={{ current_filters.broker }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}">All Advisors</a></li>
+            {% for adv in advisors %}
+              <li><a class="dropdown-item" href="?advisor={{ adv.id }}{% if current_filters.broker %}&broker={{ current_filters.broker }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">{{ adv.advisor_type|upper }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Broker Filter -->
+        <div class="dropdown">
+          <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            {{ selected_broker.name|default:"Broker" }}
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="?{% if current_filters.advisor %}advisor={{ current_filters.advisor }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}">All Brokers</a></li>
+            {% for bro in brokers %}
+              <li><a class="dropdown-item" href="?broker={{ bro.id }}{% if current_filters.advisor %}&advisor={{ current_filters.advisor }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">{{ bro.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+
   </div>
   <div style="overflow-x: auto;">
-<div style="min-width: 800px;">
-  <div class="user-portfolio-table">
-    <table class="user-portfolio-toptable">
-        <thead class="user-portfolio-head1">
-          <tr>
-            <th style="padding: 10px;">Stock Name ᐯ</th>
-            <th style="padding: 10px;">Advisor</th>
-            <th style="padding: 10px;">Broker</th>
-            <th style="padding: 10px;">Quantity</th>
-            <!-- <th style="padding: 10px;">Buy Price</th>
-            <th style="padding: 10px;">Total Amt</th>
-            <th style="padding: 10px;">Order Type</th> -->
-            <th style="padding: 10px;">Status</th>
-          </tr>
-        </thead>
-      <tbody>
-        {% for order in Sell_orders_value %}
-          <tr style="background: {% cycle '#f5f9ff' 'white' %};">
-            <td style="padding: 10px;">{{ order.stock.company_name }}</td>
-            <td>
-                {% if order.advisor %}
-                  {{ order.advisor.advisor_type }}
-                {% else %}
-                  Others
-                {% endif %}
-            </td>
-            <td>
-                {% if order.broker %}
-                  {{ order.broker.name }}
-                {% else %}
-                  N/A
-                {% endif %}
-            </td>
-            <td>{{ order.quantity }}</td>
-            <!-- <td>{{ order.price_per_share }}</td>
-            <td>{{ order.total_amount }}</td>
-            <td>{{ order.order_type|title }}</td> -->
-            <td style="color:
-                {% if order.status == 'Completed' %}green
-                {% elif order.status == 'Processing' %}orange
-                {% elif order.status == 'Cancel' %}red
-                {% else %}#cc6600{% endif %};">
-              {{ order.status }}
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="8">No Sell orders found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div style="margin-top: 20px; text-align: right;">
-      {% if page_obj.has_previous %}
-        <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a>
-        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
-      {% endif %}
-
-      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-
-      {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
-      {% endif %}
+    <div style="min-width: 800px;">
+      <div class="user-portfolio-table">
+        {% include "portfolio/includes/sell_orders_table.html" %}
+      </div>
     </div>
-   </div>
-   </div>
-   </div>
+  </div>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('sell-search-input');
+    const tableContainer = document.querySelector('.user-portfolio-table');
+
+    if (!searchInput || !tableContainer) return;
+
+    let debounceTimer;
+
+    searchInput.addEventListener('input', function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        const query = encodeURIComponent(searchInput.value);
+        const advisor = "{{ current_filters.advisor|default_if_none:'' }}";
+        const broker = "{{ current_filters.broker|default_if_none:'' }}";
+
+        let url = `{% url 'user_portfolio:sell_orders' %}?search=${query}`;
+        if (advisor) url += `&advisor=${advisor}`;
+        if (broker) url += `&broker=${broker}`;
+
+        fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+          tableContainer.innerHTML = html;
+        })
+        .catch(err => console.error('Sell search failed:', err));
+      }, 300);
+    });
+  });
+</script>
+
 {% endblock %}

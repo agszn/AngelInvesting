@@ -13,8 +13,10 @@
 </ul>
 
 <hr>
-
+<div class="user-portfolio-top">
 <h4>Assign User to RM</h4>
+</div>
+<div class="user-portfolio-top">
 <form method="post">
   {% csrf_token %}
   <label for="user_id">Select User:</label>
@@ -37,7 +39,7 @@
 
   <button type="submit" class="btn btn-primary">Assign</button>
 </form>
-
+</div>
 <hr>
 
 <h4>Users with Assigned RM</h4>
@@ -56,8 +58,10 @@
   <button type="submit" class="btn btn-secondary">Filter</button>
 </form>
 
-<table class="table table-bordered">
-  <thead>
+<div class="SMtable-head">
+<div class="SMtable-scroll-container">
+  <table class="user-portfolio-toptable1">
+    <thead class="user-portfolio-head-admin">
     <tr>
       <th>User</th>
       <th>Email</th>
@@ -82,5 +86,7 @@
     {% endfor %}
   </tbody>
 </table>
+</div>
+</div>
 
 {% endblock %}

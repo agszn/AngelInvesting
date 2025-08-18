@@ -383,17 +383,17 @@
         ₹{{ stock.ltp|floatformat:2 }}
         {% if stock.profit > 0 %}
           <span style="color: #00ff00; font-weight: bold;">
-            + {{ stock.profit_percentage|floatformat:2 }} %
+            ( + {{ stock.profit_percentage|floatformat:2 }} % )
           </span>
           <span style="font-size: 24px;">⭐ ⭐</span>
         {% elif stock.profit < 0 %}
           <span style="color: #ff4c4c; font-weight: bold;">
-            {{ stock.profit_percentage|floatformat:2 }} %
+           ( {{ stock.profit_percentage|floatformat:2 }} % )
           </span>
           <span style="font-size: 24px;">🔻</span>
         {% else %}
           <span style="color: #ffffff;">
-            0.00 %
+           ( 0.00 % )
           </span>
         {% endif %}
       </p>

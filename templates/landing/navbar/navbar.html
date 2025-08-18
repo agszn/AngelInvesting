@@ -427,6 +427,28 @@ body {
                   <li class="nav-item"><a href="{% url 'Acc_User:dashboardAcc' %}" class="nav-link">Accounts Team</a></li>
                 {% elif user.user_type == 'ST' %}
                   <li class="nav-item"><a href="{% url 'ST_User:dashboardST' %}" class="nav-link">Share Transfer Team  </a></li> 
+                {% elif user.user_type == 'AP' %}
+                    <li class="nav-item">
+                      <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="nav-link">Unlisted Shares</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="/" class="nav-link">Angel Investing</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'about' %}" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'faq' %}" class="nav-link">FAQ's</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{%  url 'contact' %}" class="nav-link">Contact Us</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link"href="{% url 'user_portfolio:portfolio_view' %}" >
+                        Portfolio
+                      </a>
+                    </li>
+                  <li class="nav-item"><a href="{% url 'RM_User:dashboardRM' %}" class="nav-link">Partner</a></li> 
                 {% elif user.user_type == 'SM' or user.user_type == 'AD' %}
                   <li class="nav-item">
                     <a href="{% url 'SM_User:UnlistedStocksUpdateSM' %}" class="nav-link" style="color: #8ee0ea;">Admin</a>

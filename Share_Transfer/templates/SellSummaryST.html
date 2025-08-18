@@ -6,8 +6,10 @@
 
 {% block STprofile_content %}
         {% if order %}
-                <table class="STbuyorder-table">
-                    <thead>
+            <div class="SMtable-head">
+            <div class="order-details-transaction">
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                           <tr>
                             <th>Sl.no</th>
                             <th>Order_Id</th>
@@ -29,10 +31,12 @@
                             <td>{{ order.user.profile.user.assigned_rm }}</td>
                     </tbody>
                 </table>
+            </div>
 
                 <h6 style="padding-top: 2%;">Customer Details</h6>
-                <table class="STbuyorder-table">
-                    <thead>
+                <div class="order-details-transaction">
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                         <tr>
                             <th>Customer_name</th>
                             <th>Customer_Id</th>
@@ -51,11 +55,12 @@
                         </tr>
                     </tbody>
                 </table>
-
+                </div>
                 <h6 style="padding-top: 2%;">CMR Details</h6>
                 {% if cmr %}
-                    <table class="STbuyorder-table">
-                        <thead>
+                   <div class="order-details-transaction">
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                             <tr>
                                 <th>Broker Name</th>
                                 <th>Broker Id</th>
@@ -76,14 +81,16 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
                 {% else %}
                     <p>No broker details found.</p>
                 {% endif %}
 
                 <h6 style="padding-top: 2%;">Bank Account Details</h6>
                 {% if bank_accounts %}
-                <table class="STbuyorder-table">
-                    <thead>
+                <div class="order-details-transaction">
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                     <tr>
                         <th>Bank Name</th>
                         <th>Account Holder Name</th>
@@ -104,13 +111,15 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                </div>
                 {% else %}
                 <p>No bank account details found.</p>
                 {% endif %}
                 
                 <h6 style="padding-top: 2%;">Transaction Details</h6>
-                <table class="STbuyorder-table">
-                    <thead>
+                <div class="order-details-transaction">
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                         <tr>
                                 <th>SLNO</th>
                                 <th>Broker</th>
@@ -164,6 +173,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                </div>
                 <div class="STpayment-process">
                     <h4><strong>Total Amount: </strong> {{ order.total_value }}</h4>
                     <a href="{% url 'ST_User:sellDealLetterrST' %}?order_id={{ order.order_id }}" class="STpayment-button">

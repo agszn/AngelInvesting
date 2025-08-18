@@ -4,7 +4,8 @@
 {% block SubTitleRM %}Unlisted Shares RM{% endblock %}
 
 {% block RMSearch_content %}
-    <form method="get" style="margin-bottom: 20px;">
+<div class="user-portfolio-top">
+    <form method="get" style="display: flex; column-gap: 10px;">
         {% if stocks %}
             <button type="submit" name="download" value="1" style="padding: 2%;">                        
                 ⬇️
@@ -12,15 +13,16 @@
         {% endif %}
         <input type="text" name="q" placeholder="Search by company or industry" value="{{ query }}">
         <button type="submit" style="padding: 2%;">🔎</button>
-
     </form>
+</div>
 {% endblock %}
 
 {% block RMprofile_content %}
 
-
-    <table class="RMbuyorder-table">
-        <thead>
+<div class="SMtable-head">
+<div class="SMtable-scroll-container">
+  <table class="user-portfolio-toptable1">
+    <thead class="user-portfolio-head-admin">
             <tr>
                 <th>Sl.no</th>
                 <th>Company Name</th>
@@ -49,4 +51,6 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+</div>
 {% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+{% load static %}
+<div class="stock-page-header">
+    <h2>Disclaimer</h2>
+</div>
+<main class="blog-containerM">
+    <div class="fullpage">
+        <h1 class="title-faqPage">1. No Advisory Services</h1>
+        <p class="paragraph">Thangiv Consultancy Pvt. Ltd. does not act as a stock exchange, investment advisor, or broker under the Securities Contracts (Regulation) Act, 1956, or any other applicable law. The platform is purely informational and consultative in nature and does not facilitate secondary trading or stock exchange-like activities.</p>
+
+        <h1 class="title-faqPage">2. No Guarantees or Assurances</h1>
+        <p class="paragraph">We do not provide any guarantees of fixed returns, liquidity, or future listing of the securities discussed or featured on our platform. All investment decisions are solely the responsibility of the investor.</p>
+
+        <h1 class="title-faqPage">3. Risks of Investing in Unlisted and Pre-IPO Securities</h1>
+        <p class="paragraph1">Investing in unlisted, startup, or pre-IPO securities involves significant risks including but not limited to:</p>
+        <p class="paragraph1">- Lack of liquidity</p>
+        <p class="paragraph1">- Market uncertainty and price volatility</p>
+        <p class="paragraph1">- Absence of public disclosures</p>
+        <p class="paragraph1">- Potential for loss of full capital</p>
+        <p class="paragraph">Such investments are only suitable for investors who fully understand these risks and can tolerate illiquidity and the potential of full capital loss.</p>
+
+        <h1 class="title-faqPage">4. Investor Acknowledgements</h1>
+        <p class="paragraph1">By using www.theangelinvesting.com, you agree and acknowledge that:</p>
+        <p class="paragraph1">- You are making investment decisions independently, without any influence from Thangiv Consultancy Pvt. Ltd., its employees, partners, or affiliates.</p>
+        <p class="paragraph1">- You have not been offered or promised fixed returns by any representative of the company.</p>
+        <p class="paragraph1">- You understand that each investment opportunity carries unique risks and is not suitable for all investors.</p>
+        <p class="paragraph">- You accept that there may be delays, regulatory challenges, or complete non-performance in the execution of any deal.</p>
+
+        <h1 class="title-faqPage">5. Independent Due Diligence Required</h1>
+        <p class="paragraph">Users are encouraged to conduct their own independent due diligence, including reviewing company details, risk factors, projections, legal documents, and seeking expert advice before making any commitments.</p>
+
+        <h1 class="title-faqPage">6. No Liability</h1>
+        <p class="paragraph">Thangiv Consultancy Pvt. Ltd. is not liable for any direct, indirect, incidental, or consequential losses resulting from your use of the platform or reliance on any content, information, or third-party links.</p>
+
+        <h1 class="title-faqPage">7. Third-Party Transfers</h1>
+        <p class="paragraph">We do not take possession or custody of shares, nor do we engage in third-party share transfers or unregulated transactions. All transactions and compliance obligations remain between the investor and the issuing or transferring party.</p>
+
+        <h1 class="title-faqPage">8. Changes to This Disclaimer</h1>
+        <p class="paragraph">We may update or modify this disclaimer at any time without prior notice. Users are encouraged to check this page regularly for any updates. Continued use of the platform signifies your agreement to the latest version.</p>
+    </div>
+</main>
+<section class="contact-section">
+        <img src="{% static 'Media/images/contact-banner.jpg' %}" class="contact-bg" alt="Contact background">
+        <div class="contact-content">
+            <h1 class="contact-heading">Contact Us</h1>
+            <p class="contact-description">
+              If you'd like to learn more about The Angel Investing and how we can assist
+              you in navigating your unlisted share investment journey, please get
+              in touch with us.
+            </p>
+        </div>
+        <div class="contact-info">
+          <p class="contact-info-label">Reach out to us</p>
+          <p class="contact-info-details">
+            <b>Email:</b> info@theangelinvesting.com, <b>Phone:</b> 9740940369
+          </p>
+          <p class="contact-assistance">
+            Our expert would be happy to provide you personal assistance for your queries.
+        </p>
+        </div>
+    </section>
+{% endblock %}

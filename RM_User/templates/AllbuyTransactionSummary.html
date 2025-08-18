@@ -3,7 +3,8 @@
 {% block SubTitleRM %}Buy Order Transaction{% endblock %}
 
 {% block RMSearch_content %}
-  <form method="get" style="margin-bottom: 20px;">
+<div class="user-portfolio-top">
+  <form method="get">
     <!-- Company Name Dropdown -->
     <select name="company_name">
       <option value="">-- Company Name --</option>
@@ -53,24 +54,29 @@
     <button type="submit" class="btn btn-sm btn-outline-primary">🔍 Filter</button>
     <a class="btn btn-sm btn-outline-primary" href="{% url 'RM_User:AllbuyTransactionSummary' %}">🔄 Reset</a>
   </form>
+</div>
 {% endblock %}
 
 {% block RMprofile_content %}
   <h6 style="padding-top: 2%;">Order Transaction Details</h6>
-
-  <table class="RMbuyorder-table">
-    <thead>
+<div class="SMtable-head">
+<div class="SMtable-scroll-container">
+  <table class="user-portfolio-toptable1">
+    <thead class="user-portfolio-head-admin">
       <tr>
         <th>SLNO</th>
-        <th>User</th>
+        <th>Order ID</th>
+        <th>Client ID</th>
+        <th>Client Name</th>
+        <th>Date</th>
+        <th>Time</th>
         <th>Broker</th>
         <th>ISIN Number</th>
         <th>Stock</th>
         <th>Order Type</th>
-        <th>Order ID</th>
         <th>Share Price</th>
         <th>Buy Price</th>
-        <th>Qty</th>
+        <th>Quantity</th>
         <th>Amount</th>
         <th>RM Status</th>
         <th>AC Status</th>
@@ -82,12 +88,15 @@
       {% for item in TransactionDetails %}
         <tr>
           <td>{{ forloop.counter }}</td>
+          <td>{{ item.order_id }}</td>
+          <td>{{ item.user.id }}</td>
           <td>{{ item.user.username }}</td>
+          <td>{{ item.timestamp|date:"d-m-Y" }}</td>
+          <td>{{ item.timestamp|time:"h:i A" }}</td>
           <td>{{ item.broker.name }}</td>
           <td>{{ item.stock.isin_no }}</td>
           <td>{{ item.stock.company_name }}</td>
           <td>{{ item.order_type }}</td>
-          <td>{{ item.order_id }}</td>
           <td>{{ item.stock.share_price }}</td>
           <td>{{ item.price_per_share }}</td>
           <td>{{ item.quantity }}</td>
@@ -103,4 +112,6 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
+</div>
 {% endblock %}

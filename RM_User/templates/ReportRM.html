@@ -5,65 +5,72 @@
 {% block RMprofile_content %}
 
 <!-- Filter Form -->
-<form method="get" class="filter-form mb-4 d-flex flex-wrap gap-3 align-items-end">
-    <div>
-        <label>From Date:</label>
-        <input type="date" name="from_date" value="{{ from_date }}" class="form-control">
-    </div>
-    <div>
-        <label>To Date:</label>
-        <input type="date" name="to_date" value="{{ to_date }}" class="form-control">
-    </div>
-    <div>
-        <label>Order ID:</label>
-        <input type="text" name="order_id" value="{{ order_id }}" class="form-control" placeholder="Search Order ID">
-    </div>
-    <div>
-        <button type="submit" class="btn btn-primary">Filter</button>
-        <a href="{% url 'RM_User:ReportRM' %}" class="btn btn-secondary">Clear</a>
-    </div>
-</form>
+<!-- Filter Form -->
+<div class="user-portfolio-top">
+    <form method="get" class="filter-form mb-4 d-flex flex-wrap gap-3 align-items-end">
+        <div>
+            <label>Date:</label>
+            <input type="date" name="date_filter" value="{{ date_filter|default_if_none:'' }}" class="form-control">
+        </div>
+        <div>
+            <label>Order ID:</label>
+            <input type="text" name="order_id" value="{{ order_id|default_if_none:'' }}" class="form-control" placeholder="Search Order ID">
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{% url 'RM_User:ReportRM' %}" class="btn btn-secondary">Clear</a>
+        </div>
+    </form>
+</div>
+
 
 <!-- Completed Buy Orders -->
+<div class="SMtable-head">
 <h4 class="mt-4 mb-2">✅ Completed Buy Orders</h4>
-<table class="RMbuyorder-table mb-5">
-    <thead>
-        <tr>
-            <th>Sl.no</th>
-            <th>Order ID</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Customer Name</th>
-            <th>Customer ID</th>
-            <th>RM Status</th>
-            <th>AM Status</th>
-            <th>ST Status</th>
-            <th>Stock Details</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for order in buy_orders_ReportsRM %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ order.order_id }}</td>
-                <td>{{ order.timestamp|date:"d-m-Y" }}</td>
-                <td>{{ order.timestamp|time:"h:i A" }}</td>
-                <td>{{ order.user.profile.full_name }}</td>
-                <td>{{ order.user.profile.custom_user_id }}</td>
-                <td>{{ order.RM_status }}</td>
-                <td>{{ order.AC_status }}</td>
-                <td>{{ order.status }}</td>
-                <td><a class="view" href="{% url 'RM_User:buyordersummery' order.order_id %}">View</a></td>
-            </tr>
-        {% empty %}
-            <tr><td colspan="7">No completed buy orders found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
 
+    <div class="SMtable-scroll-container">
+        <table class="user-portfolio-toptable1">
+            <thead class="user-portfolio-head-admin">
+                <tr>
+                    <th>Sl.no</th>
+                    <th>Order ID</th>
+                    <th>Customer ID</th>
+                    <th>Customer Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Stock</th>
+                    <th>Quantity</th>
+                    <th>RM Status</th>
+                    <th>AM Status</th>
+                    <th>ST Status</th>
+                    <th>Stock Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in buy_orders_ReportsRM %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ order.order_id }}</td>
+                        <td>{{ order.user.profile.custom_user_id }}</td>
+                        <td>{{ order.user.profile.full_name }}</td>
+                        <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+                        <td>{{ order.timestamp|time:"h:i A" }}</td>
+                        <td>{{ order.stock }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>{{ order.RM_status }}</td>
+                        <td>{{ order.AC_status }}</td>
+                        <td>{{ order.status }}</td>
+                        <td><a class="view" href="{% url 'RM_User:buyordersummery' order.order_id %}">View</a></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7">No completed buy orders found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 <!-- Buy Order Pagination -->
 {% if buy_orders_ReportsRM.has_other_pages %}
-<nav class="mb-5">
+<nav class="mb-5 mt-4">
     <ul class="pagination">
         {% if buy_orders_ReportsRM.has_previous %}
         <li class="page-item">
@@ -86,8 +93,9 @@
 
 <!-- Completed Sell Orders -->
 <h4 class="mt-4 mb-2">✅ Completed Sell Orders</h4>
-<table class="RMbuyorder-table">
-    <thead>
+<div class="SMtable-scroll-container">
+    <table class="user-portfolio-toptable1">
+        <thead class="user-portfolio-head-admin">
         <tr>
             <th>Sl.no</th>
             <th>Order ID</th>
@@ -120,10 +128,10 @@
         {% endfor %}
     </tbody>
 </table>
-
+</div>
 <!-- Sell Order Pagination -->
 {% if sell_orders_ReportsRM.has_other_pages %}
-<nav>
+<nav class="mt-4">
     <ul class="pagination">
         {% if sell_orders_ReportsRM.has_previous %}
         <li class="page-item">
@@ -142,6 +150,8 @@
         {% endif %}
     </ul>
 </nav>
+</div>
+
 {% endif %}
 
 {% endblock %}

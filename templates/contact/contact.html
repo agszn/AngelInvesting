@@ -62,22 +62,33 @@
             {% endif %}
             <form method="post" novalidate>
                 {% csrf_token %}        
-                    {% if user_is_authenticated %}
-                        <!-- Read-only fields for logged-in users -->
-                        <input type="text" name="name" value="{{ form.name.value|default_if_none:'' }}" readonly>
-                        <input type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" readonly>
-                    {% else %}
-                        <!-- Editable fields for guest users -->
-                        <input type="text" name="name" value="{{ form.name.value|default_if_none:'' }}" placeholder="Your Name" required>
-                        <input type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" placeholder="Your Email" required>
-                    {% endif %}
+                {% if user_is_authenticated %}
+                    <!-- Read-only fields for logged-in users -->
+                    <input type="text" name="name" value="{{ form.name.value|default_if_none:'' }}" readonly>
+                    <input type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" readonly>
+                {% else %}
+                    <!-- Editable fields for guest users -->
+                    <input type="text" name="name" value="{{ form.name.value|default_if_none:'' }}" placeholder="Your Name" required>
+                    <input type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" placeholder="Your Email" required>
+                {% endif %}
 
-                    <!-- These are always editable -->
-                    <input type="text" name="subject" value="{{ form.subject.value|default_if_none:'' }}" placeholder="Subject" required>
-                    <textarea name="message" placeholder="Your Message" required>{{ form.message.value|default_if_none:'' }}</textarea>
+                <!-- Phone number field (always editable) -->
+                <input type="text" 
+                    name="phone" 
+                    value="{{ form.phone.value|default_if_none:'' }}" 
+                    placeholder="Your 10-digit Phone Number" 
+                    maxlength="10" 
+                    pattern="[0-9]{10}" 
+                    title="Enter a valid 10-digit phone number" 
+                    required>
 
-                    <button type="submit">Submit</button>
+                <!-- These are always editable -->
+                <input type="text" name="subject" value="{{ form.subject.value|default_if_none:'' }}" placeholder="Subject" required>
+                <textarea name="message" placeholder="Your Message" required>{{ form.message.value|default_if_none:'' }}</textarea>
+
+                <button type="submit">Submit</button>
             </form>
+
         </div>
         <div class="side-image">
             <img src="{% static 'Media/images/contactus-logo.png' %}" alt="logo">

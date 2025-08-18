@@ -4,16 +4,22 @@
 {% block SubTitleRM %}Relationship Manager - Buy Order List{% endblock %}
 
 {% block RMprofile_content %}
-    <table class="RMbuyorder-table">
-        <thead>
+<div class="SMtable-head">
+<div class="SMtable-scroll-container">
+  <table class="user-portfolio-toptable1">
+    <thead class="user-portfolio-head-admin">
             <tr>
                 <th>Sl.no</th>
                 <th>Order ID</th>
+                <th>Client ID</th>
+                <th>Client Name</th>
                 <th>Date</th>
                 <th>Time</th>
-                <th>Client Name</th>
-                <th>Client ID</th>
-                <th>Status</th>
+                <th>Stock</th>
+                <th>Quantity</th>
+                <th>RM Status</th>
+                <th>Acc Status</th>
+                <th>ST Status</th>
                 <th>Stock Details</th>
             </tr>
         </thead>
@@ -22,11 +28,15 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ order.order_id }}</td>
+                <td>{{ order.user.profile.custom_user_id }}</td>
+                <td>{{ order.user.profile.user.username }}</td>
                 <td>{{ order.timestamp|date:"d-m-Y" }}</td>
                 <td>{{ order.timestamp|time:"h:i A" }}</td>
-                <td>{{ order.user.profile.user.username }}</td>
-                <td>{{ order.user.profile.custom_user_id }}</td>
+                <td>{{ order.stock }}</td>
+                <td>{{ order.quantity }}</td>
                 <td>{{ order.RM_status }}</td>
+                <td>{{ order.AC_status }}</td>
+                <td>{{ order.status }}</td>
                 <td>
                 <a class="view" href="{% url 'RM_User:buyordersummery' order.order_id %}">view</a>
                 </td>
@@ -39,4 +49,6 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+</div>
 {% endblock %}

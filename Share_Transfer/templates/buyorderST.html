@@ -5,17 +5,22 @@
 {% block STsubtitle %} Stock Transfer - Buy Orders List{% endblock %}
 
 {% block STprofile_content %}
-            <table class="STbuyorder-table">
-                <thead>
+<div class="SMtable-head">
+<div class="SMtable-scroll-container">
+  <table class="user-portfolio-toptable1">
+    <thead class="user-portfolio-head-admin">
                     <tr>
                         <th>Sl.no</th>
-                        <th>Order_Id</th>
+                        <th>Order Id</th>
+                        <th>Client ID</th>
+                        <th>Client Name</th>
                         <th>Date</th>
                         <th>Time</th>
-                        <th>Accounts</th>
-                        <!-- <th>RM</th> -->
-                        <th>Customer_Name</th>
-                        <th>Customer_ID</th>
+                        <th>Stock</th>
+                        <th>Quantity</th>
+                        <th>RM Status</th>
+                        <th>Acc Status</th>
+                        <th>ST Status</th>
                         <th>Stock Details</th>
                     </tr>
                 </thead>
@@ -24,12 +29,16 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ order.order_id }}</td>
+                        <td>{{ order.user.profile.custom_user_id }}</td>
+                        <td>{{ order.user.profile.user.username }}</td>
                         <td>{{ order.timestamp|date:"d-m-Y" }}</td>
                         <td>{{ order.timestamp|time:"h:i A" }}</td>
-                        <td>{{ order.ACApproved }}</td>
-                        <!-- <td>{{ order.RMApproved }}</td> -->
-                        <td>{{ order.user.profile.user.username }}</td>
-                        <td>{{ order.user.profile.custom_user_id }}</td>
+                        <td>{{ order.stock }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>{{ order.get_RM_status_display }}</td>
+                        <td>{{ order.AC_status }}</td>
+                        <td>{{ order.status }}</td>
+
                         <td>
                         <a class="STview" href="{% url 'ST_User:buyOrderSummaryST' order.order_id %}">View</a>
                         </td>
@@ -42,4 +51,6 @@
                     {% endfor %}
                 </tbody>
             </table>
+</div>
+</div>
 {% endblock %}

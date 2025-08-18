@@ -487,5 +487,3 @@ def remove_from_group(request, wishlist_id):
     wishlist_item = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
     wishlist_item.delete()
     return redirect(request.META.get('HTTP_REFERER', 'accounts:profile'))
-
-

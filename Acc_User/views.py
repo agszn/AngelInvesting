@@ -37,7 +37,7 @@ def dashboardAcc(request):
         except User.DoesNotExist:
             pass
 
-        return redirect('dashboardAcc')  # Adjust if your URL name is different
+        return redirect('Acc_User:dashboardAcc')  # Adjust if your URL name is different
 
     context = {
         'rms': rms,
@@ -176,25 +176,54 @@ from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponseBadRequest
 from RM_User.models import RMPaymentRecord
 
-@csrf_exempt
+# 
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+
+# @require_POST
+# @login_required
+# def edit_payment_ac_status(request, payment_id):
+#     payment = get_object_or_404(RMPaymentRecord, id=payment_id)
+
+#     # Ensure only AC or superuser can edit
+#     if request.user.user_type != 'AC' and not request.user.is_superuser:
+#         messages.error(request, "You do not have permission to update this.")
+#         return redirect(request.META.get('HTTP_REFERER', '/'))
+
+#     # Get values from form
+#     payment.AC_Payment_Status = request.POST.get('AC_Payment_Status')
+#     payment.payment_transaction_date = request.POST.get('payment_transaction_date') or None
+#     payment.payment_transaction_id = request.POST.get('payment_transaction_id') or ''
+
+#     payment.save()
+
+#     messages.success(request, "Payment status and transaction details updated.")
+#     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+
+@require_POST
 @login_required
 def edit_payment_ac_status(request, payment_id):
-    if request.method == 'POST' and request.user.user_type == 'AC':
-        payment = get_object_or_404(RMPaymentRecord, id=payment_id)
+    payment = get_object_or_404(RMPaymentRecord, id=payment_id)
 
-        # Get valid choices from model field
-        valid_choices = dict(RMPaymentRecord._meta.get_field('AC_Payment_Status').choices).keys()
+    # Ensure only AC or superuser can edit
+    if request.user.user_type != 'AC' and not request.user.is_superuser:
+        messages.error(request, "You do not have permission to update this.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
 
-        new_status = request.POST.get('AC_Payment_Status')
-        if new_status not in valid_choices:
-            return HttpResponseBadRequest("Invalid status")
+    # Get values from form
+    payment.AC_Payment_Status = request.POST.get('AC_Payment_Status')
+    payment.payment_transaction_date = request.POST.get('payment_transaction_date') or None
+    payment.payment_transaction_id = request.POST.get('payment_transaction_id') or ''
 
-        payment.AC_Payment_Status = new_status
-        payment.save()
+    payment.save()
 
-        return redirect('Acc_User:buyOrderSummaryAcc', order_id=payment.rm_user_view.order_id)
-
-    return HttpResponseBadRequest("Invalid request")
+    messages.success(request, "Payment status and transaction details updated.")
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 from django.views.decorators.csrf import csrf_exempt
@@ -363,27 +392,30 @@ def clientAcc(request):
     return render(request, 'clientAcc.html')
 
 from django.core.paginator import Paginator
+
 def reportsAcc(request):
-    
     buy_orders_qs = BuyTransaction.objects.filter(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
     sell_orders_qs = SellTransaction.objects.filter(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
 
-    from_date = request.GET.get('from_date')
-    to_date = request.GET.get('to_date')
+    # Get the date (only one date parameter is expected)
+    date_filter = request.GET.get('date_filter')
     order_id = request.GET.get('order_id')
 
-    if from_date:
-        buy_orders_qs = buy_orders_qs.filter(timestamp__date__gte=from_date)
-        sell_orders_qs = sell_orders_qs.filter(timestamp__date__gte=from_date)
-    if to_date:
-        buy_orders_qs = buy_orders_qs.filter(timestamp__date__lte=to_date)
-        sell_orders_qs = sell_orders_qs.filter(timestamp__date__lte=to_date)
+    # Sanitize "None" or empty values in the date and order_id
+    if date_filter in [None, '', 'None']:
+        date_filter = None
+    if order_id in [None, '', 'None']:
+        order_id = None
+
+    # Apply filtering only if date_filter is provided
+    if date_filter:
+        # Assuming that the user is providing a date in the format YYYY-MM-DD
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date=date_filter)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date=date_filter)
+
     if order_id:
         buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
         sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
-
-    buy_orders_qs = buy_orders_qs.order_by('-timestamp')
-    sell_orders_qs = sell_orders_qs.order_by('-timestamp')
 
     # PAGINATION
     buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
@@ -398,8 +430,7 @@ def reportsAcc(request):
     return render(request, 'reportsAcc.html', {
         'buy_orders_ReportsAcc': buy_orders_ReportsAcc,
         'sell_orders_ReportsAcc': sell_orders_ReportsAcc,
-        'from_date': from_date,
-        'to_date': to_date,
+        'date_filter': date_filter,
         'order_id': order_id
     })
 

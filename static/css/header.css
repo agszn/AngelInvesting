@@ -46,12 +46,15 @@
     color: #ffffff;
 }
 
-/* .unlisted-deals {
-    width: 17%;
+.unlisted-deals {
+    width: 7%;
     font-size: 20px;
     font-weight: 600;
-    color: #FFD400;
-} */
+    color: #FFD400 !important;
+    align-items: center;
+    text-align: center;
+    cursor:  pointer;
+}
 /* .up {
     color: #00FF33;
 }

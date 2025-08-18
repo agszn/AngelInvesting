@@ -1,19 +1,29 @@
 {% extends 'base.html' %}
 {% block title %}Profile{% endblock %}
 {% load static %}
+
+{% block marquee %}
+{% endblock %}
+
+{% block contentNavbar %}
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
 {% block content %}
     <style>
         .RMmain{
             width: 100%;
             display: flex;
         } 
-        .RMsidebar {
+        /* .RMsidebar {
         min-height: 100vh;
         width: 25%;
         border: 1px solid black;
-        }
+        } */
 
-        .RMsidebar nav{
+        /* .RMsidebar nav{
             background-color: #ECF3FF;
             display: block;
             flex-direction: column;
@@ -27,13 +37,13 @@
             font-weight: 600;
             transition: all 0.3s;
             width: 100%;
-        }
+        } */
 
-        .RMsidebar .nav-link:hover,
+        /* .RMsidebar .nav-link:hover,
         .RMsidebar .nav-link.active {
         background-color: #34495e;
         color: #ffffff;
-        }
+        } */
 
         .RMdashboard
         {
@@ -41,49 +51,15 @@
             border: 1px solid black;
             padding: 25px;
         }
-        .RMtable-head{
-            margin: auto;
-            background-color: #e8f1ff;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .RMheading
-        {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .RMheading h3{
-            margin: 0;
-            color: #2e3a59;
-        }
-        .RMsearch-bar
-        {
-            display: flex; 
-            align-items: center;
-            gap: 10px;
-        }
-        .RMsearch-bar input{
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            width: 250px;
-        }
-        .RMsearch-bar select{
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            width: 250px;
-        }
-        .RMtable-scroll-container
+       
+        /* .RMtable-scroll-container
         {
             min-height: 200px;
             max-height: 600px;
             overflow-y: auto;
             border: 1px solid #ccc;
-        }
-        .RMbuyorder-table
+        } */
+        /* .RMbuyorder-table
         {
             width: 100%;
             border-collapse: collapse;
@@ -98,16 +74,16 @@
         }
         .RMbuyorder-table tr td{
             padding: 10px; 
-        }
+        } */
 
-        .RMbuyorder-table  tbody tr:nth-child(odd) {
+        /* .RMbuyorder-table  tbody tr:nth-child(odd) {
             background-color: white;
         }
 
         .RMbuyorder-table  tbody tr:nth-child(even) {
             background-color: #f7fbff;
-        }
-        .view {
+        } */
+        /* .view {
             display: inline-block;
             padding: 6px 10px;
             background-color: #3a456d;
@@ -115,7 +91,7 @@
             border: none;
             border-radius: 6px;
             font-size: 15px;
-        }
+        } */
         .stock-page-header {
             text-align: center;
             margin-bottom: 20px;
@@ -181,6 +157,7 @@
             color: white;
             border: none;
             border-radius: 6px;
+            text-decoration: none;
         }
         .RMpaymentAddsection{
             margin-bottom: 10px;
@@ -222,57 +199,111 @@
             align-items: center;
             gap: 5px;
         }
+
+        .modal-title,.form-label,.col-md-4 label
+        {
+            color: #000 !important;
+        }
     </style>
-    <div class="stock-page-header">
+    <!-- <div class="stock-page-header">
         <h2>{% block headerContent %}RM Profile{% endblock %}</h2>
-    </div>
-    <div class="RMmain">
-        <div class="RMsidebar">
-            <nav class="nav">
-            <a class="nav-link" href="{% url 'RM_User:dashboardRM' %}">Dashboard</a>
-            <!-- <a class="nav-link" href="{% url 'RM_User:ordersRM' %}">Orders</a> -->
-            <a class="nav-link" href="{% url 'RM_User:buyorderRM' %}">Buy Orders</a>
-            <a class="nav-link" href="{% url 'RM_User:AllbuyTransactionSummary' %}">Buy Transaction</a>
-
-
-            <a class="nav-link" href="{% url 'RM_User:sellorderRM' %}">Sell Orders</a>
-            <a class="nav-link" href="{% url 'RM_User:AllsellTransactionSummary' %}">Sell Transaction</a>
-
-            <a class="nav-link" href="{% url 'RM_User:clientRM' %}">Client</a>
-
-            <a class="nav-link" href="{% url 'RM_User:unlistedSharesRM' %}">Unlisted Shares</a>
-
-            <a class="nav-link" href="{% url 'RM_User:ReportRM' %}">Reports</a>
-
-
-            <!-- <a class="nav-link" href="{% url 'RM_User:angelInvestRM' %}">Angel Invest</a> -->
-            </nav>
-        </div>
-        <div class="RMdashboard">
-            <div class="RMtable-head">
-                <div class="RMheading">
-                    <h3>{% block SubTitleRM %}{% endblock %}</h3>
-                    <div class="RMsearch-bar">
-                        
-                        {% block RMSearch_content %}
-
-                        {% endblock %}
-                        
+    </div> -->
+    <section class="SMloginDashboard">
+        <div class="d-flex user-container">
+            <div class="user-sidebar" id="userSidebar">
+                <div class="user-sidebar-top-logo">
+                    <img src="{% static 'Media/images/dashboardlogo.png' %}" alt="logo">
+                </div>
+                <div class="sitemanage-list-tab">
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'RM_User:dashboardRM' %}">Dashboard</a>
+                    </div>
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'RM_User:buyorderRM' %}">Buy Orders</a>
+                    </div>
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'RM_User:AllbuyTransactionSummary' %}">Buy Transaction</a>
+                    </div>
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'RM_User:sellorderRM' %}">Sell Orders</a>
+                    </div>
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'RM_User:AllsellTransactionSummary' %}">Sell Transaction</a>
+                    </div>
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'RM_User:clientRM' %}">Client</a>
+                    </div>
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'RM_User:unlistedSharesRM' %}">Unlisted Shares</a>
+                    </div>
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'RM_User:ReportRM' %}">Reports</a>
                     </div>
                 </div>
-                <div class="RMtable-scroll-container">
-                        {% if messages %}
-                        <div class="messages">
-                            {% for message in messages|slice:"-2:" %}
-                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                    {% block RMprofile_content %}
+                <script>
+                    function toggleSidebar() {
+                        const sidebar = document.getElementById('userSidebar');
+                        const mainContent = document.querySelector('.user-main-content');
+                        sidebar.classList.toggle('collapsed');
+                        mainContent.classList.toggle('collapsed');
+                    }
 
-                    {% endblock %}
+                    // Initialize sidebar state based on screen size
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const sidebar = document.getElementById('userSidebar');
+                        const mainContent = document.querySelector('.user-main-content');
+                        if (window.innerWidth < 768) {
+                            sidebar.classList.add('collapsed');
+                            mainContent.classList.add('collapsed');
+                        }
+
+                        // Handle window resize
+                        window.addEventListener('resize', function () {
+                            if (window.innerWidth < 768) {
+                                sidebar.classList.add('collapsed');
+                                mainContent.classList.add('collapsed');
+                            } else {
+                                sidebar.classList.remove('collapsed');
+                                mainContent.classList.remove('collapsed');
+                            }
+                        });
+                    });
+                </script>
+            </div>
+            <div class="user-main-content">
+                <div class="top-back-to-site">
+                    <button class="btn btn-primary user-toggle-btn" type="button" onclick="toggleSidebar()">
+                        Toggle
+                    </button>
+                    <div class="Backtositelink">
+                        <a class="" href="/">Home</a>
+                    </div>
+                </div>
+                <div class="admin-main-dashboardcontent" style="color: white;">
+                    <div class="RMtable-head">
+                        <div class="RMheading">
+                            <h3>{% block SubTitleRM %}{% endblock %}</h3>
+                        </div>
+                         <div class="RMsearch-bar">
+                            {% block RMSearch_content %}
+
+                            {% endblock %}
+                        </div>
+                        <div class="RMtable-scroll-container">
+                                {% if messages %}
+                                <div class="messages">
+                                    {% for message in messages|slice:"-2:" %}
+                                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            {% block RMprofile_content %}
+
+                            {% endblock %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 {% endblock %}

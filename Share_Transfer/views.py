@@ -62,22 +62,27 @@ from RM_User.models import BuyTransaction, SellTransaction
 def ReportsST(request):
     buy_orders_qs = BuyTransaction.objects.filter(status__in=['completed', 'cancelled']).order_by('-timestamp')
     sell_orders_qs = SellTransaction.objects.filter(status__in=['completed', 'cancelled']).order_by('-timestamp')
-    from_date = request.GET.get('from_date')
-    to_date = request.GET.get('to_date')
+
+    # Get the date (only one date parameter is expected)
+    date_filter = request.GET.get('date_filter')
     order_id = request.GET.get('order_id')
 
-    if from_date:
-        buy_orders_qs = buy_orders_qs.filter(timestamp__date__gte=from_date)
-        sell_orders_qs = sell_orders_qs.filter(timestamp__date__gte=from_date)
-    if to_date:
-        buy_orders_qs = buy_orders_qs.filter(timestamp__date__lte=to_date)
-        sell_orders_qs = sell_orders_qs.filter(timestamp__date__lte=to_date)
+    # Sanitize "None" or empty values in the date and order_id
+    if date_filter in [None, '', 'None']:
+        date_filter = None
+    if order_id in [None, '', 'None']:
+        order_id = None
+
+    # Apply filtering only if date_filter is provided
+    if date_filter:
+        # Assuming that the user is providing a date in the format YYYY-MM-DD
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date=date_filter)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date=date_filter)
+
     if order_id:
         buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
         sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
 
-    buy_orders_qs = buy_orders_qs.order_by('-timestamp')
-    sell_orders_qs = sell_orders_qs.order_by('-timestamp')
 
     # PAGINATION
     buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
@@ -92,8 +97,7 @@ def ReportsST(request):
     return render(request, 'ReportsST.html', {
         'buy_orders_ReportsST': buy_orders_ReportsST,
         'sell_orders_ReportsST': sell_orders_ReportsST,
-        'from_date': from_date,
-        'to_date': to_date,
+        'date_filter': date_filter,
         'order_id': order_id
     })
 
@@ -443,7 +447,7 @@ def render_to_pdf(request, template_src, context_dict, filename):
 
 
 def get_logo_base64():
-    logo_path = os.path.join(settings.BASE_DIR, 'static/Media/images/headerlogo2.png')
+    logo_path = os.path.join(settings.BASE_DIR, 'static/images/logo2.png')
     if os.path.exists(logo_path):
         with open(logo_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
@@ -529,6 +533,7 @@ from .models import DealLetterRecord  # Import
 @login_required
 def buyDealLetterrST(request):
     order_id = request.GET.get('order_id')
+    # print(order_id)
     if not order_id:
         messages.error(request, "Order ID is missing.")
         return redirect("ST_User:dashboardST")
@@ -541,7 +546,7 @@ def buyDealLetterrST(request):
         'full_name': 'theangelinvesting.com',
         'pan_number': 'NA',
         'email': 'info@theangelinvesting.com',
-        'phone': '+91-XXXXXXXXXX',
+        'phone': '+91-9945164369',
         'client_id': 'NA',
     }
 
@@ -592,7 +597,7 @@ def sellDealLetterrST(request):
         'full_name': 'theangelinvesting.com',
         'pan_number': 'NA',
         'email': 'info@theangelinvesting.com',
-        'phone': '+91-XXXXXXXXXX',
+        'phone': '+91-9945164369',
         'client_id': 'NA',
     }
 

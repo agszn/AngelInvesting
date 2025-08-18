@@ -5,9 +5,10 @@
 
 {% block RMprofile_content %}
   {% if order %}
+    <div class="SMtable-head">
       <div class="order-details-transaction">
-          <table class="RMbuyorder-table">
-            <thead>
+          <table class="user-portfolio-toptable2">
+            <thead class="user-portfolio-head-admin">
               <tr>
                 <th>Sl.no</th>
                 <th>Order ID</th>
@@ -34,8 +35,8 @@
 
       <div class="order-details-transaction">
         <h6 style="padding-top: 2%;">Client Details</h6>
-        <table class="RMbuyorder-table">
-          <thead>
+       <table class="user-portfolio-toptable2">
+            <thead class="user-portfolio-head-admin">
             <tr>
               <th>Name</th>
               <th>Custom User ID</th>
@@ -59,8 +60,8 @@
       <div class="order-details-transaction">
         <h6 style="padding-top: 2%;">Broker Details</h6>
         {% if cmr %}
-          <table class="RMbuyorder-table">
-            <thead>
+         <table class="user-portfolio-toptable2">
+            <thead class="user-portfolio-head-admin">
               <tr>
                 <th>Broker Name</th>
                 <th>Broker ID</th>
@@ -89,8 +90,8 @@
       <div class="order-details-transaction">
         <h6 style="padding-top: 2%;">Bank Account Details</h6>
         {% if bank_accounts %}
-          <table class="RMbuyorder-table">
-            <thead>
+          <table class="user-portfolio-toptable2">
+            <thead class="user-portfolio-head-admin">
               <tr>
                 <th>Bank Name</th>
                 <th>Account Holder Name</th>
@@ -120,162 +121,174 @@
 
     <!-- Add Payment Button -->
     <div class="RMpaymentAddsection" style="padding-top: 2%;">
-      <button class="RMpaymentAdd btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal">Add Payment</button> Total Balance - {{ remaining_amount }}
+      <button class="RMpaymentAdd btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal">Add Payment</button>
+      <h6> Deal Value - {{ order.total_amount }}</h6>
+      <h6> Remaining Amount - <span id="remainingAmount">{{ remaining_amount|floatformat:2 }}</span></h6>
     </div>
 
 <!-- RM_User/templates/buyordersummeryRM.html -->
     <!-- Payment Records Table -->
-      <div class="order-details-transaction">
-          <table class="RMbuyorder-table">
-            <thead>
-              <tr>
-                <th>SLNO</th>
-                <th>Date</th>
-                <th>Bank</th>
-                <th>Enter Amount</th>
-                <th>Remaining Amount</th>
-                <th>Upload Screenshot</th>
-                <th>Remark</th>
-                <th>RM Status</th>
-                <th>AM Status</th>
-                <th>Actions</th>
-
-              </tr>
-            </thead>
-            <tbody>
-              {% for payment in rm_view.payment_records.all %}
-              <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ payment.date|date:"d-m-Y" }}</td>
-                <td>{{ payment.bank_name }}</td>
-                <td>{{ payment.amount }}</td>
-                <td>{{ payment.remaining_amount }}</td>
-                <td>
-                  {% if payment.screenshot %}
-                    <a href="{{ payment.screenshot.url }}" target="_blank">👁️‍🗨️</a>
-                  {% else %}
-                    N/A
-                  {% endif %}
-                </td>
-                <td>{{ payment.remark }}</td>
-                <!-- <td>{{ payment.payment_status|capfirst }}</td> -->
-                <td>{{ payment.get_payment_status_display }}</td> 
-                <td>{{ payment.get_AC_Payment_Status_display }}</td> 
-                <td>
-                  <!-- Edit Button -->
-                  <button type="button"
-                    class="btn btn-sm btn-outline-primary"
-                    onclick='openPaymentEditModal({
-                      id: {{ payment.id }},
-                      bank_name: "{{ payment.bank_name }}",
-                      amount: "{{ payment.amount }}",
-                      remaining_amount: "{{ payment.remaining_amount }}",
-                      remark: "{{ payment.remark }}",
-                      payment_status: "{{ payment.payment_status }}",
-                      screenshot_url: "{% if payment.screenshot %}{{ payment.screenshot.url }}{% else %}#{% endif %}"
-                    })'>
-                    ✏️ 
-                  </button>
-
-                  <!-- <a href="{% url 'RM_User:delete_payment' payment.id %}" class="btn btn-sm btn-danger" 
-                    onclick="return confirm('Are you sure you want to delete this payment?');">
-                    🗑️
-                  </a> -->
-                </td>
-
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="9">No payment records found.</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-      </div>
+    <div class="order-details-transaction">
+      <table class="user-portfolio-toptable2">
+        <thead class="user-portfolio-head-admin">
+          <tr>
+            <th>SLNO</th>
+            <th>Date</th>
+            <th>Bank</th>
+            <th>Amount Received</th>
+            <th>Remaining Amount</th>
+            <th>Upload Screenshot</th>
+            <th>Remark</th>
+            <th>RM Status</th>
+            <th>AM Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for payment in rm_view.payment_records.all %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ payment.date|date:"d-m-Y" }}</td>
+            <td>{{ payment.bank_name }}</td>
+            <td>{{ payment.amount }}</td>
+            <td>{{ payment.remaining_amount }}</td>
+            <td>
+              {% if payment.screenshot %}
+                <a href="{{ payment.screenshot.url }}" target="_blank">👁️‍🗨️</a>
+              {% else %}
+                N/A
+              {% endif %}
+            </td>
+            <td>{{ payment.remark }}</td>
+            <td>{{ payment.get_payment_status_display }}</td> 
+            <td>{{ payment.get_AC_Payment_Status_display }}</td> 
+            <td>
+              <!-- Edit Button -->
+              <button type="button"
+                class="btn btn-sm btn-outline-primary"
+                onclick='openPaymentEditModal({
+                  id: {{ payment.id }},
+                  bank_name: "{{ payment.bank_name }}",
+                  amount: "{{ payment.amount }}",
+                  remaining_amount: "{{ payment.remaining_amount }}",
+                  remark: "{{ payment.remark }}",
+                  payment_status: "{{ payment.payment_status }}",
+                  paymentConfirmationMessage: "{{ payment.paymentConfirmationMessage|default_if_none:"" }}",
+                  screenshot_url: "{% if payment.screenshot %}{{ payment.screenshot.url }}{% else %}#{% endif %}"
+                })'>
+                ✏️ 
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="10">No payment records found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
 
     <!-- Payment Modal -->
-      <div class="order-details-transaction">
-        <div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-lg-custom">
-            <div class="modal-content custom-modal">
-              <div class="modal-header">
-                <h5 class="modal-title" id="buyModalLabel">Add/Edit Payment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
 
-              <div class="modal-body">
-                <form id="paymentForm" method="post" enctype="multipart/form-data" action="{% url 'RM_User:add_payment' order_id=order.order_id %}">
-                  {% csrf_token %}
-                  <div class="row g-3">
-                    <div class="col-6">
-                      <label class="form-label">Select Bank</label>
-                      <select name="bank_name" class="form-select" required>
-                        {% for bank in bank_accounts %}
-                          <option value="{{ bank.bank_name }}">{{ bank.bank_name }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
+    <!-- Add/Edit Payment Modal -->
+    <div class="order-details-transaction">
+      <div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg-custom">
+          <div class="modal-content custom-modal">
+            <div class="modal-header">
+              <h5 class="modal-title" id="buyModalLabel">Add/Edit Payment</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                    <div class="col-6">
-                      <label class="form-label">Remaining Amount</label>
-                      <input type="number" name="remaining_amount" class="form-control" step="0.01" value="{{ remaining_amount|floatformat:2 }}">
-                    </div>
-
-                    <div class="col-6">
-                      <label class="form-label">Enter Amount</label>
-                      <input type="number" name="amount" class="form-control" required step="0.01">
-                    </div>
-
-                    <div class="col-6">
-                      <label class="form-label">Upload Screenshot</label>
-                      <input type="file" name="screenshot" class="form-control">
-                      <a href="#" id="screenshotLink" target="_blank" style="display: none;">View Existing</a>
-                    </div>
-
-                    <div class="col-6">
-                      <label class="form-label">Remark</label>
-                      <input type="text" name="remark" class="form-control">
-                    </div>
-
-                    <div class="col-6">
-                      <label class="form-label">Status</label>
-                      <!-- <select name="payment_status" class="form-select">
-                        <option value="pending">Pending</option>
-                        <option value="partial">Partial Payment</option>
-                        <option value="approved">Payment Received</option>
-                        <option value="rejected">Rejected</option>
-                      </select> -->
-                      
-                      {% with payment.payment_status|default:"pending" as selected_status %}
-                      <select name="payment_status" class="form-select">
-                        <option value="pending" {% if selected_status == "pending" %}selected{% endif %}>Pending</option>
-                        <option value="partial" {% if selected_status == "partial" %}selected{% endif %}>Partial Payment</option>
-                        <option value="approved" {% if selected_status == "approved" %}selected{% endif %}>Payment Received</option>
-                        <option value="rejected" {% if selected_status == "rejected" %}selected{% endif %}>Rejected</option>
-                      </select>
-                      {% endwith %}
-
-                    </div>
+            <div class="modal-body">
+              <form id="paymentForm" method="post" enctype="multipart/form-data" action="{% url 'RM_User:add_payment' order_id=order.order_id %}">
+                {% csrf_token %}
+                <div class="row g-3">
+                  <div class="col-6">
+                    <label class="form-label">Select Bank</label>
+                    <select name="bank_name" class="form-select" required>
+                      {% for bank in bank_accounts %}
+                        <option value="{{ bank.bank_name }}">{{ bank.bank_name }}</option>
+                      {% endfor %}
+                    </select>
                   </div>
 
-                  <div class="modal-footer justify-content-center mt-3">
-                    <button type="submit" class="btn btn-success w-100" id="submitBtn">✔️ Submit</button>
+                  <div class="col-6">
+                    <label class="form-label">Remaining Amount</label>
+                    <input type="number" name="remaining_amount" class="form-control" step="0.01" value="{{ remaining_amount|floatformat:2 }}" readonly>
                   </div>
-                </form>
-              </div>
+
+                  <div class="col-6">
+                    <label class="form-label">Enter Amount</label>
+                    <input type="number" name="amount" class="form-control" required step="0.01">
+                  </div>
+
+                  <div class="col-6">
+                    <label class="form-label">Upload Screenshot</label>
+                    <input type="file" name="screenshot" class="form-control">
+                    <a href="#" id="screenshotLink" target="_blank" style="display: none;">View Existing</a>
+                  </div>
+
+                  <div class="col-6">
+                    <label class="form-label">Payment Confirmation Message</label>
+                    <input type="text" name="paymentConfirmationMessage" class="form-control">
+                  </div>
+
+                  <div class="col-6">
+                    <label class="form-label">Remark</label>
+                    <input type="text" name="remark" class="form-control">
+                  </div>
+
+                  <div class="col-6">
+                    <label class="form-label">Status</label>
+                    {% with payment.payment_status|default:"pending" as selected_status %}
+                    <select name="payment_status" class="form-select">
+                      <option value="pending" {% if selected_status == "pending" %}selected{% endif %}>Pending</option>
+                      <option value="partial" {% if selected_status == "partial" %}selected{% endif %}>Partial Payment</option>
+                      <option value="approved" {% if selected_status == "approved" %}selected{% endif %}>Payment Received</option>
+                      <option value="rejected" {% if selected_status == "rejected" %}selected{% endif %}>Rejected</option>
+                    </select>
+                    {% endwith %}
+                  </div>
+                </div>
+
+                <div class="modal-footer justify-content-center mt-3">
+                  <button type="submit" class="btn btn-success w-100" id="submitBtn">✔️ Submit</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Edit Status Modal -->
+    <div class="modal fade" id="transactionEditModal" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="transactionEditModalLabel">Edit Buy Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="transactionEditFormContainer">
+            <div class="text-center">
+              <span class="spinner-border"></span> Loading...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>  
 
 
 <!-- RM_User/templates/buyordersummeryRM.html -->
+
   <!-- Order Transaction Details -->
     <div class="order-details-transaction">
       <h6 style="padding-top: 2%;">Order Transaction Details</h6>
-      <table class="RMbuyorder-table">
-        <thead>
+        <table class="user-portfolio-toptable2">
+          <thead class="user-portfolio-head-admin">
           <tr>
             <th>SLNO</th>
             <th>Broker</th>
@@ -336,13 +349,16 @@
           {% endfor %}
         </tbody>
       </table>
-
+      </div>
 
       <div class="RMpayment-process">
-        <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
-        <!-- <button class="RMpayment-button">Process To Account Department</button> -->
+
+        <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ order.order_id }}" class="RMpayment-button">
+                        Generate Provisional Deal Letter
+        </a>
+
       </div>
-    </div>
+    
 
     <!-- edit status form  -->
     <div class="modal fade" id="transactionEditModal" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
@@ -362,13 +378,13 @@
       </div>
     </div>
 
-
+</div>
   {% else %}
     <p>No order details found.</p>
   {% endif %}
 
 <!-- JavaScript payment -->
-<script>
+<!-- <script>
   // Reset form for Add Payment
   document.querySelector('.RMpaymentAdd').addEventListener('click', function () {
     const form = document.getElementById('paymentForm');
@@ -411,7 +427,142 @@
     const modal = new bootstrap.Modal(document.getElementById('buyModal'));
     modal.show();
   }
+</script> -->
+
+
+
+<script>
+  // Reset form for Add Payment
+  document.querySelector('.RMpaymentAdd').addEventListener('click', function () {
+    const form = document.getElementById('paymentForm');
+    form.reset();
+    form.action = "{% url 'RM_User:add_payment' order_id=order.order_id %}";
+    form.elements['remaining_amount'].value = "{{ remaining_amount|floatformat:2 }}";
+    document.getElementById('submitBtn').innerText = '✔️ Submit';
+    document.getElementById('screenshotLink').style.display = 'none';
+  });
+
+  function openPaymentEditModal(payment) {
+    const form = document.getElementById('paymentForm');
+    form.action = `/RM_User/payment/edit/${payment.id}/`;
+    form.elements['bank_name'].value = payment.bank_name;
+    form.elements['amount'].value = payment.amount;
+    form.elements['remaining_amount'].value = payment.remaining_amount;
+    form.elements['remark'].value = payment.remark;
+    form.elements['payment_status'].value = payment.payment_status;
+    form.elements['paymentConfirmationMessage'].value = payment.paymentConfirmationMessage || '';
+
+    const link = document.getElementById('screenshotLink');
+    if (payment.screenshot_url && payment.screenshot_url !== "#") {
+      link.href = payment.screenshot_url;
+      link.style.display = 'block';
+    } else {
+      link.style.display = 'none';
+    }
+
+    handleStatusChange(form);
+    document.getElementById('submitBtn').innerText = '✔️ Update';
+
+    const modal = new bootstrap.Modal(document.getElementById('buyModal'));
+    modal.show();
+  }
+
+  function disableFields(form) {
+    form.elements['bank_name'].disabled = true;
+    form.elements['amount'].disabled = true;
+    form.elements['remark'].disabled = true;
+    form.elements['paymentConfirmationMessage'].disabled = true;
+    form.elements['screenshot'].disabled = true;
+    form.elements['remaining_amount'].disabled = true;
+    form.elements['payment_status'].disabled = false;
+  }
+
+  function enableFields(form) {
+    form.elements['bank_name'].disabled = false;
+    form.elements['amount'].disabled = false;
+    form.elements['remark'].disabled = false;
+    form.elements['paymentConfirmationMessage'].disabled = false;
+    form.elements['screenshot'].disabled = false;
+    form.elements['remaining_amount'].disabled = true;
+    form.elements['payment_status'].disabled = false;
+  }
+
+  function handleStatusChange(form) {
+    const status = form.elements['payment_status'].value;
+    if (status === "pending" || status === "rejected") {
+      disableFields(form);
+    } else {
+      enableFields(form); // Partial or approved, keep fields editable
+    }
+  }
+
+  document.querySelector('select[name="payment_status"]').addEventListener('change', function () {
+    const form = document.getElementById('paymentForm');
+    handleStatusChange(form);
+  });
+
+  // Disable Add Payment button if remaining balance is 0
+  function updateAddPaymentButton(remainingAmount) {
+    const addBtn = document.querySelector('.RMpaymentAdd');
+    if (parseFloat(remainingAmount) <= 0) {
+      addBtn.disabled = true;
+    } else {
+      addBtn.disabled = false;
+    }
+  }
+
+  // Initial check
+  updateAddPaymentButton("{{ remaining_amount|floatformat:2 }}");
+
+  // Update remaining amount and Add button after submission
+  document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    // If using AJAX, replace this logic with returned remaining_amount
+    const form = e.target;
+    const remainingInput = form.elements['remaining_amount'];
+    const enteredAmount = parseFloat(form.elements['amount'].value) || 0;
+    const currentRemaining = parseFloat(remainingInput.value) || 0;
+    const newRemaining = (currentRemaining - enteredAmount).toFixed(2);
+
+    // Update UI
+    document.getElementById('remainingAmount').innerText = newRemaining;
+    remainingInput.value = newRemaining;
+
+    updateAddPaymentButton(newRemaining);
+  });
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- status  Transfer to Accounts -->
 <script>

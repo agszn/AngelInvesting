@@ -6,7 +6,10 @@
 
 {% block Accprofile_content %}
         {% if order %}
-            <table class="Accbuyorder-table">
+ <div class="SMtable-head">
+        <div class="order-details-transaction">
+          <table class="user-portfolio-toptable2">
+            <thead class="user-portfolio-head-admin">
                 <thead>
                     <tr>
                         <th>Sl.no</th>
@@ -29,10 +32,11 @@
                         <td>{{ order.user.profile.user.assigned_rm }}</td>
                 </tbody>
             </table>
-
+        </div>
             <h6 style="padding-top: 2%;">Customer Details</h6>
-            <table class="Accbuyorder-table">
-                <thead>
+        <div class="order-details-transaction">
+            <table class="user-portfolio-toptable2">
+                <thead class="user-portfolio-head-admin">
                     <tr>
                         <th>Customer_name</th>
                         <th>Customer_Id</th>
@@ -51,11 +55,13 @@
                     </tr>
                 </tbody>
             </table>
-            
+        </div>
+
             {% if cmr %}
                 <h6 style="padding-top: 2%;">CMR Details</h6>
-                <table class="Accbuyorder-table">
-                    <thead>
+               <div class="order-details-transaction">
+                    <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                         <tr>
                             <th>Broker Name</th>
                             <th>Broker Id</th>
@@ -76,14 +82,16 @@
                         </tr>
                     </tbody>
                 </table>
+               </div>
             {% else %}
                 <p>No broker details found.</p>
             {% endif %}
                 
             {% if bank_accounts %}
                 <h6 style="padding-top: 2%;">Bank Details</h6>
-                <table class="Accbuyorder-table">
-                    <thead>
+                <div class="order-details-transaction">
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                         <tr>
                             <th>Bank Name</th>
                             <th>Account Holder Name</th>
@@ -104,14 +112,15 @@
                     {% endfor %}
                     </tbody>
                 </table>
+            </div>
             {% else %}
                 <p>No bank account details found.</p>
             {% endif %}
                 
-            <div class="Accorder-details-transaction">
                 <h6 style="padding-top: 2%;">Transaction Details</h6>
-                    <table class="Accbuyorder-table">
-                        <thead>
+                    <div class="order-details-transaction">
+                        <table class="user-portfolio-toptable2">
+                            <thead class="user-portfolio-head-admin">
                                 <tr>
                                 <th>SLNO</th>
                                 <th>Broker</th>
@@ -163,12 +172,12 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    
+                    </div>
                     <div class="Accpayment-process">
                         <h4><strong>Total Amount: </strong> {{ order.total_value }}</h4>
                         <!-- <button class="Accpayment-button">Process To Account Department</button> -->
                     </div>
-            </div>
+            
         {% else %}
             <p>No order details found.</p>
         {% endif %}

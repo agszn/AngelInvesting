@@ -51,6 +51,7 @@ class StockData(models.Model):
     pbv = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     share_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    partner_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     ltp = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # Last traded price
     week_52_high = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     week_52_low = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
@@ -126,8 +127,7 @@ class StockData(models.Model):
         except CustomFieldValue.DoesNotExist:
             return None
 
-    # def formatted_overview(self):
-    #     return render_custom_format(self.company_overview)
+
 
 from decimal import Decimal, InvalidOperation
 
@@ -148,59 +148,6 @@ class StockDailySnapshot(models.Model):
     lot = models.PositiveIntegerField(default=100, blank=True, null=True)
     class Meta:
         unique_together = ('stock', 'date')
-    # def save(self, *args, update_stockdata=False, **kwargs):
-    #     from decimal import Decimal, InvalidOperation
-
-    #     # ✅ Always get previous snapshot for ltp
-    #     previous_snapshot = (
-    #         StockDailySnapshot.objects
-    #         .filter(stock=self.stock, date__lt=self.date)
-    #         .order_by('-date')
-    #         .first()
-    #     )
-    #     self.ltp = (
-    #         previous_snapshot.share_price
-    #         if previous_snapshot and previous_snapshot.share_price is not None
-    #         else Decimal('0.00')
-    #     )
-
-    #     # Ensure ltp and share_price are Decimal
-    #     try:
-    #         self.ltp = Decimal(self.ltp) if self.ltp is not None else Decimal('0.00')
-    #     except InvalidOperation:
-    #         self.ltp = Decimal('0.00')
-
-    #     try:
-    #         self.share_price = Decimal(self.share_price) if self.share_price is not None else Decimal('0.00')
-    #     except InvalidOperation:
-    #         self.share_price = Decimal('0.00')
-
-    #     # Calculate profit
-    #     try:
-    #         self.profit = self.share_price - self.ltp
-    #         self.profit_percentage = (self.profit / self.ltp * 100) if self.ltp != 0 else Decimal('0.00')
-    #     except Exception:
-    #         self.profit = Decimal('0.00')
-    #         self.profit_percentage = Decimal('0.00')
-
-    #     # Sync sector
-    #     if not self.sector:
-    #         self.sector = self.stock.sector
-    #     elif self.stock.sector != self.sector:
-    #         self.stock.sector = self.sector
-    #         self.stock.save()
-
-    #     super().save(*args, **kwargs)
-
-    #     # ✅ Sync back to StockData
-    #     self.stock.ltp = self.ltp
-    #     self.stock.share_price = self.share_price
-    #     self.stock.profit = self.profit
-    #     self.stock.profit_percentage = self.profit_percentage
-    #     if self.conviction_level:
-    #         self.stock.conviction_level = self.conviction_level
-    #     self.stock.save()
-    
     # save directly to StockHistory
     def save(self, *args, update_stockdata=False, **kwargs):
         from decimal import Decimal, InvalidOperation

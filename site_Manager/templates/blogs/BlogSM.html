@@ -5,20 +5,21 @@
 {% load static %}
 {% block SMprofile_content %}
 
-<h2 class="text-center my-4"><span style="color:green;">Blogs</span></h2>
-<div class="text-end mb-3 me-4">
-    <a href="{% url 'SM_User:create_blog' %}" class="btn btn-success">➕ Create New Blog</a>
+<div class="user-portfolio-top">
+    <div class="user-dashboard-heading"><h3>Blogs</h3></div>
+    <div class="SMsearch-bar">
+        <a href="{% url 'SM_User:create_blog' %}" class="btn btn-success">➕ Create New Blog</a>
+    </div>
 </div>
-
 <div class="container">
     <div class="row">
         {% for blog in blogs %}
         <div class="col-md-4 mb-4">
-            <div class="card h-100">
+            <div class="card h-80">
                 {% if blog.banner %}
-                <img src="{{ blog.banner.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                <img src="{{ blog.banner.url }}" class="card-img-top">
                 {% else %}
-                <img src="{% static 'default.png' %}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                <img src="{% static 'default.png' %}" class="card-img-top">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">

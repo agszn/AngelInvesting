@@ -5,9 +5,10 @@
 {% block Accsubtitle %}Accounts Department - Buy Order Summary{% endblock %}
 
 {% block Accprofile_content %}
-            <div class="order-details-transaction">
-                <table class="Accbuyorder-table">
-                    <thead>
+<div class="SMtable-head">
+        <div class="order-details-transaction">
+          <table class="user-portfolio-toptable2">
+            <thead class="user-portfolio-head-admin">
                         <tr>
                             <th>Sl.no</th>
                             <th>Order_Id</th>
@@ -28,11 +29,11 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+        </div>
+            <h6 style="padding-top: 2%;">Customer Details</h6>
             <div class="order-details-transaction">
-                <h6 style="padding-top: 2%;">Customer Details</h6>
-                <table class="Accbuyorder-table">
-                    <thead>
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                         <tr>
                             <th>Customer_name</th>
                             <th>Customer_Id</th>
@@ -51,13 +52,12 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-
+            </div>  
+            <h6 style="padding-top: 2%;">CMR Details</h6>
             <div class="order-details-transaction">
-                <h6 style="padding-top: 2%;">CMR Details</h6>
                 {% if cmr %}
-                    <table class="Accbuyorder-table">
-                        <thead>
+                    <table class="user-portfolio-toptable2">
+                         <thead class="user-portfolio-head-admin">
                             <tr>
                                 <th>Broker Name</th>
                                 <th>Broker Id</th>
@@ -86,8 +86,8 @@
             <div class="order-details-transaction">
                 <h6 style="padding-top: 2%;">Bank Details</h6>
                 {% if bank_accounts %}
-                    <table class="Accbuyorder-table">
-                        <thead>
+                    <table class="user-portfolio-toptable2">
+                        <thead class="user-portfolio-head-admin">
                             <tr>
                                 <th>Bank Name</th>
                                 <th>Account Holder Name</th>
@@ -115,18 +115,21 @@
 
             <div class="order-details-transaction">
                 <h6 style="padding-top: 2%;">Payment Details</h6>
-                <table class="Accbuyorder-table">
-                    <thead>
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">           
                         <tr>
                             <th>SLNO</th>
                             <th>Date</th>
                             <th>Bank</th>
-                            <th>Enter Amount</th>
+                            <th>Deal Value</th>
                             <th>Remaining Amount</th>
                             <th>Upload Screenshot</th>
                             <th>Remark</th>
                             <th>RM Status</th>
                             <th>AM Status</th>
+
+                            <th>Transaction Date</th>
+                            <th>Transaction ID</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,9 +149,35 @@
                         </td>
                         <td>{{ payment.remark }}</td>
                         <!-- <td>{{ payment.payment_status|capfirst }}</td> -->
+
                         <td>{{ payment.get_payment_status_display }}</td> 
 
                         <td>
+                            {% if user_type == 'AC' %}
+                            <form method="post" action="{% url 'Acc_User:edit_payment_ac_status' payment.id %}">
+                                {% csrf_token %}
+                                <select name="AC_Payment_Status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    {% for key, label in ac_payment_choices %}
+                                        <option value="{{ key }}" {% if payment.AC_Payment_Status == key %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <!-- Add transaction date input -->
+                                <td><input type="date" name="payment_transaction_date" value="{{ payment.payment_transaction_date|date:'Y-m-d' }}" class="form-control form-control-sm mt-1" onchange="this.form.submit()">
+                                </td>
+                                <!-- Add transaction ID input -->
+                                <td><input type="text" name="payment_transaction_id" value="{{ payment.payment_transaction_id }}" placeholder="Txn ID" class="form-control form-control-sm mt-1" onchange="this.form.submit()"></td>
+                            </form>
+                            {% else %}
+                                {{ payment.get_AC_Payment_Status_display }}<br>
+                                {{ payment.payment_transaction_date|date:"d-m-Y" }}<br>
+                                {{ payment.payment_transaction_id }}
+                            {% endif %}
+                        </td>
+
+
+
+                        <!-- <td>
                         {% if user_type == 'AC' %}
                         <form method="post" action="{% url 'Acc_User:edit_payment_ac_status' payment.id %}">
                             {% csrf_token %}
@@ -161,7 +190,7 @@
                         {% else %}
                         {{ payment.get_AC_Payment_Status_display }}
                         {% endif %}
-                        </td>
+                        </td> -->
 
 
                         </tr>
@@ -177,8 +206,8 @@
             <!-- transaction details -->
             <div class="order-details-transaction">
                 <h6 style="padding-top: 2%;">Transaction Details</h6>
-                <table class="Accbuyorder-table">
-                    <thead>
+                <table class="user-portfolio-toptable2">
+                    <thead class="user-portfolio-head-admin">
                         <tr>
                             <th>SLNO</th>
                             <th>Broker</th>
@@ -247,9 +276,10 @@
                 </table>
                 <div class="Accpayment-process">
                     <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
-                    <!-- <button class="payment-button">Process To Account Department</button> -->
+                    <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ order.order_id }}" class="Accpayment-button">
+                                    Generate Provisional Deal Letter
+                    </a>
                 </div>
             </div>
-
 
 {% endblock %}

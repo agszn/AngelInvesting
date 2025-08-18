@@ -96,6 +96,7 @@ class StockDataForm(forms.ModelForm):
             'pbv': forms.NumberInput(attrs={'class': 'form-control'}),
 
             'share_price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'partner_price': forms.NumberInput(attrs={'class': 'form-control'}),
             'ltp': forms.NumberInput(attrs={'class': 'form-control'}),
             'week_52_high': forms.NumberInput(attrs={'class': 'form-control'}),
             'week_52_low': forms.NumberInput(attrs={'class': 'form-control'}),

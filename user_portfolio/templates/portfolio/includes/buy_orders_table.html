@@ -1,0 +1,51 @@
+<table class="user-portfolio-toptable">
+  <thead class="user-portfolio-head1">
+    <tr>
+      <th>Stock Name</th>
+      <th>Advisor</th>
+      <th>Broker</th>
+      <th>Quantity</th>
+      <th>Buy Price</th>
+      <th>Total Amt</th>
+      <th>Order Type</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in page_obj %}
+      <tr style="background: {% cycle '#f5f9ff' 'white' %};">
+        <td>{{ order.stock.company_name }}</td>
+        <td>{{ order.advisor.advisor_type|default:"Others" }}</td>
+        <td>{{ order.broker.name|default:"N/A" }}</td>
+        <td>{{ order.quantity }}</td>
+        <td>₹{{ order.price_per_share }}</td>
+        <td>₹{{ order.total_amount }}</td>
+        <td>{{ order.order_type|title }}</td>
+        <td style="color:
+          {% if order.status == 'Completed' %}green
+          {% elif order.status == 'Processing' %}orange
+          {% elif order.status == 'Cancel' %}red
+          {% else %}#cc6600{% endif %};">
+          {{ order.status }}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="8" style="text-align: center; padding: 15px;">No buy orders found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="user-portfolio-tpaginatioin">
+  {% if page_obj.has_previous %}
+    <a href="?page=1{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">&laquo; First</a>
+    <a href="?page={{ page_obj.previous_page_number }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">Previous</a>
+  {% endif %}
+
+  <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+  {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">Next</a>
+    <a href="?page={{ page_obj.paginator.num_pages }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">Last &raquo;</a>
+  {% endif %}
+</div>

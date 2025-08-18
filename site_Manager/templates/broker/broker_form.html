@@ -5,9 +5,10 @@
 
 {% block SMprofile_content %}
 <div class="container my-4">
-  <h2 class="text-primary mb-3">{{ view.object.pk|yesno:"Edit Broker,Add Broker" }}</h2>
-
-  <form method="post" class="row g-3" style="max-width: 600px;">
+  <div class="user-portfolio-top">
+    <div class="user-dashboard-heading"><h3>{{ view.object.pk|yesno:"Edit Broker,Add Broker" }}</h3></div>
+  </div>
+  <form method="post" class="row g-3" style="max-width: 600px; padding-bottom: 10px;">
     {% csrf_token %}
     
     {% for field in form.visible_fields %}

@@ -113,7 +113,7 @@
               <option value="italic" {% if group.parent.text_style == 'italic' %}selected{% endif %}>Italic</option>
               <option value="underline" {% if group.parent.text_style == 'underline' %}selected{% endif %}>Underline</option>
             </select>
-            <button class="btn btn-sm btn-success me-2 save-btn" data-id="{{ group.parent.id }}">Save</button>
+            <button class="btn btn-sm btn-primary me-2 save-btn" data-id="{{ group.parent.id }}">Save</button>
             <button class="btn btn-sm btn-outline-danger delete-btn" data-id="{{ group.parent.id }}">Delete</button>
           </div>
         </li>

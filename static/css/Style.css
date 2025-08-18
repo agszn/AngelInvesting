@@ -2055,9 +2055,13 @@ a{
   align-items: center;
   gap: 10%;
 }
-
-.join-details p {
+.join-details div
+{
   width: 75%;
+}
+
+.join-details div>p {
+  
   font-size: 24px;
   font-weight: 500;
   margin: 0;
@@ -2073,6 +2077,7 @@ a{
   font-weight: 600;
   cursor: pointer;
 }
+
 .join-details button:hover{
    background-color: #39B54A;
   color: white;
@@ -2164,12 +2169,22 @@ a{
   font-weight: 300;
   margin-left: 8px;
 }
+
 .fullpage .title-faqPage
 {
   margin-bottom:10px;
   font-size:22px;
   font-weight: bold;
 }
+.fullpage .title-head-faq
+{
+  margin-bottom:20px;
+  font-size:28px;
+  font-weight: bold;
+  color: rgba(14, 33, 63, 1);
+}
+
+
 
 /* contact us page */
 .icon-sections {
@@ -2892,6 +2907,7 @@ a{
     font-weight: 300;
     margin-left: 4px;
   }
+
   .fullpage .title-faqPage
   {
     margin-bottom:10px;

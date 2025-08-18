@@ -4,9 +4,8 @@
 {% block subtitle %}Homepage Banner{% endblock %}
 
 {% block SMprofile_content %}
-    <h4>Homepage Banner</h4>
-
-    <div class="SMbanner" style="margin-bottom: 20px;">
+    <div class="user-dashboard-heading"><h3>Home Page Banner</h3></div>
+    <div class="SMbanner">
         <strong>Current Banner:</strong><br><br>
         {% if banner %}
             <img src="{{ banner.image.url }}" alt="Current Banner" style="max-width: 100%; max-height: 300px;">
@@ -14,30 +13,31 @@
             <img src="{% static 'images/banner.png' %}" alt="Default Banner" style="max-width: 100%; max-height: 300px;">
         {% endif %}
     </div>
-
-    <!-- Upload Form -->
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="SMupload-feild">
-            <div class="SMform-group">
-                <label for="banner">Upload New Banner</label>
-                <input type="file" name="banner" class="SMform-control" accept="image/*" {% if not banner %}required{% endif %}>
+    <div class="banner-update">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="SMupload-feild">
+                <div class="SMform-group">
+                    <label for="banner">Upload New Banner</label>
+                    <input type="file" name="banner" class="SMform-control" accept="image/*" {% if not banner %}required{% endif %}>
+                </div>
+                <div class="SMform-group" style="margin-top: 10px;">
+                    <button type="submit" class="btn btn-success">Upload</button>
+                </div>
             </div>
-            <div class="SMform-group" style="margin-top: 10px;">
-                <button type="submit" class="btn btn-success">Upload</button>
-            </div>
-        </div>
-    </form>
+        </form>
+        <!-- Upload Form -->
 
-    <!-- Delete Form -->
-    {% if banner %}
-    <form method="POST" action="{% url 'SM_User:delete_banner' %}" style="margin-top: 10px;">
-        {% csrf_token %}
-        <div class="SMupload-feild">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the banner?');">
-                Delete Banner
-            </button>
-        </div>
-    </form>
-    {% endif %}
+        <!-- Delete Form -->
+        {% if banner %}
+        <form method="POST" action="{% url 'SM_User:delete_banner' %}" style="margin-top: 10px;">
+            {% csrf_token %}
+            <div class="SMupload-feild">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the banner?');">
+                    Delete Banner
+                </button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
 {% endblock %}

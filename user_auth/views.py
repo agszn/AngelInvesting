@@ -75,15 +75,19 @@ def stock_autocomplete(request):
 
 #     return render(request, 'SiteManageUsers/ManageUserAuth.html', {'users': users, 'query': query})
 
+
 @login_required
 @user_passes_test(is_admin_or_site_manager)
 def manage_user_types(request):
     query = request.GET.get('q', '')
-    users = CustomUser.objects.exclude(user_type='AD')
-    rms = CustomUser.objects.filter(user_type='RM')
+
+    users = CustomUser.objects.exclude(user_type='AD').order_by('-date_joined')
+    rms = CustomUser.objects.filter(user_type='RM').order_by('username')
 
     if query:
-        users = users.filter(username__icontains=query) | users.filter(email__icontains=query)
+        users = users.filter(
+            Q(username__icontains=query) | Q(email__icontains=query)
+        )
 
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
@@ -101,11 +105,18 @@ def manage_user_types(request):
         user.save()
         return redirect('manage_user_types')
 
+    # ✅ Ensure every user has login_records
+    for u in users:
+        if not hasattr(u, "login_records"):
+            u.login_records = []
+
     return render(request, 'SiteManageUsers/ManageUserAuth.html', {
         'users': users,
         'rms': rms,
         'query': query,
     })
+
+
 
 from django.shortcuts import render
 from site_Manager.models import HeroSectionBanner, Blog
@@ -162,13 +173,13 @@ def register_view(request):
             user.save()
 
             # Send OTP to email
-            # send_mail(
-            #     'Verify Your Account',
-            #     f'Your OTP for verification is: {user.otp}',
-            #     settings.EMAIL_HOST_USER,
-            #     [user.email],
-            #     fail_silently=False,
-            # )
+            send_mail(
+                'Verify Your Account',
+                f'Your OTP for verification is: {user.otp}',
+                settings.EMAIL_HOST_USER,
+                [user.email],
+                fail_silently=False,
+            )
             
             # Send OTP via Twilio
             send_otp(user, f'Your OTP for verification is: {user.otp}')
@@ -192,13 +203,13 @@ def resend_otp(request, user_id):
     user.save()
 
     # Send OTP to email
-    # send_mail(
-    #     'Verify Your Account',
-    #     f'Your OTP for verification is: {user.otp}',
-    #     settings.EMAIL_HOST_USER,
-    #     [user.email],
-    #     fail_silently=False,
-    # )
+    send_mail(
+        'Verify Your Account',
+        f'Your OTP for verification is: {user.otp}',
+        settings.EMAIL_HOST_USER,
+        [user.email],
+        fail_silently=False,
+    )
     
     # Send OTP via Twilio
     send_otp(user, f'Your OTP for verification is: {user.otp}')
@@ -704,7 +715,6 @@ from django.db.models import IntegerField
 
 
 from user_portfolio.utils import get_user_stock_context
-
 @login_required
 def view_profile(request):
     user = request.user
@@ -712,10 +722,13 @@ def view_profile(request):
     brokers = Broker.objects.all()
     cmr_copies = CMRCopy.objects.filter(user_profile=profile)
 
+    # Add flags for PDF checks
+    profile.is_pan_pdf = profile.pan_card_photo and str(profile.pan_card_photo.url).lower().endswith('.pdf')
+    profile.is_aadhaar_pdf = profile.adhar_card_photo and str(profile.adhar_card_photo.url).lower().endswith('.pdf')
+
     form = UserProfileForm(instance=profile)
     cmr_form = CMRForm()
 
-    # --- Handle POST for Profile or CMR ---
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
 
@@ -745,7 +758,6 @@ def view_profile(request):
             else:
                 messages.error(request, "Please correct the errors in the profile form.")
 
-    # --- Wishlist/Unlisted/Angel Stocks Logic ---
     stock_context = get_user_stock_context(user, request)
 
     context = {
@@ -754,13 +766,11 @@ def view_profile(request):
         'brokers': brokers,
         'cmr_copies': cmr_copies,
         'profile': profile,
-        
-
-        # Stock data
         **stock_context,
     }
 
     return render(request, 'accounts/profile.html', context)
+
 
 
 
@@ -802,28 +812,37 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import BankAccount
 
-@csrf_exempt
+
 @login_required
 def save_bank_account(request):
-    if request.method == 'POST':
-        account_id = request.POST.get('account_id')
+    if request.method == "POST":
+        account_id = request.POST.get("account_id")
+        instance = None
+        if account_id:
+            instance = get_object_or_404(
+                BankAccount, pk=account_id, user_profile=request.user.profile
+            )
 
-        if account_id:  
-            bank = get_object_or_404(BankAccount, id=account_id, user_profile=request.user.profile)
-        else:  
-            bank = BankAccount(user_profile=request.user.profile)
-        bank.account_holder_name = request.POST.get('account_holder_name', '')
-        bank.bank_name = request.POST.get('bank_name', '')
-        bank.account_type = request.POST.get('account_type', '')
-        bank.account_number = request.POST.get('account_number', '')
-        bank.ifsc_code = request.POST.get('ifsc_code', '')
-        
-        if 'statementPaper' in request.FILES:
-            bank.statementPaper = request.FILES['statementPaper']
-        bank.save()
+        form = BankAccountForm(request.POST, request.FILES, instance=instance)
 
-        return redirect('profile')
-    return JsonResponse({'status': 'error'}, status=400)
+        if form.is_valid():
+            bank_account = form.save(commit=False)
+            bank_account.user_profile = request.user.profile
+            bank_account.save()
+            return redirect("profile")
+
+        # --- invalid case ---
+        return render(request, "accounts/profile.html", {
+            "bank_accounts": request.user.profile.bank_accounts.all(),
+            "profile": request.user.profile,
+
+            # 👇 these three are what the template + JS use
+            "bank_form_errors": form.errors.get_json_data(),
+            "bank_form_post": request.POST.dict(),
+            "open_bank_modal": True,
+        })
+
+    return redirect("profile")
 
 
 @csrf_exempt
@@ -836,6 +855,7 @@ def get_bank_account(request, bank_id):
         'account_type': bank.account_type,
         'account_number': bank.account_number,
         'ifsc_code': bank.ifsc_code,
+        'bankDetails_doc_password': bank.bankDetails_doc_password,
     }
     return JsonResponse(data)
 
@@ -953,6 +973,18 @@ def contact_view(request):
 # about
 def about(request):
     return render(request, 'about/about.html')
+
+# terms
+def terms(request):
+    return render(request, 'about/terms.html')
+
+# privacy
+def privacy(request):
+    return render(request, 'about/privacy.html')
+
+# disclaimer
+def disclaimer(request):
+    return render(request, 'about/disclaimer.html')
 
 # FAQ
 def Gendral_User_FAQ(request):

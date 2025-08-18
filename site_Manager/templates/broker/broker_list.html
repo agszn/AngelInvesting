@@ -5,11 +5,12 @@
 
 {% block SMprofile_content %}
 <div class="container my-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="text-primary">Broker List</h2>
-    <a href="{% url 'SM_User:broker-add' %}" class="btn btn-success view">Add Broker</a>
+<div class="user-portfolio-top">
+  <div class="user-dashboard-heading"><h3>Broker List</h3></div>
+  <div class="SMsearch-bar">
+      <a href="{% url 'SM_User:broker-add' %}" class="btn btn-success view">Add Broker</a>
   </div>
-
+</div>
   {% if brokers %}
     <div class="row">
       {% for broker in brokers %}

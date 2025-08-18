@@ -4,16 +4,19 @@
 
 {% block SMprofile_content %}
 <style>
-    .table-container {
-        background-color: #f8f9fa;
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    .user-portfolio-toptable1 td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        vertical-align: top;
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+        white-space: normal;
     }
-
-    .table th, .table td {
-        vertical-align: middle;
-    }
+    .user-portfolio-toptable1 td:nth-child(1) { width: 15%; } /* Name */
+    .user-portfolio-toptable1 td:nth-child(2) { width: 22%; } /* Email */
+    .user-portfolio-toptable1 td:nth-child(3) { width: 15%; } /* Subject */
+    .user-portfolio-toptable1 td:nth-child(4) { width: 30%; } /* Message */
+    .user-portfolio-toptable1 td:nth-child(5) { width: 18%; } /* Sent at */
 
     .pagination {
         display: flex;
@@ -38,22 +41,21 @@
         margin: 0 5px;
         padding: 5px 10px;
         border-radius: 5px;
-        background-color: #e9ecef;
+        /* background-color: #e9ecef; */
     }
 </style>
 
 <div class="container mt-5">
-    <h1 class="text-center text-primary mb-4" style="text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">
-        <i class="bi bi-chat-dots"></i> Contact Messages
-    </h1>
-    
-    <div class="table-container">
-        <!-- Display contacts -->
-        <table class="table table-striped">
-            <thead>
+    <div class="user-portfolio-top">
+        <div class="user-dashboard-heading"><h3><i class="bi bi-chat-dots"></i> Contact Messages</h3></div>
+    </div>
+    <div class="SMtable-scroll-container">
+        <table class="user-portfolio-toptable1">
+            <thead class="user-portfolio-head-admin">
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Phone</th> <!-- Added Phone column -->
                     <th>Subject</th>
                     <th>Message</th>
                     <th>Sent At</th>
@@ -64,13 +66,14 @@
                 <tr>
                     <td>{{ contact.name }}</td>
                     <td>{{ contact.email }}</td>
+                    <td>{{ contact.phone }}</td> <!-- Display phone number -->
                     <td>{{ contact.subject }}</td>
                     <td>{{ contact.message }}</td>
-                    <td>{{ contact.sent_at }}</td>
+                    <td>{{ contact.sent_at|date:"Y-m-d H:i" }}</td> <!-- formatted timestamp -->
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3">No contact messages found.</td>
+                    <td colspan="6">No contact messages found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -94,4 +97,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

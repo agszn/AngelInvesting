@@ -6,6 +6,9 @@
     <div class="user-sidebar" id="userSidebar">
       <div class="user-sidebar-top-logo">
         <img src="{% static 'Media/images/dashboardlogo.png' %}" alt="logo">
+        <!-- <button class="" type="button" onclick="toggleSidebar()">
+            X
+        </button> -->
       </div>
       <div class="user-group-tap">
         <div class="user-number-group">
@@ -24,12 +27,13 @@
       </div>
       <!-- templates/accounts/profileSidebar.html -->
       <div class="user-serach-bar">
-        <input type="text" placeholder="Search Stocks...">
-        <button type="submit" style="background: none; border: none; cursor: pointer; padding: 0 8px;" title="Search">
+        <input type="text" id="sidebarSearchInput" placeholder="Search Stocks..." autocomplete="off">
+
+        <!-- <button type="submit" style="background: none; border: none; cursor: pointer; padding: 0 8px;" title="Search">
             <span style="color: white; font-size: 18px;">&#128269;</span>
-        </button>
+        </button> -->
       </div>
-      <div class="user-stock-list-tab">
+      <!-- <div class="user-stock-list-tab">
         {% for stock in stock_list %}
           {% if stock.company_name and not stock.hide_company_overview %}
             <div class="user-stocks-sidebar">
@@ -86,27 +90,66 @@
         {% empty %}
           <p style="color: white; text-align: center;">No stocks found.</p>
         {% endfor %}
+      </div> -->
+      <div id="stockListContainer">
+        {% include 'accounts/includes/sidebar_stock_list.html' %}
       </div>
+
     </div>
     <script>
+        function setCookie(name, value, hours) {
+            let expires = "";
+            if (hours) {
+                const date = new Date();
+                date.setTime(date.getTime() + (hours * 60 * 60 * 1000)); // hours → milliseconds
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
         function toggleSidebar() {
             const sidebar = document.getElementById('userSidebar');
             const mainContent = document.querySelector('.user-main-content');
-            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('collapsed');
+            setCookie("sidebarState", isCollapsed ? "collapsed" : "expanded", 1);
         }
 
         // Initialize sidebar state based on screen size
         document.addEventListener('DOMContentLoaded', function () {
             const sidebar = document.getElementById('userSidebar');
             const mainContent = document.querySelector('.user-main-content');
-            if (window.innerWidth < 768) {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('collapsed');
+            const sidebarState = getCookie("sidebarState");
+            if (sidebarState) {
+                if (sidebarState === "collapsed") {
+                  sidebar.classList.add('collapsed');
+                  mainContent.classList.add('collapsed');
+              } else {
+                  sidebar.classList.remove('collapsed');
+                  mainContent.classList.remove('collapsed');
+              }
+            }else {
+                // Default behavior based on screen size
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('collapsed');
+                    setCookie("sidebarState", "collapsed", 1);
+                }
             }
 
             // Handle window resize
-            window.addEventListener('resize', function () {
+            window.addEventListener('resize', function () 
+            {
+              if (!getCookie("sidebarState")) {
                 if (window.innerWidth < 768) {
                     sidebar.classList.add('collapsed');
                     mainContent.classList.add('collapsed');
@@ -114,6 +157,7 @@
                     sidebar.classList.remove('collapsed');
                     mainContent.classList.remove('collapsed');
                 }
+              }
             });
         });
     </script>
@@ -178,4 +222,39 @@
   {% if popup_message %}
     showPopupMessage("{{ popup_message }}");
   {% endif %}
+</script>
+
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("sidebarSearchInput");
+    const stockListContainer = document.getElementById("stockListContainer");
+    let typingTimer;
+    const delay = 300;
+
+    searchInput.addEventListener("input", function () {
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(performSearch, delay);
+    });
+
+    function performSearch() {
+      const query = searchInput.value;
+      const params = new URLSearchParams(window.location.search);
+      params.set("sidebar_search", query);
+
+      const ajaxUrl = "{% url 'user_portfolio:ajax_filtered_stocks' %}";
+      fetch(`${ajaxUrl}?${params.toString()}`, {
+
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          stockListContainer.innerHTML = data.html;
+        });
+    }
+  });
 </script>

@@ -4,8 +4,9 @@
 
 {% block SMprofile_content %}
 <div class="container mt-4">
-    <h2>Advisor Types</h2>
-
+    <div class="user-portfolio-top">
+        <div class="user-dashboard-heading"><h3>Advisor Types</h3></div>
+    </div>
     <!-- Add New Type Button -->
     <div class="mb-3">
         <a href="{% url 'SM_User:advisor-type-add' %}" class="btn btn-success">+ Add Advisor Type</a>
@@ -13,8 +14,10 @@
     </div>
 
     <!-- Advisor Type List -->
-    <table class="table table-bordered table-hover">
-        <thead class="thead-light">
+    <div class="SMtable-head">
+    <div class="SMtable-scroll-container">
+        <table class="user-portfolio-toptable1">
+            <thead class="user-portfolio-head-admin">
             <tr>
                 <th>#</th>
                 <th>Type Name</th>
@@ -42,5 +45,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
+    </div>
 </div>
 {% endblock %}

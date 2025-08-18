@@ -838,6 +838,20 @@
     .edit-profile-modal-user.active {
         grid-template-columns: 1fr;
     }
+
+    .user-sidebar-top-logo
+    {
+        padding: 10px;
+        width: 80%;
+        height: 60px;
+        display: flex;
+        /* align-items: center; */
+        justify-content: space-between;
+    }
+    .user-sidebar-top-logo img{
+        height: auto;
+        /* width: 100%; */
+    }
 }
 @media (min-width: 768px) and (max-width: 1024px) 
 {
@@ -904,4 +918,377 @@
     .edit-profile-modal-user {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+
+/* **************************** SITE MANAGE LOGIN *********************************** */
+/*
+SITE MANANGET -> TEMPLATE - .HTML FILES 
+ */
+
+ .SMloginDashboard
+ {
+    background-color: #081426;
+    margin: 0;
+    padding: 0;
+    display:flex;
+    margin-top:-121px;
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto; 
+ }
+
+.sitemanage-list-tab
+{
+    height:600px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;  
+}
+.sitemanage-list-tab::-webkit-scrollbar {
+  display: none;
+}
+
+.sitemange-lists-sidebar
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding:12px 15px;
+    width: 100%;
+    position: relative;
+    border-bottom: 1px solid white;
+}
+.sitemange-lists-sidebar:first-child {
+    border-top: 1px solid white;
+}
+
+.sitemange-lists-sidebar a{
+    text-decoration: none;
+    font-weight: medium;
+    color: #FFFF;
+    font-size: 18px;
+}
+
+.sitemange-lists-sidebar:hover {
+    background-color: #0E213F;
+}
+
+
+.admin-main-dashboardcontent
+{
+    margin: 10px 20px 10px 20px; 
+    border-radius: 10px;
+    background-color: #0E213F;
+    padding:0;
+}
+
+.admin-dashboard-heading
+{
+    padding: 10px;
+    color: white;
+    font-size: 22px;
+    font-weight: medium;
+}
+
+.SMbanner
+{
+    width: 90%;
+    height: 400px;
+    background-color: #d9d9d9;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3a456d;
+    font-size: 18px;
+    margin:0 5% 20px 5%;
+}
+
+.banner-update {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    gap: 20px;
+}
+
+.SMupload-feild {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.SMform-group label {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.SMform-control {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.btn-success, .btn-danger {
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+
+ .SMsearch-bar
+{
+    display: flex; 
+    align-items: center;
+    gap: 10px;
+    margin-right: 20px;
+}
+.SMsearch-bar input{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 250px;
+}
+
+.SMtable-head{
+    /* margin: auto; */
+    /* background-color: #e8f1ff; */
+    /* padding: 20px; */
+    /* border-radius: 10px; */
+    padding: 20px;
+}
+
+.SMtable-scroll-container
+{
+    min-height: 200px;
+    max-height: 600px;
+    overflow-y: scroll;
+    overflow-x: auto;   
+    border-radius: 10px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.SMtable-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+.user-portfolio-toptable1 {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: auto;
+    white-space: nowrap;
+}
+
+.user-portfolio-toptable2
+{
+    border-collapse: collapse;
+    /* width: 100%; */
+    table-layout: auto;
+    white-space: nowrap;
+}
+
+.user-portfolio-head-admin
+{
+    width: 100%;
+    background-color: #0B1A32;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    padding: 10px;
+}
+
+.user-portfolio-head-admin2
+{
+    background-color: #0B1A32;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    padding: 10px;
+}
+
+.user-portfolio-head-admin th,
+.user-portfolio-head-admin td {
+    white-space: nowrap; /* no wrapping in both head and body */
+    padding:10px;
+    text-align: left;
+    font-size: 16px;
+}
+
+.user-portfolio-head-admin th {
+    background-color: #0B1A32;
+    color: #fff;
+}
+
+.user-portfolio-head-admin td, .user-portfolio-toptable2 tbody>tr>td, .user-portfolio-toptable1 tbody>tr>td{
+    color: #000 !important;
+}
+.user-portfolio-toptable1 tbody tr:nth-child(odd) {
+    background-color: #e9e4e4; /* Light gray for odd rows */
+}
+
+.user-portfolio-toptable1 tbody tr:nth-child(even) {
+    background-color: #ffffff; /* White for even rows */
+}
+
+/* Optional: highlight on hover */
+.user-portfolio-toptable1 tbody tr:hover {
+    background-color: #e6f2ff; /* Light blue on hover */
+}
+
+.user-portfolio-toptable2 tbody tr:nth-child(odd) {
+    background-color: #e9e4e4; /* Light gray for odd rows */
+}
+
+.user-portfolio-toptable2 tbody tr:nth-child(even) {
+    background-color: #ffffff; /* White for even rows */
+}
+
+/* Optional: highlight on hover */
+.user-portfolio-toptable2 tbody tr:hover {
+    background-color: #e6f2ff; /* Light blue on hover */
+}
+
+/* blogs */
+
+.card-img-top
+{
+    height: 150px; 
+    object-fit: cover;
+}
+.card-title a{
+    text-decoration: none;
+    color: #000;
+    cursor: pointer;
+}
+
+form.p-4 p {
+    margin-bottom: 15px;
+}
+form.p-4 label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: white
+}
+
+form.p-4 input[type="text"],
+form.p-4 input[type="email"],
+form.p-4 input[type="number"],
+form.p-4 input[type="file"],
+form.p-4 input[type="password"],
+form.p-4 select,
+form.p-4 textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+form.p-4 input:focus,
+form.p-4 select:focus,
+form.p-4 textarea:focus {
+    border-color: #28a745; /* green border */
+    outline: none;
+    box-shadow: 0 0 4px rgba(40, 167, 69, 0.4);
+}
+
+form.p-4 .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+ .view
+{
+    padding: 6px 12px;
+    background-color: #3a456d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+
+/* RM dashboard */
+ .RMtable-head{
+    margin: auto;
+    /* background-color: #e8f1ff; */
+    padding: 20px;
+    border-radius: 10px;
+}
+.RMheading
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.RMheading h3{
+    margin: 0;
+    color: white;
+}
+
+ .RMsearch-bar
+{
+    display: flex; 
+    align-items: center;
+    gap: 10px;
+}
+.RMsearch-bar input{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 250px;
+}
+.RMsearch-bar select{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 250px;
+}
+
+
+
+.order-details-transaction
+{
+    max-height: 600px;
+    overflow-y: scroll;
+    overflow-x: auto;   
+    border-radius: 10px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.order-details-transaction::-webkit-scrollbar {
+    display: none;
 }

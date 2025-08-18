@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'Share_Transfer',
     'site_Manager',
     
+
+    
 ]
 
 MIDDLEWARE = [

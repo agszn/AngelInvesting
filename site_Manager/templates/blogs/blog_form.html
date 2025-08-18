@@ -6,7 +6,7 @@
 {% block SMprofile_content %}
 <div class="container mt-4">
     <h3>{{ title }}</h3>
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" class="p-4">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-success">Save</button>

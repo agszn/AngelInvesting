@@ -50,28 +50,30 @@ def unlistedSharesRM(request):
 from django.core.paginator import Paginator
 @login_required
 def ReportRM(request):
-    
     buy_orders_qs = BuyTransaction.objects.filter(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
     sell_orders_qs = SellTransaction.objects.filter(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
 
-    from_date = request.GET.get('from_date')
-    to_date = request.GET.get('to_date')
+    # Get the date (only one date parameter is expected)
+    date_filter = request.GET.get('date_filter')
     order_id = request.GET.get('order_id')
 
-    if from_date:
-        buy_orders_qs = buy_orders_qs.filter(timestamp__date__gte=from_date)
-        sell_orders_qs = sell_orders_qs.filter(timestamp__date__gte=from_date)
-    if to_date:
-        buy_orders_qs = buy_orders_qs.filter(timestamp__date__lte=to_date)
-        sell_orders_qs = sell_orders_qs.filter(timestamp__date__lte=to_date)
+    # Sanitize "None" or empty values in the date and order_id
+    if date_filter in [None, '', 'None']:
+        date_filter = None
+    if order_id in [None, '', 'None']:
+        order_id = None
+
+    # Apply filtering only if date_filter is provided
+    if date_filter:
+        # Assuming that the user is providing a date in the format YYYY-MM-DD
+        buy_orders_qs = buy_orders_qs.filter(timestamp__date=date_filter)
+        sell_orders_qs = sell_orders_qs.filter(timestamp__date=date_filter)
+
     if order_id:
         buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
         sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
 
-    buy_orders_qs = buy_orders_qs.order_by('-timestamp')
-    sell_orders_qs = sell_orders_qs.order_by('-timestamp')
-
-    # PAGINATION
+    # Pagination
     buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
     sell_paginator = Paginator(sell_orders_qs, 10)
 
@@ -84,10 +86,10 @@ def ReportRM(request):
     return render(request, 'ReportRM.html', {
         'buy_orders_ReportsRM': buy_orders_ReportsRM,
         'sell_orders_ReportsRM': sell_orders_ReportsRM,
-        'from_date': from_date,
-        'to_date': to_date,
+        'date_filter': date_filter,
         'order_id': order_id
     })
+
 
 @login_required
 def buyorderRM(request):
@@ -407,6 +409,7 @@ from decimal import Decimal
 
 from .models import RMPaymentRecord, RMUserView, BuyTransaction
 
+# RM_User/views.py
 @csrf_exempt
 @login_required
 def add_or_edit_payment(request, order_id=None, payment_id=None):
@@ -428,6 +431,8 @@ def add_or_edit_payment(request, order_id=None, payment_id=None):
         payment.amount = entered_amount
         payment.remark = request.POST.get('remark')
         payment.payment_status = request.POST.get('payment_status', 'pending')
+        payment.payment_transaction_date = request.POST.get('payment_transaction_date') or None
+        payment.paymentConfirmationMessage = request.POST.get('paymentConfirmationMessage') or None
 
         if request.FILES.get('screenshot'):
             payment.screenshot = request.FILES['screenshot']

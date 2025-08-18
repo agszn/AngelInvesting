@@ -1,0 +1,1125 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% load static %}
+{% block marquee %}
+{% endblock %}
+
+{% block contentNavbar %}
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .profile-wrapper {
+        display: flex;
+        margin: 30px;
+    }
+
+    .profile-sidebar {
+        width: 30%;
+        padding: 20px;
+        background-color: #f8f9fa;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .custom-profile-main {
+        width: 70%;
+        padding: 30px;
+        background-color: #e6f2ff;
+        border-radius: 8px;
+    }
+
+    .custom-section {
+        margin-bottom: 40px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #FDFAFA;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-section-block {
+        margin-bottom: 40px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #FDFAFA;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        text-align: center;
+        color: #0e213f;
+    }
+
+    .custom-section-header:hover {
+        background-color: #f5f5f5;
+    }
+
+    .custom-section-header span {
+        transition: transform 0.3s ease;
+    }
+
+    .custom-section-header.open span {
+        transform: rotate(180deg);
+    }
+
+    .custom-section-body {
+        margin-top: 15px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .custom-profile-left {
+        grid-column: span 3;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .custom-profile-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .custom-profile-btn {
+        padding: 6px 10px;
+        background: #d0e8ff;
+        border: 1px solid #8ab6d6;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #000;
+    }
+
+    .custom-profile-btn:hover {
+        background: #b3dbff;
+    }
+
+    .stock-page-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 75px;
+        font-size: 2em;
+        color: aliceblue;
+        background: radial-gradient(
+            64.54% 23.63% at 69.24% 61.54%,
+            #271b3f 0%,
+            #271b3f 43.09%,
+            #341a47 68.59%,
+            #0e213f 100%
+        );
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-label-block {
+        margin-bottom: 12px;
+    }
+
+    .custom-label-block .custom-label {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    /* subnav */
+    .custom-profile-subnav {
+        background-color: #f9f9f9;
+        border-bottom: 2px solid #e0e0e0;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+    }
+
+    .custom-subnav-list {
+        list-style: none;
+        display: flex;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .custom-subnav-list li button {
+        background-color: transparent;
+        border: none;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .custom-subnav-list li button:hover {
+        background-color: #e0e0e0;
+    }
+
+    .custom-subnav-list li button.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* left */
+    .profile-sidebar {
+        background-color: #f0f8ff;
+        border: 1px solid #cce0ff;
+        border-radius: 12px;
+        padding: 25px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+    }
+
+    .profile-sidebar h4 {
+        color: #003366;
+        border-bottom: 2px solid #99ccff;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+        font-size: 1.6rem;
+    }
+
+    .filter-form-inline {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+
+    .filter-form-inline .form-control,
+    .filter-form-inline .form-select {
+        width: 200px;
+        border-radius: 8px;
+        border: 1px solid #99ccff;
+        padding: 8px 12px;
+    }
+
+    .filter-form-inline .btn-primary {
+        background-color: #004080;
+        border-color: #004080;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: bold;
+    }
+
+    .filter-form-inline .btn-primary:hover {
+        background-color: #0059b3;
+        border-color: #0059b3;
+    }
+
+    .list-group-item {
+        background-color: #ffffff;
+        border-left: 4px solid #004080;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: left;
+    }
+
+    .list-group-item .fw-bold {
+        font-size: 1.1rem;
+    }
+
+    .text-primary {
+        color: #004080 !important;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+    .stock-page-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 75px;
+        font-size: 2em;
+        color: aliceblue;
+        background: radial-gradient(
+            64.54% 23.63% at 69.24% 61.54%,
+            #271b3f 0%,
+            #271b3f 43.09%,
+            #341a47 68.59%,
+            #0e213f 100%
+        );
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .custom-subnav-list {
+        list-style: none;
+        display: flex;
+        background-color: #ECF3FF;
+        padding: 15px;
+    }
+
+    .custom-subnav-list li a {
+        display: block; /* Ensures padding + background work fully */
+        text-decoration: none;
+        background-color: transparent;
+        border: none;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #000000;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: background-color 0.3s, color 0.3s;
+        width: 100%; /* Optional: make entire <li> clickable if needed */
+    }
+
+    .custom-subnav-list li a:hover {
+        background-color: #e0e0e0;
+    }
+
+    .custom-subnav-list li a.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+
+</style>
+<section class="userloginDashboard">
+    <div class="d-flex user-container">
+        {% include 'accounts/profileSidebar.html' %}
+        <!-- Main content -->
+        <div class="user-main-content">
+            <div class="top-back-to-site">
+                <button class="btn btn-primary user-toggle-btn" type="button" onclick="toggleSidebar()">
+                    Toggle
+                </button>
+                <div class="Backtositelink">
+                    <a class="" href="/">Home</a> | <a class="" href="{% url 'profile' %}">Profile</a>
+                </div>
+            </div>
+            <div class="user-main-navigation">
+                 <ul class="user-custom-subnav-list">
+                    <li>
+                        <a href="{% url 'user_portfolio:profile_overview' %}" 
+                            id="overview-btn" 
+                            class="{% if request.resolver_match.url_name == 'profile_overview' %}active{% endif %}">
+                            Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:unlisted_view' %}" 
+                            id="unlisted-btn" 
+                            class="{% if request.resolver_match.url_name == 'unlisted_view' %}active{% endif %}">
+                            Unlisted
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:angel_invest' %}" 
+                            id="angel-btn" 
+                            class="{% if request.resolver_match.url_name == 'angel_invest' %}active{% endif %}">
+                            Angel Invest
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:portfolio_view' %}" 
+                            id="portfolio-btn" 
+                            class="{% if request.resolver_match.url_name == 'portfolio_view' %}active{% endif %}">
+                            Portfolio
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:buy_orders' %}" 
+                            id="buyorders-btn" 
+                            class="{% if request.resolver_match.url_name == 'buy_orders' %}active{% endif %}">
+                            Buy Orders
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:sell_orders' %}" 
+                            id="sellorders-btn" 
+                            class="{% if request.resolver_match.url_name == 'sell_orders' %}active{% endif %}">
+                            Sell Orders
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:view_deal_letters' %}" 
+                            id="statementPaper-btn" 
+                            class="{% if request.resolver_match.url_name == 'view_deal_letters' %}active{% endif %}">
+                            Order Statement
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% block profile_content %}
+            <div class="user-main-dashboardcontent">
+                <div class="user-dashboard-heading"><h3>Profile</h3></div>
+                <!-- i added this check later  while client testing  start -->
+
+                <!-- Feedback Messages -->
+                {% if messages %}
+                    <ul>
+                        {% for message in messages|slice:":4" %}
+                            <li style="color: {% if message.tags == 'success' %}green{% else %}red{% endif %};">
+                                {{ message }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% if form.errors %}
+                    <div style="color: red; margin-top: 10px;">
+                        <strong>Form Errors:</strong>
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- i added this check later  while client testing  end -->
+                <!-- {% if form.errors %}
+                    <div style="color: red; margin-top: 10px;">
+                        <strong>Form Errors:</strong>
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %} -->
+
+                <div class="user-profile-dashboard">
+                    <div class="user-nameProfile">
+                        {% if profile.photo %}
+                            <img src="{{ profile.photo.url }}" alt="Profile Photo">
+                        {% else %}
+                            <img src="{% static 'default_user.png' %}  " alt="Profile Photo">
+                        {% endif %}
+                        <div class="User-user-info">
+                            <div class="User-username">{{ profile.user.username }}</div>
+                            <div class="User-user-id">Customer ID: {{ profile.custom_user_id }}</div>
+                            <a href="{% url 'change_phone' %}" class="User-user-id">Change Password</a>
+
+                        </div>
+                    </div>
+                    <!-- user details -->
+                    <div class="user-personal_Information">
+                        <div class="user-personal_Information-label">
+                            <div>Personal Information</div>
+                            <button onclick="openModalEditProfile('personal')" >✏️ Edit</button>
+                        </div>
+                        <div class="user-personal_Information-feilds">
+                            <div class="profile-container">
+                                <div class="heading-feilds">First Name<span>{{ profile.first_name }}</span></div>
+                                <div class="heading-feilds">Middle Name<span>{{ profile.middle_name }}</span></div>
+                                <div class="heading-feilds">Last Name<span>{{ profile.last_name }}</span></div>
+                                <div class="heading-feilds">Email<span>{{ profile.email }}</span></div>
+                                <div class="heading-feilds">WhatsApp Number<span>{{ profile.whatsapp_number }}</span></div>
+                                <div class="heading-feilds">Mobile Number<span>{{ profile.mobile_number }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- pan aadhar -->
+                    <div class="user-personal_Information">
+                        <div class="user-personal_Information-label">
+                            <div>Identity Information</div>
+                            <button onclick="openModalEditProfile('identity')">✏️ Edit</button>
+                        </div>
+                        <div class="user-personal_Information-feilds">
+                            <div class="profile-container">
+
+                            <!-- PAN -->
+                            <div class="heading-feilds">
+                                PAN Number
+                                {% if profile.pan_card_photo %}
+                                    <span onclick="toggleImage('pan-file')" style="cursor: pointer; margin-left: 8px;">👁</span>
+                                {% endif %}
+                                    <span>{{ profile.pan_number }}</span>
+                                    {% if profile.pan_card_photo %}
+                                    <div id="pan-file" style="display: none; margin-top: 8px;">
+                                        {% if profile.is_pan_pdf %}
+                                            <a href="{{ profile.pan_card_photo.url }}" target="_blank">📄 View PAN PDF</a>
+                                        {% else %}
+                                            <img src="{{ profile.pan_card_photo.url }}" style="width:100px; border:1px solid #ccc;">
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    Not Uploaded
+                                {% endif %}
+                                <!-- PAN document password with toggle -->
+                                <div style="margin-top:8px;">
+                                    <strong>Document Password:</strong>
+                                    <div class="input-group" style="max-width:250px;">
+                                    <input type="password" class="form-control" value="{{ profile.pan_doc_password }}" readonly id="pan_doc_password">
+                                    <span class="input-group-text" onclick="togglePassword('pan_doc_password', this)">
+                                        <i class="bi bi-eye-slash"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Aadhaar -->
+                        <div class="heading-feilds" style="margin-top: 15px;">
+                            Aadhaar Number
+                            {% if profile.adhar_card_photo %}
+                                <span onclick="toggleImage('aadhaar-file')" style="cursor: pointer; margin-left: 8px;">👁</span>
+                            {% endif %}
+                            <span>{{ profile.adhar_number }}</span>
+                            {% if profile.adhar_card_photo %}
+                            <div id="aadhaar-file" style="display: none; margin-top: 8px;">
+                                {% if profile.is_aadhaar_pdf %}
+                                    <a href="{{ profile.adhar_card_photo.url }}" target="_blank">📄 View Aadhaar PDF</a>
+                                {% else %}
+                                    <img src="{{ profile.adhar_card_photo.url }}" style="width:100px; border:1px solid #ccc;">
+                                {% endif %}
+                            </div>
+                            {% else %}
+                                Not Uploaded
+                            {% endif %}
+                            <!-- Aadhaar document password with toggle -->
+                            <div style="margin-top:8px;">
+                                <strong>Document Password:</strong>
+                                <div class="input-group" style="max-width:250px;">
+                                    <input type="password" class="form-control" value="{{ profile.adhar_doc_password }}" readonly id="adhar_doc_password">
+                                    <span class="input-group-text" onclick="togglePassword('adhar_doc_password', this)">
+                                        <i class="bi bi-eye-slash"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <script>
+            function togglePassword(fieldId, iconElem) {
+                const field = document.getElementById(fieldId);
+                const icon = iconElem.querySelector("i");
+                if (field.type === "password") {
+                    field.type = "text";
+                    icon.classList.remove("bi-eye-slash");
+                    icon.classList.add("bi-eye");
+                } else {
+                    field.type = "password";
+                    icon.classList.remove("bi-eye");
+                    icon.classList.add("bi-eye-slash");
+                }
+            }
+        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <!-- bank details -->
+                    <div class="user-personal_Information">
+                        <div class="user-personal_Information-label">
+                            <div>Bank Account Details</div>
+                            <button onclick="openBankModal('add')" class="add-button">➕ Add Bank</button>
+                        </div>
+                        <div class="user-personal_Information-feilds">
+                            <div class="profile-container">
+                                {% if bank_accounts %}
+                                    {% for account in bank_accounts %}
+                                        <div class="heading-feilds"><span>Account Holder Name</span>{{ account.account_holder_name }}</div>
+                                        <div class="heading-feilds"><span>Bank Name</span>{{ account.bank_name }}</div>
+                                        <div class="heading-feilds"><span>Account Type</span>{{ account.account_type }}</div>
+                                        <div class="heading-feilds"><span>Account Number</span>{{ account.account_number }}</div>
+                                        <div class="heading-feilds"><span>IFSC Code</span>{{ account.ifsc_code }}</div>
+                                        <!-- Display Document Password (if available) -->
+                                        {% if account.bankDetails_doc_password %}
+                                            <div class="heading-feilds">
+                                                <span>Document Password</span> {{ account.bankDetails_doc_password }}
+                                            </div>
+                                        {% endif %}
+
+                                        {% if account.statementPaper %}
+                                            <div class="heading-feilds">
+                                                <span>Statement Paper</span>
+                                                <a href="{{ account.statementPaper.url }}" target="_blank" class="download-link">📄 Download</a>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if account.statementPaper %}
+                                            <div class="heading-feilds">
+                                                <span>Statement Paper</span>
+                                                <a href="{{ account.statementPaper.url }}" target="_blank" class="download-link">📄 Download</a>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="heading-feilds1">
+                                            <button 
+                                                onclick="editBank({{ account.id }}, '{{ account.account_holder_name }}', '{{ account.bank_name }}', '{{ account.account_type }}', '{{ account.account_number }}', '{{ account.ifsc_code }}', '{{ account.bankDetails_doc_password }}')" 
+                                                class="edit-bank-button">
+                                                ✏️ Edit
+                                            </button>
+                                            <form method="POST" action="{% url 'delete_bank_account' account.id %}" 
+                                                style="display:inline;" 
+                                                onsubmit="return confirm('Are you sure you want to delete this Bank Account Detail?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="delete-bank-button">🗑 Delete</button>
+                                            </form>
+                                        </div>
+                                        <div class="heading-feilds1"></div>
+                                        <div class="heading-feilds1"></div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="no-data-message">No bank accounts added yet.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CMR details -->
+                    <div class="user-personal_Information">
+                        <div class="user-personal_Information-label">
+                            <div>CMR Copy</div>
+                            <button onclick="openModalCMR()">➕ Add CMR</button>
+                        </div>
+                        {% if cmr_form.errors %}
+                            <div style="color:red; margin-bottom: 15px;">
+                                {{ cmr_form.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="user-personal_Information-feilds">
+                            <div style="overflow-x: auto;">
+                            <div style="min-width: 800px;">
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr) 1fr; font-weight: 600; color: #2c3e50; padding: 10px 0; border-bottom: 2px solid #eee;">
+                                <div>Broker Name</div>
+                                <div>Broker ID</div>
+                                <div>Client ID</div>
+                                <div>CMR File</div>
+                                <div style="text-align:right;">Actions</div>
+                            </div>
+                            {% for cmr in cmr_copies %}
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr) 1fr; align-items: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0; color:#344767;">
+                                <div>{{ cmr.broker.name }}</div>
+                                <div>{{ cmr.broker.broker_id }}</div>
+                                <div>{{ cmr.client_id_input }}</div>
+                                <div>
+                                    {% if cmr.cmr_file %}
+                                        <!-- Download Button -->
+                                        <a href="{% url 'download_cmr_file' cmr.id %}" title="Download" style="text-decoration: none;">💾</a>
+
+                                        <!-- Preview Button -->
+                                        <button type="button"
+                                            onclick="openCMRPreview('{{ cmr.cmr_file.url }}')"
+                                            style="margin-left: 8px; background:none; border:none; cursor:pointer;"
+                                            title="View">
+                                            👁️
+                                        </button>
+                                    {% else %}
+                                        <span style="color: #aaa;">No File</span>
+                                    {% endif %}
+                                </div>
+
+                                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                    <button onclick="openModalCMR('{{ cmr.id }}', '{{ cmr.broker.id }}', '{{ cmr.broker_id_input }}', '{{ cmr.client_id_input }}')"
+                                        style="padding:6px 12px; border:1px solid #b0b8c1; border-radius:24px; background:white; color:#344767; cursor:pointer;">
+                                        ✏️
+                                    </button>
+                                    <form method="post" action="{% url 'delete_cmr' cmr.id %}" onsubmit="return confirm('Are you sure you want to delete this CMR copy?');">
+                                        {% csrf_token %}
+                                        <button type="submit" style="padding:6px 12px; border:1px solid #e57373; border-radius:24px; background:white; color:#d32f2f; cursor:pointer;">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            </div>
+                            </div>
+                            {% empty %}
+                                <p style="color:#888;">No brokers added yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Modals -->
+                <!-- Modal Form -->
+
+                <!-- Modal -->
+                <div id="edit-profile-modal" style="display:none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+                    <div style="background: #ffffff; margin: 3% auto; padding: 0; border-radius: 12px; width: 80%; max-width: 900px; position: relative; box-shadow: 0 8px 20px rgba(0,0,0,0.3); overflow: hidden;">
+
+                        <!-- Modal Header -->
+                        <div style="background: #0E213F; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; color: #fff;">
+                            <h3 style="margin: 0; font-size: 20px;">Edit Profile</h3>
+                            <div>
+                                <button type="submit" form="profile-form" style="background-color: #4CAF50; color: white; border: none; padding: 8px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-right: 10px;">
+                                    Save ✔
+                                </button>
+                                <button type="button" onclick="closeModalEditProfile()" style="background-color: #f44336; color: white; border: none; padding: 8px 18px; border-radius: 20px; font-weight: bold; cursor: pointer;">
+                                    Close ❌
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Modal Content -->
+                        <form id="profile-form" method="POST" action="{% url 'profile' %}" enctype="multipart/form-data" style="padding: 25px; background-color: #f9f9f9;">
+                            {% csrf_token %}
+                            <input type="hidden" id="form_type" name="form_type" value="profile_form">
+
+                            <!-- Personal Fields -->
+                            <div id="personal-fields" class="edit-profile-modal-user" 
+                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                                <div><label style="font-weight: bold;">First Name (As Per PAN)</label><br>{{ form.first_name }}</div>
+                                <div><label style="font-weight: bold;">Middle Name (As Per PAN)</label><br>{{ form.middle_name }}</div>
+                                <div><label style="font-weight: bold;">Last Name (As Per PAN)</label><br>{{ form.last_name }}</div>
+                                <div><label style="font-weight: bold;">Email</label><br>{{ form.email }}</div>
+                                <div><label style="font-weight: bold;">WhatsApp Number</label><br>{{ form.whatsapp_number }}</div>
+                                <div><label style="font-weight: bold;">Mobile Number</label><br>{{ form.mobile_number }}</div>
+                                <div style="grid-column: span 3;">
+                                    <label style="font-weight: bold;">Photo</label><br>{{ form.photo }}
+                                </div>
+                            </div>
+
+                            <!-- Identity Fields -->
+                            <div id="identity-fields" 
+                                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                                <div>
+                                    <label style="font-weight: bold;">PAN Number</label><br>{{ form.pan_number }}
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold;">PAN Card Photo</label><br>{{ form.pan_card_photo }}
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold;">PAN Document Password</label><br>{{ form.pan_doc_password }}
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold;">Aadhaar Number</label><br>{{ form.adhar_number }}
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold;">Aadhaar Card Photo</label><br>{{ form.adhar_card_photo }}
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold;">Aadhaar Document Password</label><br>{{ form.adhar_doc_password }}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+                <!-- end personal modal -->
+                <!-- JS to toggle modal -->
+
+                <script>
+                    function openModalEditProfile(section) {
+                        document.getElementById('edit-profile-modal').style.display = 'block';
+                        document.getElementById('personal-fields').style.display = 'none';
+                        document.getElementById('identity-fields').style.display = 'none';
+
+                        if (section === 'personal') {
+                            document.getElementById('personal-fields').style.display = 'grid';
+                            document.getElementById('form_type').value = 'personal';
+                        } else if (section === 'identity') {
+                            document.getElementById('identity-fields').style.display = 'grid';
+                            document.getElementById('form_type').value = 'identity';
+                        }
+                    }
+
+                    function closeModalEditProfile() {
+                        document.getElementById('edit-profile-modal').style.display = 'none';
+                    }
+
+                    function toggleImage(id) {
+                        const el = document.getElementById(id);
+                        el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+                    }
+
+                    window.onload = function () {
+                        {% if form.errors %}
+                            document.getElementById('edit-profile-modal').style.display = 'block';
+                            const formType = '{{ request.POST.form_type|default:"personal" }}';
+                            openModalEditProfile(formType);
+                        {% endif %}
+                    };
+                </script>
+                <!--Bank Modals  -->
+                <!-- Bank Modal -->
+                <div id="bank_modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center;">
+                    <div style="width: 750px; background: #0E213F; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-height: 70vh; overflow-y: auto;">
+                        <div style="margin: auto; background-color: #f9f9f9; padding: 25px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+                        <!-- Modal Header -->
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 id="modal_title" style="margin: 0; color: #2c3e50;">Bank Account Details</h3>
+                            <div>
+                                <button onclick="submitBankForm()" style="background-color: #e5f9e7; color: green; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-right: 8px;">✔ Save</button>
+                                <button onclick="closeBankModal()" style="background-color: #ffe5e5; color: red; border: none; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer;">❌ Close</button>
+                            </div>
+                        </div>
+
+                        <!-- Bank Form -->
+                        <form id="bank_form" method="POST" action="{% url 'save_bank_account' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- If Editing an Existing Bank Account, pass the account ID -->
+                            {% if bank_account %}
+                                <input type="hidden" name="account_id" value="{{ bank_account.id }}">
+                            {% endif %}
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+                                <!-- Account Holder Name -->
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Account Holder Name</label>
+                                    {% if bank_account %}
+                                        <input id="holder_name" name="account_holder_name" type="text" 
+                                            placeholder="Enter name" value="{{ bank_account.account_holder_name }}" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% else %}
+                                        <input id="holder_name" name="account_holder_name" type="text" 
+                                            placeholder="Enter name" value="" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% endif %}
+                                </div>
+
+                                <!-- Bank Name -->
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Bank Name</label>
+                                    {% if bank_account %}
+                                        <input id="bank_name" name="bank_name" type="text" 
+                                            placeholder="Enter bank name" value="{{ bank_account.bank_name }}" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% else %}
+                                        <input id="bank_name" name="bank_name" type="text" 
+                                            placeholder="Enter bank name" value="" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% endif %}
+                                </div>
+
+                                <!-- Account Type Dropdown -->
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Account Type</label>
+                                    <select id="account_type" name="account_type" style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                        <option value="">Select Account Type</option>
+                                        <option value="saving" {% if bank_account and bank_account.account_type == 'saving' %}selected{% endif %}>Saving</option>
+                                        <option value="current" {% if bank_account and bank_account.account_type == 'current' %}selected{% endif %}>Current</option>
+                                        <option value="salary" {% if bank_account and bank_account.account_type == 'salary' %}selected{% endif %}>Salary</option>
+                                        <option value="nre" {% if bank_account and bank_account.account_type == 'nre' %}selected{% endif %}>NRE</option>
+                                        <option value="nro" {% if bank_account and bank_account.account_type == 'nro' %}selected{% endif %}>NRO</option>
+                                    </select>
+                                </div>
+
+                                <!-- Account Number -->
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Account Number</label>
+                                    {% if bank_account %}
+                                        <input id="account_number" name="account_number" type="text" 
+                                            placeholder="Enter account number" value="{{ bank_account.account_number }}" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% else %}
+                                        <input id="account_number" name="account_number" type="text" 
+                                            placeholder="Enter account number" value="" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% endif %}
+                                </div>
+
+                                <!-- IFSC Code -->
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">IFSC Code</label>
+                                    {% if bank_account %}
+                                        <input id="ifsc_code" name="ifsc_code" type="text" 
+                                            placeholder="Enter IFSC" value="{{ bank_account.ifsc_code }}" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% else %}
+                                        <input id="ifsc_code" name="ifsc_code" type="text" 
+                                            placeholder="Enter IFSC" value="" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% endif %}
+                                </div>
+
+                                <!-- Document Password -->
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Document Password (Optional)</label>
+                                    {% if bank_account %}
+                                        <input id="doc_password" name="bankDetails_doc_password" type="text" 
+                                            placeholder="Enter document password" value="{{ bank_account.bankDetails_doc_password }}" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% else %}
+                                        <input id="doc_password" name="bankDetails_doc_password" type="text" 
+                                            placeholder="Enter document password" value="" 
+                                            style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                    {% endif %}
+                                </div>
+
+                                <!-- Statement Paper Upload -->
+                                <div style="flex: 1; min-width: 250px;">
+                                    <label style="font-weight: bold;">Statement Paper (PDF/XLSX)</label>
+                                    <input id="statementPaper" name="statementPaper" type="file" accept=".pdf,.xlsx"
+                                        style="width: 100%; padding: 8px; border: 1px solid #7d8fa0; border-radius: 5px;">
+                                </div>
+
+                            </div>
+
+                            <input type="submit" value="Save" style="margin-top: 20px; padding: 10px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 5px;">
+                        </form>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank Modal JavaScript -->
+                <script>
+                    function openBankModal(mode) {
+                        document.getElementById('bank_modal').style.display = 'flex';
+                        document.getElementById('modal_title').textContent = mode === 'add' ? 'Add Bank Account' : 'Edit Bank Account';
+                        if (mode === 'add') {
+                            document.getElementById('bank_form').reset();
+                            document.getElementById('account_id').value = '';
+                        }
+                    }
+
+                    function closeBankModal() {
+                        document.getElementById('bank_modal').style.display = 'none';
+                    }
+
+                    function submitBankForm() {
+                        document.getElementById('bank_form').submit();
+                    }
+
+                    function editBank(id, holder, bank, type, number, ifsc) {
+                        openBankModal('edit');
+                        document.getElementById('account_id').value = id;
+                        document.getElementById('holder_name').value = holder;
+                        document.getElementById('bank_name').value = bank;
+                        document.getElementById('account_type').value = type;
+                        document.getElementById('account_number').value = number;
+                        document.getElementById('ifsc_code').value = ifsc;
+                        document.getElementById('doc_password').value = docPassword || '';
+                    }
+                </script>
+                <!-- <h1>End Test Bank</h1> -->
+
+
+                <!-- CRM Modal -->
+                <div id="edit_cmr_modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
+                    <div style="background-color:#0E213F; border-radius:12px; padding:24px; max-width:900px; margin:auto; margin-top:50px; box-shadow:0 2px 10px rgba(0,0,0,0.05); position:relative;">
+                        <div style="max-width: 1000px; margin: auto; background-color: #f9f9f9; padding: 25px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+                        <!-- Modal Top Buttons -->
+                        <div style="position:absolute; top:34px; right:34px; display:flex; gap:10px;">
+                            <button onclick="document.getElementById('cmr_form').submit()" style="padding:8px 20px; border-radius:24px; border:1px solid #ccc; background-color: #4CAF50; cursor:pointer;">
+                                Save ✔️
+                            </button>
+                            <button onclick="closeModalCMR()" style="background-color:#ffe5e5; color:red; border:none; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer;">
+                                Close ❌
+                            </button>
+                        </div>
+
+                        <h3 style="margin-top:0; margin-bottom:20px;">Add / Edit CMR Copy</h3>
+
+                        {% if cmr_form.errors %}
+                            <div style="color:red; margin-bottom: 15px;">
+                                {{ cmr_form.errors }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Form -->
+                        <form method="post" enctype="multipart/form-data" id="cmr_form" action="{% url 'profile' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="cmr_form">
+                            <input type="hidden" name="cmr_id" id="cmr_id" value="">
+                            <div style="display:flex; flex-wrap:wrap; gap:20px;">
+                                <div style="flex:1;">
+                                    <label>Broker Name</label><br>
+                                    <select name="broker" id="broker" required style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                                        <option value="">-- Select Broker --</option>
+                                        {% for broker in brokers %}
+                                            <option value="{{ broker.id }}">{{ broker.name }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <!-- <div style="margin-top: 15px;">
+                                        <label>Broker ID Input</label><br>
+                                        <input type="text" name="broker_id_input" id="broker_id_input"
+                                            value="{{ request.POST.broker_id_input|default:'' }}"
+                                            style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; width:100%;">
+                                    </div> -->
+
+                                    <div style="margin-top: 15px;">
+                                        <label>Broker ID Input</label><br>
+                                        <input type="text" name="broker_id_input" id="broker_id_input" value="" readonly style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; width:100%;">
+                                    </div>
+                                    
+
+
+
+                                    <div style="margin-top: 15px;">
+                                        <label>Client ID Input</label><br>
+                                        <input type="text" name="client_id_input" id="client_id_input"
+                                            value="{{ request.POST.client_id_input|default:'' }}"
+                                            style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; width:100%;">
+                                    </div>
+                                </div>
+
+                                <div style="flex:1;">
+                                    <label>Upload CMR</label><br>
+                                    <input type="file" name="cmr_file" accept=".pdf,.jpg,.jpeg,.png" style="padding:4px;">
+                                </div>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- crm modal Javascript -->
+                <script>
+                    const brokerIdMap = {
+                        {% for broker in brokers %}
+                            "{{ broker.id }}": "{{ broker.broker_id }}",
+                        {% endfor %}
+                    };
+
+                    // When modal is opened, set broker ID if editing
+                    function openModalCMR(cmrId = null, brokerId = null, brokerInput = '', clientInput = '') {
+                        document.getElementById('edit_cmr_modal').style.display = 'block';
+                        document.getElementById('cmr_id').value = cmrId || '';
+
+                        const brokerSelect = document.getElementById('broker');
+                        brokerSelect.value = brokerId || '';
+                        document.getElementById('client_id_input').value = clientInput || '';
+
+                        const brokerInputField = document.getElementById('broker_id_input');
+                        if (brokerId && brokerIdMap[brokerId]) {
+                            brokerInputField.value = brokerIdMap[brokerId];
+                        } else {
+                            brokerInputField.value = '';
+                        }
+                    }
+
+                    // Update broker_id_input when broker is changed
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const brokerSelect = document.getElementById('broker');
+                        brokerSelect.addEventListener('change', function () {
+                            const selectedId = this.value;
+                            document.getElementById('broker_id_input').value = brokerIdMap[selectedId] || '';
+                        });
+                    });
+
+                    function closeModalCMR() {
+                        document.getElementById('edit_cmr_modal').style.display = 'none';
+                        const form = document.getElementById('cmr_form');
+                        form.reset();
+                        form.querySelector('input[name="cmr_id"]').value = '';
+                        form.querySelector('#broker_id').selectedIndex = 0;
+                    }
+                </script>
+                
+                <!--  -->
+
+                <!-- CMR View document start -->
+                <!-- CMR Preview Modal -->
+                <div id="cmrPreviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000;">
+                    <div style="background:white; max-width:80%; max-height:90%; margin:auto; margin-top:5%; padding:20px; border-radius:10px; position:relative;">
+                        <button onclick="closeCMRPreview()" style="position:absolute; top:10px; right:10px; background:#ffdddd; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;">
+                            ❌
+                        </button>
+                        <div id="cmrPreviewContent" style="text-align:center; max-height:80vh; overflow:auto;"></div>
+                    </div>
+                </div>
+
+
+                <script>
+                    function openCMRPreview(fileUrl) {
+                        const previewContainer = document.getElementById('cmrPreviewContent');
+                        const modal = document.getElementById('cmrPreviewModal');
+
+                        if (!previewContainer || !modal) {
+                            alert("CMR preview modal not found.");
+                            return;
+                        }
+
+                        const extension = fileUrl.split('.').pop().toLowerCase();
+
+                        if (['jpg', 'jpeg', 'png'].includes(extension)) {
+                            previewContainer.innerHTML = `<img src="${fileUrl}" alt="CMR Copy" style="max-width:100%; max-height:80vh;">`;
+                        } else if (extension === 'pdf') {
+                            previewContainer.innerHTML = `
+                                <object data="${fileUrl}" type="application/pdf" width="100%" height="600px">
+                                    <p>PDF cannot be previewed here. <a href="${fileUrl}" target="_blank">Open in new tab</a>.</p>
+                                </object>`;
+                        } else {
+                            previewContainer.innerHTML = `<p>Preview not available for this file type.</p>`;
+                        }
+
+                        modal.style.display = 'block';
+                    }
+
+
+                    function closeCMRPreview() {
+                        const modal = document.getElementById('cmrPreviewModal');
+                        const previewContainer = document.getElementById('cmrPreviewContent');
+                        if (modal && previewContainer) {
+                            modal.style.display = 'none';
+                            previewContainer.innerHTML = '';
+                        }
+                    }
+                </script>
+                <!-- CMR View document end -->
+                <script>
+                    function toggleSection(id) {
+                        const section = document.getElementById(id);
+                        const header = section.previousElementSibling;
+                        const isVisible = section.style.display === 'none';
+
+                        if (isVisible) {
+                            section.style.display = 'grid';
+                            header.classList.add('open');
+                        } else {
+                            section.style.display = 'none';
+                            header.classList.remove('open');
+                        }
+                    }
+
+                    // Ensure all sections are visible on initial load
+                    document.querySelectorAll('.custom-section-body').forEach(sec => {
+                        sec.style.display = 'grid';
+                    });
+                    document.querySelectorAll('.custom-section-header').forEach(head => {
+                        head.classList.add('open');
+                    });
+
+                    function enableEdit(sectionId) {
+                        const section = document.getElementById(sectionId);
+                        section.querySelectorAll('.display-field').forEach(el => el.style.display = 'none');
+                        section.querySelectorAll('.edit-field').forEach(el => el.style.display = 'block');
+                    }
+
+                    function cancelEdit(sectionId) {
+                        const section = document.getElementById(sectionId);
+                        section.querySelectorAll('.display-field').forEach(el => el.style.display = 'block');
+                        section.querySelectorAll('.edit-field').forEach(el => el.style.display = 'none');
+                    }
+                </script>
+                <!--  -->
+
+            </div>
+            {% endblock %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+

@@ -87,9 +87,10 @@
     <tr>
       <th>#</th>
       <th>Type</th>
-      <th>User</th>
+      <th>Client ID</th>
+      <th>Client Name</th>
       <th>Stock</th>
-      <th>Qty</th>
+      <th>Quantity</th>
       <th>Price/Share</th>
       <th>Total</th>
       <th>Generated On</th>
@@ -101,6 +102,7 @@
     <tr>
       <td>{{ forloop.counter }}</td>
       <td>{{ record.deal_type }}</td>
+      <td>{{ record.user.id }}</td>
       <td>{{ record.user.username }}</td>
       <td>{{ record.stock_name }}</td>
       <td>{{ record.quantity }}</td>

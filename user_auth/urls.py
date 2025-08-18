@@ -63,6 +63,15 @@ urlpatterns = [
     # about
     path('about/', about, name='about'),
 
+    # terms
+    path('terms/', terms, name='terms'),
+
+    # privacy
+    path('privacy/', privacy, name='privacy'),
+
+    # disclaimer
+    path('disclaimer/', disclaimer, name='disclaimer'),
+    
     # faq
     path('faq/',Gendral_User_FAQ, name='faq'),
     
@@ -70,6 +79,9 @@ urlpatterns = [
     path('blog/',blog,name='blog'),
     path('blog_Details/<int:blog_id>/', user_blog_detail_view, name='user_blog_detail'),
     path('manage-users/', manage_user_types, name='manage_user_types'),
+    
+
+
 ]
 
 if settings.DEBUG:

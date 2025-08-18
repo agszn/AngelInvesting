@@ -103,17 +103,28 @@ from .models import UserProfile
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['first_name', 'middle_name', 'last_name', 'email',
-                  'whatsapp_number', 'mobile_number', 'photo',
-                  'pan_number', 'pan_card_photo', 'adhar_number', 'adhar_card_photo']
+        fields = [
+            'first_name', 'middle_name', 'last_name', 'email',
+            'whatsapp_number', 'mobile_number', 'photo',
+            'pan_number', 'pan_card_photo', 'pan_doc_password',
+            'adhar_number', 'adhar_card_photo', 'adhar_doc_password'
+        ]
         widgets = {
             'email': forms.EmailInput(attrs={'type': 'email'}),
+            'pan_doc_password': forms.PasswordInput(render_value=True),
+            'adhar_doc_password': forms.PasswordInput(render_value=True),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Make all fields optional
         for field in self.fields:
-            self.fields[field].required = False  # Make all fields optional
+            self.fields[field].required = False  
+
+        # Always show password fields (no hiding)
+        self.fields['pan_doc_password'].widget.attrs.pop('hidden', None)
+        self.fields['adhar_doc_password'].widget.attrs.pop('hidden', None)
 
 
 # bank acc
@@ -123,7 +134,23 @@ from .models import BankAccount
 class BankAccountForm(forms.ModelForm):
     class Meta:
         model = BankAccount
-        fields = ['account_holder_name', 'bank_name', 'account_type', 'account_number', 'ifsc_code']
+        fields = [
+            'account_holder_name', 
+            'bank_name', 
+            'account_type', 
+            'account_number', 
+            'account_status', 
+            'linked_phone_number', 
+            'ifsc_code', 
+            'statementPaper', 
+            'bankDetails_doc_password'
+        ]
+    
+    def clean_account_number(self):
+        account_number = self.cleaned_data.get('account_number')
+        if len(account_number) < 10 or len(account_number) > 20:
+            raise forms.ValidationError('Account number must be between 10 and 20 characters.')
+        return account_number
 
 
 
@@ -145,10 +172,11 @@ class CMRForm(forms.ModelForm):
 from django import forms
 from .models import Contact
 
+
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
-        fields = ['name', 'email', 'subject', 'message'] 
+        fields = ['name', 'email', 'phone', 'subject', 'message']  # added phone here
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control', 
@@ -158,6 +186,13 @@ class ContactForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'Enter your email address'
+            }),
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your 10-digit phone number',
+                'maxlength': '10',
+                'pattern': '[0-9]{10}',  # HTML5 validation
+                'title': 'Enter a valid 10-digit phone number'
             }),
             'subject': forms.TextInput(attrs={  
                 'class': 'form-control',

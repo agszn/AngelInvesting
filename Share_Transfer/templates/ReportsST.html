@@ -6,38 +6,39 @@
 {% block STprofile_content %}
 
 <!-- Filter Form -->
-<form method="get" class="mb-4" style="display: flex; gap: 20px; align-items: end; flex-wrap: wrap;">
-    <div>
-        <label>From Date:</label>
-        <input type="date" name="from_date" value="{{ from_date }}" class="form-control">
-    </div>
-    <div>
-        <label>To Date:</label>
-        <input type="date" name="to_date" value="{{ to_date }}" class="form-control">
-    </div>
-    <div>
-        <label>Order ID:</label>
-        <input type="text" name="order_id" value="{{ order_id }}" class="form-control" placeholder="Search Order ID">
-    </div>
-    <div>
-        <button type="submit" class="btn btn-primary">Filter</button>
-        <a href="{% url 'ST_User:ReportsST' %}" class="btn btn-secondary">Clear</a>
-    </div>
-</form>
-
+<div class="user-portfolio-top">
+    <form method="get" class="filter-form mb-4 d-flex flex-wrap gap-3 align-items-end">
+        <div>
+            <label>Date:</label>
+            <input type="date" name="date_filter" value="{{ date_filter|default_if_none:'' }}" class="form-control">
+        </div>
+        <div>
+            <label>Order ID:</label>
+            <input type="text" name="order_id" value="{{ order_id|default_if_none:'' }}" class="form-control" placeholder="Search Order ID">
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{% url 'ST_User:ReportsST' %}" class="btn btn-secondary">Clear</a>
+        </div>
+    </form>
+</div>
+    <div class="SMtable-head">
     <!-- Completed Buy Orders -->
     <h4 class="mt-4 mb-2">✅ Completed Buy Orders</h4>
-    <table class="STbuyorder-table mb-5">
-        <thead>
+
+<div class="SMtable-scroll-container">
+  <table class="user-portfolio-toptable1">
+    <thead class="user-portfolio-head-admin">
             <tr>
                 <th>Sl.no</th>
                 <th>Order ID</th>
+                <th>Customer ID</th>
+                <th>Customer Name</th>
+
                 <th>Date</th>
                 <th>Time</th>
-                <th>Accounts</th>
-                <th>RM</th>
-                <th>Customer Name</th>
-                <th>Customer ID</th>
+                <th>Stock</th>
+                <th>Quantity</th>
                 <th>RM Status</th>
                 <th>AM Status</th>
                 <th>Status</th>
@@ -49,15 +50,17 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ order.order_id }}</td>
+                    <td>{{ order.user.profile.custom_user_id }}</td>
+                    <td>{{ order.user.profile.user.username }}</td>
+
                     <td>{{ order.timestamp|date:"d-m-Y" }}</td>
                     <td>{{ order.timestamp|time:"h:i A" }}</td>
-                    <td>{{ order.AC_status|title }}</td>
+                    <td>{{ order.stock }}</td>
+                    <td>{{ order.quantity }}</td>
+
                     <td>{{ order.get_RM_status_display }}</td>
-                    <td>{{ order.user.profile.user.username }}</td>
-                    <td>{{ order.user.profile.custom_user_id }}</td>
-                    <td>{{ order.RM_status }}</td>
-                    <td>{{ order.AC_status }}</td>
-                    <td>{{ order.status }}</td>
+                    <td>{{ order.AC_status|title }}</td>
+                    <td>{{ order.status|title }}</td>
                     <td><a class="STview" href="{% url 'ST_User:buyOrderSummaryST' order.order_id %}">View</a></td>
                 </tr>
             {% empty %}
@@ -67,11 +70,11 @@
             {% endfor %}
         </tbody>
     </table>
-
+</div>
 
     <!-- Buy Order Pagination -->
     {% if buy_orders_ReportsST.has_other_pages %}
-    <nav class="mb-5">
+    <nav class="mb-5 mt-4">
     <ul class="pagination">
         {% if buy_orders_ReportsST.has_previous %}
         <li class="page-item">
@@ -97,8 +100,9 @@
 
     <!-- Completed Sell Orders -->
     <h4 class="mt-4 mb-2">✅ Completed Sell Orders</h4>
-    <table class="STbuyorder-table">
-        <thead>
+    <div class="SMtable-scroll-container">
+   <table class="user-portfolio-toptable1">
+    <thead class="user-portfolio-head-admin">
             <tr>
                 <th>Sl.no</th>
                 <th>Order ID</th>
@@ -137,10 +141,11 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 
     <!-- Sell Order Pagination -->
     {% if sell_orders_ReportsST.has_other_pages %}
-    <nav>
+    <nav class="mt-4">
     <ul class="pagination">
         {% if sell_orders_ReportsST.has_previous %}
         <li class="page-item">
@@ -162,5 +167,5 @@
     </ul>
     </nav>
     {% endif %}
-
+    </div>
 {% endblock %}

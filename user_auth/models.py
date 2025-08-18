@@ -7,7 +7,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 from django.core.validators import RegexValidator
-
+from django.utils import timezone
+# ===============================
+# Custom User Model
+# ===============================
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = [
         ('RM', 'Relationship Manager'),
@@ -16,12 +19,17 @@ class CustomUser(AbstractUser):
         ('ST', 'Share Transfer'),
         ('AD', 'Admin'),
         ('DF', 'Default User'),
-        ('AP', 'Associate Partner'),   
-        ('PT', 'Partner'),   
-        ('Other', 'Other'),           
+        ('AP', 'Associate Partner'),
+        ('Other', 'Other'),
     ]
 
-    phone_number = models.CharField(max_length=12, validators=[RegexValidator(r'^\+?\d{10,12}$', 'Enter valid phone number')], unique=True, blank=True, null=True)
+    phone_number = models.CharField(
+        max_length=12,
+        validators=[RegexValidator(r'^\+?\d{10,12}$', 'Enter valid phone number')],
+        unique=True,
+        blank=True,
+        null=True
+    )
     email = models.EmailField(unique=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
     user_type = models.CharField(max_length=5, choices=USER_TYPE_CHOICES, default='DF')
@@ -38,13 +46,47 @@ class CustomUser(AbstractUser):
     )
 
     assigned_rm = models.ForeignKey(
-            'self',
-            null=True,
-            blank=True,
-            on_delete=models.SET_NULL,
-            limit_choices_to={'user_type': 'RM'},
-            related_name='assigned_users'
-        )
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        limit_choices_to={'user_type': 'RM'},
+        related_name='assigned_users'
+    )
+
+    # 🔹 Login tracking fields
+    daily_login_count = models.PositiveIntegerField(default=0)
+    weekly_login_count = models.PositiveIntegerField(default=0)
+    monthly_login_count = models.PositiveIntegerField(default=0)
+    last_login_date = models.DateField(null=True, blank=True)
+
+    def update_login_stats(self):
+        """Update login counters for day, week, month."""
+        today = timezone.now().date()
+        current_week = today.isocalendar()[1]
+        current_month = today.month
+
+        if self.last_login_date != today:
+            # Reset daily counter if new day
+            self.daily_login_count = 0
+
+        # Count this login
+        self.daily_login_count += 1
+
+        # Weekly & monthly reset logic
+        if not self.last_login_date or self.last_login_date.isocalendar()[1] != current_week:
+            self.weekly_login_count = 0
+        if not self.last_login_date or self.last_login_date.month != current_month:
+            self.monthly_login_count = 0
+
+        self.weekly_login_count += 1
+        self.monthly_login_count += 1
+        self.last_login_date = today
+
+        self.save(update_fields=[
+            "daily_login_count", "weekly_login_count",
+            "monthly_login_count", "last_login_date"
+        ])
 
 
 
@@ -67,7 +109,7 @@ ACCOUNT_STATUS_CHOICES = [
 
 from django.db import models
 from django.conf import settings
-
+from django.core.validators import FileExtensionValidator
 
 class UserProfile(models.Model):
     user = models.OneToOneField(
@@ -88,9 +130,24 @@ class UserProfile(models.Model):
     
     # KYC Information
     pan_number = models.CharField(max_length=20, validators=[RegexValidator(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}', 'Enter valid PAN number')], blank=True, null=True)
-    pan_card_photo = models.ImageField(upload_to='pan_cards/', blank=True, null=True)
+    # pan_card_photo = models.ImageField(upload_to='pan_cards/', blank=True, null=True)
+    pan_card_photo = models.FileField(
+        upload_to='pan_cards/',
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf'])],
+        blank=True, null=True
+    )
+
+    adhar_card_photo = models.FileField(
+        upload_to='adhar_cards/',
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf'])],
+        blank=True, null=True
+    )
+
     adhar_number = models.CharField(max_length=12, validators=[RegexValidator(r'^\d{12}$', 'Enter valid 12-digit Aadhaar number')], blank=True, null=True)
-    adhar_card_photo = models.ImageField(upload_to='adhar_cards/', blank=True, null=True)
+    # adhar_card_photo = models.ImageField(upload_to='adhar_cards/', blank=True, null=True)
+
+    pan_doc_password = models.CharField(max_length=100, blank=True, null=True)
+    adhar_doc_password = models.CharField(max_length=100, blank=True, null=True)
 
     # Meta Info
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -117,23 +174,52 @@ class UserProfile(models.Model):
                 count += 1
         super().save(*args, **kwargs)
 
+
+# ===============================
+# Login History Model
+# ===============================
+class LoginHistory(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="login_history"
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} logged in at {self.timestamp}"
+
+
 from django.core.validators import FileExtensionValidator
 from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MaxLengthValidator, MinLengthValidator
 
 class BankAccount(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='bank_accounts')
     account_holder_name = models.CharField(max_length=100)
     bank_name = models.CharField(max_length=100)
-    account_number = models.CharField(max_length=20)
-    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES)
-    account_status = models.CharField(max_length=10, choices=ACCOUNT_STATUS_CHOICES)
-    linked_phone_number = models.CharField(max_length=15)
+    account_number = models.CharField(
+        max_length=20,
+        validators=[
+            MinLengthValidator(10),  # Minimum length of 10
+            MaxLengthValidator(20)   # Maximum length of 20
+        ]
+    )
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES,default="saving")
+    
+    account_status = models.CharField(
+        max_length=10,
+        choices=ACCOUNT_STATUS_CHOICES,
+        default="active"
+    )
 
+    linked_phone_number = models.CharField(max_length=15, blank=True, null=True)
+    # IFSC Code - regex to enforce the pattern
     ifsc_code = models.CharField(
         max_length=11,
         validators=[
             RegexValidator(
-                regex=r'^[A-Z]{4}0[0-9A-Z]{6}$',
+                regex=r'^[A-Z]{4}0[A-Z0-9]{6}$',
                 message='Enter a valid IFSC code (e.g., SBIN0001234)'
             )
         ], blank=True, null=True
@@ -146,6 +232,8 @@ class BankAccount(models.Model):
             FileExtensionValidator(allowed_extensions=['pdf', 'xlsx'])
         ]
     )
+
+    bankDetails_doc_password = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.bank_name} - {self.account_number}"
@@ -181,6 +269,11 @@ class CMRCopy(models.Model):
 from django.db import models
 from django.conf import settings
 
+from django.conf import settings
+from django.db import models
+from django.core.validators import RegexValidator
+
+
 class Contact(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -191,12 +284,18 @@ class Contact(models.Model):
     )
     name = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField()
+    phone = models.CharField(
+        max_length=10,
+        validators=[RegexValidator(r'^\d{10}$', 'Enter a valid 10-digit phone number.')],
+        help_text="10-digit phone number (digits only).", null=True, blank=True
+    )
     subject = models.CharField(max_length=200, null=True, blank=True)
     message = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
-        return f"Message from {self.name} - {self.subject}"
+        return f"Message from {self.name or self.email} - {self.subject or 'No subject'}"
+
 
 
 

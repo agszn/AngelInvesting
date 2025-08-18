@@ -1,0 +1,548 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% load static %}
+{% block marquee %}
+{% endblock %}
+
+{% block contentNavbar %}
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .profile-wrapper {
+        display: flex;
+        margin: 30px;
+    }
+
+    .profile-sidebar {
+        width: 30%;
+        padding: 20px;
+        background-color: #f8f9fa;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .custom-profile-main {
+        width: 70%;
+        padding: 30px;
+        background-color: #e6f2ff;
+        border-radius: 8px;
+    }
+
+    .custom-section {
+        margin-bottom: 40px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #FDFAFA;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-section-block {
+        margin-bottom: 40px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #FDFAFA;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        text-align: center;
+        color: #0e213f;
+    }
+
+    .custom-section-header:hover {
+        background-color: #f5f5f5;
+    }
+
+    .custom-section-header span {
+        transition: transform 0.3s ease;
+    }
+
+    .custom-section-header.open span {
+        transform: rotate(180deg);
+    }
+
+    .custom-section-body {
+        margin-top: 15px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .custom-profile-left {
+        grid-column: span 3;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .custom-profile-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .custom-profile-btn {
+        padding: 6px 10px;
+        background: #d0e8ff;
+        border: 1px solid #8ab6d6;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #000;
+    }
+
+    .custom-profile-btn:hover {
+        background: #b3dbff;
+    }
+
+    .stock-page-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 75px;
+        font-size: 2em;
+        color: aliceblue;
+        background: radial-gradient(
+            64.54% 23.63% at 69.24% 61.54%,
+            #271b3f 0%,
+            #271b3f 43.09%,
+            #341a47 68.59%,
+            #0e213f 100%
+        );
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-label-block {
+        margin-bottom: 12px;
+    }
+
+    .custom-label-block .custom-label {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    /* subnav */
+    .custom-profile-subnav {
+        background-color: #f9f9f9;
+        border-bottom: 2px solid #e0e0e0;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+    }
+
+    .custom-subnav-list {
+        list-style: none;
+        display: flex;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .custom-subnav-list li button {
+        background-color: transparent;
+        border: none;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .custom-subnav-list li button:hover {
+        background-color: #e0e0e0;
+    }
+
+    .custom-subnav-list li button.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* left */
+    .profile-sidebar {
+        background-color: #f0f8ff;
+        border: 1px solid #cce0ff;
+        border-radius: 12px;
+        padding: 25px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+    }
+
+    .profile-sidebar h4 {
+        color: #003366;
+        border-bottom: 2px solid #99ccff;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+        font-size: 1.6rem;
+    }
+
+    .filter-form-inline {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+
+    .filter-form-inline .form-control,
+    .filter-form-inline .form-select {
+        width: 200px;
+        border-radius: 8px;
+        border: 1px solid #99ccff;
+        padding: 8px 12px;
+    }
+
+    .filter-form-inline .btn-primary {
+        background-color: #004080;
+        border-color: #004080;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: bold;
+    }
+
+    .filter-form-inline .btn-primary:hover {
+        background-color: #0059b3;
+        border-color: #0059b3;
+    }
+
+    .list-group-item {
+        background-color: #ffffff;
+        border-left: 4px solid #004080;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: left;
+    }
+
+    .list-group-item .fw-bold {
+        font-size: 1.1rem;
+    }
+
+    .text-primary {
+        color: #004080 !important;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+    .stock-page-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 75px;
+        font-size: 2em;
+        color: aliceblue;
+        background: radial-gradient(
+            64.54% 23.63% at 69.24% 61.54%,
+            #271b3f 0%,
+            #271b3f 43.09%,
+            #341a47 68.59%,
+            #0e213f 100%
+        );
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .custom-subnav-list {
+        list-style: none;
+        display: flex;
+        background-color: #ECF3FF;
+        padding: 15px;
+    }
+
+    .custom-subnav-list li a {
+        display: block; /* Ensures padding + background work fully */
+        text-decoration: none;
+        background-color: transparent;
+        border: none;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #000000;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: background-color 0.3s, color 0.3s;
+        width: 100%; /* Optional: make entire <li> clickable if needed */
+    }
+
+    .custom-subnav-list li a:hover {
+        background-color: #e0e0e0;
+    }
+
+    .custom-subnav-list li a.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+
+</style>
+<section class="userloginDashboard">
+    <div class="d-flex user-container">
+        {% include 'accounts/profileSidebar.html' %}
+        <!-- Main content -->
+        <div class="user-main-content">
+            <div class="top-back-to-site">
+                <button class="btn btn-primary user-toggle-btn" type="button" onclick="toggleSidebar()">
+                    Toggle
+                </button>
+                <div class="Backtositelink">
+                    <a class="" href="/">Home</a> | <a class="" href="{% url 'profile' %}">Profile</a>
+                </div>
+            </div>
+            <div class="user-main-navigation">
+                 <ul class="user-custom-subnav-list">
+                    <li>
+                        <a href="{% url 'user_portfolio:profile_overview' %}" 
+                            id="overview-btn" 
+                            class="{% if request.resolver_match.url_name == 'profile_overview' %}active{% endif %}">
+                            Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:unlisted_view' %}" 
+                            id="unlisted-btn" 
+                            class="{% if request.resolver_match.url_name == 'unlisted_view' %}active{% endif %}">
+                            Unlisted
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:angel_invest' %}" 
+                            id="angel-btn" 
+                            class="{% if request.resolver_match.url_name == 'angel_invest' %}active{% endif %}">
+                            Angel Invest
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:portfolio_view' %}" 
+                            id="portfolio-btn" 
+                            class="{% if request.resolver_match.url_name == 'portfolio_view' %}active{% endif %}">
+                            Portfolio
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:buy_orders' %}" 
+                            id="buyorders-btn" 
+                            class="{% if request.resolver_match.url_name == 'buy_orders' %}active{% endif %}">
+                            Buy Orders
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:sell_orders' %}" 
+                            id="sellorders-btn" 
+                            class="{% if request.resolver_match.url_name == 'sell_orders' %}active{% endif %}">
+                            Sell Orders
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_portfolio:view_deal_letters' %}" 
+                            id="statementPaper-btn" 
+                            class="{% if request.resolver_match.url_name == 'view_deal_letters' %}active{% endif %}">
+                            Order Statement
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% block profile_content %}
+            <div class="user-main-dashboardcontent">
+                <div class="user-dashboard-heading"><h3>Profile</h3></div>
+                <!-- i added this check later  while client testing  start -->
+
+                <!-- Feedback Messages -->
+                {% if messages %}
+                    <ul>
+                        {% for message in messages|slice:":4" %}
+                            <li style="color: {% if message.tags == 'success' %}green{% else %}red{% endif %};">
+                                {{ message }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% if form.errors %}
+                    <div style="color: red; margin-top: 10px;">
+                        <strong>Form Errors:</strong>
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- i added this check later  while client testing  end -->
+                <!-- {% if form.errors %}
+                    <div style="color: red; margin-top: 10px;">
+                        <strong>Form Errors:</strong>
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %} -->
+
+                <div class="user-profile-dashboard">
+                    <div class="user-nameProfile">
+                        {% if profile.photo %}
+                            <img src="{{ profile.photo.url }}" alt="Profile Photo">
+                        {% else %}
+                            <img src="{% static 'default_user.png' %}  " alt="Profile Photo">
+                        {% endif %}
+                        <div class="User-user-info">
+                            <div class="User-username">{{ profile.user.username }}</div>
+                            <div class="User-user-id">Customer ID: {{ profile.custom_user_id }}</div>
+                            <a href="{% url 'change_phone' %}" class="User-user-id">Change Password</a>
+
+                        </div>
+                    </div>
+                    <!-- user details -->
+                    <div class="user-personal_Information">
+                        <div class="user-personal_Information-label">
+                            <div>Personal Information</div>
+                            <button onclick="openModalEditProfile('personal')" >✏️ Edit</button>
+                        </div>
+                        <div class="user-personal_Information-feilds">
+                            <div class="profile-container">
+                                <div class="heading-feilds">First Name<span>{{ profile.first_name }}</span></div>
+                                <div class="heading-feilds">Middle Name<span>{{ profile.middle_name }}</span></div>
+                                <div class="heading-feilds">Last Name<span>{{ profile.last_name }}</span></div>
+                                <div class="heading-feilds">Email<span>{{ profile.email }}</span></div>
+                                <div class="heading-feilds">WhatsApp Number<span>{{ profile.whatsapp_number }}</span></div>
+                                <div class="heading-feilds">Mobile Number<span>{{ profile.mobile_number }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- pan aadhar -->
+                    <div class="user-personal_Information">
+                        <div class="user-personal_Information-label">
+                            <div>Identity Information</div>
+                            <button onclick="openModalEditProfile('identity')">✏️ Edit</button>
+                        </div>
+                        <div class="user-personal_Information-feilds">
+                            <div class="profile-container">
+
+                            <!-- PAN -->
+                            <div class="heading-feilds">
+                                PAN Number
+                                {% if profile.pan_card_photo %}
+                                    <span onclick="toggleImage('pan-file')" style="cursor: pointer; margin-left: 8px;">👁</span>
+                                {% endif %}
+                                    <span>{{ profile.pan_number }}</span>
+                                    {% if profile.pan_card_photo %}
+                                    <div id="pan-file" style="display: none; margin-top: 8px;">
+                                        {% if profile.is_pan_pdf %}
+                                            <a href="{{ profile.pan_card_photo.url }}" target="_blank">📄 View PAN PDF</a>
+                                        {% else %}
+                                            <img src="{{ profile.pan_card_photo.url }}" style="width:100px; border:1px solid #ccc;">
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    Not Uploaded
+                                {% endif %}
+                                <!-- PAN document password with toggle -->
+                                <div style="margin-top:8px;">
+                                    <strong>Document Password:</strong>
+                                    <div class="input-group" style="max-width:250px;">
+                                    <input type="password" class="form-control" value="{{ profile.pan_doc_password }}" readonly id="pan_doc_password">
+                                    <span class="input-group-text" onclick="togglePassword('pan_doc_password', this)">
+                                        <i class="bi bi-eye-slash"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Aadhaar -->
+                        <div class="heading-feilds" style="margin-top: 15px;">
+                            Aadhaar Number
+                            {% if profile.adhar_card_photo %}
+                                <span onclick="toggleImage('aadhaar-file')" style="cursor: pointer; margin-left: 8px;">👁</span>
+                            {% endif %}
+                            <span>{{ profile.adhar_number }}</span>
+                            {% if profile.adhar_card_photo %}
+                            <div id="aadhaar-file" style="display: none; margin-top: 8px;">
+                                {% if profile.is_aadhaar_pdf %}
+                                    <a href="{{ profile.adhar_card_photo.url }}" target="_blank">📄 View Aadhaar PDF</a>
+                                {% else %}
+                                    <img src="{{ profile.adhar_card_photo.url }}" style="width:100px; border:1px solid #ccc;">
+                                {% endif %}
+                            </div>
+                            {% else %}
+                                Not Uploaded
+                            {% endif %}
+                            <!-- Aadhaar document password with toggle -->
+                            <div style="margin-top:8px;">
+                                <strong>Document Password:</strong>
+                                <div class="input-group" style="max-width:250px;">
+                                    <input type="password" class="form-control" value="{{ profile.adhar_doc_password }}" readonly id="adhar_doc_password">
+                                    <span class="input-group-text" onclick="togglePassword('adhar_doc_password', this)">
+                                        <i class="bi bi-eye-slash"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <script>
+            function togglePassword(fieldId, iconElem) {
+                const field = document.getElementById(fieldId);
+                const icon = iconElem.querySelector("i");
+                if (field.type === "password") {
+                    field.type = "text";
+                    icon.classList.remove("bi-eye-slash");
+                    icon.classList.add("bi-eye");
+                } else {
+                    field.type = "password";
+                    icon.classList.remove("bi-eye");
+                    icon.classList.add("bi-eye-slash");
+                }
+            }
+        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+            </div>
+            {% endblock %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+
