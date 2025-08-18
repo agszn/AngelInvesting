@@ -212,120 +212,70 @@ from datetime import datetime, timezone
 from user_portfolio.models import UserStockInvestmentSummary
 
 
-#this is portfolio with other advisor in different table
-# @login_required
-# def portfolio_view(request):
-#     user = request.user
-
-#     # 🔄 Update holdings summary
-#     update_user_holdings(user)
-
-#     # 📌 Initial queryset
-#     holdings = UserStockInvestmentSummary.objects.filter(user=user).order_by('-id')
-
-#     # 📌 GET filters
-#     advisor_id = request.GET.get('advisor')
-#     broker_id = request.GET.get('broker')
-#     transaction_type = request.GET.get('type')  # buy or sell
-#     search_query = request.GET.get('search')
-
-#     # 📌 Apply filters to holdings
-#     if advisor_id:
-#         holdings = holdings.filter(advisor__id=advisor_id)
-#     if broker_id:
-#         holdings = holdings.filter(broker__id=broker_id)
-#     if transaction_type == 'buy':
-#         holdings = holdings.filter(total_buys__gt=0)
-#     elif transaction_type == 'sell':
-#         holdings = holdings.filter(total_sells__gt=0)
-#     if search_query:
-#         holdings = holdings.filter(stock__company_name__icontains=search_query)
-
-#     # 📌 Pagination
-#     paginator = Paginator(holdings, 10)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-
-#     # 📌 Filtered "Other Advisor" Sell Transactions
-#     other_sells = SellTransaction.objects.filter(
-#         user=user,
-#         status='completed',
-#         advisor__advisor_type='Other'
-#     ).select_related('stock', 'advisor', 'broker').order_by('-timestamp')
-
-#     if advisor_id:
-#         holdings = holdings.filter(advisor__id=advisor_id)
-#     if broker_id:
-#         holdings = holdings.filter(broker__id=broker_id)
-#     if transaction_type == 'buy':
-#         holdings = holdings.filter(buy_order_count__gt=0)  # ✅ FIXED
-#     elif transaction_type == 'sell':
-#         holdings = holdings.filter(sell_order_count__gt=0)  # ✅ FIXED
-#     if search_query:
-#         holdings = holdings.filter(stock__company_name__icontains=search_query)
-
-
-#     # 📌 Dropdown options
-#     advisors = Advisor.objects.all()
-#     brokers = Broker.objects.all()
-#     selected_advisor = Advisor.objects.filter(id=advisor_id).first() if advisor_id else None
-#     selected_broker = Broker.objects.filter(id=broker_id).first() if broker_id else None
-
-#     # 📌 Additional context (if any custom logic)
-#     stock_context = get_user_stock_context(user, request)
-
-#     # ✅ Final render
-#     return render(request, 'portfolio/PortfolioList.html', {
-#         'holdings': page_obj,
-#         'advisors': advisors,
-#         'brokers': brokers,
-#         'selected_advisor': selected_advisor,
-#         'selected_broker': selected_broker,
-#         'current_filters': {
-#             'advisor': advisor_id,
-#             'broker': broker_id,
-#             'type': transaction_type,
-#             'search': search_query,
-#         },
-#         'page_obj': page_obj,
-#         'other_sells': other_sells,  # 👈 Included in template context
-#         **stock_context
-#     })
+# this is portfolio with other advisor in different table
 @login_required
 def portfolio_view(request):
     user = request.user
 
+    # 🔄 Update holdings summary
     update_user_holdings(user)
+
+    # 📌 Initial queryset
     holdings = UserStockInvestmentSummary.objects.filter(user=user).order_by('-id')
 
+    # 📌 GET filters
     advisor_id = request.GET.get('advisor')
     broker_id = request.GET.get('broker')
-    transaction_type = request.GET.get('type')
+    transaction_type = request.GET.get('type')  # buy or sell
     search_query = request.GET.get('search')
+
+    # 📌 Apply filters to holdings
+    if advisor_id:
+        holdings = holdings.filter(advisor__id=advisor_id)
+    if broker_id:
+        holdings = holdings.filter(broker__id=broker_id)
+    if transaction_type == 'buy':
+        holdings = holdings.filter(total_buys__gt=0)
+    elif transaction_type == 'sell':
+        holdings = holdings.filter(total_sells__gt=0)
+    if search_query:
+        holdings = holdings.filter(stock__company_name__icontains=search_query)
+
+    # 📌 Pagination
+    paginator = Paginator(holdings, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # 📌 Filtered "Other Advisor" Sell Transactions
+    other_sells = SellTransaction.objects.filter(
+        user=user,
+        status='completed',
+        advisor__advisor_type='Other'
+    ).select_related('stock', 'advisor', 'broker').order_by('-timestamp')
 
     if advisor_id:
         holdings = holdings.filter(advisor__id=advisor_id)
     if broker_id:
         holdings = holdings.filter(broker__id=broker_id)
     if transaction_type == 'buy':
-        holdings = holdings.filter(buy_order_count__gt=0)
+        holdings = holdings.filter(buy_order_count__gt=0)  # ✅ FIXED
     elif transaction_type == 'sell':
-        holdings = holdings.filter(sell_order_count__gt=0)
+        holdings = holdings.filter(sell_order_count__gt=0)  # ✅ FIXED
     if search_query:
         holdings = holdings.filter(stock__company_name__icontains=search_query)
 
-    paginator = Paginator(holdings, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
 
+    # 📌 Dropdown options
     advisors = Advisor.objects.all()
     brokers = Broker.objects.all()
     selected_advisor = Advisor.objects.filter(id=advisor_id).first() if advisor_id else None
     selected_broker = Broker.objects.filter(id=broker_id).first() if broker_id else None
 
+    # 📌 Additional context (if any custom logic)
     stock_context = get_user_stock_context(user, request)
 
-    context = {
+    # ✅ Final render
+    return render(request, 'portfolio/PortfolioList.html', {
         'holdings': page_obj,
         'advisors': advisors,
         'brokers': brokers,
@@ -338,14 +288,9 @@ def portfolio_view(request):
             'search': search_query,
         },
         'page_obj': page_obj,
+        'other_sells': other_sells,  # 👈 Included in template context
         **stock_context
-    }
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'portfolio/includes/portfolio_table.html', context)
-
-    return render(request, 'portfolio/PortfolioList.html', context)
-
+    })
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
