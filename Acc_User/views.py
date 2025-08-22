@@ -204,7 +204,7 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
-
+# this is main start
 @require_POST
 @login_required
 def edit_payment_ac_status(request, payment_id):
@@ -224,7 +224,7 @@ def edit_payment_ac_status(request, payment_id):
 
     messages.success(request, "Payment status and transaction details updated.")
     return redirect(request.META.get('HTTP_REFERER', '/'))
-
+# this is main end
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404, redirect
@@ -392,33 +392,40 @@ def clientAcc(request):
     return render(request, 'clientAcc.html')
 
 from django.core.paginator import Paginator
-
 def reportsAcc(request):
     buy_orders_qs = BuyTransaction.objects.filter(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
     sell_orders_qs = SellTransaction.objects.filter(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
 
-    # Get the date (only one date parameter is expected)
+    # Get the filters
     date_filter = request.GET.get('date_filter')
     order_id = request.GET.get('order_id')
+    username = request.GET.get('username')
 
-    # Sanitize "None" or empty values in the date and order_id
+    # Sanitize inputs
     if date_filter in [None, '', 'None']:
         date_filter = None
     if order_id in [None, '', 'None']:
         order_id = None
+    if username in [None, '', 'None']:
+        username = None
 
-    # Apply filtering only if date_filter is provided
+    # Apply date filtering
     if date_filter:
-        # Assuming that the user is providing a date in the format YYYY-MM-DD
         buy_orders_qs = buy_orders_qs.filter(timestamp__date=date_filter)
         sell_orders_qs = sell_orders_qs.filter(timestamp__date=date_filter)
 
+    # Apply order ID filtering
     if order_id:
         buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
         sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
 
+    # Apply username filtering (assuming related user has a `username` field)
+    if username:
+        buy_orders_qs = buy_orders_qs.filter(user__username__icontains=username)
+        sell_orders_qs = sell_orders_qs.filter(user__username__icontains=username)
+
     # PAGINATION
-    buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
+    buy_paginator = Paginator(buy_orders_qs, 10)
     sell_paginator = Paginator(sell_orders_qs, 10)
 
     buy_page_number = request.GET.get('buy_page')
@@ -431,10 +438,9 @@ def reportsAcc(request):
         'buy_orders_ReportsAcc': buy_orders_ReportsAcc,
         'sell_orders_ReportsAcc': sell_orders_ReportsAcc,
         'date_filter': date_filter,
-        'order_id': order_id
+        'order_id': order_id,
+        'username': username,
     })
-
-
 
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseForbidden

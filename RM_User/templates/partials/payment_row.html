@@ -1,0 +1,33 @@
+<tr id="paymentRow-{{ payment.id }}">
+    <td>{{ forloop.counter }}</td>
+    <td>{{ payment.date|date:"d-m-Y" }}</td>
+    <td>{{ payment.bank_name }}</td>
+    <td>{{ payment.amount }}</td>
+    <td>{{ payment.remaining_amount }}</td>
+    <td>
+        {% if payment.screenshot %}
+            <a href="{{ payment.screenshot.url }}" target="_blank">👁️‍🗨️</a>
+        {% else %}
+            N/A
+        {% endif %}
+    </td>
+    <td>{{ payment.remark }}</td>
+    <td>{{ payment.get_payment_status_display }}</td>
+    <td>{{ payment.get_AC_Payment_Status_display }}</td>
+    <td>
+        <button type="button"
+            class="btn btn-sm btn-outline-primary"
+            onclick='openPaymentEditModal({
+                id: {{ payment.id }},
+                bank_name: "{{ payment.bank_name }}",
+                amount: "{{ payment.amount }}",
+                remaining_amount: "{{ payment.remaining_amount }}",
+                remark: "{{ payment.remark }}",
+                payment_status: "{{ payment.payment_status }}",
+                paymentConfirmationMessage: "{{ payment.paymentConfirmationMessage|default_if_none:"" }}",
+                screenshot_url: "{% if payment.screenshot %}{{ payment.screenshot.url }}{% else %}#{% endif %}"
+            })'>
+            ✏️
+        </button>
+    </td>
+</tr>

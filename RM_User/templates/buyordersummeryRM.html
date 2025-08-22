@@ -127,7 +127,7 @@
     </div>
 
 <!-- RM_User/templates/buyordersummeryRM.html -->
-    <!-- Payment Records Table -->
+    <!-- Payment Records Table start -->
     <div class="order-details-transaction">
       <table class="user-portfolio-toptable2">
         <thead class="user-portfolio-head-admin">
@@ -178,6 +178,8 @@
                 })'>
                 ✏️ 
               </button>
+
+
             </td>
           </tr>
           {% empty %}
@@ -188,11 +190,10 @@
         </tbody>
       </table>
     </div>
+    <!-- Payment Modal Table end -->
 
-
-    <!-- Payment Modal -->
-
-    <!-- Add/Edit Payment Modal -->
+    <!-- test 1234 start  -->
+    <!-- Add/Edit Payment Modal Start-->
     <div class="order-details-transaction">
       <div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg-custom">
@@ -206,6 +207,8 @@
               <form id="paymentForm" method="post" enctype="multipart/form-data" action="{% url 'RM_User:add_payment' order_id=order.order_id %}">
                 {% csrf_token %}
                 <div class="row g-3">
+
+                  <!-- a) BANK -->
                   <div class="col-6">
                     <label class="form-label">Select Bank</label>
                     <select name="bank_name" class="form-select" required>
@@ -215,56 +218,68 @@
                     </select>
                   </div>
 
+                  <!-- b) Remaining Amount -->
                   <div class="col-6">
                     <label class="form-label">Remaining Amount</label>
                     <input type="number" name="remaining_amount" class="form-control" step="0.01" value="{{ remaining_amount|floatformat:2 }}" readonly>
                   </div>
 
+                  <!-- c) Status -->
                   <div class="col-6">
-                    <label class="form-label">Enter Amount</label>
-                    <input type="number" name="amount" class="form-control" required step="0.01">
+                    <label class="form-label">Status</label>
+                    <select name="payment_status" class="form-select" required>
+                      <option value="pending">Pending</option>
+                      <option value="partial">Partial Payment</option>
+                      <option value="approved">Payment Received</option>
+                      <option value="rejected">Rejected</option> <!-- treat as "cancelled" -->
+                    </select>
                   </div>
 
+                  <!-- Enter Amount (editable only for partial; auto-filled for approved) -->
+                  <div class="col-6">
+                    <label class="form-label">Enter Amount</label>
+                    <input type="number" name="amount" class="form-control" step="0.01" required>
+                  </div>
+
+                  <!-- Screenshot -->
                   <div class="col-6">
                     <label class="form-label">Upload Screenshot</label>
                     <input type="file" name="screenshot" class="form-control">
-                    <a href="#" id="screenshotLink" target="_blank" style="display: none;">View Existing</a>
+                    <a href="#" id="screenshotLink" target="_blank" style="display: none;">🔍 View Existing</a>
                   </div>
 
+                  <!-- Confirmation Message -->
                   <div class="col-6">
                     <label class="form-label">Payment Confirmation Message</label>
                     <input type="text" name="paymentConfirmationMessage" class="form-control">
                   </div>
 
-                  <div class="col-6">
+                  <!-- Remark -->
+                  <div class="col-12">
                     <label class="form-label">Remark</label>
                     <input type="text" name="remark" class="form-control">
                   </div>
-
-                  <div class="col-6">
-                    <label class="form-label">Status</label>
-                    {% with payment.payment_status|default:"pending" as selected_status %}
-                    <select name="payment_status" class="form-select">
-                      <option value="pending" {% if selected_status == "pending" %}selected{% endif %}>Pending</option>
-                      <option value="partial" {% if selected_status == "partial" %}selected{% endif %}>Partial Payment</option>
-                      <option value="approved" {% if selected_status == "approved" %}selected{% endif %}>Payment Received</option>
-                      <option value="rejected" {% if selected_status == "rejected" %}selected{% endif %}>Rejected</option>
-                    </select>
-                    {% endwith %}
-                  </div>
                 </div>
 
-                <div class="modal-footer justify-content-center mt-3">
+                <div class="modal-footer flex-column gap-2 mt-3">
                   <button type="submit" class="btn btn-success w-100" id="submitBtn">✔️ Submit</button>
+                  <button type="button" class="btn btn-danger w-100" id="deleteBtn" style="display: none;">🗑️ Delete</button>
                 </div>
               </form>
             </div>
+
+
+
           </div>
         </div>
       </div>
     </div>
+    <!-- Add/Edit Payment Modal end-->
 
-    <!-- Edit Status Modal -->
+
+
+
+    <!-- Edit Status Modal start -->
     <div class="modal fade" id="transactionEditModal" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -280,7 +295,7 @@
         </div>
       </div>
     </div>  
-
+    <!-- Edit Status Modal end -->
 
 <!-- RM_User/templates/buyordersummeryRM.html -->
 
@@ -298,7 +313,7 @@
             <th>Share Price</th>
             <th>Buy Price</th>
             <th>Qty</th>
-            <th>Amount</th>
+            <th>Deal Value</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -361,225 +376,190 @@
     
 
     <!-- edit status form  -->
-    <div class="modal fade" id="transactionEditModal" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="transactionEditModalLabel">Edit Buy Transaction</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body" id="transactionEditFormContainer">
-            <!-- Form will be loaded here by AJAX -->
-            <div class="text-center">
-              <span class="spinner-border"></span> Loading...
+      <div class="modal fade" id="transactionEditModal" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="transactionEditModalLabel">Edit Buy Transaction</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="transactionEditFormContainer">
+              <!-- Form will be loaded here by AJAX -->
+              <div class="text-center">
+                <span class="spinner-border"></span> Loading...
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-</div>
   {% else %}
     <p>No order details found.</p>
   {% endif %}
 
-<!-- JavaScript payment -->
-<!-- <script>
-  // Reset form for Add Payment
-  document.querySelector('.RMpaymentAdd').addEventListener('click', function () {
-    const form = document.getElementById('paymentForm');
-    form.reset();
-    form.action = "{% url 'RM_User:add_payment' order_id=order.order_id %}";
-
-    // Set remaining amount again in add mode
-    form.elements['remaining_amount'].value = "{{ remaining_amount|floatformat:2 }}";
-
-    document.getElementById('submitBtn').innerText = '✔️ Submit';
-    document.getElementById('screenshotLink').style.display = 'none';
-  });
-
-  function openPaymentEditModal(payment) {
-    const form = document.getElementById('paymentForm');
-
-    // Set form action URL for edit
-    form.action = `/RM_User/payment/edit/${payment.id}/`;
-
-    // Fill fields
-    form.elements['bank_name'].value = payment.bank_name;
-    form.elements['amount'].value = payment.amount;
-    form.elements['remaining_amount'].value = payment.remaining_amount;
-    form.elements['remark'].value = payment.remark;
-    form.elements['payment_status'].value = payment.payment_status;
-
-    // Screenshot link
-    const link = document.getElementById('screenshotLink');
-    if (payment.screenshot_url && payment.screenshot_url !== "#") {
-      link.href = payment.screenshot_url;
-      link.style.display = 'block';
-    } else {
-      link.style.display = 'none';
-    }
-
-    // Change button label
-    document.getElementById('submitBtn').innerText = '✔️ Update';
-
-    // Show modal
-    const modal = new bootstrap.Modal(document.getElementById('buyModal'));
-    modal.show();
-  }
-</script> -->
-
-
 
 <script>
-  // Reset form for Add Payment
-  document.querySelector('.RMpaymentAdd').addEventListener('click', function () {
-    const form = document.getElementById('paymentForm');
-    form.reset();
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById('paymentForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const screenshotLink = document.getElementById('screenshotLink');
+
+  let mode = 'add'; // 'add' | 'edit'
+  let currentPaymentId = null;
+
+  function setActionForAdd() {
     form.action = "{% url 'RM_User:add_payment' order_id=order.order_id %}";
-    form.elements['remaining_amount'].value = "{{ remaining_amount|floatformat:2 }}";
-    document.getElementById('submitBtn').innerText = '✔️ Submit';
-    document.getElementById('screenshotLink').style.display = 'none';
-  });
+    mode = 'add';
+    currentPaymentId = null;
+    deleteBtn.style.display = 'none';
+    submitBtn.innerText = '✔️ Submit';
+  }
 
-  function openPaymentEditModal(payment) {
-    const form = document.getElementById('paymentForm');
-    form.action = `/RM_User/payment/edit/${payment.id}/`;
-    form.elements['bank_name'].value = payment.bank_name;
-    form.elements['amount'].value = payment.amount;
-    form.elements['remaining_amount'].value = payment.remaining_amount;
-    form.elements['remark'].value = payment.remark;
-    form.elements['payment_status'].value = payment.payment_status;
-    form.elements['paymentConfirmationMessage'].value = payment.paymentConfirmationMessage || '';
+  function setActionForEdit(id) {
+    form.action = `/RM_User/payment/edit/${id}/`;
+    mode = 'edit';
+    currentPaymentId = id;
+    deleteBtn.style.display = 'inline-block';
+    submitBtn.innerText = '✔️ Update';
+  }
 
-    const link = document.getElementById('screenshotLink');
-    if (payment.screenshot_url && payment.screenshot_url !== "#") {
-      link.href = payment.screenshot_url;
-      link.style.display = 'block';
-    } else {
-      link.style.display = 'none';
+  function disableAllFields(disabled) {
+    const controls = [
+      'bank_name', 'amount', 'screenshot',
+      'paymentConfirmationMessage', 'remark'
+    ];
+    controls.forEach(n => {
+      const el = form.elements[n];
+      if (el) el.disabled = disabled;
+    });
+  }
+
+  function handleStatusChange() {
+    const status = form.elements['payment_status'].value;
+    const amountEl = form.elements['amount'];
+    const remEl = form.elements['remaining_amount'];
+    const bankEl = form.elements['bank_name'];
+    const confirmEl = form.elements['paymentConfirmationMessage'];
+    const remarkEl = form.elements['remark'];
+    const fileEl = form.elements['screenshot'];
+
+    // Always keep remaining readonly
+    remEl.readOnly = true;
+
+    // Reset disabled/readOnly before applying rules
+    [amountEl, bankEl, confirmEl, remarkEl, fileEl].forEach(el => {
+      el.disabled = false;
+      if (el === amountEl) el.readOnly = false;
+    });
+    submitBtn.disabled = false;
+
+    const remaining = parseFloat(remEl.value) || 0;
+
+    if (status === 'pending') {
+      // 2) Pending => submit disabled
+      amountEl.value = '';
+      submitBtn.disabled = true;
+    } else if (status === 'approved') {
+      // 3) Payment Received => take all remaining, lock amount
+      amountEl.value = remaining.toFixed(2);
+      amountEl.readOnly = true;
+      submitBtn.disabled = false;
+    } else if (status === 'partial') {
+      // 3) Partial => amount editable
+      amountEl.readOnly = false;
+      submitBtn.disabled = false;
+    } else if (status === 'rejected') {
+      // 5) "cancelled" => disable all values (and prevent submit)
+      amountEl.value = '';
+      disableAllFields(true);
+      submitBtn.disabled = true;
     }
+  }
 
-    handleStatusChange(form);
-    document.getElementById('submitBtn').innerText = '✔️ Update';
+  function resetForm() {
+    form.reset();
+    screenshotLink.style.display = 'none';
+    setActionForAdd();
+    // default remaining from context
+    form.elements['remaining_amount'].value = "{{ remaining_amount|floatformat:2 }}";
+    handleStatusChange();
+  }
 
+  // Wire: Add Payment button
+  document.querySelector('.RMpaymentAdd')?.addEventListener('click', () => {
+    resetForm();
     const modal = new bootstrap.Modal(document.getElementById('buyModal'));
     modal.show();
-  }
-
-  function disableFields(form) {
-    form.elements['bank_name'].disabled = true;
-    form.elements['amount'].disabled = true;
-    form.elements['remark'].disabled = true;
-    form.elements['paymentConfirmationMessage'].disabled = true;
-    form.elements['screenshot'].disabled = true;
-    form.elements['remaining_amount'].disabled = true;
-    form.elements['payment_status'].disabled = false;
-  }
-
-  function enableFields(form) {
-    form.elements['bank_name'].disabled = false;
-    form.elements['amount'].disabled = false;
-    form.elements['remark'].disabled = false;
-    form.elements['paymentConfirmationMessage'].disabled = false;
-    form.elements['screenshot'].disabled = false;
-    form.elements['remaining_amount'].disabled = true;
-    form.elements['payment_status'].disabled = false;
-  }
-
-  function handleStatusChange(form) {
-    const status = form.elements['payment_status'].value;
-    if (status === "pending" || status === "rejected") {
-      disableFields(form);
-    } else {
-      enableFields(form); // Partial or approved, keep fields editable
-    }
-  }
-
-  document.querySelector('select[name="payment_status"]').addEventListener('change', function () {
-    const form = document.getElementById('paymentForm');
-    handleStatusChange(form);
   });
 
-  // Disable Add Payment button if remaining balance is 0
-  function updateAddPaymentButton(remainingAmount) {
-    const addBtn = document.querySelector('.RMpaymentAdd');
-    if (parseFloat(remainingAmount) <= 0) {
-      addBtn.disabled = true;
+  // Expose to row "Edit" button
+  window.openPaymentEditModal = function(payment) {
+    setActionForEdit(payment.id);
+    form.elements['bank_name'].value = payment.bank_name;
+    form.elements['amount'].value = payment.amount || '';
+    form.elements['remaining_amount'].value = payment.remaining_amount || "{{ remaining_amount|floatformat:2 }}";
+    form.elements['payment_status'].value = payment.payment_status;
+    form.elements['remark'].value = payment.remark || '';
+    form.elements['paymentConfirmationMessage'].value = payment.paymentConfirmationMessage || '';
+
+    if (payment.screenshot_url && payment.screenshot_url !== '#') {
+      screenshotLink.href = payment.screenshot_url;
+      screenshotLink.style.display = 'inline-block';
     } else {
-      addBtn.disabled = false;
+      screenshotLink.style.display = 'none';
     }
-  }
 
-  // Initial check
-  updateAddPaymentButton("{{ remaining_amount|floatformat:2 }}");
+    handleStatusChange();
+    const modal = new bootstrap.Modal(document.getElementById('buyModal'));
+    modal.show();
+  };
 
-  // Update remaining amount and Add button after submission
-  document.getElementById('paymentForm').addEventListener('submit', function(e) {
-    // If using AJAX, replace this logic with returned remaining_amount
-    const form = e.target;
-    const remainingInput = form.elements['remaining_amount'];
-    const enteredAmount = parseFloat(form.elements['amount'].value) || 0;
-    const currentRemaining = parseFloat(remainingInput.value) || 0;
-    const newRemaining = (currentRemaining - enteredAmount).toFixed(2);
-
-    // Update UI
-    document.getElementById('remainingAmount').innerText = newRemaining;
-    remainingInput.value = newRemaining;
-
-    updateAddPaymentButton(newRemaining);
+  // Delete (4) — only shown in edit mode
+  deleteBtn.addEventListener('click', () => {
+    if (!currentPaymentId) return;
+    if (confirm('Are you sure you want to delete this payment record?')) {
+      window.location.href = `/RM_User/payment/delete/${currentPaymentId}/`;
+    }
   });
+
+  // Status change listener
+  form.elements['payment_status'].addEventListener('change', handleStatusChange);
+
+  // Submit UX (no AJAX here; server will revalidate)
+  form.addEventListener('submit', () => {
+    submitBtn.disabled = true;
+    submitBtn.innerText = mode === 'edit' ? 'Updating…' : 'Submitting…';
+  });
+});
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <!-- status  Transfer to Accounts -->
 <script>
-function openTransactionEditModal(id) {
-  const container = document.getElementById('transactionEditFormContainer');
-  container.innerHTML = '<div class="text-center"><span class="spinner-border"></span> Loading...</div>';
+  function openTransactionEditModal(id) {
+    const container = document.getElementById('transactionEditFormContainer');
+    container.innerHTML = '<div class="text-center"><span class="spinner-border"></span> Loading...</div>';
 
-  fetch(`/RM_User/transaction/${id}/edit/ajax/`)
-    .then(response => response.text())
-    .then(html => {
-      container.innerHTML = html;
-      const modal = new bootstrap.Modal(document.getElementById('transactionEditModal'));
-      modal.show();
-    });
-}
-
-
+    fetch(`/RM_User/transaction/${id}/edit/ajax/`)
+      .then(response => response.text())
+      .then(html => {
+        container.innerHTML = html;
+        const modal = new bootstrap.Modal(document.getElementById('transactionEditModal'));
+        modal.show();
+      });
+  }
 </script>
 
+
+<!-- delete payment -->
+<script>
+function confirmDelete() {
+  if (confirm("Are you sure you want to delete this payment record?")) {
+    if (currentEditingPaymentId) {
+      window.location.href = `/RM_User/payment/delete/${currentEditingPaymentId}/`;
+    }
+  }
+}
+</script>
 {% endblock %}

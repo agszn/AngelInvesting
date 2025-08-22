@@ -193,16 +193,16 @@ class LoginHistory(models.Model):
 from django.core.validators import FileExtensionValidator
 from django.core.validators import RegexValidator
 from django.core.validators import RegexValidator, MaxLengthValidator, MinLengthValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class BankAccount(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='bank_accounts')
     account_holder_name = models.CharField(max_length=100)
     bank_name = models.CharField(max_length=100)
-    account_number = models.CharField(
-        max_length=20,
+    account_number = models.BigIntegerField(
         validators=[
-            MinLengthValidator(10),  # Minimum length of 10
-            MaxLengthValidator(20)   # Maximum length of 20
+            MinValueValidator(10**9),              # minimum 10 digits
+            MaxValueValidator(10**20 - 1)          # maximum 20 digits
         ]
     )
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES,default="saving")

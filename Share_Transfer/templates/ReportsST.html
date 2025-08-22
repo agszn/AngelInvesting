@@ -17,6 +17,11 @@
             <input type="text" name="order_id" value="{{ order_id|default_if_none:'' }}" class="form-control" placeholder="Search Order ID">
         </div>
         <div>
+            <label>Username:</label>
+            <input type="text" name="username" value="{{ username|default_if_none:'' }}" class="form-control" placeholder="Search Username">
+        </div>
+
+        <div>
             <button type="submit" class="btn btn-primary">Filter</button>
             <a href="{% url 'ST_User:ReportsST' %}" class="btn btn-secondary">Clear</a>
         </div>

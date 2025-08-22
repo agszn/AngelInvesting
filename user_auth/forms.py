@@ -145,12 +145,17 @@ class BankAccountForm(forms.ModelForm):
             'statementPaper', 
             'bankDetails_doc_password'
         ]
-    
     def clean_account_number(self):
-        account_number = self.cleaned_data.get('account_number')
-        if len(account_number) < 10 or len(account_number) > 20:
-            raise forms.ValidationError('Account number must be between 10 and 20 characters.')
-        return account_number
+        data = self.cleaned_data['account_number']
+
+        # Convert to string for length check
+        data_str = str(data)
+
+        if len(data_str) < 10:
+            raise forms.ValidationError("Account number must be at least 10 digits long.")
+
+        return data
+
 
 
 

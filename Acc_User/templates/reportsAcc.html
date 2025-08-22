@@ -17,11 +17,16 @@
             <input type="text" name="order_id" value="{{ order_id|default_if_none:'' }}" class="form-control" placeholder="Search Order ID">
         </div>
         <div>
+            <label>Username:</label>
+            <input type="text" name="username" value="{{ username|default_if_none:'' }}" class="form-control" placeholder="Search Username">
+        </div>
+        <div>
             <button type="submit" class="btn btn-primary">Filter</button>
             <a href="{% url 'Acc_User:reportsAcc' %}" class="btn btn-secondary">Clear</a>
         </div>
     </form>
 </div>
+
 
 <!-- Completed Buy Orders -->
 <h4 class="mt-4 mb-2">✅ Completed Buy Orders</h4>

@@ -138,7 +138,22 @@ class BuyTransactionOtherAdvisor(models.Model):
 
     # Optional: keep status if you still want transaction tracking
     status = models.CharField(max_length=15, choices=ST_STATUS_LABELS, default='completed')
+    # in user_portfolio/models.py -> class BuyTransactionOtherAdvisor
+    RM_status = models.CharField(max_length=15, choices=RM_STATUS_LABELS, default='completed')
+    RMApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='rm_approved_buy_other_transactions'
+    )
+
+    AC_status = models.CharField(max_length=15, choices=AC_STATUS_LABELS, default='completed')
+    ACApproved = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='ac_approved_buy_other_transactions'
+    )
+    
+
     order_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    
 
     # Calculated and stored values
     invested_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)

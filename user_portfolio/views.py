@@ -392,6 +392,13 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from .models import SellTransaction, Advisor, Broker
 from .utils import get_user_stock_context  # assuming you have this
+from itertools import chain
+from operator import attrgetter
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import SellTransaction, SellTransactionOtherAdvisor, Advisor, Broker
+from .utils import get_user_stock_context
 
 @login_required
 def sell_orders(request):
@@ -399,26 +406,36 @@ def sell_orders(request):
     search_query = request.GET.get('search', '')
     advisor_id = request.GET.get('advisor')
     broker_id = request.GET.get('broker')
-    transaction_type = request.GET.get('type')  # Optional: for extensibility
+    transaction_type = request.GET.get('type')  # optional
 
-    # Fetch base queryset
-    sell_orders_qs = SellTransaction.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
+    # Fetch base querysets
+    sell_orders = SellTransaction.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
+    sell_orders_other = SellTransactionOtherAdvisor.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
 
     # Apply filters
     if advisor_id:
-        sell_orders_qs = sell_orders_qs.filter(advisor__id=advisor_id)
+        sell_orders = sell_orders.filter(advisor__id=advisor_id)
+        sell_orders_other = sell_orders_other.filter(advisor__id=advisor_id)
 
     if broker_id:
-        sell_orders_qs = sell_orders_qs.filter(broker__id=broker_id)
+        sell_orders = sell_orders.filter(broker__id=broker_id)
+        sell_orders_other = sell_orders_other.filter(broker__id=broker_id)
 
     if search_query:
-        sell_orders_qs = sell_orders_qs.filter(stock__company_name__icontains=search_query)
+        sell_orders = sell_orders.filter(stock__company_name__icontains=search_query)
+        sell_orders_other = sell_orders_other.filter(stock__company_name__icontains=search_query)
 
-    # Order by timestamp
-    sell_orders_qs = sell_orders_qs.order_by('-timestamp')
+    # Mark origin for template (optional)
+    for o in sell_orders:
+        o.is_other = False
+    for o in sell_orders_other:
+        o.is_other = True
+
+    # Combine + sort by timestamp desc
+    combined = sorted(chain(sell_orders, sell_orders_other), key=attrgetter('timestamp'), reverse=True)
 
     # Pagination
-    paginator = Paginator(sell_orders_qs, 10)
+    paginator = Paginator(combined, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -450,7 +467,6 @@ def sell_orders(request):
         return render(request, 'portfolio/includes/sell_orders_table.html', context)
 
     return render(request, 'portfolio/SellOrdersList.html', context)
-
 
 
 
@@ -577,6 +593,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from decimal import Decimal, InvalidOperation
 from .models import StockData, SellTransaction, Advisor, Broker, UserStockInvestmentSummary
+# at the imports near sell_stock
+from django.db.models import Sum  # add this
 
 @require_POST
 @login_required
@@ -588,7 +606,7 @@ def sell_stock(request, stock_id):
         broker_id = request.POST.get('broker')
         quantity = int(request.POST.get('quantity'))
 
-        # Parse selling price
+        # selling price
         selling_price_str = request.POST.get('selling_price')
         if selling_price_str:
             try:
@@ -603,27 +621,32 @@ def sell_stock(request, stock_id):
         advisor = get_object_or_404(Advisor, id=advisor_id)
         broker = get_object_or_404(Broker, id=broker_id)
 
-        # Only check availability if advisor is NOT 'other'
+        # Only enforce availability for non-Other advisors
         if advisor.advisor_type.lower() != 'other':
             try:
-                summary = UserStockInvestmentSummary.objects.get(user=request.user, stock=stock)
-                held_qty = summary.quantity_held
-
-                # Calculate pending sell quantity
-                pending_qty = SellTransaction.objects.filter(
-                    user=request.user,
-                    stock=stock,
-                    status__in=['processing', 'on_hold']
-                ).aggregate(total=models.Sum('quantity'))['total'] or 0
-
-                available_qty = held_qty - pending_qty
-
-                if quantity > available_qty:
-                    messages.error(request, f"You only have {available_qty} shares available for selling. Cannot sell {quantity} shares.")
-                    return redirect(request.META.get('HTTP_REFERER', '/'))
-
+                # 🔑 disambiguate the summary row
+                summary = UserStockInvestmentSummary.objects.get(
+                    user=request.user, stock=stock, is_other_advisor=False
+                )
             except UserStockInvestmentSummary.DoesNotExist:
                 messages.error(request, f"You do not hold any shares of {stock.company_name}. Cannot sell.")
+                return redirect(request.META.get('HTTP_REFERER', '/'))
+
+            held_qty = summary.quantity_held
+
+            # pending qty (processing/on_hold)
+            pending_qty = SellTransaction.objects.filter(
+                user=request.user,
+                stock=stock,
+                status__in=['processing', 'on_hold']
+            ).aggregate(total=Sum('quantity'))['total'] or 0  # ✅ use django.db.models.Sum
+
+            available_qty = held_qty - pending_qty
+            if quantity > available_qty:
+                messages.error(
+                    request,
+                    f"You only have {available_qty} shares available for selling. Cannot sell {quantity} shares."
+                )
                 return redirect(request.META.get('HTTP_REFERER', '/'))
 
         # Save transaction
@@ -647,6 +670,7 @@ def sell_stock(request, stock_id):
         messages.error(request, f"Failed to place sell order: {str(e)}")
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
+
 
 from Share_Transfer.models import DealLetterRecord
 

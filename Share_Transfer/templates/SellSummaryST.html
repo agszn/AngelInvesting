@@ -129,7 +129,7 @@
                                 <th>Share Price</th>
                                 <th>Selling Price</th>
                                 <th>Qty</th>
-                                <th>Total Value</th>
+                                <th>Deal Value</th>
                                 <!-- <th>RM Status</th> -->
                                 <td>Ac</td>
                                 <th>Actions</th>
@@ -175,7 +175,7 @@
                 </table>
                 </div>
                 <div class="STpayment-process">
-                    <h4><strong>Total Amount: </strong> {{ order.total_value }}</h4>
+                    <h4><strong>Deal Value: </strong> {{ order.total_value }}</h4>
                     <a href="{% url 'ST_User:sellDealLetterrST' %}?order_id={{ order.order_id }}" class="STpayment-button">
                         Generate Deal Letter
                     </a>

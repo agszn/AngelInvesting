@@ -57,25 +57,27 @@ from django.utils.dateparse import parse_date
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from RM_User.models import BuyTransaction, SellTransaction
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 @login_required
 def ReportsST(request):
     buy_orders_qs = BuyTransaction.objects.filter(status__in=['completed', 'cancelled']).order_by('-timestamp')
     sell_orders_qs = SellTransaction.objects.filter(status__in=['completed', 'cancelled']).order_by('-timestamp')
 
-    # Get the date (only one date parameter is expected)
     date_filter = request.GET.get('date_filter')
     order_id = request.GET.get('order_id')
+    username = request.GET.get('username')
 
-    # Sanitize "None" or empty values in the date and order_id
     if date_filter in [None, '', 'None']:
         date_filter = None
     if order_id in [None, '', 'None']:
         order_id = None
+    if username in [None, '', 'None']:
+        username = None
 
-    # Apply filtering only if date_filter is provided
     if date_filter:
-        # Assuming that the user is providing a date in the format YYYY-MM-DD
         buy_orders_qs = buy_orders_qs.filter(timestamp__date=date_filter)
         sell_orders_qs = sell_orders_qs.filter(timestamp__date=date_filter)
 
@@ -83,9 +85,11 @@ def ReportsST(request):
         buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
         sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
 
+    if username:
+        buy_orders_qs = buy_orders_qs.filter(user__username__icontains=username)
+        sell_orders_qs = sell_orders_qs.filter(user__username__icontains=username)
 
-    # PAGINATION
-    buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
+    buy_paginator = Paginator(buy_orders_qs, 10)
     sell_paginator = Paginator(sell_orders_qs, 10)
 
     buy_page_number = request.GET.get('buy_page')
@@ -98,7 +102,8 @@ def ReportsST(request):
         'buy_orders_ReportsST': buy_orders_ReportsST,
         'sell_orders_ReportsST': sell_orders_ReportsST,
         'date_filter': date_filter,
-        'order_id': order_id
+        'order_id': order_id,
+        'username': username,
     })
 
 

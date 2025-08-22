@@ -45,27 +45,29 @@ def unlistedSharesRM(request):
         return response
 
     return render(request, 'unlistedSharesRM.html', {'stocks': stocks, 'query': query})
-
-
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import BuyTransaction, SellTransaction
+
 @login_required
 def ReportRM(request):
     buy_orders_qs = BuyTransaction.objects.filter(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
     sell_orders_qs = SellTransaction.objects.filter(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
 
-    # Get the date (only one date parameter is expected)
     date_filter = request.GET.get('date_filter')
     order_id = request.GET.get('order_id')
+    username = request.GET.get('username')
 
-    # Sanitize "None" or empty values in the date and order_id
+    # Clean inputs
     if date_filter in [None, '', 'None']:
         date_filter = None
     if order_id in [None, '', 'None']:
         order_id = None
+    if username in [None, '', 'None']:
+        username = None
 
-    # Apply filtering only if date_filter is provided
     if date_filter:
-        # Assuming that the user is providing a date in the format YYYY-MM-DD
         buy_orders_qs = buy_orders_qs.filter(timestamp__date=date_filter)
         sell_orders_qs = sell_orders_qs.filter(timestamp__date=date_filter)
 
@@ -73,8 +75,11 @@ def ReportRM(request):
         buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
         sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
 
-    # Pagination
-    buy_paginator = Paginator(buy_orders_qs, 10)  # 10 per page
+    if username:
+        buy_orders_qs = buy_orders_qs.filter(user__username__icontains=username)
+        sell_orders_qs = sell_orders_qs.filter(user__username__icontains=username)
+
+    buy_paginator = Paginator(buy_orders_qs, 10)
     sell_paginator = Paginator(sell_orders_qs, 10)
 
     buy_page_number = request.GET.get('buy_page')
@@ -87,9 +92,9 @@ def ReportRM(request):
         'buy_orders_ReportsRM': buy_orders_ReportsRM,
         'sell_orders_ReportsRM': sell_orders_ReportsRM,
         'date_filter': date_filter,
-        'order_id': order_id
+        'order_id': order_id,
+        'username': username,
     })
-
 
 @login_required
 def buyorderRM(request):
@@ -408,58 +413,124 @@ from django.http import HttpResponseBadRequest
 from decimal import Decimal
 
 from .models import RMPaymentRecord, RMUserView, BuyTransaction
+from decimal import Decimal
+from django.db.models import Sum
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponseBadRequest
+from RM_User.models import RMPaymentRecord, RMUserView, BuyTransaction
 
-# RM_User/views.py
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest
+from django.db.models import Sum
+from decimal import Decimal
+from django.utils import timezone
+
+from .models import RMPaymentRecord, BuyTransaction, RMUserView
+
 @csrf_exempt
 @login_required
 def add_or_edit_payment(request, order_id=None, payment_id=None):
-    if request.method == 'POST':
-        if payment_id:  # Edit flow
-            payment = get_object_or_404(RMPaymentRecord, id=payment_id)
-        else:  # Add flow
-            order = get_object_or_404(BuyTransaction, order_id=order_id)
-            rm_view = get_object_or_404(RMUserView, order_id=order_id)
-            payment = RMPaymentRecord(
-                rm_user_view=rm_view,
-                date=timezone.now().date(),
-                time=timezone.now().time()
-            )
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Invalid request method")
 
-        # Input values
-        payment.bank_name = request.POST.get('bank_name')
-        entered_amount = Decimal(request.POST.get('amount') or '0')
-        payment.amount = entered_amount
-        payment.remark = request.POST.get('remark')
-        payment.payment_status = request.POST.get('payment_status', 'pending')
-        payment.payment_transaction_date = request.POST.get('payment_transaction_date') or None
-        payment.paymentConfirmationMessage = request.POST.get('paymentConfirmationMessage') or None
-
-        if request.FILES.get('screenshot'):
-            payment.screenshot = request.FILES['screenshot']
-
-        # Auto-calculate remaining amount
+    # locate / build record
+    if payment_id:
+        payment = get_object_or_404(RMPaymentRecord, id=payment_id)
         rm_view = payment.rm_user_view
-        total_expected_amount = rm_view.total_amount  # <-- Assumes `total_amount` exists on RMUserView
+    else:
+        order = get_object_or_404(BuyTransaction, order_id=order_id)
+        rm_view = get_object_or_404(RMUserView, order_id=order_id)
+        payment = RMPaymentRecord(
+            rm_user_view=rm_view,
+            date=timezone.now().date(),
+            time=timezone.now().time()
+        )
 
-        # Sum of all other payments for this rm_view (excluding current one if editing)
-        previous_payments = RMPaymentRecord.objects.filter(rm_user_view=rm_view).exclude(id=payment.id)
-        total_paid_before = previous_payments.aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+    # posted fields
+    payment.bank_name = request.POST.get('bank_name')
+    posted_status = request.POST.get('payment_status', 'pending')
+    payment.payment_status = posted_status
+    payment.remark = request.POST.get('remark') or None
+    payment.payment_transaction_date = request.POST.get('payment_transaction_date') or None
+    payment.paymentConfirmationMessage = request.POST.get('paymentConfirmationMessage') or None
 
-        # Remaining = Total expected - (Previous paid + Current amount)
-        payment.remaining_amount = total_expected_amount - (total_paid_before + entered_amount)
+    if request.FILES.get('screenshot'):
+        payment.screenshot = request.FILES['screenshot']
 
+    # compute remaining BEFORE applying this payment
+    from decimal import Decimal
+    from django.db.models import Sum
+
+    total_expected = rm_view.total_amount  # comes from RMUserView auto-populated total_amount
+    previous_total = RMPaymentRecord.objects.filter(
+        rm_user_view=rm_view
+    ).exclude(id=payment.id).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    remaining_before = (total_expected or Decimal('0')) - previous_total
+
+    # STATUS RULES
+    # 2) pending => block submission
+    if posted_status == 'pending':
+        return HttpResponseBadRequest("Cannot submit while status is Pending. Please choose Partial or Payment Received.")
+
+    # 3) approved => take all remaining, lock amount
+    if posted_status == 'approved':
+        payment.amount = max(remaining_before, Decimal('0'))
+        payment.remaining_amount = max(total_expected - (previous_total + payment.amount), Decimal('0'))
         payment.save()
-        return redirect('RM_User:buyordersummery', order_id=payment.rm_user_view.order_id)
+        return redirect('RM_User:buyordersummery', order_id=rm_view.order_id)
 
-    return HttpResponseBadRequest("Invalid request method")
+    # 5) rejected ("cancelled") => zero effect, lock everything
+    if posted_status == 'rejected':
+        payment.amount = Decimal('0')
+        payment.remaining_amount = remaining_before
+        payment.save()
+        return redirect('RM_User:buyordersummery', order_id=rm_view.order_id)
+
+    # 3) partial => amount must be >0 and <= remaining_before
+    if posted_status == 'partial':
+        try:
+            amt = Decimal(request.POST.get('amount') or '0')
+        except Exception:
+            return HttpResponseBadRequest("Invalid amount.")
+        if amt <= 0:
+            return HttpResponseBadRequest("Amount must be greater than 0 for Partial Payment.")
+        if amt > remaining_before:
+            return HttpResponseBadRequest("Amount cannot exceed remaining.")
+        payment.amount = amt
+        payment.remaining_amount = max(total_expected - (previous_total + amt), Decimal('0'))
+        payment.save()
+        return redirect('RM_User:buyordersummery', order_id=rm_view.order_id)
+
+    # Fallback
+    return HttpResponseBadRequest("Unsupported payment status.")
 
 
 @login_required
 def delete_payment(request, payment_id):
     payment = get_object_or_404(RMPaymentRecord, id=payment_id)
-    order_id = payment.rm_user_view.order_id
+    rm_view = payment.rm_user_view
     payment.delete()
-    return redirect('RM_User:buyordersummery', order_id=order_id)
+
+    # 🧮 Recalculate remaining amounts after deletion
+    all_payments = RMPaymentRecord.objects.filter(
+        rm_user_view=rm_view
+    ).order_by('date', 'time', 'id')
+
+    total_expected = rm_view.total_amount
+    cumulative_paid = Decimal('0')
+
+    for p in all_payments:
+        cumulative_paid += p.amount
+        p.remaining_amount = max(total_expected - cumulative_paid, Decimal('0'))
+        p.save(update_fields=['remaining_amount'])
+
+    return redirect('RM_User:buyordersummery', order_id=rm_view.order_id)
 
 
 

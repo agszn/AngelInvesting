@@ -161,12 +161,27 @@
                                         <option value="{{ key }}" {% if payment.AC_Payment_Status == key %}selected{% endif %}>{{ label }}</option>
                                     {% endfor %}
                                 </select>
-                                
-                                <!-- Add transaction date input -->
-                                <td><input type="date" name="payment_transaction_date" value="{{ payment.payment_transaction_date|date:'Y-m-d' }}" class="form-control form-control-sm mt-1" onchange="this.form.submit()">
-                                </td>
-                                <!-- Add transaction ID input -->
-                                <td><input type="text" name="payment_transaction_id" value="{{ payment.payment_transaction_id }}" placeholder="Txn ID" class="form-control form-control-sm mt-1" onchange="this.form.submit()"></td>
+                              <!-- Transaction Date -->
+                            <td>
+                            <input type="date"
+                                    name="payment_transaction_date"
+                                    value="{{ payment.payment_transaction_date|date:'Y-m-d' }}"
+                                    class="form-control form-control-sm mt-1"
+                                    {% if payment.AC_Payment_Status != 'partial' and payment.AC_Payment_Status != 'approved' %}disabled{% endif %}
+                                    onchange="this.form.submit()">
+                            </td>
+
+                            <!-- Transaction ID -->
+                            <td>
+                            <input type="text"
+                                    name="payment_transaction_id"
+                                    value="{{ payment.payment_transaction_id }}"
+                                    placeholder="Txn ID"
+                                    class="form-control form-control-sm mt-1"
+                                    {% if payment.AC_Payment_Status != 'partial' and payment.AC_Payment_Status != 'approved' %}disabled{% endif %}
+                                    onchange="this.form.submit()">
+                            </td>
+
                             </form>
                             {% else %}
                                 {{ payment.get_AC_Payment_Status_display }}<br>
@@ -217,7 +232,7 @@
                             <th>Share Price</th>
                             <th>Buy Price</th>
                             <th>Qty</th>
-                            <th>Amount</th>
+                            <th>Deal Value</th>
                             <th>Status</th>
                             <!-- <th>Actions</th> -->
                         </tr>
@@ -275,7 +290,7 @@
                     </tbody>
                 </table>
                 <div class="Accpayment-process">
-                    <h4><strong>Total Amount: </strong> {{ order.total_amount }}</h4>
+                    <h4><strong>Deal Value: </strong> {{ order.total_amount }}</h4>
                     <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ order.order_id }}" class="Accpayment-button">
                                     Generate Provisional Deal Letter
                     </a>

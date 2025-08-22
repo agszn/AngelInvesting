@@ -8,7 +8,9 @@
       <th>Buy Price</th>
       <th>Total Amt</th>
       <th>Order Type</th>
-      <th>Status</th>
+      <th>RM Status</th>
+      <th>Acc Status</th>
+      <th>ST Status</th>
     </tr>
   </thead>
   <tbody>
@@ -21,6 +23,20 @@
         <td>₹{{ order.price_per_share }}</td>
         <td>₹{{ order.total_amount }}</td>
         <td>{{ order.order_type|title }}</td>
+        <td style="color:
+          {% if order.RM_status == 'completed' %}green
+          {% elif order.RM_status == 'processing' %}orange
+          {% elif order.RM_status == 'cancelled' %}red
+          {% else %}#cc6600{% endif %};">
+          {{ order.RM_status }}
+        </td>
+        <td style="color:
+          {% if order.AC_status == 'completed' %}green
+          {% elif order.AC_status == 'processing' %}orange
+          {% elif order.AC_status == 'cancelled' %}red
+          {% else %}#cc6600{% endif %};">
+          {{ order.AC_status }}
+        </td>
         <td style="color:
           {% if order.status == 'Completed' %}green
           {% elif order.status == 'Processing' %}orange
