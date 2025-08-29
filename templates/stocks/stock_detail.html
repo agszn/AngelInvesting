@@ -498,7 +498,7 @@
       <h2 class="Sec2_3_PG_heading">Stock <span>Performance</span></h2>
       <div class="Sec2_3_PG_stockCard">
         <div class="buttons">
-          <button class="filter-btn" data-range="7">1W</button>
+          <!-- <button class="filter-btn" data-range="7">1W</button> -->
           <button class="filter-btn" data-range="30">1M</button>
           <button class="filter-btn" data-range="90">3M</button>
           <button class="filter-btn active" data-range="180">6M</button>
@@ -788,468 +788,489 @@
 
 
 
-<style>
-  /* --- PART 4 layout (left 80% / right 20%) --- */
-  .company-overall-wrapper {
-    display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 2fr); /* ~80/20 */
-    gap: 20px;
-    margin: 40px 100px;
-  }
+        <style>
+          /* --- PART 4 layout (left 80% / right 20%) --- */
+          .company-overall-wrapper {
+            display: grid;
+            grid-template-columns: minmax(0, 4fr) minmax(0, 2fr); /* ~80/20 */
+            gap: 20px;
+            margin: 40px 100px;
+          }
 
-  .company-overall-allDetails {
-    display: flex;
-    flex-direction: column;
-  }
+          .company-overall-allDetails {
+            display: flex;
+            flex-direction: column;
+          }
 
-  .company-left-inner {
-    display: flex;
-    flex-direction: column;
-  }
+          .company-left-inner {
+            display: flex;
+            flex-direction: column;
+          }
 
-  /* Left column */
-  .company-overall-allDetails {
-    margin: 0;
-    text-align: justify;
-  }
+          /* Left column */
+          .company-overall-allDetails {
+            margin: 0;
+            text-align: justify;
+          }
 
-  /* Right column */
-  .company-right-section {
-    background: #0e213f;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    font-size: 14px;
-    height: fit-content;
-    color: white;
-    margin-top: 110px;
-  }
+          /* Right column */
+          .company-right-section {
+            background: #0e213f;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 14px;
+            height: fit-content;
+            color: white;
+            margin-top: 210px;
+          }
 
-  /* Sticky on large screens */
-  @media (min-width: 1025px) {
-    .company-right-section {
-      position: sticky;
-      top: 190px;
-    }
-  }
+          /* Sticky on large screens */
+          @media (min-width: 1025px) {
+            .company-right-section {
+              position: sticky;
+              top: 190px;
+            }
+          }
 
-  /* Remove big margins for sections */
-  .company-overall-wrapper .stock-overview-section,
-  .company-overall-wrapper .content-section {
-    margin: 20px 0;
-  }
+          /* Remove big margins for sections */
+          .company-overall-wrapper .stock-overview-section,
+          .company-overall-wrapper .content-section {
+            margin: 20px 0;
+          }
 
-  /* Mobile: stack */
-  @media (max-width: 1024px) {
-    .company-overall-wrapper {
-      grid-template-columns: 1fr;
-    }
-  }
+          /* Mobile: stack */
+          @media (max-width: 1024px) {
+            .company-overall-wrapper {
+              grid-template-columns: 1fr;
+            }
+          }
 
-  /* Overview + buttons */
-  .company-details-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-    justify-content: center;
-    margin: 20px 0;
-  }
+          /* Overview + buttons */
+          .company-details-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: center;
+            margin: 20px 0;
+          }
 
-  .company-details-buttons button {
-    width: 121px;
-    height: 50px;
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff;
-    background-color: #0e213f;
-    cursor: pointer;
-    transition: 0.3s ease;
-    border-radius: 5px;
-  }
+          .company-details-buttons button {
+            width: 121px;
+            height: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            background-color: #0e213f;
+            cursor: pointer;
+            transition: 0.3s ease;
+            border-radius: 5px;
+          }
 
-  .company-details-buttons button:hover {
-    transform: scale(1.05);
-  }
+          .company-details-buttons button:hover {
+            transform: scale(1.05);
+          }
 
-  /* Overview section */
-  .stock-overview-section {
-    display: block;
-  }
-  .stock-overview-text h2 {
-    font-size: 24px;
-    font-weight: 600;
-    margin: 10px 0;
-  }
-  .stock-overview-text p {
-    font-size: 18px;
-    font-weight: 300;
-    padding-bottom: 10px;
-    margin: 0;
-  }
-  .stock-overview-text h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 10px 0;
-  }
-  .stock-overview-text p > span,
-  .stock-overview-text ul li > span {
-    font-weight: 600;
-    color: #000;
-  }
-  .stock-overview-text ul {
-    margin: 0;
-  }
-  .stock-overview-text ul li {
-    font-size: 18px;
-    font-weight: 300;
-    padding-bottom: 10px;
-    margin: 0;
-  }
-  .stock-overview-text table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .stock-overview-text table,
-  .stock-overview-text table th,
-  .stock-overview-text table td {
-    border: 1px solid #000;
-    padding: 8px;
-    text-align: left;
-  }
-  .stock-overview-text table th:nth-child(2),
-  .stock-overview-text table td:nth-child(2),
-  .stock-overview-text table th:nth-child(3),
-  .stock-overview-text table td:nth-child(3) {
-    text-align: right;
-  }
-  .stock-overview-text table tr:last-child td {
-    font-weight: 600;
-  }
-</style>
+          /* Overview section */
+          .stock-overview-section {
+            display: block;
+          }
+          .stock-overview-text h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 10px 0;
+          }
+          .stock-overview-text p {
+            font-size: 18px;
+            font-weight: 300;
+            padding-bottom: 10px;
+            margin: 0;
+          }
+          .stock-overview-text h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 10px 0;
+          }
+          .stock-overview-text p > span,
+          .stock-overview-text ul li > span {
+            font-weight: 600;
+            color: #000;
+          }
+          .stock-overview-text ul {
+            margin: 0;
+          }
+          .stock-overview-text ul li {
+            font-size: 18px;
+            font-weight: 300;
+            padding-bottom: 10px;
+            margin: 0;
+          }
+          .stock-overview-text table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          .stock-overview-text table,
+          .stock-overview-text table th,
+          .stock-overview-text table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+          }
+          .stock-overview-text table th:nth-child(2),
+          .stock-overview-text table td:nth-child(2),
+          .stock-overview-text table th:nth-child(3),
+          .stock-overview-text table td:nth-child(3) {
+            text-align: right;
+          }
+          .stock-overview-text table tr:last-child td {
+            font-weight: 600;
+          }
+        </style>
 
-<section class="company-overall-wrapper">
-  <!-- Left (80%) -->
-  <section class="company-overall-allDetails">
-    <div class="hero-headers">
-      <h1 class="heading">Share <span class="highlight">Details</span></h1>
-    </div>
+        <section class="company-overall-wrapper">
+          <!-- Left (80%) -->
+          <section class="company-overall-allDetails">
+            <div class="hero-headers">
+              <h1 class="heading">Share <span class="highlight">Details</span></h1>
+            </div>
 
-    <div class="company-left-inner">
-      <!-- Buttons row -->
-      <div class="company-details-buttons">
-        <button onclick="showSection('overview')">Overview</button>
-        <button onclick="showSection('balance-sheet')">Balance Sheet</button>
-        <button onclick="showSection('pl-account')">P&L Account</button>
-        <button onclick="showSection('cash-flow')">Cash Flow</button>
-        <button onclick="showSection('dividend-history')">Dividend</button>
-        <button onclick="showSection('financial-ratios')">Financial Ratios</button>
-      </div>
+            <div class="company-left-inner">
+              <!-- Buttons row -->
+              <div class="company-details-buttons">
+                <button onclick="showSection('overview')">Overview</button>
+                <button onclick="showSection('balance-sheet')">Balance Sheet</button>
+                <button onclick="showSection('pl-account')">P&L Account</button>
+                <button onclick="showSection('cash-flow')">Cash Flow</button>
+                <button onclick="showSection('dividend-history')">Dividend</button>
+                <button onclick="showSection('financial-ratios')" style="width:15%;">Financial Ratios</button>
+              </div>
 
-      <!-- Sections -->
-      <section id="overview" class="stock-overview-section">
-        <section class="stock-overview-box">
-          <div class="stock-overview-text">
-            {{ stock.company_overview|safe }}
-          </div>
-          {% if reports %}
-          <div class="stock-overview-text">
-            {% for report in reports %}
-              {{ report.summary|safe }}
-            {% endfor %}
-          </div>
-          {% endif %}
-        </section>
-      </section>
-
-          <!-- balance-sheet -->
-    <section id="balance-sheet" class="content-section" style="display: none;">
-      <h2>{{ stock.company_name }} - Balance Sheet</h2>
-      {% with data=balance_sheet_data %}
-        {% if data.headers and data.rows %}
-          <div style="overflow-x: auto; width: 100%;">
-            <table class="balance-sheet-table" style="border-collapse: collapse; width: 100%; min-width: 600px;">
-              <thead>
-                <tr style="background-color: #f2f2f2;">
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: left;
-                            position: sticky; left: 0; background-color: #f2f2f2; z-index: 2;">
-                    {{ data.particulars_header.title }}
-                  </th>
-                  {% for header in data.headers %}
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right; white-space: nowrap;">
-                      {{ header.title }} (₹ Cr)
-                    </th>
-                  {% endfor %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in data.rows %}
-                  <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight: bold;"{% endif %}>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: left;
-                              position: sticky; left: 0; background-color: #fff; z-index: 1;"
-                        class="{{ row.text_style|default:'normal' }}">
-                      {{ row.name }}
-                    </td>
-                    {% for header in data.headers %}
-                      <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
-                        {{ row.values|get_itemTest:header.id|default:"" }}
-                      </td>
+              <!-- Sections -->
+              <section id="overview" class="stock-overview-section">
+                <section class="stock-overview-box">
+                  <div class="stock-overview-text">
+                    {{ stock.company_overview|safe }}
+                  </div>
+                  {% if reports %}
+                  <div class="stock-overview-text">
+                    {% for report in reports %}
+                      {{ report.summary|safe }}
                     {% endfor %}
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
-            No data available in this category for this stock.
-          </p>
-        {% endif %}
-      {% endwith %}
-    </section>
-    <!-- balance-sheet end -->
+                  </div>
+                  {% endif %}
+                </section>
+              </section>
 
-        <!-- pl-account section start -->
-    <section id="pl-account" class="content-section" style="display: none;">
-        <h2>{{ stock.company_name }} - P & L Account</h2>
-        {% with data=pl_account_data %}
-          {% if data.headers and data.rows %}
-            <div style="overflow-x: auto; width: 100%;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 600px;">
-                    <thead>
+            <!-- balance-sheet -->
+            <section id="balance-sheet" class="content-section" style="display: none;">
+              <h2>{{ stock.company_name }} - Balance Sheet</h2>
+              {% with data=balance_sheet_data %}
+                {% if data.headers and data.rows %}
+                  <div style="overflow-x: auto; width: 100%;">
+                    <table class="balance-sheet-table" style="border-collapse: collapse; width: 100%; min-width: 600px;">
+                      <thead>
                         <tr style="background-color: #f2f2f2;">
-                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;
-                                      position: sticky; left: 0; background-color: #f2f2f2; z-index: 2;">
-                                {{ data.particulars_header.title }}
+                          <th style="border: 1px solid #ddd; padding: 8px; text-align: left;
+                                    position: sticky; left: 0; background-color: #f2f2f2; z-index: 2;">
+                            {{ data.particulars_header.title }}
+                          </th>
+                          {% for header in data.headers %}
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: right; white-space: nowrap;">
+                              {{ header.title }} (₹ Cr)
+                            </th>
+                          {% endfor %}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for row in data.rows %}
+                          <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight: bold;"{% endif %}>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: left;
+                                      position: sticky; left: 0; background-color: #fff; z-index: 1;"
+                                class="{{ row.text_style|default:'normal' }}">
+                              {{ row.name }}
+                            </td>
+                            {% for header in data.headers %}
+                              <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+                                {{ row.values|get_itemTest:header.id|default:"" }}
+                              </td>
+                            {% endfor %}
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
+                    No data available in this category for this stock.
+                  </p>
+                {% endif %}
+              {% endwith %}
+            </section>
+            <!-- balance-sheet end -->
+
+                <!-- pl-account section start -->
+            <section id="pl-account" class="content-section" style="display: none;">
+                <h2>{{ stock.company_name }} - P & L Account</h2>
+                {% with data=pl_account_data %}
+                  {% if data.headers and data.rows %}
+                    <div style="overflow-x: auto; width: 100%;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 600px;">
+                            <thead>
+                                <tr style="background-color: #f2f2f2;">
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;
+                                              position: sticky; left: 0; background-color: #f2f2f2; z-index: 2;">
+                                        {{ data.particulars_header.title }}
+                                    </th>
+                                    {% for header in data.headers %}
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: right; white-space: nowrap;">
+                                            {{ header.title }} (₹ Cr)
+                                        </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in data.rows %}
+                                    <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight: bold;"{% endif %}>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: left;
+                                                  position: sticky; left: 0; background-color: #fff; z-index: 1;"
+                                            class="{{ row.text_style|default:'normal' }}">
+                                            {{ row.name }}
+                                        </td>
+                                        {% for header in data.headers %}
+                                            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+                                                {{ row.values|get_itemTest:header.id|default:"" }}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                  {% else %}
+                      <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
+                          No data available in this category for this stock.
+                      </p>
+                  {% endif %}
+                {% endwith %}
+            </section>
+            <!-- pl-account section end -->
+
+            <!-- cash-flow section start -->
+            <section id="cash-flow" class="content-section" style="display: none;">
+                <h2>{{ stock.company_name }} - Cash Flow</h2>
+                {% with data=cash_flow_data %}
+                  {% if data.headers and data.rows %}
+                    <div style="overflow-x:auto; width:100%;">
+                      <table style="width:100%; border-collapse:collapse; font-size:14px; min-width:600px;">
+                        <thead>
+                          <tr style="background-color:#f2f2f2;">
+                            <th style="border:1px solid #ddd; padding:8px; text-align:left;
+                                      position:sticky; left:0; background-color:#f2f2f2; z-index:2;">
+                              {{ data.particulars_header.title }}
                             </th>
                             {% for header in data.headers %}
-                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right; white-space: nowrap;">
-                                    {{ header.title }} (₹ Cr)
-                                </th>
+                              <th style="border:1px solid #ddd; padding:8px; text-align:right; white-space:nowrap;">
+                                {{ header.title }} (₹ Cr)
+                              </th>
                             {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in data.rows %}
-                            <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight: bold;"{% endif %}>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: left;
-                                          position: sticky; left: 0; background-color: #fff; z-index: 1;"
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for row in data.rows %}
+                            <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight:bold;"{% endif %}>
+                              <td style="border:1px solid #ddd; padding:8px; text-align:left;
+                                        position:sticky; left:0; background-color:#fff; z-index:1;"
+                                  class="{{ row.text_style|default:'normal' }}">
+                                {{ row.name }}
+                              </td>
+                              {% for header in data.headers %}
+                                <td style="border:1px solid #ddd; padding:8px; text-align:right;">
+                                  {{ row.values|get_itemTest:header.id|default:"" }}
+                                </td>
+                              {% endfor %}
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  {% else %}
+                      <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
+                          No data available in this category for this stock.
+                      </p>
+                  {% endif %}
+                {% endwith %}
+            </section>
+            <!-- cash-flow section end -->
+
+            <!-- dividend-history section start -->
+            <section id="dividend-history" class="content-section" style="display: none;">
+                <h2>{{ stock.company_name }} - Dividend History</h2>
+                {% with data=dividend_data %}
+                  {% if data.headers and data.rows %}
+                      <div style="overflow-x:auto; width:100%;">
+                        <table style="width:100%; border-collapse:collapse; font-size:14px; min-width:600px;">
+                          <thead>
+                            <tr style="background-color:#f2f2f2;">
+                              <th style="border:1px solid #ddd; padding:8px; text-align:left;
+                                        position:sticky; left:0; background-color:#f2f2f2; z-index:2;">
+                                {{ data.particulars_header.title }}
+                              </th>
+                              {% for header in data.headers %}
+                                <th style="border:1px solid #ddd; padding:8px; text-align:right; white-space:nowrap;">
+                                  {{ header.title }} (₹ Cr)
+                                </th>
+                              {% endfor %}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for row in data.rows %}
+                              <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight:bold;"{% endif %}>
+                                <td style="border:1px solid #ddd; padding:8px; text-align:left;
+                                          position:sticky; left:0; background-color:#fff; z-index:1;"
                                     class="{{ row.text_style|default:'normal' }}">
-                                    {{ row.name }}
+                                  {{ row.name }}
                                 </td>
                                 {% for header in data.headers %}
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
-                                        {{ row.values|get_itemTest:header.id|default:"" }}
-                                    </td>
+                                  <td style="border:1px solid #ddd; padding:8px; text-align:right;">
+                                    {{ row.values|get_itemTest:header.id|default:"" }}
+                                  </td>
                                 {% endfor %}
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                  {% else %}
+                      <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
+                          No data available in this category for this stock.
+                      </p>
+                  {% endif %}
+                {% endwith %}
+            </section>
+            <!-- dividend-history section end -->
+
+            <!-- financial-ratios section start -->
+            <section id="financial-ratios" class="content-section" style="display: none;">
+                <h2>{{ stock.company_name }} - Financial Ratios</h2>
+                {% with data=financial_ratios_data %}
+                    {% if data.headers and data.rows %}
+                      <div style="overflow:auto; max-height:500px; width:100%;">
+                        <table style="width:100%; border-collapse:collapse; font-size:14px; min-width:600px;">
+                          <thead>
+                            <tr style="background-color:#f2f2f2;">
+                              <th style="border:1px solid #ddd; padding:8px; text-align:left;
+                                        position:sticky; top:0; left:0;
+                                        background-color:#f2f2f2; z-index:3;">
+                                {{ data.particulars_header.title }}
+                              </th>
+                              {% for header in data.headers %}
+                                <th style="border:1px solid #ddd; padding:8px; text-align:right; white-space:nowrap;
+                                          position:sticky; top:0; background-color:#f2f2f2; z-index:2;">
+                                  {{ header.title }} (₹ Cr)
+                                </th>
+                              {% endfor %}
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                          </thead>
+                          <tbody>
+                            {% for row in data.rows %}
+                              <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight:bold;"{% endif %}>
+                                <td style="border:1px solid #ddd; padding:8px; text-align:left;
+                                          position:sticky; left:0; background-color:#fff; z-index:1;"
+                                    class="{{ row.text_style|default:'normal' }}">
+                                  {{ row.name }}
+                                </td>
+                                {% for header in data.headers %}
+                                  <td style="border:1px solid #ddd; padding:8px; text-align:right;">
+                                    {{ row.values|get_itemTest:header.id|default:"" }}
+                                  </td>
+                                {% endfor %}
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    {% else %}
+                        <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
+                            No data available in this category for this stock.
+                        </p>
+                    {% endif %}
+                {% endwith %}
+            </section>
+            <!-- financial-ratios section end -->
             </div>
-          {% else %}
-              <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
-                  No data available in this category for this stock.
-              </p>
-          {% endif %}
-        {% endwith %}
-    </section>
-    <!-- pl-account section end -->
+          </section>
 
-    <!-- cash-flow section start -->
-    <section id="cash-flow" class="content-section" style="display: none;">
-        <h2>{{ stock.company_name }} - Cash Flow</h2>
-        {% with data=cash_flow_data %}
-          {% if data.headers and data.rows %}
-            <div style="overflow-x:auto; width:100%;">
-              <table style="width:100%; border-collapse:collapse; font-size:14px; min-width:600px;">
-                <thead>
-                  <tr style="background-color:#f2f2f2;">
-                    <th style="border:1px solid #ddd; padding:8px; text-align:left;
-                              position:sticky; left:0; background-color:#f2f2f2; z-index:2;">
-                      {{ data.particulars_header.title }}
-                    </th>
-                    {% for header in data.headers %}
-                      <th style="border:1px solid #ddd; padding:8px; text-align:right; white-space:nowrap;">
-                        {{ header.title }} (₹ Cr)
-                      </th>
-                    {% endfor %}
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for row in data.rows %}
-                    <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight:bold;"{% endif %}>
-                      <td style="border:1px solid #ddd; padding:8px; text-align:left;
-                                position:sticky; left:0; background-color:#fff; z-index:1;"
-                          class="{{ row.text_style|default:'normal' }}">
-                        {{ row.name }}
-                      </td>
-                      {% for header in data.headers %}
-                        <td style="border:1px solid #ddd; padding:8px; text-align:right;">
-                          {{ row.values|get_itemTest:header.id|default:"" }}
-                        </td>
-                      {% endfor %}
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% else %}
-              <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
-                  No data available in this category for this stock.
-              </p>
-          {% endif %}
-        {% endwith %}
-    </section>
-    <!-- cash-flow section end -->
+          <!-- Right (20%) -->
+          <aside id="events-sidebar" class="company-right-section">
+            <h3 style="text-align: center;">Events</h3>
 
-    <!-- dividend-history section start -->
-    <section id="dividend-history" class="content-section" style="display: none;">
-        <h2>{{ stock.company_name }} - Dividend History</h2>
-        {% with data=dividend_data %}
-          {% if data.headers and data.rows %}
-              <div style="overflow-x:auto; width:100%;">
-                <table style="width:100%; border-collapse:collapse; font-size:14px; min-width:600px;">
-                  <thead>
-                    <tr style="background-color:#f2f2f2;">
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;
-                                position:sticky; left:0; background-color:#f2f2f2; z-index:2;">
-                        {{ data.particulars_header.title }}
-                      </th>
-                      {% for header in data.headers %}
-                        <th style="border:1px solid #ddd; padding:8px; text-align:right; white-space:nowrap;">
-                          {{ header.title }} (₹ Cr)
-                        </th>
-                      {% endfor %}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for row in data.rows %}
-                      <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight:bold;"{% endif %}>
-                        <td style="border:1px solid #ddd; padding:8px; text-align:left;
-                                  position:sticky; left:0; background-color:#fff; z-index:1;"
-                            class="{{ row.text_style|default:'normal' }}">
-                          {{ row.name }}
-                        </td>
-                        {% for header in data.headers %}
-                          <td style="border:1px solid #ddd; padding:8px; text-align:right;">
-                            {{ row.values|get_itemTest:header.id|default:"" }}
-                          </td>
-                        {% endfor %}
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-          {% else %}
-              <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
-                  No data available in this category for this stock.
-              </p>
-          {% endif %}
-        {% endwith %}
-    </section>
-    <!-- dividend-history section end -->
-
-    <!-- financial-ratios section start -->
-    <section id="financial-ratios" class="content-section" style="display: none;">
-        <h2>{{ stock.company_name }} - Financial Ratios</h2>
-        {% with data=financial_ratios_data %}
-            {% if data.headers and data.rows %}
-              <div style="overflow:auto; max-height:500px; width:100%;">
-                <table style="width:100%; border-collapse:collapse; font-size:14px; min-width:600px;">
-                  <thead>
-                    <tr style="background-color:#f2f2f2;">
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;
-                                position:sticky; top:0; left:0;
-                                background-color:#f2f2f2; z-index:3;">
-                        {{ data.particulars_header.title }}
-                      </th>
-                      {% for header in data.headers %}
-                        <th style="border:1px solid #ddd; padding:8px; text-align:right; white-space:nowrap;
-                                  position:sticky; top:0; background-color:#f2f2f2; z-index:2;">
-                          {{ header.title }} (₹ Cr)
-                        </th>
-                      {% endfor %}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for row in data.rows %}
-                      <tr {% if row.text_style in "bold bold_italic bold_underline all" %}style="font-weight:bold;"{% endif %}>
-                        <td style="border:1px solid #ddd; padding:8px; text-align:left;
-                                  position:sticky; left:0; background-color:#fff; z-index:1;"
-                            class="{{ row.text_style|default:'normal' }}">
-                          {{ row.name }}
-                        </td>
-                        {% for header in data.headers %}
-                          <td style="border:1px solid #ddd; padding:8px; text-align:right;">
-                            {{ row.values|get_itemTest:header.id|default:"" }}
-                          </td>
-                        {% endfor %}
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
+            {% if events|length > 10 %}
+              <div style="max-height: 600px; overflow-y: auto;">
             {% else %}
-                <p style="text-align: center; color: #666; font-size: 16px; margin-top: 20px;">
-                    No data available in this category for this stock.
-                </p>
+              <div>
             {% endif %}
-        {% endwith %}
-    </section>
-    <!-- financial-ratios section end -->
-    </div>
-  </section>
 
-  <!-- Right (20%) -->
-  <aside class="company-right-section">
-    <h3>Events</h3>
-    <!-- Latest Events Section -->
-    <ul class="list-group">
-      {% for event in events %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            {% if event.image %}
-              <img src="{{ event.image.url }}" alt="{{ event.title }}" 
-                  style="width: 60px; height: 60px; object-fit: cover; margin-right: 15px;">
-            {% endif %}
-            <div>
-              <h5 class="mb-1">{{ event.title }}</h5>
-              <small class="text-muted">{{ event.subtitle|default:"" }}</small>
+              <ul class="list-group">
+                {% for event in events %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                      {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}" 
+                            style="width: 60px; height: 60px; object-fit: cover; margin-right: 15px;">
+                      {% endif %}
+                      <div>
+                        <h5 class="mb-1">{{ event.title }}</h5>
+                        <small class="text-muted">{{ event.subtitle|default:"" }}</small>
+                      </div>
+                    </div>
+                    <div>
+                      <a href="{% url 'SM_User:event_pdf' event.pk %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-download"></i> 
+                      </a>
+                    </div>
+                  </li>
+                {% empty %}
+                  <li class="list-group-item">No events available.</li>
+                {% endfor %}
+              </ul>
             </div>
-          </div>
-          <div>
-            <a href="{% url 'SM_User:event_pdf' event.pk %}" class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-download"></i> 
-            </a>
-          </div>
-        </li>
-      {% empty %}
-        <li class="list-group-item">No events available.</li>
-      {% endfor %}
-    </ul>
+          </aside>
 
-  </aside>
-</section>
+        </section>
 
-<!-- JS for tab switching -->
-<script>
-  function showSection(id) {
-    const sections = document.querySelectorAll('.content-section');
-    sections.forEach(sec => sec.style.display = 'none');
+        <!-- JS for tab switching -->
+        <script>
+          function showSection(id) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(sec => sec.style.display = 'none');
 
-    const overview = document.getElementById('overview');
-    if (id !== 'overview' && overview) {
-      overview.style.display = 'none';
-    }
-    const target = document.getElementById(id);
-    if (target) {
-      target.style.display = 'block';
-      window.scrollTo({
-        behavior: 'smooth'
-      });
-    }
-  }
-</script>
+            const overview = document.getElementById('overview');
+            const sidebar = document.getElementById('events-sidebar');
+
+            if (id === 'overview') {
+              if (overview) overview.style.display = 'block';
+              if (sidebar) sidebar.style.display = 'block';  // show sidebar on overview
+            } else {
+              if (overview) overview.style.display = 'none';
+              if (sidebar) sidebar.style.display = 'none';   // hide sidebar on other tabs
+            }
+
+            const target = document.getElementById(id);
+            if (target && id !== 'overview') {
+              target.style.display = 'block';
+            }
+
+            window.scrollTo({
+              behavior: 'smooth'
+            });
+          }
+
+          // Optionally, show Overview by default and show sidebar
+          window.onload = () => {
+            showSection('overview');
+          };
+
+        </script>
 
 
 
