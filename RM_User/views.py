@@ -50,66 +50,258 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import BuyTransaction, SellTransaction
 
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+
+CustomUser = get_user_model()
+
+
+def _attach_activity_and_payments(orders_qs):
+    """
+    Returns:
+      orders_list: list of orders with .latest_payment_at and ._last_activity set
+      payments_by_order: {order_id: [RMPaymentRecord, ...]}
+      payment_stats_by_order: {order_id: {...summary...}}
+    """
+    orders_list = list(orders_qs)
+    order_ids = [o.order_id for o in orders_list if o.order_id]
+
+    # payments (latest edit/add first)
+    payments = (
+        RMPaymentRecord.objects
+        .filter(rm_user_view__order_id__in=order_ids)
+        .select_related('rm_user_view')
+        .order_by('-modified_at')
+    )
+
+    payments_by_order = {}
+    latest_payment_at_by_order = {}
+    for p in payments:
+        oid = p.rm_user_view.order_id
+        payments_by_order.setdefault(oid, []).append(p)
+        if oid not in latest_payment_at_by_order:
+            latest_payment_at_by_order[oid] = p.modified_at
+
+    # quick stats per order_id
+    payment_stats_by_order = {}
+    for oid, plist in payments_by_order.items():
+        latest = plist[0] if plist else None
+        payment_stats_by_order[oid] = {
+            'count': len(plist),
+            'total_paid': sum(p.amount for p in plist),
+            'latest_remaining': latest.remaining_amount if latest else None,
+            'last_payment_date': latest.date if latest else None,
+            'last_payment_time': latest.time if latest else None,
+        }
+
+    # attach last_activity for sorting
+    for o in orders_list:
+        latest_payment_at = latest_payment_at_by_order.get(o.order_id)
+        o.latest_payment_at = latest_payment_at
+        upd = o.updated_at
+        if timezone.is_naive(upd):
+            upd = timezone.make_aware(upd, timezone.get_current_timezone())
+        o._last_activity = max(upd, latest_payment_at) if latest_payment_at else upd
+
+    # most recent activity first
+    orders_list.sort(key=lambda o: (o._last_activity, o.updated_at, o.timestamp), reverse=True)
+
+    return orders_list, payments_by_order, payment_stats_by_order
+
+
 @login_required
 def ReportRM(request):
-    buy_orders_qs = BuyTransaction.objects.filter(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
-    sell_orders_qs = SellTransaction.objects.filter(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
+    # Current RM and all users assigned to this RM
+    rm_user = request.user
+    assigned_users = (
+        CustomUser.objects
+        .filter(assigned_rm=rm_user)
+        .select_related('profile')
+    )
 
-    date_filter = request.GET.get('date_filter')
-    order_id = request.GET.get('order_id')
-    username = request.GET.get('username')
+    # Base completed/cancelled sets, scoped to assigned users
+    buy_qs_base = (
+        BuyTransaction.objects
+        .filter(RM_status__in=['completed', 'cancelled'], user__in=assigned_users)
+        .select_related('user', 'stock', 'user__profile')
+    )
+    sell_qs_base = (
+        SellTransaction.objects
+        .filter(RM_status__in=['completed', 'cancelled'], user__in=assigned_users)
+        .select_related('user', 'stock', 'user__profile')
+    )
 
-    # Clean inputs
-    if date_filter in [None, '', 'None']:
-        date_filter = None
-    if order_id in [None, '', 'None']:
-        order_id = None
-    if username in [None, '', 'None']:
-        username = None
+    # --- Dropdown options (built BEFORE user filters) ---
+    # Order IDs from these scoped orders
+    buy_oids = buy_qs_base.values_list('order_id', flat=True)
+    sell_oids = sell_qs_base.values_list('order_id', flat=True)
+    order_id_options = sorted({oid for oid in buy_oids if oid} | {oid for oid in sell_oids if oid})
+
+    # Usernames from ALL users assigned to this RM (even if no orders)
+    username_options = []
+    for u in assigned_users:
+        # Prefer profile.full_name() if it exists / returns text; else fallback
+        try:
+            full_name = u.profile.full_name() or u.get_full_name() or u.username
+        except Exception:
+            full_name = u.get_full_name() or u.username
+        username_options.append((u.username, full_name))
+    # sort by label then username
+    username_options.sort(key=lambda t: (t[1] or t[0], t[0]))
+
+    # --- Filters from querystring ---
+    date_filter = (request.GET.get('date_filter') or '').strip() or None
+    order_id = (request.GET.get('order_id') or '').strip() or None
+    username = (request.GET.get('username') or '').strip() or None
+
+    buy_qs = buy_qs_base
+    sell_qs = sell_qs_base
 
     if date_filter:
-        buy_orders_qs = buy_orders_qs.filter(timestamp__date=date_filter)
-        sell_orders_qs = sell_orders_qs.filter(timestamp__date=date_filter)
+        buy_qs = buy_qs.filter(timestamp__date=date_filter)
+        sell_qs = sell_qs.filter(timestamp__date=date_filter)
 
+    # From dropdowns, so exact matches make sense; keep icontains if you prefer partials
     if order_id:
-        buy_orders_qs = buy_orders_qs.filter(order_id__icontains=order_id)
-        sell_orders_qs = sell_orders_qs.filter(order_id__icontains=order_id)
+        buy_qs = buy_qs.filter(order_id=order_id)
+        sell_qs = sell_qs.filter(order_id=order_id)
 
     if username:
-        buy_orders_qs = buy_orders_qs.filter(user__username__icontains=username)
-        sell_orders_qs = sell_orders_qs.filter(user__username__icontains=username)
+        buy_qs = buy_qs.filter(user__username=username)
+        sell_qs = sell_qs.filter(user__username=username)
 
-    buy_paginator = Paginator(buy_orders_qs, 10)
-    sell_paginator = Paginator(sell_orders_qs, 10)
+    # Compute activity + payments
+    buy_list, buy_payments_by_order, buy_payment_stats = _attach_activity_and_payments(buy_qs)
+    sell_list, sell_payments_by_order, sell_payment_stats = _attach_activity_and_payments(sell_qs)
 
-    buy_page_number = request.GET.get('buy_page')
-    sell_page_number = request.GET.get('sell_page')
-
+    # Paginate
+    buy_paginator = Paginator(buy_list, 10)
+    sell_paginator = Paginator(sell_list, 10)
+    buy_page_number = request.GET.get('buy_page') or 1
+    sell_page_number = request.GET.get('sell_page') or 1
     buy_orders_ReportsRM = buy_paginator.get_page(buy_page_number)
     sell_orders_ReportsRM = sell_paginator.get_page(sell_page_number)
 
     return render(request, 'ReportRM.html', {
         'buy_orders_ReportsRM': buy_orders_ReportsRM,
         'sell_orders_ReportsRM': sell_orders_ReportsRM,
+
+        # payments + stats dicts (cover all visible order_ids)
+        'buy_payments_by_order': buy_payments_by_order,
+        'buy_payment_stats_by_order': buy_payment_stats,
+        'sell_payments_by_order': sell_payments_by_order,
+        'sell_payment_stats_by_order': sell_payment_stats,
+
+        # filters and dropdown options
         'date_filter': date_filter,
         'order_id': order_id,
         'username': username,
+        'order_id_options': order_id_options,
+        'username_options': username_options,  # list of (username, full_name)
     })
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.db.models import Sum, Max
+from user_auth.models import CustomUser
+from user_portfolio.models import BuyTransaction
+from .models import RMPaymentRecord  # adjust import path to where RMPaymentRecord lives
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.utils import timezone
+from datetime import datetime
+from user_auth.models import CustomUser
+from user_portfolio.models import BuyTransaction
+from .models import RMPaymentRecord  # adjust import
+
+def _combine_aware(d, t):
+    """Combine date + time and make timezone-aware if needed."""
+    dt = datetime.combine(d, t)
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+    return dt
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.utils import timezone
+from user_auth.models import CustomUser
+from user_portfolio.models import BuyTransaction
+from .models import RMPaymentRecord  # adjust import
 
 @login_required
 def buyorderRM(request):
     rm_user = request.user
 
-    # Get users assigned to this RM
+    # Users assigned to this RM
     assigned_users = CustomUser.objects.filter(assigned_rm=rm_user)
 
-    # Fetch BuyTransactions of those users, excluding 'completed'
-    buy_orders = BuyTransaction.objects.filter(
-        user__in=assigned_users
-    ).exclude(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
+    # Base queryset (we'll sort in Python)
+    buy_qs = (
+        BuyTransaction.objects
+        .filter(user__in=assigned_users)
+        .exclude(RM_status__in=['completed', 'cancelled'])
+        .select_related('user', 'stock', 'advisor', 'broker')
+    )
 
-    return render(request, 'buyorderRM.html', {'buy_orders': buy_orders})
+    # Gather payments for these orders, latest EDITS first
+    order_ids = list(buy_qs.values_list('order_id', flat=True))
+    payments = (
+        RMPaymentRecord.objects
+        .filter(rm_user_view__order_id__in=order_ids)
+        .select_related('rm_user_view')
+        .order_by('-modified_at')   # <-- key change
+    )
 
+    # Group + compute latest_payment_at per order from modified_at
+    payments_by_order = {}
+    payment_stats_by_order = {}
+    latest_payment_at_by_order = {}
+
+    for p in payments:
+        oid = p.rm_user_view.order_id
+        payments_by_order.setdefault(oid, []).append(p)
+        # first seen is the latest because of order_by('-modified_at')
+        if oid not in latest_payment_at_by_order:
+            latest_payment_at_by_order[oid] = p.modified_at  # <-- use modified_at
+
+    # Stats (you can keep using date/time for display)
+    for oid, plist in payments_by_order.items():
+        latest = plist[0] if plist else None
+        payment_stats_by_order[oid] = {
+            'total_paid': sum(p.amount for p in plist),
+            'latest_remaining': latest.remaining_amount if latest else None,
+            'last_payment_date': latest.date if latest else None,
+            'last_payment_time': latest.time if latest else None,
+            'count': len(plist),
+        }
+
+    # Attach latest_payment_at and compute last_activity
+    buy_orders = []
+    for order in buy_qs:
+        latest_payment_at = latest_payment_at_by_order.get(order.order_id)
+        order.latest_payment_at = latest_payment_at  # for template if you show it
+
+        updated_at = order.updated_at
+        if timezone.is_naive(updated_at):
+            updated_at = timezone.make_aware(updated_at, timezone.get_current_timezone())
+
+        last_activity = max(updated_at, latest_payment_at) if latest_payment_at else updated_at
+        order._last_activity = last_activity
+        buy_orders.append(order)
+
+    # Sort by last activity desc (then updated_at, then timestamp)
+    buy_orders.sort(key=lambda o: (o._last_activity, o.updated_at, o.timestamp), reverse=True)
+
+    context = {
+        'buy_orders': buy_orders,
+        'payments_by_order': payments_by_order,
+        'payment_stats_by_order': payment_stats_by_order,
+    }
+    return render(request, 'buyorderRM.html', context)
 
 from .models import *
 
@@ -226,9 +418,13 @@ def buyordersummeryRM(request, order_id):
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.db.models import Prefetch
 from user_portfolio.models import BuyTransaction
 from user_auth.models import CustomUser
 from site_Manager.models import Advisor, Broker
+from .models import RMPaymentRecord  # Import your payment model
+
+
 @login_required
 def AllbuyTransactionSummary(request):
     # Step 1: Restrict users to those assigned to the logged-in RM
@@ -270,7 +466,17 @@ def AllbuyTransactionSummary(request):
     # Step 3.5: Sort transactions by latest first
     transactions = transactions.order_by('-timestamp')
 
-    # Step 4: Limit dropdowns to assigned users' data
+    # Step 4: Fetch related payment records
+    payment_records = RMPaymentRecord.objects.filter(
+        rm_user_view__order_id__in=transactions.values_list('order_id', flat=True)
+    )
+
+    # Organize payment records by order_id for easy lookup in template
+    payments_by_order = {}
+    for record in payment_records:
+        payments_by_order.setdefault(record.rm_user_view.order_id, []).append(record)
+
+    # Step 5: Limit dropdowns to assigned users' data
     company_names = transactions.values_list('stock__company_name', flat=True).distinct()
     order_ids = transactions.values_list('order_id', flat=True).distinct()
 
@@ -281,16 +487,26 @@ def AllbuyTransactionSummary(request):
         'brokers': Broker.objects.all(),
         'company_names': company_names,
         'order_ids': order_ids,
+        'payments_by_order': payments_by_order,  # <-- add this to template
     }
-    return render(request, 'AllbuyTransactionSummary.html', context)
+    if request.user.user_type == "AC":
+        template = "AllbuyTransactionSummary_ac.html"
+    elif request.user.user_type == "ST":
+        template = "AllbuyTransactionSummary_st.html"
+    else:
+        template = "AllbuyTransactionSummary.html"  
 
+    return render(request, template, context)
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
+from django.db.models import Prefetch
 from user_auth.models import CustomUser
 from user_portfolio.models import SellTransaction
 from site_Manager.models import Advisor, Broker
+from .models import RMPaymentRecord  # <-- import payment model
+
 
 @login_required
 def AllsellTransactionSummary(request):
@@ -301,7 +517,11 @@ def AllsellTransactionSummary(request):
         users = CustomUser.objects.all()
 
     # Step 2: Restrict transactions to only those users
-    transactions = SellTransaction.objects.filter(user__in=users)
+    transactions = (
+        SellTransaction.objects
+        .filter(user__in=users)
+        .select_related('user', 'broker', 'stock', 'advisor')  # perf
+    )
 
     # Step 3: Filters from request
     user_id = request.GET.get('user')
@@ -330,9 +550,21 @@ def AllsellTransactionSummary(request):
     if timestamp:
         transactions = transactions.filter(timestamp__date=timestamp)
 
+    # Latest first
     transactions = transactions.order_by('-timestamp')
 
-    # Step 4: Limit dropdowns to assigned users' data
+    # Step 4: Fetch related payment records (match by order_id)
+    order_ids_qs = transactions.values_list('order_id', flat=True)
+    payment_records = RMPaymentRecord.objects.filter(
+        rm_user_view__order_id__in=order_ids_qs
+    )
+
+    # Group payments by order_id for easy template lookup
+    payments_by_order = {}
+    for pr in payment_records:
+        payments_by_order.setdefault(pr.rm_user_view.order_id, []).append(pr)
+
+    # Step 5: Limit dropdowns to assigned users' data (based on filtered set)
     company_names = transactions.values_list('stock__company_name', flat=True).distinct()
     order_ids = transactions.values_list('order_id', flat=True).distinct()
 
@@ -343,9 +575,17 @@ def AllsellTransactionSummary(request):
         'brokers': Broker.objects.all(),
         'company_names': company_names,
         'order_ids': order_ids,
+        'payments_by_order': payments_by_order,  # <-- ADD
     }
 
-    return render(request, 'AllsellTransactionSummary.html', context)
+    if request.user.user_type == "AC":
+        template = "AllsellTransactionSummary_ac.html"
+    elif request.user.user_type == "ST":
+        template = "AllsellTransactionSummary_st.html"
+    else:
+        template = "AllsellTransactionSummary.html"  
+
+    return render(request, template, context)
 
 from django.views.decorators.csrf import csrf_exempt
 from .models import RMPaymentRecord
@@ -457,7 +697,27 @@ def add_or_edit_payment(request, order_id=None, payment_id=None):
     posted_status = request.POST.get('payment_status', 'pending')
     payment.payment_status = posted_status
     payment.remark = request.POST.get('remark') or None
-    payment.payment_transaction_date = request.POST.get('payment_transaction_date') or None
+
+    # ---- Parse datetime-local -> timezone-aware datetime ----
+    # Accepts 'YYYY-MM-DDTHH:MM' or 'YYYY-MM-DDTHH:MM:SS'
+    dt_str = request.POST.get('payment_transaction_date')
+    if dt_str:
+        from datetime import datetime
+        try:
+            try:
+                dt = datetime.strptime(dt_str, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                dt = datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S")
+            # Make timezone-aware in current timezone if naive
+            if timezone.is_naive(dt):
+                dt = timezone.make_aware(dt, timezone.get_current_timezone())
+            payment.payment_transaction_date = dt
+        except ValueError:
+            return HttpResponseBadRequest("Invalid date/time for transaction date.")
+    else:
+        payment.payment_transaction_date = None
+    # --------------------------------------------------------
+
     payment.paymentConfirmationMessage = request.POST.get('paymentConfirmationMessage') or None
 
     if request.FILES.get('screenshot'):
@@ -509,7 +769,6 @@ def add_or_edit_payment(request, order_id=None, payment_id=None):
 
     # Fallback
     return HttpResponseBadRequest("Unsupported payment status.")
-
 
 @login_required
 def delete_payment(request, payment_id):
@@ -678,24 +937,105 @@ from django.shortcuts import render
 from itertools import chain
 from operator import attrgetter
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.utils import timezone
+from user_auth.models import CustomUser
+from user_portfolio.models import SellTransaction
+from .models import RMPaymentRecord  # adjust import if needed
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.utils import timezone
+from itertools import chain
+from decimal import Decimal
+
+from user_auth.models import CustomUser
+from user_portfolio.models import SellTransaction
+# from user_portfolio.models import SellTransactionOtherAdvisor  # uncomment if you want to include it
+from .models import RMPaymentRecord  # adjust import if needed
+
+
 @login_required
 def sellorderRM(request):
     rm_user = request.user
     assigned_users = CustomUser.objects.filter(assigned_rm=rm_user)
 
-    # Fetch both types of sell transactions
-    sell_orders_main = SellTransaction.objects.filter(user__in=assigned_users).exclude(RM_status__in=['completed', 'cancelled']).order_by('-timestamp')
-    # sell_orders_other = SellTransactionOtherAdvisor.objects.filter(user__in=assigned_users)
+    # Base querysets (don’t order here; we’ll sort after computing last_activity)
+    sell_main_qs = (
+        SellTransaction.objects
+        .filter(user__in=assigned_users)
+        .exclude(RM_status__in=['completed', 'cancelled'])
+        .select_related('user', 'stock', 'advisor', 'broker')
+    )
 
-    # Combine and sort them by timestamp (most recent first)
-    # combined_sell_orders = sorted(
-    #     chain(sell_orders_main, sell_orders_other),
-    #     key=attrgetter('timestamp'),
-    #     reverse=True
+    # If you also want other-advisor sells, uncomment:
+    # sell_other_qs = (
+    #     SellTransactionOtherAdvisor.objects
+    #     .filter(user__in=assigned_users)
+    #     .exclude(RM_status__in=['completed', 'cancelled'])
+    #     .select_related('user', 'stock', 'advisor', 'broker')
     # )
 
-    return render(request, 'sellorderRM.html', {'sell_orders': sell_orders_main})
+    # Build list we’ll sort
+    sell_qs = list(sell_main_qs)
+    # sell_qs = list(chain(sell_main_qs, sell_other_qs))
 
+    # Collect order_ids for payment lookup
+    order_ids = [s.order_id for s in sell_qs if s.order_id]
+
+    # Pull payments (latest edits first)
+    payments = (
+        RMPaymentRecord.objects
+        .filter(rm_user_view__order_id__in=order_ids)
+        .select_related('rm_user_view')
+        .order_by('-modified_at')   # 👈 key: edits push the order up
+    )
+
+    # Group payments + compute latest per order (by modified_at)
+    payments_by_order = {}
+    payment_stats_by_order = {}
+    latest_payment_at_by_order = {}
+
+    for p in payments:
+        oid = p.rm_user_view.order_id
+        payments_by_order.setdefault(oid, []).append(p)
+        if oid not in latest_payment_at_by_order:
+            latest_payment_at_by_order[oid] = p.modified_at  # 👈 use modified_at (edit/add)
+
+    # Stats for display (date/time kept for readability)
+    for oid, plist in payments_by_order.items():
+        latest = plist[0] if plist else None
+        payment_stats_by_order[oid] = {
+            'total_paid': sum(p.amount for p in plist),
+            'latest_remaining': latest.remaining_amount if latest else None,
+            'last_payment_date': latest.date if latest else None,
+            'last_payment_time': latest.time if latest else None,
+            'count': len(plist),
+        }
+
+    # Attach latest_payment_at + compute last_activity for sorting
+    sell_orders = []
+    for s in sell_qs:
+        latest_payment_at = latest_payment_at_by_order.get(s.order_id)
+        s.latest_payment_at = latest_payment_at  # for template (optional column)
+
+        updated_at = s.updated_at
+        if timezone.is_naive(updated_at):
+            updated_at = timezone.make_aware(updated_at, timezone.get_current_timezone())
+
+        last_activity = max(updated_at, latest_payment_at) if latest_payment_at else updated_at
+        s._last_activity = last_activity
+        sell_orders.append(s)
+
+    # Sort: most recently active first
+    sell_orders.sort(key=lambda o: (o._last_activity, o.updated_at, o.timestamp), reverse=True)
+
+    return render(request, 'sellorderRM.html', {
+        'sell_orders': sell_orders,
+        'payments_by_order': payments_by_order,
+        'payment_stats_by_order': payment_stats_by_order,
+    })
 
 @login_required
 def ShareListRM(request):

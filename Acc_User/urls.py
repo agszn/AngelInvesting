@@ -5,7 +5,7 @@ from django.contrib.auth import views as auth_views
 
 from django.conf import settings
 from django.conf.urls.static import static
-
+from RM_User.views import AllbuyTransactionSummary, AllsellTransactionSummary
 
 app_name = 'Acc_User'
 
@@ -35,6 +35,9 @@ urlpatterns = [
         
         path('edit-sell-ac-status/<int:transaction_id>/', edit_sell_transaction_ac_status, name='edit_sell_transaction_ac_status'),
 
+        path('AllbuyTransactionSummaryAcc/', AllbuyTransactionSummary, name='AllbuyTransactionSummaryAcc'),
+        
+        path('AllsellTransactionSummaryAcc/', AllsellTransactionSummary, name='AllsellTransactionSummaryAcc'),
                         
     ]
 

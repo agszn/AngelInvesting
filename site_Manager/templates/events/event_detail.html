@@ -1,0 +1,21 @@
+{% extends "baseStructureSM.html" %}
+{% load static %}
+{% block title %}Banner{% endblock %}
+{% block subtitle %}Homepage Banner{% endblock %}
+
+{% block SMprofile_content %}
+<div class="container mt-4">
+  <h2>{{ event.title }}</h2>
+  <h4>{{ event.subtitle }}</h4>
+  <p><strong>Date & Time:</strong> {{ event.date_time }}</p>
+  {% if event.image %}
+    <img src="{{ event.image.url }}" class="img-fluid mb-3">
+  {% endif %}
+  <p>{{ event.paragraph }}</p>
+
+  {% if user == event.user %}
+    <a href="{% url 'SM_User:event_update' event.pk %}" class="btn btn-warning">Edit</a>
+    <a href="{% url 'SM_User:event_delete' event.pk %}" class="btn btn-danger">Delete</a>
+  {% endif %}
+</div>
+{% endblock %}

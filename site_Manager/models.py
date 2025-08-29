@@ -67,3 +67,28 @@ class Blog(models.Model):
 
 
 
+from django.db import models
+from django.contrib.auth.models import User
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
+
+class Event(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    title = models.CharField(max_length=200)
+    subtitle = models.CharField(max_length=300, blank=True, null=True)
+    paragraph = models.TextField()
+    date_time = models.DateTimeField(default=timezone.now)  # default = created time, editable
+    image = models.ImageField(upload_to="events/images/", blank=True, null=True)
+    show = models.BooleanField(default=True)
+
+    created_on = models.DateTimeField(auto_now_add=True)  # system creation timestamp
+    updated_on = models.DateTimeField(auto_now=True)      # system update timestamp
+
+    def __str__(self):
+        return self.title

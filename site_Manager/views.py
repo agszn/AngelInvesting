@@ -1400,3 +1400,230 @@ def stock_model_overview(request):
         'stocks': stocks,
         'selected_stock_id': int(selected_stock_id) if selected_stock_id else None
     })
+
+
+# app/views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse, reverse_lazy
+from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date
+from django.contrib.auth.decorators import login_required
+
+from .forms import StockHistoryForm
+
+from datetime import datetime
+from datetime import datetime
+from django.db.models import Count
+
+# app/views.py
+from datetime import datetime
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.db.models import F, Count, Window
+
+
+@login_required
+def stockhistory_list(request, stock_id=None):
+    # Always show latest updated/added first
+    qs = StockHistory.objects.select_related("stock").order_by("-updated_at", "-id")
+
+    # Filters
+    stock_id = stock_id or request.GET.get("stock_id")
+    date_exact = request.GET.get("date")
+    q = request.GET.get("q")
+
+    if stock_id:
+        qs = qs.filter(stock_id=stock_id)
+
+    if date_exact:
+        try:
+            qs = qs.filter(timestamp=datetime.strptime(date_exact, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+    if q:
+        qs = qs.filter(stock__company_name__icontains=q)
+
+    # Annotate duplicate count (same stock + date)
+    qs = qs.annotate(
+        duplicate_count=Window(
+            expression=Count("id"),
+            partition_by=[F("stock_id"), F("timestamp")],
+        )
+    )
+
+    latest_entry = qs.first()
+
+    # Build grouped IDs
+    group_ids = {}
+    for row in qs.values("id", "stock_id", "timestamp"):
+        key = f"{row['stock_id']}|{row['timestamp']}"
+        group_ids.setdefault(key, []).append(row["id"])
+
+    # Pagination
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    # Attach group_ids to page items
+    for item in page_obj.object_list:
+        key = f"{item.stock_id}|{item.timestamp}"
+        ids_list = group_ids.get(key, [])
+        item.group_ids = sorted(ids_list, reverse=True)
+        item.group_ids_str = ", ".join(str(i) for i in item.group_ids)
+
+    params = request.GET.copy()
+    params.pop("page", None)
+    querystring = params.urlencode()
+
+    current_stock = StockData.objects.filter(id=stock_id).first() if stock_id else None
+
+    return render(request, "stockhistory/history_list.html", {
+        "histories": page_obj,
+        "all_stocks": StockData.objects.all(),
+        "current_stock": current_stock,
+        "is_paginated": page_obj.has_other_pages(),
+        "page_obj": page_obj,
+        "querystring": querystring,
+        "latest_entry": latest_entry,
+    })
+
+
+
+@login_required
+def stockhistory_detail(request, pk):
+    history = get_object_or_404(StockHistory, pk=pk)
+    return render(request, "stockhistory/history_detail.html", {"history": history})
+
+
+@login_required
+def stockhistory_create(request, stock_id=None):
+    if request.method == "POST":
+        form = StockHistoryForm(request.POST)
+        if form.is_valid():
+            history = form.save()
+            return redirect("SM_User:Historylist")
+    else:
+        initial = {}
+        if stock_id:
+            initial["stock"] = get_object_or_404(StockData, id=stock_id)
+        form = StockHistoryForm(initial=initial)
+
+    return render(request, "stockhistory/history_form.html", {"form": form})
+
+
+@login_required
+def stockhistory_update(request, pk):
+    history = get_object_or_404(StockHistory, pk=pk)
+    if request.method == "POST":
+        form = StockHistoryForm(request.POST, instance=history)
+        if form.is_valid():
+            form.save()
+            return redirect("SM_User:Historydetail", pk=history.pk)
+    else:
+        form = StockHistoryForm(instance=history)
+
+    return render(request, "stockhistory/history_form.html", {"form": form})
+
+
+@login_required
+def stockhistory_delete(request, pk):
+    history = get_object_or_404(StockHistory, pk=pk)
+    if request.method == "POST":
+        stock_id = history.stock_id
+        history.delete()
+        if stock_id:
+            return redirect("SM_User:Historylist")
+        return redirect("SM_User:Historylist")
+
+    return render(request, "stockhistory/history_confirm_delete.html", {"object": history})
+
+
+
+
+# CRUD Events 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Event
+from .forms import EventForm
+
+# List all visible events
+def event_list(request):
+    events = Event.objects.filter(show=True).order_by("-date_time")
+    return render(request, "events/event_list.html", {"events": events})
+
+# Single event detail
+def event_detail(request, pk):
+    event = get_object_or_404(Event, pk=pk, show=True)
+    return render(request, "events/event_detail.html", {"event": event})
+
+# Create event
+@login_required
+def event_create(request):
+    if request.method == "POST":
+        form = EventForm(request.POST, request.FILES)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.user = request.user
+            event.save()
+            return redirect("SM_User:event_list")
+    else:
+        form = EventForm()
+    return render(request, "events/event_form.html", {"form": form, "title": "Create Event"})
+
+# Update event
+@login_required
+def event_update(request, pk):
+    event = get_object_or_404(Event, pk=pk, user=request.user)
+    if request.method == "POST":
+        form = EventForm(request.POST, request.FILES, instance=event)
+        if form.is_valid():
+            form.save()
+            return redirect("SM_User:event_detail", pk=pk)
+    else:
+        form = EventForm(instance=event)
+    return render(request, "events/event_form.html", {"form": form, "title": "Update Event"})
+
+# Delete event
+@login_required
+def event_delete(request, pk):
+    event = get_object_or_404(Event, pk=pk, user=request.user)
+    if request.method == "POST":
+        event.delete()
+        return redirect("SM_User:event_list")
+    return render(request, "events/event_confirm_delete.html", {"event": event})
+
+# views.py
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
+import tempfile
+from .models import Event  # update model import
+# views.py
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
+import tempfile
+from .models import Event  # update model import
+
+# views.py
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.conf import settings
+from weasyprint import HTML
+from .models import Event  # adjust import if needed
+
+def event_pdf(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    ctx = {
+        "event": event,
+        "image_abs_url": request.build_absolute_uri(event.image.url) if event.image else None,
+    }
+    html_string = render_to_string("events/event_pdf_template.html", ctx)
+    pdf_bytes = HTML(string=html_string, base_url=request.build_absolute_uri("/")).write_pdf()
+    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
+    resp["Content-Disposition"] = f'attachment; filename="event_{event.pk}.pdf"'
+    return resp
+

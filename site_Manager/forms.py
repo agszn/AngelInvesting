@@ -199,3 +199,56 @@ class BlogForm(forms.ModelForm):
         super(BlogForm, self).__init__(*args, **kwargs)
         if self.instance and self.instance.date:
             self.fields['date'].initial = self.instance.date.strftime('%Y-%m-%d')
+
+
+# stock history
+# app/forms.py
+
+class StockHistoryForm(forms.ModelForm):
+    class Meta:
+        model = StockHistory
+        fields = ["stock", "price", "timestamp"]
+        widgets = {
+            "timestamp": forms.DateInput(attrs={"type": "date"}),
+        }
+
+# events forms
+from django import forms
+from .models import Event
+
+from django import forms
+from .models import Event
+
+from django import forms
+from .models import Event
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ["title", "subtitle", "paragraph", "date_time", "image", "show"]
+
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter event title"
+            }),
+            "subtitle": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter event subtitle"
+            }),
+            "paragraph": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 5,
+                "placeholder": "Enter event details"
+            }),
+            "date_time": forms.DateTimeInput(attrs={
+                "class": "form-control",
+                "type": "datetime-local"
+            }),
+            "image": forms.ClearableFileInput(attrs={
+                "class": "form-control"
+            }),
+            "show": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+        }

@@ -1,0 +1,21 @@
+{% extends "baseStructureSM.html" %}
+{% block title %}Delete History Entry{% endblock %}
+{% block subtitle %}Delete History Entry{% endblock %}
+
+{% block SMprofile_content %}
+<div class="container mt-4">
+  <h1 class="h4 mb-3">Delete History Entry</h1>
+
+  <div class="alert alert-warning">
+    Are you sure you want to delete: <strong>{{ object }}</strong>?
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-danger">Yes, delete</button>
+      <a class="btn btn-light" href="{% url 'SM_User:Historydetail' object.pk %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

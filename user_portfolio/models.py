@@ -59,7 +59,7 @@ class BuyTransaction(models.Model):
     order_type = models.CharField(max_length=10, choices=(('market', 'Market'), ('limit', 'Limit')))
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
-    
+    updated_at = models.DateTimeField(auto_now=True)
     RM_status = models.CharField(max_length=15, choices=RM_STATUS_LABELS, default='processing')
     RMApproved = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
@@ -135,7 +135,7 @@ class BuyTransactionOtherAdvisor(models.Model):
     order_type = models.CharField(max_length=10, choices=(('market', 'Market'), ('limit', 'Limit')))
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
-
+    updated_at = models.DateTimeField(auto_now=True)
     # Optional: keep status if you still want transaction tracking
     status = models.CharField(max_length=15, choices=ST_STATUS_LABELS, default='completed')
     # in user_portfolio/models.py -> class BuyTransactionOtherAdvisor
@@ -217,7 +217,7 @@ class SellTransaction(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True)
     quantity = models.PositiveIntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
-
+    updated_at = models.DateTimeField(auto_now=True)
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
 
@@ -278,7 +278,7 @@ class SellTransactionOtherAdvisor(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True)
     quantity = models.PositiveIntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
-
+    updated_at = models.DateTimeField(auto_now=True)
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
 

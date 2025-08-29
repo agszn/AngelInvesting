@@ -5,6 +5,7 @@ from django.contrib.auth import views as auth_views
 
 from django.conf import settings
 from django.conf.urls.static import static
+from RM_User.views import AllbuyTransactionSummary, AllsellTransactionSummary
 
 app_name = 'ST_User'
 
@@ -35,6 +36,10 @@ urlpatterns = [
         path('edit-sell-st-status/<int:transaction_id>/', edit_sell_transaction_st_status, name='edit_sell_transaction_st_status'),
 
         path('ReportsST/', ReportsST, name='ReportsST'),
+        
+        path('AllbuyTransactionSummaryST/', AllbuyTransactionSummary, name='AllbuyTransactionSummaryST'),
+        
+        path('AllsellTransactionSummaryST/', AllsellTransactionSummary, name='AllsellTransactionSummaryST'),
     ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

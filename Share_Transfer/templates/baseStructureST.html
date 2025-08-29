@@ -184,11 +184,18 @@
                     <div class="sitemange-lists-sidebar">
                         <a href="{% url 'ST_User:buyDealLetterrST' %}">Buy Deal Letter</a>
                     </div>
+
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'ST_User:AllbuyTransactionSummaryST' %}">Buy Transaction</a>
+                    </div>
                     <div class="sitemange-lists-sidebar">
                         <a href="{% url 'ST_User:sellorderST' %}">Sell Orders</a>
                     </div>
                     <div class="sitemange-lists-sidebar">
                         <a href="{% url 'ST_User:sellDealLetterrST' %}">Sell Deal Letter</a>
+                    </div>
+                    <div class="sitemange-lists-sidebar">
+                        <a href="{% url 'ST_User:AllsellTransactionSummaryST' %}">Sell Transaction</a>
                     </div>
                     <div class="sitemange-lists-sidebar">
                         <a class="nav-link" href="{% url 'ST_User:ReportsST' %}">Report</a>
@@ -237,6 +244,11 @@
                     <div class="RMtable-head">
                         <div class="RMheading">
                             <h3>{% block STsubtitle %}{% endblock %}</h3>
+                        </div>
+                        <div class="STsearch-bar">
+                            {% block STSearch_content %}
+
+                            {% endblock %}
                         </div>
                         {% if messages %}
                             <div class="messages">

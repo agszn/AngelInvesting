@@ -56,6 +56,8 @@ urlpatterns = [
 
 
 
+
+
         # View grouped stock + model overview
         path('custom-values/', stock_model_overview, name='custom_value_list'),
 
@@ -72,6 +74,36 @@ urlpatterns = [
         
         path('custom-values/reorder/', reorder_custom_values, name='reorder_custom_values'),
 
+
+
+
+
+
+
+
+
+
+
+
+        # history start 
+        path("history/", stockhistory_list, name="Historylist"),
+        path("history/new/", stockhistory_create, name="Historycreate"),
+        path("stocks/<int:stock_id>/history/", stockhistory_list, name="Historylist_by_stock"),
+        path("stocks/<int:stock_id>/history/new/", stockhistory_create, name="Historycreate_for_stock"),
+
+        path("history/<int:pk>/", stockhistory_detail, name="Historydetail"),
+        path("history/<int:pk>/edit/", stockhistory_update, name="Historyupdate"),
+        path("history/<int:pk>/delete/", stockhistory_delete, name="Historydelete"),
+        
+
+        # Events
+        path("event_list/", event_list, name="event_list"),
+        path("<int:pk>/", event_detail, name="event_detail"),
+        path("create/", event_create, name="event_create"),
+        path("<int:pk>/update/", event_update, name="event_update"),
+        path("<int:pk>/delete/", event_delete, name="event_delete"),
+        
+        path("events/<int:pk>/download/", event_pdf, name="event_pdf"),
 
     ]
 

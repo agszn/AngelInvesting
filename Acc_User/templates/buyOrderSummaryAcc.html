@@ -163,12 +163,12 @@
                                 </select>
                               <!-- Transaction Date -->
                             <td>
-                            <input type="date"
-                                    name="payment_transaction_date"
-                                    value="{{ payment.payment_transaction_date|date:'Y-m-d' }}"
-                                    class="form-control form-control-sm mt-1"
-                                    {% if payment.AC_Payment_Status != 'partial' and payment.AC_Payment_Status != 'approved' %}disabled{% endif %}
-                                    onchange="this.form.submit()">
+                            <input type="datetime-local"
+                                name="payment_transaction_date"
+                                value="{{ payment.payment_transaction_date|date:'Y-m-d\\TH:i' }}"
+                                class="form-control form-control-sm mt-1"
+                                {% if payment.AC_Payment_Status != 'partial' and payment.AC_Payment_Status != 'approved' %}disabled{% endif %}
+                                onchange="this.form.submit()">
                             </td>
 
                             <!-- Transaction ID -->

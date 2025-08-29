@@ -1,6 +1,7 @@
 {% extends "baseStructureRM.html" %}
-{% block title %}Buy Order List{% endblock %}
+{% load dict_extras %} {# for payments_by_order|get_item:key #}
 
+{% block title %}Buy Order List{% endblock %}
 {% block SubTitleRM %}Relationship Manager - Buy Order List{% endblock %}
 
 {% block RMprofile_content %}
@@ -8,47 +9,118 @@
 <div class="SMtable-scroll-container">
   <table class="user-portfolio-toptable1">
     <thead class="user-portfolio-head-admin">
-            <tr>
-                <th>Sl.no</th>
-                <th>Order ID</th>
-                <th>Client ID</th>
-                <th>Client Name</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Stock</th>
-                <th>Quantity</th>
-                <th>RM Status</th>
-                <th>Acc Status</th>
-                <th>ST Status</th>
-                <th>Stock Details</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in buy_orders %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ order.order_id }}</td>
-                <td>{{ order.user.profile.custom_user_id }}</td>
-                <td>{{ order.user.profile.user.username }}</td>
-                <td>{{ order.timestamp|date:"d-m-Y" }}</td>
-                <td>{{ order.timestamp|time:"h:i A" }}</td>
-                <td>{{ order.stock }}</td>
-                <td>{{ order.quantity }}</td>
-                <td>{{ order.RM_status }}</td>
-                <td>{{ order.AC_status }}</td>
-                <td>{{ order.status }}</td>
-                <td>
-                <a class="view" href="{% url 'RM_User:buyordersummery' order.order_id %}">view</a>
-                </td>
+      <tr>
+        <th>Sl.no</th>
+        <th>Order ID</th>
+        <th>Client ID</th>
+        <th>Client Name</th>
+        <th>Date</th>
+        <th>Time</th>
+        <!-- <th>Last Activity</th>   {# CHANGED from Last Updated #} -->
+        <th>Stock</th>
+        <th>Quantity</th>
+        <th>Total</th>
+        <th>RM Status</th>
+        <th>Acc Status</th>
+        <th>ST Status</th>
+        <th>Payments</th>
+        <th>Stock Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in buy_orders %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ order.order_id }}</td>
+        <td>{{ order.user.profile.custom_user_id }}</td>
+        <td>{{ order.user.profile.user.username }}</td>
+        <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+        <td>{{ order.timestamp|time:"h:i A" }}</td>
 
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7">No buy orders found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <!-- {# NEW: show latest payment time if exists, else updated_at #}
+        <td>
+          {% if order.latest_payment_at %}
+            {{ order.latest_payment_at|date:"d-m-Y h:i A" }}
+          {% else %}
+            {{ order.updated_at|date:"d-m-Y h:i A" }}
+          {% endif %}
+        </td> -->
+
+        <td>{{ order.stock }}</td>
+        <td>{{ order.quantity }}</td>
+        <td>{{ order.total_amount }}</td>
+        <td>{{ order.get_RM_status_display|default:order.RM_status }}</td>
+        <td>{{ order.get_AC_status_display|default:order.AC_status }}</td>
+        <td>{{ order.get_status_display|default:order.status }}</td>
+
+        <td style="min-width: 380px;">
+          {% with stats=payment_stats_by_order|get_item:order.order_id payments=payments_by_order|get_item:order.order_id %}
+            {% if stats %}
+              <div style="margin-bottom:4px;">
+                <strong>Count:</strong> {{ stats.count }} |
+                <strong>Total Paid:</strong> {{ stats.total_paid }} |
+                <strong>Remaining:</strong> {{ stats.latest_remaining|default:"-" }} |
+                <strong>Last:</strong>
+                {% if stats.last_payment_date %}
+                  {{ stats.last_payment_date|date:"d-m-Y" }} {{ stats.last_payment_time|time:"h:i A" }}
+                {% else %}-{% endif %}
+              </div>
+            {% endif %}
+
+            {% if payments %}
+              <div class="table-responsive">
+                <table class="table table-sm table-bordered" style="font-size:12px; margin-top:4px;">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Bank</th>
+                      <th>Amount</th>
+                      <th>Remaining</th>
+                      <th>RM</th>
+                      <th>AC</th>
+                      <th>Txn ID</th>
+                      <th>SS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for p in payments %}
+                      <tr>
+                        <td>{{ p.date|date:"d-m-Y" }}</td>
+                        <td>{{ p.time|time:"h:i A" }}</td>
+                        <td>{{ p.bank_name }}</td>
+                        <td>{{ p.amount }}</td>
+                        <td>{{ p.remaining_amount }}</td>
+                        <td>{{ p.payment_status }}</td>
+                        <td>{{ p.AC_Payment_Status }}</td>
+                        <td>{{ p.payment_transaction_id|default:"-" }}</td>
+                        <td>
+                          {% if p.screenshot %}
+                            <a href="{{ p.screenshot.url }}" target="_blank">View</a>
+                          {% else %}-{% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <em>No Payments</em>
+            {% endif %}
+          {% endwith %}
+        </td>
+
+        <td>
+          <a class="view" href="{% url 'RM_User:buyordersummery' order.order_id %}">view</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="15" class="text-center">No buy orders found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 </div>
 {% endblock %}

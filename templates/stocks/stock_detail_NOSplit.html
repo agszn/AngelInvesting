@@ -308,7 +308,7 @@
 <div class="stock-page-header-1">
   <div class="header-content-details">
     <!-- stock data buy sell wishlist left options start -->
-    <div class="header-details-left">
+    <div class="header-details-left" style="margin-left: 20px;">
         <div class="header-details-logo-left">
             {% if stock.logo %}
                 <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo-1">
@@ -344,7 +344,9 @@
     </div>
     <!-- stock data buy sell wishlist left options end -->
     <!-- stock data price LEP left options start -->
-    <div class="header-details-right">
+
+
+    <!-- <div class="header-details-right">
       <h2>{{ stock.company_name }}</h2>
       <p><strong>Price:</strong> ₹{{ stock.share_price }}</p>
       <p><strong>Last Entry Price:</strong> ₹{{ stock.ltp }}</p>
@@ -365,7 +367,38 @@
           </p>
         {% endif %}
 
+    </div> -->
+
+
+    <div class="header-details-right" style="background: linear-gradient(to right, #0a2342, #36144b); padding: 20px; border-radius: 10px; color: white; font-family: 'Georgia', serif;">
+      <h1 style="font-size: 36px; font-weight: bold; margin-bottom: 10px;">
+        {{ stock.company_name }} 
+      </h1>
+
+      <p style="color: gold; font-size: 20px; font-weight: bold; margin-bottom: 0;">
+        Last Traded Price
+      </p>
+
+      <p style="font-size: 32px; margin: 5px 0;">
+        ₹{{ stock.share_price|floatformat:2 }}
+        {% if stock.profit > 0 %}
+          <span style="color: #00ff00; font-weight: bold;">
+            ( + {{ stock.profit_percentage|floatformat:2 }} % )
+          </span>
+          <span style="font-size: 24px;">⭐ ⭐</span>
+        {% elif stock.profit < 0 %}
+          <span style="color: #ff4c4c; font-weight: bold;">
+           ( {{ stock.profit_percentage|floatformat:2 }} % )
+          </span>
+          <span style="font-size: 24px;">🔻</span>
+        {% else %}
+          <span style="color: #ffffff;">
+           ( 0.00 % )
+          </span>
+        {% endif %}
+      </p>
     </div>
+
     <!-- stock data price LEP left options end -->
   </div>
 </div>
@@ -380,11 +413,11 @@
         <p>{{ stock.company_name }}</p>
         <hr />
       </div>
-      <div class="stock-info-block">
+      <!-- <div class="stock-info-block">
         <h3>Script Name</h3>
         <p>{{stock.scrip_name}}</p>
         <hr/>
-      </div>
+      </div> -->
       <div class="stock-info-block">
         <h3>ISIN No.</h3>
         <p>{{stock.isin_no}}</p>
@@ -421,8 +454,9 @@
         <hr />
       </div>
       <div class="stock-info-block">
-        <h3>Market Capitalization</h3>
-        <p>₹{{ stock.market_capitalization }} Crore</p>
+        <h3>Market Capitalization (in Cr)</h3>
+        <p>₹{{ stock.market_capitalization }}</p>
+        <!-- <p>₹{{ stock.outstanding_shares }} * {{ stock.ltp }} Crore</p> -->
         <hr />
       </div>
       <div class="stock-info-block">
@@ -435,36 +469,36 @@
         <p>{{stock.pbv}}</p>
         <hr />
       </div>
-      <div class="stock-info-block">
+      <!-- <div class="stock-info-block">
         <h3>52 Week High</h3>
         <p>₹{{ stock.week_52_high }}</p>
         <hr />
-      </div>
-      <div class="stock-info-block">
+      </div> -->
+      <!-- <div class="stock-info-block">
         <h3>Lifetime High</h3>
         <p>₹{{ stock.lifetime_high }} {{ stock.lifetime_high_date }}</p>
         <hr />
-      </div>
-      <div class="stock-info-block">
+      </div> -->
+      <!-- <div class="stock-info-block">
         <h3>Day High</h3>
         <p>₹ {{stock.day_high}}</p>
         <hr />
-      </div>
-      <div class="stock-info-block">
+      </div> -->
+      <!-- <div class="stock-info-block">
         <h3>52 Week Low</h3>
         <p>₹{{ stock.week_52_low }}</p>
         <hr />
-      </div>
-      <div class="stock-info-block">
+      </div> -->
+      <!-- <div class="stock-info-block">
         <h3>Lifetime Low</h3>
         <p>₹{{ stock.lifetime_low }} {{ stock.lifetime_low_date }}</p>
         <hr />
-      </div>
-      <div class="stock-info-block">
+      </div> -->
+      <!-- <div class="stock-info-block">
         <h3>Day Low</h3>
         <p>₹ {{stock.day_low}}</p>
         <hr />
-      </div>
+      </div> -->
       <div class="stock-info-block">
         <h3>DRHP Filed?</h3>
         <p>{% if stock.drhp_filed %}
@@ -479,7 +513,7 @@
         <p>{{stock.available_on}}</p>
         <hr />
       </div>
-      <div class="stock-info-block">
+      <!-- <div class="stock-info-block">
         <h3>ROFR Require</h3>
         <p>{% if stock.rofr_require %}
               Yes
@@ -488,7 +522,7 @@
           {% endif %}
         </p>
         <hr />
-      </div>
+      </div> -->
       <div class="stock-info-block">
         <h3>Sector</h3>
         <p>{{stock.sector}}</p>
@@ -511,144 +545,149 @@
 
 <!-- part 3 start -->
 <!-- stock data graph start -->
-  <section>
-    <div class="hero-headers">
-      <h1 class="heading">Stock <span class="highlight">Performance</span></h1>
+<section>
+  <div class="hero-headers">
+    <h1 class="heading">Stock <span class="highlight">Performance</span></h1>
+  </div>
+  <div class="chart-wrapper">
+    <div class="filter-buttons">
+      <button class="filter-btn" data-range="7">1W</button>
+      <button class="filter-btn" data-range="30">1M</button>
+      <button class="filter-btn" data-range="90">3M</button>
+      <button class="filter-btn active" data-range="180">6M</button>
+      <button class="filter-btn" data-range="365">1Y</button>
+      <button class="filter-btn" data-range="730">2Y</button>
+      <button class="filter-btn" data-range="1095">3Y</button>
+      <button class="filter-btn" data-range="1825">5Y</button>
+      <button class="filter-btn" data-range="MAX" style="margin-right :10px ;">MAX</button>
     </div>
-    <div class="chart-wrapper">
-        <div class="filter-buttons">
-            <button class="filter-btn" data-range="7">1W</button>
-            <button class="filter-btn" data-range="30">1M</button>
-            <button class="filter-btn" data-range="90">3M</button>
-            <button class="filter-btn active" data-range="180">6M</button>
-            <button class="filter-btn" data-range="365">1Y</button>
-            <button class="filter-btn" data-range="730">2Y</button>
-            <button class="filter-btn" data-range="1095">3Y</button>
-            <button class="filter-btn" data-range="1825">5Y</button>
-            <button class="filter-btn" data-range="MAX" style="margin-right :10px ;">MAX</button>
-        </div>
 
-        <!-- Chart Container -->
-        <div class="chart-container">
-            <h3>Stock Price Over Time</h3>
-            <canvas id="stockPriceChart"></canvas>
-        </div>
+    <!-- Chart Container -->
+    <div class="chart-container">
+      <h3>Stock Price Over Time</h3>
+      <canvas id="stockPriceChart" class="canvasDetails"></canvas>
     </div>
-    <!-- Chart.js Script -->
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    const stockDates = JSON.parse('{{ stock_dates|safe }}');
-                    const stockPrices = JSON.parse('{{ stock_prices|safe }}').map(price => parseFloat(price));
-                    const parsedDates = stockDates.map(date => new Date(date));
+  </div>
 
-                    const ctx = document.getElementById('stockPriceChart').getContext('2d');
+  <!-- Chart.js Script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const stockDates = JSON.parse('{{ stock_dates|safe }}'); // e.g. ["2025-01-01","2025-02-01"]
+      const stockPrices = JSON.parse('{{ stock_prices|safe }}').map(price => parseFloat(price));
+      const parsedDates = stockDates.map(date => new Date(date));
 
-                    function getDateBefore(days) {
-                        const d = new Date();
-                        d.setDate(d.getDate() - days);
-                        return d;
-                    }
+      const ctx = document.getElementById('stockPriceChart').getContext('2d');
 
-                    function filterData(range) {
-                        if (range === "MAX") {
-                            return { labels: stockDates, data: stockPrices };
-                        }
+      function getDateBefore(days) {
+        const d = new Date();
+        d.setDate(d.getDate() - days);
+        return d;
+      }
 
-                        const days = parseInt(range);
-                        if (!isNaN(days)) {
-                            const startDate = getDateBefore(days);
-                            const endDate = new Date();
-                            const filteredDates = [];
-                            const filteredPrices = [];
+      function filterData(range) {
+        if (range === "MAX") {
+          return { labels: parsedDates, data: stockPrices };
+        }
 
-                            for (let i = 0; i < parsedDates.length; i++) {
-                                if (parsedDates[i] >= startDate && parsedDates[i] <= endDate) {
-                                    filteredDates.push(stockDates[i]);
-                                    filteredPrices.push(stockPrices[i]);
-                                }
-                            }
+        const days = parseInt(range);
+        if (!isNaN(days)) {
+          const startDate = getDateBefore(days);
+          const endDate = new Date();
+          const filteredDates = [];
+          const filteredPrices = [];
 
-                            return { labels: filteredDates, data: filteredPrices };
-                        }
+          for (let i = 0; i < parsedDates.length; i++) {
+            if (parsedDates[i] >= startDate && parsedDates[i] <= endDate) {
+              filteredDates.push(parsedDates[i]);
+              filteredPrices.push(stockPrices[i]);
+            }
+          }
 
-                        return { labels: stockDates, data: stockPrices }; // fallback
-                    }
+          return { labels: filteredDates, data: filteredPrices };
+        }
 
-                    // 👉 Default to 6 months (180 days)
-                    const defaultRange = 180;
-                    const { labels: defaultLabels, data: defaultData } = filterData(defaultRange);
+        return { labels: parsedDates, data: stockPrices }; // fallback
+      }
 
-                    let stockChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: defaultLabels,
-                            datasets: [{
-                                label: 'Stock Price',
-                                data: defaultData,
-                                borderColor: 'yellow',
-                                backgroundColor: 'rgba(255, 255, 0, 0.2)',
-                                borderWidth: 2,
-                                pointRadius: 4,
-                                pointBackgroundColor: 'yellow'
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            interaction: {
-                                mode: 'index',
-                                intersect: false
-                            },
-                            scales: {
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Dates',
-                                        color: 'white'
-                                    },
-                                    ticks: { color: 'white' }
-                                },
-                                y: {
-                                    title: {
-                                        display: true,
-                                        text: 'Stock Price',
-                                        color: 'white'
-                                    },
-                                    ticks: { color: 'white' }
-                                }
-                            },
-                            plugins: {
-                                legend: {
-                                    labels: { color: 'white' }
-                                },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false
-                                }
-                            }
-                        }
-                    });
+      // 👉 Default to 6 months (180 days)
+      const defaultRange = 180;
+      const { labels: defaultLabels, data: defaultData } = filterData(defaultRange);
 
-                    // Add click listeners for range filters
-                    document.querySelectorAll(".filter-btn").forEach(button => {
-                        button.addEventListener("click", function () {
-                            const range = this.getAttribute("data-range");
-                            const { labels, data } = filterData(range);
-                            stockChart.data.labels = labels;
-                            stockChart.data.datasets[0].data = data;
-                            stockChart.update();
-                        });
-                    });
-                });
-            </script>
+      let stockChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: defaultLabels,
+          datasets: [{
+            label: 'Stock Price',
+            data: defaultData,
+            borderColor: 'yellow',
+            backgroundColor: 'rgba(255, 255, 0, 0.2)',
+            borderWidth: 2,
+            pointRadius: 4,
+            pointBackgroundColor: 'yellow'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            x: {
+              type: 'time',   // ✅ use time scale
+              time: {
+                unit: 'month',
+                tooltipFormat: 'MMM dd, yyyy',
+                displayFormats: {
+                  month: 'MMM yyyy' // ✅ only show Month + Year
+                }
+              },
+              title: {
+                display: true,
+                text: 'Month & Year',
+                color: 'white'
+              },
+              ticks: { color: 'white' }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Stock Price',
+                color: 'white'
+              },
+              ticks: { color: 'white' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: 'white' }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          }
+        }
+      });
 
-            <!-- Chart.js Line Chart End -->
+      // Add click listeners for range filters
+      document.querySelectorAll(".filter-btn").forEach(button => {
+        button.addEventListener("click", function () {
+          const range = this.getAttribute("data-range");
+          const { labels, data } = filterData(range);
+          stockChart.data.labels = labels;
+          stockChart.data.datasets[0].data = data;
+          stockChart.update();
+        });
+      });
+    });
+  </script>
+</section>
 
-
-            <!-- Chart.js Script End-->
-            <!-- Chart.js Line Chart End -->
-  </section>
 <!-- stock data graph end -->
 <!-- part 3 end -->
 
@@ -677,7 +716,7 @@
     {% if reports %}
     <div class="stock-overview-text">
       {% for report in reports %}
-        <h2>{{ report.title }}</h2>
+        <!-- <h2>{{ report.title }}</h2> -->
         {{ report.summary|safe }}
       {% endfor %}
     </div>
@@ -924,149 +963,63 @@
     {% endwith %}
 </section>
 <!-- financial-ratios section end -->
+          <script>
+              function showSection(id) 
+              {
+                  const sections = document.querySelectorAll('.content-section');
+                  sections.forEach(sec => sec.style.display = 'none');
 
+                  const overview = document.getElementById('overview');
+                  if (id !== 'overview' && overview) {
+                    overview.style.display = 'none';
+                  }
+                  const target = document.getElementById(id);
+                  if (target) {
+                    target.style.display = 'block';
+                    window.scrollTo({
+                      // top: target.offsetTop - 50,
+                      behavior: 'smooth'
+                    });
+                  }
+              }
+          </script>
 <!-- part 4 end -->
 
-<!-- shareholder table start  -->
-<section class="stock-shareholding-section">
-    <!-- shareholder start  -->
-    <!-- 1 -->
-      {% load humanize %}
-      {% if shareholdings %}
-      <div class="stock-overview-text">
-        <h2>Shareholding Pattern for {{ stock.company_name }}</h2>
-      </div>
-      <div class="stock-overview-table">
-        <table>
-          <thead>
-            <tr style="background-color: #f2f2f2;">
-              <th>Shareholder</th>
-              <th>No. of Shares</th>
-              <th>% of Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for holder in shareholdings %}
-            <tr>
-              <td>{{ holder.shareholder_name }}</td>
-              <td>{{ holder.number_of_shares|intcomma }}</td>
-              <td>{{ holder.percentage_of_total|floatformat }}%</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-        <!--  else  -->
-      {% endif %}
-  <!-- 1 -->
-  <!-- shareholder end -->
-  <script>
-      function showSection(id) {
-          const sections = document.querySelectorAll('.content-section');
-          sections.forEach(sec => sec.style.display = 'none');
-          const target = document.getElementById(id);
-          if (target) {
-              target.style.display = 'block';
-              window.scrollTo({ top: target.offsetTop - 50, behavior: 'smooth' });
-          }
-      }
-  </script>
-</section>
-<!-- shareholder table end  -->
+  <!-- part 5 start -->
 
-        <main>
+        <!-- shareholder table start  -->
+        <!-- <section class="stock-shareholding-section">
+              {% load humanize %}
+              {% if shareholdings %}
+              <div class="stock-overview-text">
+                <h2>Shareholding Pattern for {{ stock.company_name }}</h2>
+              </div>
+              <div class="stock-overview-table">
+                <table>
+                  <thead>
+                    <tr style="background-color: #f2f2f2;">
+                      <th>Shareholder</th>
+                      <th>No. of Shares</th>
+                      <th>% of Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for holder in shareholdings %}
+                    <tr>
+                      <td>{{ holder.shareholder_name }}</td>
+                      <td>{{ holder.number_of_shares|intcomma }}</td>
+                      <td>{{ holder.percentage_of_total|floatformat }}%</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% endif %}
 
-            <!-- part 3 overview etc start -->
-            <main style="max-width: 1235px; margin: 0 auto; padding: 20px; font-family: &quot;Outfit&quot;, sans-serif;">
-                <!-- overview section start -->
-                    <!-- Internal CSS -->
-                    <!-- <style>
-                      .stock-overview-section {
-                        display: block;
-                        margin-bottom: 30px;
-                      } */
+        </section> -->
+        <!-- shareholder table end  -->
 
-                      .stock-overview-box {
-                        margin-bottom: 30px;
-                      }
-
-                      .stock-overview-text {
-                        font-size: 16px;
-                        color: #000;
-                        line-height: 1.4;
-                      } 
-
-                      .stock-report-list {
-                        list-style: none;
-                        padding: 0;
-                        margin: 0;
-                      }
-
-                      .stock-report-item {
-                        margin-bottom: 12px;
-                        padding: 12px;
-                        background-color: #f9f9f9;
-                        border-left: 4px solid #3498db;
-                      }
-
-                      .stock-report-title {
-                        display: block;
-                        color: #000;
-                        font-size: 20px;
-                        font-weight: 600;
-                        margin: 10px 0 12px;
-                        padding: 6px 0;
-                      }
-
-                      .stock-report-summary {
-                        font-size: 16px;
-                        color: #000;
-                        line-height: 1.4;
-                        margin-bottom: 10px;
-                      }
-
-                      .stock-report-subtitle {
-                        font-size: 18px;
-                        font-weight: 500;
-                        color: #000;
-                        margin: 8px 0 4px;
-                      }
-
-                      .stock-report-subsummary {
-                        font-size: 16px;
-                        color: #000;
-                        line-height: 1.4;
-                      }
-
-                      .stock-report-list h2 {
-                        font-size: 20px;
-                        font-weight: bold;
-                        margin-bottom: 8px;
-                      }
-
-                      .stock-report-list p {
-                        font-size: 16px;
-                        line-height: 1.5;
-                        margin-bottom: 6px;
-                      }
-
-                    </style> -->
-                    <!-- HTML Structure -->
-                    
-                <!-- overview section end -->
-                
-                
-                
-               
-
-                
-                <!-- part 3 overview etc end-->
-
-
-
-
-                <!-- part 4 start -->
-                  
+        <!-- <main style="max-width: 1235px; margin: 0 auto; padding: 20px; font-family: &quot;Outfit&quot;, sans-serif;"> -->
 
                   <!-- statrt principalBusinessActivity -->
                     <!-- {% if principalBusinessActivity %}
@@ -1130,37 +1083,75 @@
                         </table>
                     {% endif %} -->
                   <!-- company subsidary end -->
-                    <!-- start FAQ -->
-                      <!-- {% if faqs %}
-                        {% if faqs is not None %}
-                          <h2 style="
+
+                  <!-- shareholder start  -->
+                      <!-- {% load humanize %}
+                      {% if shareholdings %}
+                          <h2  style="
                           color: #000;
                           font-size: 22px;
                           font-weight: 600;
                           margin-bottom: 20px;
-                          margin-top: 20px;padding: 20px;">FAQs for {{ stock.company_name }}</h2>
-                          <ul style="list-style: none; padding: 0;">
-                            {% for faq in faqs %}
-                              <li style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #007acc;font-size: larger;">
-                                <strong style="color: #007acc;">Q:</strong>
-                                <span style="font-weight: bold;">{{ faq.question }}</span><br>
-                                <strong style="color: #28a745;">A:</strong>
-                                <span>{{ faq.answer }}</span>
-                              </li>
-                            {% endfor %}
-                          </ul>
-                        {% endif %}
+                          margin-top: 20px;padding: 20px;">
+                          Shareholding Pattern for {{ stock.company_name }}</h2>
+                          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                              <thead>
+                                  <tr style="background-color: #f2f2f2;">
+                                      <th style="text-align: left; padding: 10px; border: 1px solid #ccc;font-size: 18px;">Shareholder</th>
+                                      <th style="text-align: right; padding: 10px; border: 1px solid #ccc;font-size: 18px;">No. of Shares</th>
+                                      <th style="text-align: right; padding: 10px; border: 1px solid #ccc;font-size: 18px;">% of Total</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  {% for holder in shareholdings %}
+                                      <tr>
+                                          <td style="padding: 10px; border: 1px solid #ccc;font-size: 18px;">{{ holder.shareholder_name }}</td>
+                                          <td style="padding: 10px; text-align: right; border: 1px solid #ccc;font-size: 18px;">{{ holder.number_of_shares|intcomma }}</td>
+                                          <td style="padding: 10px; text-align: right; border: 1px solid #ccc;font-size: 18px;">{{ holder.percentage_of_total|floatformat }}%</td>
+                                      </tr>
+                                  {% endfor %}
+                              </tbody>
+                          </table>
                       {% endif %} -->
-                    <!-- End FAQ -->
-                </main>
-                <!-- part 4 end  -->
-                
-                <!-- most searched  start -->
-                <!-- a -->
-                  <!-- a -->
+                  <!-- shareholder end -->
+
+                      <!-- start FAQ -->
+                        <!-- {% if faqs %}
+                          {% if faqs is not None %}
+                            <h2 style="
+                            color: #000;
+                            font-size: 22px;
+                            font-weight: 600;
+                            margin-bottom: 20px;
+                            margin-top: 20px;padding: 20px;">FAQs for {{ stock.company_name }}</h2>
+                            <ul style="list-style: none; padding: 0;">
+                              {% for faq in faqs %}
+                                <li style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #007acc;font-size: larger;">
+                                  <strong style="color: #007acc;">Q:</strong>
+                                  <span style="font-weight: bold;">{{ faq.question }}</span><br>
+                                  <strong style="color: #28a745;">A:</strong>
+                                  <span>{{ faq.answer }}</span>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+                        {% endif %} -->
+                      <!-- End FAQ -->
+        <!-- </main> -->
+
+  <!-- part 5 end  -->   
+
+
+<!-- part 6 Start  -->  
+            <!-- most searched  start -->
+            <main>          
                 <div class="carousel-container-main">
                     <div class="carousel-title-main">
-                        Most Searched Unlisted &amp; Pre IPO Companies Stocks in India
+                        <span style="color: #000;"> Most Searched </span> <span style="color: #39B54A;">Unlisted</span>
+                        <span style="color: #000;">&amp; </span>
+                        <span style="color: #39B54A;">Pre IPO</span>
+                        <span style="color: #000;">Companies Stocks in India</span>
+  
                     </div>
                     <div class="carousel-content">
                         <div class="nav-arrow left" onclick="scrollLeftsroll()">
@@ -1172,12 +1163,30 @@
                         <div class="scroll-container-main" id="scrollContainer1">
                           {% for stock in all_stocks %}
                             <div class="company-card-main">
-                                <div class="logo-main">
+                                <!-- <div class="logo-main">
                                   {% if stock.logo %}
                                       <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo-main">
                                   {% endif %}
                                 </div>
-                                <div class="company-name-main">{{ stock.company_name }}</div>
+                                <div class="company-name-main">
+                                    {{ stock.company_name }}
+                                </div> -->
+                                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" 
+                                  style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
+                                  
+                                  <div style="width: 40px; height: 40px; flex-shrink: 0;">
+                                    {% if stock.logo %}
+                                      <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" 
+                                          style="width: 100%; height: 100%; object-fit: contain;">
+                                    {% endif %}
+                                  </div>
+                                  
+                                  <div style="font-weight: 600; font-size: 1rem;">
+                                    {{ stock.company_name }}
+                                  </div>
+                                  
+                                </a>
+
                                 <div class="company-sector-main"><span>Sector:</span>&nbsp;&nbsp;{{stock.sector}}</div>
                                 <div class="company-ltp-main">
                                   <span>LTP:</span>
@@ -1231,6 +1240,9 @@
                     </div>
                 </div>
             </main>
+          <!-- most searched  start -->
+<!-- part 6 Start  -->            
+
     <!-- js for most searched start -->
     <script>
           function getVisibleCards() {

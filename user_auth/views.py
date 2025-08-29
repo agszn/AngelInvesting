@@ -137,12 +137,14 @@ def base(request):
     # Fetch latest 3 blogs
     latest_blogs = Blog.objects.all().order_by('-date', '-time')[:3]
 
+
     rms = CustomUser.objects.filter(user_type='RM', phone_number__isnull=False)
     
     return render(request, "base.html", {
         "stocks": stocks,
         "banner": banner,
         "latest_blogs": latest_blogs,
+
         'rms': rms
     })
 
@@ -294,38 +296,60 @@ from .forms import ForgotPasswordForm, OTPVerificationForm, ResetPasswordForm
 from django.utils import timezone
 import uuid
 
-# Forgot Password - Step 1
+# ---------- View ----------
 def forgot_password_view(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ForgotPasswordForm(request.POST)
         if form.is_valid():
-            value = form.cleaned_data['email_or_username']
-            user = CustomUser.objects.filter(email=value).first() or CustomUser.objects.filter(username=value).first()
-            if user:
-                user.otp = str(uuid.uuid4().int)[:6]
-                user.otp_created_at = timezone.now()
-                user.save()
+            parsed = form.cleaned_data["email_or_phone"]
 
-                # Send OTP to email
-                # send_mail(
-                #     'Verify Your Account',
-                #     f'Your OTP for verification is: {user.otp}',
-                #     settings.EMAIL_HOST_USER,
-                #     [user.email],
-                #     fail_silently=False,
-                # )
-                
-                # Send OTP via Twilio
-                send_otp(user, f'Your OTP for verification is: {user.otp}')
-                
-                messages.success(request, "An OTP has been sent to your Number.")
-                return redirect('verify_otp_reset', user_id=user.id)
+            if parsed["type"] == "email":
+                user = CustomUser.objects.filter(email__iexact=parsed["value"]).first()
+            else:  # phone
+                # Adjust field name to your model (e.g., 'phone', 'mobile', etc.)
+                user = CustomUser.objects.filter(phone_number=parsed["value"]).first()
+
+            if user:
+                # ✅ Generate and save OTP
+                user.otp = str(uuid.uuid4().int)[:6]
+
+                # Save fields safely
+                fields_to_update = ["otp"]
+                if hasattr(user, "otp_created_at"):  # only if model has it
+                    user.otp_created_at = timezone.now()
+                    fields_to_update.append("otp_created_at")
+
+                user.save(update_fields=fields_to_update)
+
+
+
+                # Send OTP via the chosen channel
+                if parsed["type"] == "email":
+                    send_mail(
+                        subject="Verify Your Account",
+                        message=f"Your OTP for verification is: {user.otp}",
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=[user.email],
+                        fail_silently=False,
+                    )
+                    messages.success(request, "An OTP has been sent to your email.")
+                else:
+                    # Reuse your existing Twilio helper; make sure it uses user.phone_number
+                    send_otp(user, f"Your OTP for verification is: {user.otp}")
+                    messages.success(request, "An OTP has been sent to your phone number.")
+
+                return redirect("verify_otp_reset", user_id=user.id)
             else:
-                form.add_error(None, "No user found with this email or username.")
+                # If you prefer not to reveal whether the account exists, replace with a generic message.
+                form.add_error(None, "No user found with this email or phone number.")
     else:
         form = ForgotPasswordForm()
 
-    return render(request, 'Authentication/ForgotPassword/forgot_password.html', {'form': form})
+    return render(
+        request,
+        "Authentication/ForgotPassword/forgot_password.html",
+        {"form": form},
+    )
 
 # OTP Verification - Step 2
 def verify_otp_for_reset_view(request, user_id):

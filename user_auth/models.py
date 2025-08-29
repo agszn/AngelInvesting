@@ -32,6 +32,7 @@ class CustomUser(AbstractUser):
     )
     email = models.EmailField(unique=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(null=True, blank=True)
     user_type = models.CharField(max_length=5, choices=USER_TYPE_CHOICES, default='DF')
 
     groups = models.ManyToManyField(

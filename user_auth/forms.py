@@ -232,9 +232,39 @@ class FAQForm(forms.ModelForm):
 # and the below is test and temporary updates
 # start - 02082025  => secure "Forgot Password" flow using OTP delivered via email.
 
-# ForgotPasswordForm
+import re
+from django import forms
+
+# ---------- Helpers ----------
+def is_valid_email(value: str) -> bool:
+    # Simple email check; you can also use Django's EmailValidator
+    return re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", value) is not None
+
+def normalize_phone(raw: str) -> str | None:
+    """
+    Strip spaces, dashes, parentheses; allow optional +; require 7–15 digits.
+    Returns normalized number or None if invalid.
+    """
+    s = re.sub(r"[()\s-]+", "", raw)
+    if re.fullmatch(r"\+?\d{7,15}", s):
+        return s
+    return None
+
+# ---------- Form ----------
 class ForgotPasswordForm(forms.Form):
-    email_or_username = forms.CharField(label="Email or Username", max_length=100)
+    email_or_phone = forms.CharField(label="Email or Phone Number", max_length=100)
+
+    def clean_email_or_phone(self):
+        value = self.cleaned_data["email_or_phone"].strip()
+
+        if is_valid_email(value):
+            return {"type": "email", "value": value.lower()}
+
+        phone = normalize_phone(value)
+        if phone:
+            return {"type": "phone", "value": phone}
+
+        raise forms
 
 # OTPVerificationForm
 class OTPVerificationForm(forms.Form):

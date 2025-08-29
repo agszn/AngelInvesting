@@ -1,10 +1,10 @@
 {% extends "baseStructureRM.html" %}
+{% load dict_extras %}
 {% block title %}Completed Orders - RM{% endblock %}
 {% block SubTitleRM %}Reports – Completed Buy & Sell Orders{% endblock %}
 
 {% block RMprofile_content %}
 
-<!-- Filter Form -->
 <!-- Filter Form -->
 <div class="user-portfolio-top">
     <form method="get" class="filter-form mb-4 d-flex flex-wrap gap-3 align-items-end">
@@ -12,13 +12,27 @@
             <label>Date:</label>
             <input type="date" name="date_filter" value="{{ date_filter|default_if_none:'' }}" class="form-control">
         </div>
+
         <div>
             <label>Order ID:</label>
-            <input type="text" name="order_id" value="{{ order_id|default_if_none:'' }}" class="form-control" placeholder="Search Order ID">
+            <select name="order_id" class="form-control" style="min-width:220px;">
+                <option value="">All</option>
+                {% for oid in order_id_options %}
+                    <option value="{{ oid }}" {% if order_id == oid %}selected{% endif %}>{{ oid }}</option>
+                {% endfor %}
+            </select>
         </div>
+
         <div>
             <label>Username:</label>
-            <input type="text" name="username" value="{{ username|default_if_none:'' }}" class="form-control" placeholder="Search Username">
+            <select name="username" class="form-control" style="min-width:240px;">
+                <option value="">All</option>
+                {% for u, fn in username_options %}
+                    <option value="{{ u }}" {% if username == u %}selected{% endif %}>
+                        {{ fn|default:u }} ({{ u }})
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
         <div>
@@ -28,10 +42,9 @@
     </form>
 </div>
 
-
 <!-- Completed Buy Orders -->
 <div class="SMtable-head">
-<h4 class="mt-4 mb-2">✅ Completed Buy Orders</h4>
+    <h4 class="mt-4 mb-2">✅ Completed Buy Orders</h4>
 
     <div class="SMtable-scroll-container">
         <table class="user-portfolio-toptable1">
@@ -43,6 +56,8 @@
                     <th>Customer Name</th>
                     <th>Date</th>
                     <th>Time</th>
+                    <th>Last Activity</th>
+                    <th>Payments</th>
                     <th>Stock</th>
                     <th>Quantity</th>
                     <th>RM Status</th>
@@ -60,6 +75,61 @@
                         <td>{{ order.user.profile.full_name }}</td>
                         <td>{{ order.timestamp|date:"d-m-Y" }}</td>
                         <td>{{ order.timestamp|time:"h:i A" }}</td>
+
+                        <td>
+                            {% if order.latest_payment_at %}
+                                {{ order.latest_payment_at|date:"d-m-Y h:i A" }}
+                            {% else %}
+                                {{ order.updated_at|date:"d-m-Y h:i A" }}
+                            {% endif %}
+                        </td>
+
+                        <td style="min-width:380px;">
+                            {% with stats=buy_payment_stats_by_order|get_item:order.order_id payments=buy_payments_by_order|get_item:order.order_id %}
+                                {% if stats %}
+                                    <div style="margin-bottom:4px;">
+                                        <strong>Count:</strong> {{ stats.count }} |
+                                        <strong>Total Paid:</strong> {{ stats.total_paid|default:"-" }} |
+                                        <strong>Remaining:</strong> {{ stats.latest_remaining|default:"-" }} |
+                                        <strong>Last:</strong>
+                                        {% if stats.last_payment_date %}
+                                            {{ stats.last_payment_date|date:"d-m-Y" }} {{ stats.last_payment_time|time:"h:i A" }}
+                                        {% else %}-{% endif %}
+                                    </div>
+                                {% endif %}
+
+                                {% if payments %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered" style="font-size:12px; margin-top:4px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th><th>Time</th><th>Bank</th><th>Amount</th>
+                                                    <th>Remaining</th><th>RM</th><th>AC</th><th>Txn ID</th><th>SS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for p in payments %}
+                                                    <tr>
+                                                        <td>{{ p.date|date:"d-m-Y" }}</td>
+                                                        <td>{{ p.time|time:"h:i A" }}</td>
+                                                        <td>{{ p.bank_name }}</td>
+                                                        <td>{{ p.amount|default:"-" }}</td>
+                                                        <td>{{ p.remaining_amount|default:"-" }}</td>
+                                                        <td>{{ p.payment_status }}</td>
+                                                        <td>{{ p.AC_Payment_Status }}</td>
+                                                        <td>{{ p.payment_transaction_id|default:"-" }}</td>
+                                                        <td>{% if p.screenshot %}<a href="{{ p.screenshot.url }}" target="_blank">View</a>{% else %}-{% endif %}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <em>No Payments</em>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+
                         <td>{{ order.stock }}</td>
                         <td>{{ order.quantity }}</td>
                         <td>{{ order.RM_status }}</td>
@@ -68,95 +138,151 @@
                         <td><a class="view" href="{% url 'RM_User:buyordersummery' order.order_id %}">View</a></td>
                     </tr>
                 {% empty %}
-                    <tr><td colspan="7">No completed buy orders found.</td></tr>
+                    <tr><td colspan="14">No completed buy orders found.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-<!-- Buy Order Pagination -->
-{% if buy_orders_ReportsRM.has_other_pages %}
-<nav class="mb-5 mt-4">
-    <ul class="pagination">
-        {% if buy_orders_ReportsRM.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?buy_page={{ buy_orders_ReportsRM.previous_page_number }}&sell_page={{ sell_orders_ReportsRM.number }}&from_date={{ from_date }}&to_date={{ to_date }}&order_id={{ order_id }}">«</a>
-        </li>
-        {% endif %}
-        {% for num in buy_orders_ReportsRM.paginator.page_range %}
-        <li class="page-item {% if buy_orders_ReportsRM.number == num %}active{% endif %}">
-            <a class="page-link" href="?buy_page={{ num }}&sell_page={{ sell_orders_ReportsRM.number }}&from_date={{ from_date }}&to_date={{ to_date }}&order_id={{ order_id }}">{{ num }}</a>
-        </li>
-        {% endfor %}
-        {% if buy_orders_ReportsRM.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?buy_page={{ buy_orders_ReportsRM.next_page_number }}&sell_page={{ sell_orders_ReportsRM.number }}&from_date={{ from_date }}&to_date={{ to_date }}&order_id={{ order_id }}">»</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
 
-<!-- Completed Sell Orders -->
-<h4 class="mt-4 mb-2">✅ Completed Sell Orders</h4>
-<div class="SMtable-scroll-container">
-    <table class="user-portfolio-toptable1">
-        <thead class="user-portfolio-head-admin">
-        <tr>
-            <th>Sl.no</th>
-            <th>Order ID</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Customer Name</th>
-            <th>Customer ID</th>
-            <th>RM Status</th>
-            <th>AM Status</th>
-            <th>ST Status</th>
-            <th>Stock Details</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for order in sell_orders_ReportsRM %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ order.order_id }}</td>
-                <td>{{ order.timestamp|date:"d-m-Y" }}</td>
-                <td>{{ order.timestamp|time:"h:i A" }}</td>
-                <td>{{ order.user.profile.full_name }}</td>
-                <td>{{ order.user.profile.custom_user_id }}</td>
-                <td>{{ order.RM_status }}</td>
-                <td>{{ order.AC_status }}</td>
-                <td>{{ order.status }}</td>
-                <td><a class="view" href="{% url 'RM_User:selldersummeryRM' order.order_id %}">View</a></td>
-            </tr>
-        {% empty %}
-            <tr><td colspan="7">No completed sell orders found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-</div>
-<!-- Sell Order Pagination -->
-{% if sell_orders_ReportsRM.has_other_pages %}
-<nav class="mt-4">
-    <ul class="pagination">
-        {% if sell_orders_ReportsRM.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?sell_page={{ sell_orders_ReportsRM.previous_page_number }}&buy_page={{ buy_orders_ReportsRM.number }}&from_date={{ from_date }}&to_date={{ to_date }}&order_id={{ order_id }}">«</a>
-        </li>
-        {% endif %}
-        {% for num in sell_orders_ReportsRM.paginator.page_range %}
-        <li class="page-item {% if sell_orders_ReportsRM.number == num %}active{% endif %}">
-            <a class="page-link" href="?sell_page={{ num }}&buy_page={{ buy_orders_ReportsRM.number }}&from_date={{ from_date }}&to_date={{ to_date }}&order_id={{ order_id }}">{{ num }}</a>
-        </li>
-        {% endfor %}
-        {% if sell_orders_ReportsRM.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?sell_page={{ sell_orders_ReportsRM.next_page_number }}&buy_page={{ buy_orders_ReportsRM.number }}&from_date={{ from_date }}&to_date={{ to_date }}&order_id={{ order_id }}">»</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-</div>
+    {% if buy_orders_ReportsRM.has_other_pages %}
+    <nav class="mb-5 mt-4">
+        <ul class="pagination">
+            {% if buy_orders_ReportsRM.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?buy_page={{ buy_orders_ReportsRM.previous_page_number }}&sell_page={{ sell_orders_ReportsRM.number }}&date_filter={{ date_filter }}&order_id={{ order_id }}&username={{ username }}">«</a>
+            </li>
+            {% endif %}
+            {% for num in buy_orders_ReportsRM.paginator.page_range %}
+            <li class="page-item {% if buy_orders_ReportsRM.number == num %}active{% endif %}">
+                <a class="page-link" href="?buy_page={{ num }}&sell_page={{ sell_orders_ReportsRM.number }}&date_filter={{ date_filter }}&order_id={{ order_id }}&username={{ username }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if buy_orders_ReportsRM.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?buy_page={{ buy_orders_ReportsRM.next_page_number }}&sell_page={{ sell_orders_ReportsRM.number }}&date_filter={{ date_filter }}&order_id={{ order_id }}&username={{ username }}">»</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 
-{% endif %}
+    <!-- Completed Sell Orders -->
+    <h4 class="mt-4 mb-2">✅ Completed Sell Orders</h4>
+    <div class="SMtable-scroll-container">
+        <table class="user-portfolio-toptable1">
+            <thead class="user-portfolio-head-admin">
+                <tr>
+                    <th>Sl.no</th>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Last Activity</th>
+                    <!-- <th>Payments</th> -->
+                    <th>Customer Name</th>
+                    <th>Customer ID</th>
+                    <th>RM Status</th>
+                    <th>AM Status</th>
+                    <th>ST Status</th>
+                    <th>Stock Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in sell_orders_ReportsRM %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ order.order_id }}</td>
+                        <td>{{ order.timestamp|date:"d-m-Y" }}</td>
+                        <td>{{ order.timestamp|time:"h:i A" }}</td>
+
+                        <td>
+                            {% if order.latest_payment_at %}
+                                {{ order.latest_payment_at|date:"d-m-Y h:i A" }}
+                            {% else %}
+                                {{ order.updated_at|date:"d-m-Y h:i A" }}
+                            {% endif %}
+                        </td>
+
+                        <!-- <td style="min-width:380px;">
+                            {% with stats=sell_payment_stats_by_order|get_item:order.order_id payments=sell_payments_by_order|get_item:order.order_id %}
+                                {% if stats %}
+                                    <div style="margin-bottom:4px;">
+                                        <strong>Count:</strong> {{ stats.count }} |
+                                        <strong>Total Paid:</strong> {{ stats.total_paid|default:"-" }} |
+                                        <strong>Remaining:</strong> {{ stats.latest_remaining|default:"-" }} |
+                                        <strong>Last:</strong>
+                                        {% if stats.last_payment_date %}
+                                            {{ stats.last_payment_date|date:"d-m-Y" }} {{ stats.last_payment_time|time:"h:i A" }}
+                                        {% else %}-{% endif %}
+                                    </div>
+                                {% endif %}
+
+                                {% if payments %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered" style="font-size:12px; margin-top:4px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th><th>Time</th><th>Bank</th><th>Amount</th>
+                                                    <th>Remaining</th><th>RM</th><th>AC</th><th>Txn ID</th><th>SS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for p in payments %}
+                                                    <tr>
+                                                        <td>{{ p.date|date:"d-m-Y" }}</td>
+                                                        <td>{{ p.time|time:"h:i A" }}</td>
+                                                        <td>{{ p.bank_name }}</td>
+                                                        <td>{{ p.amount|default:"-" }}</td>
+                                                        <td>{{ p.remaining_amount|default:"-" }}</td>
+                                                        <td>{{ p.payment_status }}</td>
+                                                        <td>{{ p.AC_Payment_Status }}</td>
+                                                        <td>{{ p.payment_transaction_id|default:"-" }}</td>
+                                                        <td>{% if p.screenshot %}<a href="{{ p.screenshot.url }}" target="_blank">View</a>{% else %}-{% endif %}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <em>No Payments</em>
+                                {% endif %}
+                            {% endwith %}
+                        </td> -->
+
+                        <td>{{ order.user.profile.full_name }}</td>
+                        <td>{{ order.user.profile.custom_user_id }}</td>
+                        <td>{{ order.RM_status }}</td>
+                        <td>{{ order.AC_status }}</td>
+                        <td>{{ order.status }}</td>
+                        <td><a class="view" href="{% url 'RM_User:selldersummeryRM' order.order_id %}">View</a></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="12">No completed sell orders found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if sell_orders_ReportsRM.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination">
+            {% if sell_orders_ReportsRM.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?sell_page={{ sell_orders_ReportsRM.previous_page_number }}&buy_page={{ buy_orders_ReportsRM.number }}&date_filter={{ date_filter }}&order_id={{ order_id }}&username={{ username }}">«</a>
+            </li>
+            {% endif %}
+            {% for num in sell_orders_ReportsRM.paginator.page_range %}
+            <li class="page-item {% if sell_orders_ReportsRM.number == num %}active{% endif %}">
+                <a class="page-link" href="?sell_page={{ num }}&buy_page={{ buy_orders_ReportsRM.number }}&date_filter={{ date_filter }}&order_id={{ order_id }}&username={{ username }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if sell_orders_ReportsRM.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?sell_page={{ sell_orders_ReportsRM.next_page_number }}&buy_page={{ buy_orders_ReportsRM.number }}&date_filter={{ date_filter }}&order_id={{ order_id }}&username={{ username }}">»</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
 
 {% endblock %}

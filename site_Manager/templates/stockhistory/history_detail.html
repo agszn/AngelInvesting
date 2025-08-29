@@ -1,0 +1,27 @@
+{% extends "baseStructureSM.html" %}
+{% block title %}Stock History — {{ history.stock.company_name }}{% endblock %}
+{% block subtitle %}Stock History Detail{% endblock %}
+
+{% block SMprofile_content %}
+<div class="container mt-4">
+  <h1 class="h4 mb-3">{{ history.stock.company_name }}</h1>
+
+  <div class="card">
+    <div class="card-body">
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Price</dt>
+        <dd class="col-sm-9">₹{{ history.price }}</dd>
+
+        <dt class="col-sm-3">Date</dt>
+        <dd class="col-sm-9">{{ history.timestamp }}</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="mt-3 d-flex gap-2">
+    <a class="btn btn-secondary" href="{% url 'SM_User:Historyupdate' history.pk %}">Edit</a>
+    <a class="btn btn-danger" href="{% url 'SM_User:Historydelete' history.pk %}">Delete</a>
+    <a class="btn btn-light" href="{% url 'SM_User:Historylist_by_stock' history.stock.id %}">Back to History</a>
+  </div>
+</div>
+{% endblock %}

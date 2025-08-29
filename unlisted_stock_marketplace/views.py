@@ -60,7 +60,7 @@ from .models import StockData
 from django.db.models import Q
 from django.shortcuts import render
 from .models import StockData
-
+from site_Manager.models import *
 def stock_list(request):
     query = request.GET.get('q', '')
     stocks = StockData.objects.filter(hide_company_overview=False)
@@ -133,6 +133,7 @@ def get_sheet_data(stock_id, model_type):
     }
 # unlisted_stock_marketplace/views.py
 # Stock Detail - onclick on stock name
+
 def stock_detail(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
     price_history = StockHistory.objects.filter(stock=stock).order_by('timestamp')
@@ -246,6 +247,13 @@ def stock_detail(request, stock_id):
     # 
     # 
 
+
+
+    # events
+    # Fetch latest 3 visible events (sorted by date_time)
+    events = Event.objects.filter(show=True).order_by('-date_time')
+    # events = Event.objects.filter(show=True).order_by('-date_time')[:3]
+            
     context = {
         'stock': stock,
         'directors': directors,
@@ -275,6 +283,8 @@ def stock_detail(request, stock_id):
         'faqs': faqs,
 
         'all_stocks': all_stocks, 
+        
+        "events": events,
 
     }
     return render(request, 'stocks/stock_detail.html', context)

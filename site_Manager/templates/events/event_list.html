@@ -1,0 +1,33 @@
+{% extends "baseStructureSM.html" %}
+{% load static %}
+{% block title %}Banner{% endblock %}
+{% block subtitle %}Homepage Banner{% endblock %}
+
+{% block SMprofile_content %}
+<div class="container mt-4">
+  <h2>Events</h2>
+  <a href="{% url 'SM_User:event_create' %}" class="btn btn-primary mb-3">+ Create Event</a>
+  <div class="row">
+    {% for event in events %}
+      <div class="col-md-4">
+        <div class="card mb-3">
+          {% if event.image %}
+            <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}">
+          {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ event.title }}</h5>
+                <p class="card-text">{{ event.subtitle|default:"" }}</p>
+
+                <a href="{% url 'SM_User:event_detail' event.pk %}" class="btn btn-sm btn-info">View</a>
+
+                <a href="{% url 'SM_User:event_pdf' event.pk %}" class="btn btn-sm btn-outline-primary">Download PDF</a>
+            </div>
+
+        </div>
+      </div>
+    {% empty %}
+      <p>No events available.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

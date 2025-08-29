@@ -1,0 +1,132 @@
+{% extends "baseStructureSM.html" %}
+{% block title %}Stock History{% endblock %}
+{% block subtitle %}Stock History{% endblock %}
+
+{% block SMprofile_content %}
+<div class="container mt-4">
+  <h1 class="h4 mb-3">Stock History{% if current_stock %} – {{ current_stock.company_name }}{% endif %}</h1>
+
+  <!-- Filters -->
+  <form method="get" class="mb-3 row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">Filter by Stock</label>
+      <select name="stock_id" class="form-select" onchange="this.form.submit()">
+        <option value="">-- All Stocks --</option>
+        {% for stock in all_stocks %}
+          <option value="{{ stock.id }}"
+            {% if request.GET.stock_id|stringformat:"s" == stock.id|stringformat:"s" %}selected{% endif %}>
+            {{ stock.company_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Date</label>
+      <input type="date" name="date" class="form-control" value="{{ request.GET.date }}">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Search (Company)</label>
+      <div class="d-flex gap-2">
+        <input type="text" name="q" class="form-control" placeholder="e.g., TCS" value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-primary">Apply</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Latest update card (based on current filters) -->
+  {% if latest_entry %}
+  <div class="card mb-3">
+    <div class="card-body d-flex justify-content-between align-items-center">
+      <div>
+        <strong>Latest update</strong>
+        <div class="small text-muted">
+          {{ latest_entry.stock.company_name }} • {{ latest_entry.timestamp }}
+          {% if latest_entry.updated_at %} • updated {{ latest_entry.updated_at|date:"Y-m-d H:i" }}{% endif %}
+        </div>
+      </div>
+      <div class="fs-5">
+        ₹{{ latest_entry.price }}
+      </div>
+      <div>
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'SM_User:Historydetail' latest_entry.pk %}">View</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <p>
+    <a class="btn btn-primary"
+       href="{% if current_stock %}{% url 'SM_User:Historycreate_for_stock' current_stock.id %}{% else %}{% url 'SM_User:Historycreate' %}{% endif %}">
+      Add Entry
+    </a>
+  </p>
+
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Price (₹)</th>
+          <th>Date</th>
+          <th>Entries (same stock+date)</th>    <!-- duplicates count -->
+          <th>ID(s) in group</th>               <!-- grouped IDs -->
+          <th style="width: 200px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in histories %}
+          <tr>
+            <td>{{ h.stock.company_name }}</td>
+            <td>{{ h.price }}</td>
+            <td>{{ h.timestamp }}</td>
+
+            <td>
+              {% if h.duplicate_count > 1 %}
+                <span class="badge text-bg-danger">{{ h.duplicate_count }}</span>
+              {% else %}
+                <span class="badge text-bg-secondary">1</span>
+              {% endif %}
+            </td>
+            <td class="small text-muted">{{ h.group_ids_str }}</td>
+            <td class="text-nowrap">
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'SM_User:Historydetail' h.pk %}">View</a>
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'SM_User:Historyupdate' h.pk %}">Edit</a>
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'SM_User:Historydelete' h.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center py-4">No history found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+  <nav aria-label="Pagination">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+
+      <li class="page-item disabled">
+        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      </li>
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

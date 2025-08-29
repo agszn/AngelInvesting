@@ -1,0 +1,177 @@
+{% extends "baseStructureAcc.html" %}
+{% block title %}Buy Order Transaction{% endblock %}
+{% block Accsubtitle %}Buy Order Transaction{% endblock %}
+{% load dict_extras %}
+
+{% block AccSearch_content %}
+  <div class="user-portfolio-top">
+    <form method="get">
+      <!-- Company Name Dropdown -->
+      <select name="company_name">
+        <option value="">-- Company Name --</option>
+        {% for name in company_names %}
+          <option value="{{ name }}" {% if request.GET.company_name == name %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Order ID Dropdown -->
+      <select name="order_id">
+        <option value="">-- Order ID --</option>
+        {% for oid in order_ids %}
+          <option value="{{ oid }}" {% if request.GET.order_id == oid %}selected{% endif %}>{{ oid }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Date -->
+      <input type="date" name="timestamp" value="{{ request.GET.timestamp }}">
+
+      <!-- User Dropdown -->
+      <select name="user">
+        <option value="">-- User --</option>
+        {% for u in users %}
+          <option value="{{ u.id }}" {% if request.GET.user == u.id|stringformat:"s" %}selected{% endif %}>
+            {{ u.username }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <!-- Broker Dropdown -->
+      <select name="broker">
+        <option value="">-- Broker --</option>
+        {% for bro in brokers %}
+          <option value="{{ bro.id }}" {% if request.GET.broker == bro.id|stringformat:"s" %}selected{% endif %}>
+            {{ bro.name }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <!-- Order Type -->
+      <select name="order_type">
+        <option value="">-- Order Type --</option>
+        <option value="market" {% if request.GET.order_type == "market" %}selected{% endif %}>Market</option>
+        <option value="limit" {% if request.GET.order_type == "limit" %}selected{% endif %}>Limit</option>
+      </select>
+
+      <button type="submit" class="btn btn-sm btn-outline-primary">🔍 Filter</button>
+      <a class="btn btn-sm btn-outline-primary" href="{% url 'RM_User:AllbuyTransactionSummary' %}">🔄 Reset</a>
+    </form>
+  </div>
+{% endblock %}
+
+{% block Accprofile_content %}
+  <h6 style="padding-top: 2%;">Order Transaction Details</h6>
+  <div class="SMtable-head">
+    <div class="SMtable-scroll-container">
+      <table class="user-portfolio-toptable1">
+        <thead class="user-portfolio-head-admin">
+          <tr>
+            <th>SLNO</th>
+            <th>Order ID</th>
+            <th>Client ID</th>
+            <th>Client Name</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Broker</th>
+            <th>ISIN Number</th>
+            <th>Stock</th>
+            <th>Order Type</th>
+            <th>Share Price</th>
+            <th>Buy Price</th>
+            <th>Quantity</th>
+            <th>Amount</th>
+            <th>RM Status</th>
+            <th>AC Status</th>
+            <th>ST Status</th>
+            <!-- NEW -->
+            <th>Payments</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in TransactionDetails %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ item.order_id }}</td>
+              <td>{{ item.user.id }}</td>
+              <td>{{ item.user.username }}</td>
+              <td>{{ item.timestamp|date:"d-m-Y" }}</td>
+              <td>{{ item.timestamp|time:"h:i A" }}</td>
+              <td>{{ item.broker.name }}</td>
+              <td>{{ item.stock.isin_no }}</td>
+              <td>{{ item.stock.company_name }}</td>
+              <td>{{ item.order_type }}</td>
+              <td>{{ item.stock.share_price }}</td>
+              <td>{{ item.price_per_share }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.total_amount }}</td>
+              <td>{{ item.get_RM_status_display }}</td>
+              <td>{{ item.get_AC_status_display }}</td>
+              <td>{{ item.get_status_display }}</td>
+
+              <!-- NEW: Render all RMPaymentRecord rows for this order -->
+              <td style="min-width: 420px;">
+                {% with payments=payments_by_order|get_item:item.order_id %}
+                  {% if payments %}
+                    <div><strong>Total Payments:</strong> {{ payments|length }}</div>
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered" style="font-size: 12px; margin-top: 6px;">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Bank</th>
+                            <th>Amount</th>
+                            <th>Remaining</th>
+                            <th>RM Pay Status</th>
+                            <th>AC Pay Status</th>
+                            <th>Txn Date</th>
+                            <th>Txn ID</th>
+                            <th>Remark</th>
+                            <th>Screenshot</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for p in payments %}
+                            <tr>
+                              <td>{{ p.date|date:"d-m-Y" }}</td>
+                              <td>{{ p.time|time:"h:i A" }}</td>
+                              <td>{{ p.bank_name }}</td>
+                              <td>{{ p.amount }}</td>
+                              <td>{{ p.remaining_amount }}</td>
+                              <td>{{ p.payment_status }}</td>
+                              <td>{{ p.AC_Payment_Status }}</td>
+                              <td>{% if p.payment_transaction_date %}{{ p.payment_transaction_date|date:"d-m-Y" }}{% else %}-{% endif %}</td>
+                              <td>{{ p.payment_transaction_id|default:"-" }}</td>
+                              <td>
+                                {% if p.remark %}{{ p.remark }}{% else %}-{% endif %}
+                                {% if p.paymentConfirmationMessage %}
+                                  <div><em>{{ p.paymentConfirmationMessage }}</em></div>
+                                {% endif %}
+                              </td>
+                              <td>
+                                {% if p.screenshot %}
+                                  <a href="{{ p.screenshot.url }}" target="_blank">View</a>
+                                {% else %}
+                                  -
+                                {% endif %}
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  {% else %}
+                    <em>No Payments</em>
+                  {% endif %}
+                {% endwith %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="18" class="text-center">No transaction details available.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

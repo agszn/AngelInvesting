@@ -132,10 +132,12 @@ class RMPaymentRecord(models.Model):
     )
     AC_Payment_Status = models.CharField(max_length=15, choices=AC_Payment_Status_options, default='pending')
 
-    payment_transaction_date = models.DateField(null=True, blank=True)  
+    payment_transaction_date = models.DateTimeField(null=True, blank=True)  
     payment_transaction_id = models.CharField(max_length=100, blank=True, null=True)
     paymentConfirmationMessage = models.TextField(blank=True, null=True)  
-    
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return f"Payment - {self.rm_user_view.order_id} - {self.amount}"
 
