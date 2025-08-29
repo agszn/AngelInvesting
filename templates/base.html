@@ -389,7 +389,7 @@
 
           /* Text highlighting */
           mark {
-            background-color: yellow;
+            /* background-color: yellow; */
             color: black;
           }
         </style>
@@ -436,9 +436,11 @@
           const li = document.createElement('li');
 
           // Highlight the matching part
-          const regex = new RegExp(`(${query})`, 'ig');
-          li.innerHTML = stock.name.replace(regex, '<mark>$1</mark>');
+          // const regex = new RegExp(`(${query})`, 'ig');
+          // li.innerHTML = stock.name.replace(regex, '<mark>$1</mark>');
 
+          // non highlight
+          li.textContent = stock.name;
           li.addEventListener('click', () => {
             window.location.href = stock.url;
           });
