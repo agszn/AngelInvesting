@@ -72,6 +72,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from unlisted_stock_marketplace.models import StockData
 
 class Event(models.Model):
     user = models.ForeignKey(
@@ -80,6 +81,7 @@ class Event(models.Model):
         null=True,
         blank=True
     )
+    stock = models.ForeignKey(StockData, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=300, blank=True, null=True)
     paragraph = models.TextField()

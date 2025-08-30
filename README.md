@@ -110,3 +110,15 @@ table header = user selects froom drop down (e.g. Fixed Assets 10 is selected as
 
 
 
+sudo chown -R www-data:www-data /var/www/AngelInvesting/media
+
+
+
+
+
+
+
+
+
+ls -l /var/www/AngelInvesting/media/stock_logos/
+sudo chmod -R 777 /var/www/AngelInvesting/media

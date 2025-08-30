@@ -251,7 +251,13 @@ def stock_detail(request, stock_id):
 
     # events
     # Fetch latest 3 visible events (sorted by date_time)
-    events = Event.objects.filter(show=True).order_by('-date_time')
+    events = (
+        Event.objects
+        .filter(show=True, stock_id=stock_id)
+        .select_related('stock', 'user')
+        .order_by('-date_time')
+    )
+
     # events = Event.objects.filter(show=True).order_by('-date_time')[:3]
             
     context = {

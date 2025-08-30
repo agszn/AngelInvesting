@@ -11,13 +11,11 @@
         color: #155724;
     }
 </style>
-<div class="stock-page-header">
+<!-- <div class="stock-page-header">
     <h2>Contact Us</h2>
-</div>
+</div> -->
 <section class="contactus-icons">
-    <div class="hero-headers">
-        <h1 class="heading">Get In Touch</h1>
-    </div>
+    <h2 style="text-align: center;padding: 5%;" class="intro-heading" >Get In Touch</h2>
     <div class="icon-sections">
         <div class="section-card">
             <!-- <i class="bi bi-geo-alt-fill"></i> -->
@@ -83,7 +81,9 @@
                     required>
 
                 <!-- These are always editable -->
-                <input type="text" name="subject" value="{{ form.subject.value|default_if_none:'' }}" placeholder="Subject" required>
+
+                <!-- <input type="text" name="subject" value="{{ form.subject.value|default_if_none:'' }}" placeholder="Subject" > -->
+
                 <textarea name="message" placeholder="Your Message" required>{{ form.message.value|default_if_none:'' }}</textarea>
 
                 <button type="submit">Submit</button>

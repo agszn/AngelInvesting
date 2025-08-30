@@ -225,9 +225,12 @@ from .models import Event
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ["title", "subtitle", "paragraph", "date_time", "image", "show"]
+        fields = ["stock", "title", "subtitle", "paragraph", "date_time", "image", "show"]
 
         widgets = {
+            "stock": forms.Select(attrs={
+                "class": "form-control",
+            }),
             "title": forms.TextInput(attrs={
                 "class": "form-control",
                 "placeholder": "Enter event title"

@@ -2,7 +2,7 @@
             {% if stock.company_name and not stock.hide_company_overview %}
                 <tr>
                   <td>{{ forloop.counter }}</td>
-                  <td class="clogo">
+                  <!-- <td class="clogo">
                     {% if stock.logo %}
                     <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">
                         <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" style="max-width: 50px; max-height: 50px; object-fit: contain;">
@@ -11,7 +11,7 @@
                     <span>No Logo</span>
                     {% endif %}
 
-                  </td>
+                  </td> -->
 
                   <td>            
                         <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">  {{ stock.company_name }}</a>
@@ -19,13 +19,13 @@
                   <td>{{ stock.sector }}</td>
                   <td>₹ {{ stock.share_price }}</td>
                   <td>{{ stock.market_capitalization }}</td>
-                  <td>₹ {{ stock.lifetime_high }}</td>
-                  <td>₹ {{ stock.lifetime_low }}</td>
-                  <td>
+                  <td>{{ stock.outstanding_shares }}</td>
+                  <td>{{ stock.pe_ratio }}</td>
+                  <!-- <td>
                     <div class="chart-img">
                       <canvas id="chart-{{ stock.id }}" width="200" height="100"></canvas>
                     </div>
-                  </td>
+                  </td> -->
                   <td class="btns">
                     <div class="buy-sell-btn">
 

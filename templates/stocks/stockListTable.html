@@ -33,14 +33,14 @@
         <thead>
           <tr>
             <th>Sl No</th>
-            <th class="logo"></th>
+            <!-- <th class="logo"></th> -->
             <th>Share Name</th>
             <th>Sector</th>
-            <th>Price <br><span class="inline">In ₹ Per Share</span></th>
+            <th>Price</th>
             <th>Market Cap <br><span class="inline">In ₹ Crores</span></th>
-            <th>Lifetime High</th>
-            <th>Lifetime Low</th>
-            <th class="chart">Chart</th>
+            <th>Number of Outstanding Shares</th>
+            <th>PE Ratio</th>
+            <!-- <th class="chart">Chart</th> -->
             <th class="options">Options</th>
           </tr>
         </thead>
@@ -75,6 +75,21 @@
       </div>
     </div>
   </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const stockHistoryData = {{ stock_history_data|safe }};

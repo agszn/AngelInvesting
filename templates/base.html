@@ -200,7 +200,7 @@
 
                 .search-box .search-btn {
                   background: #0d6efd;
-                  color: white;
+                  color: rgb(1, 1, 1);
                   border: none;
                   padding: 0 16px;
                   font-size: 1.5rem;
@@ -298,7 +298,7 @@
           .search-popup {
             position: fixed;
             top: 45px; /* just under ticker/marquee */
-            right: 30px;
+            right: 0px;
             z-index: 9999;
             display: none; /* hidden by default */
           }
@@ -311,7 +311,7 @@
           .popup-box {
             width: 650px;
             background: #0e213f;
-            border-radius: 8px;
+            /* border-radius: 8px; */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             padding: 10px;
           }
@@ -327,7 +327,7 @@
           /* Search box */
           .search-box {
             flex: 1;
-            background: #f9f9f9;
+            background: white;
             border-radius: 6px;
             padding: 5px 12px;
             display: flex;
@@ -352,35 +352,37 @@
             background: transparent;
             border: none;
           }
-
           /* Results container */
           .results {
             max-height: 150px;
             overflow-y: auto;
-            border: 1px solid #ddd;
+            /* border: 1px solid #ddd; */
             border-radius: 6px;
-            background: #fff;
+            background: #ffffff;
             margin-top: 8px;
+            color: black;
           }
 
-          /* Remove bullets */
-          .results ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
+          /* Remove bullets completely */
+          .results ul,
+          .results {
+            list-style: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
 
           /* Each result item */
           .results li {
-            padding: 8px 12px;
+            padding: 8px;
             border-bottom: 1px solid #eee;
             font-size: 14px;
             transition: background 0.2s ease;
             cursor: pointer; /* hand cursor */
+
           }
 
           .results li:hover {
-            background-color: #f0f0f0;
+            background-color: #39B54A;
           }
 
           .results li:last-child {
@@ -550,6 +552,26 @@
             {% endblock %}
                 <!-- footer -->
             {% block footer %}
+                <section class="contact-section">
+                    <img src="{% static 'Media/images/contact-banner.jpg' %}" class="contact-bg" alt="Contact background">
+                    <div class="contact-content">
+                        <h1 class="contact-heading">Contact Us</h1>
+                        <p class="contact-description">
+                          If you'd like to learn more about The Angel Investing and how we can assist
+                          you in navigating your unlisted share investment journey, please get
+                          in touch with us.
+                        </p>
+                    </div>
+                    <div class="contact-info">
+                      <p class="contact-info-label">Reach out to us</p>
+                      <p class="contact-info-details">
+                        <b>Email:</b> info@theangelinvesting.com, <b>Phone:</b>+91 9740940369
+                      </p>
+                      <p class="contact-assistance">
+                        Our expert would be happy to provide you personal assistance for your queries.
+                    </p>
+                    </div>
+                </section>
                 {% include 'landing/footer/footer.html' %}
             {% endblock %}
 
@@ -643,13 +665,17 @@
       <div id="wishlistModal" class="wishlist-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6);">
         <div class="wishlist-modal-content" style="background-color: #fff; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative;">
           <span class="close" onclick="document.getElementById('wishlistModal').style.display='none'" style="position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #aaa; cursor: pointer;">&times;</span>
-          <h3 style="margin-top: 0; font-size: 20px; color: #333;">Confirm Wishlist</h3>
-          <p style="font-size: 16px; color: #555;">You're about to add <strong id="stockName" style="color: #000;"></strong> to <strong id="wishlistGroupName" style="color: #000;"></strong>.</p>
+          <!-- <h3 style="margin-top: 0; font-size: 20px; color: #333;">Confirm Wishlist</h3> -->
+          <!-- <p style="font-size: 16px; color: #555;">You're about to add <strong id="stockName" style="color: #000;"></strong> to <strong id="wishlistGroupName" style="color: #000;"></strong>.</p>   -->
+
+          <p style="font-size: 16px; color: #555;"><strong id="stockName" style="color: #000;"></strong> <strong id="wishlistGroupName" style="color: #000;"></strong></p> 
+
+
           <form id="wishlistForm" method="POST" action="{% url 'unlisted_stock_marketplace:add_to_wishlist' %}" style="margin-top: 20px;">
             {% csrf_token %}
             <input type="hidden" name="stock_id" id="stockIdInput">
             <input type="hidden" name="custom_list_name" id="customListName">
-            <button type="submit" class="stock-btn yellow-btn" style="background-color: #61C46E; color: #000; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; width: 100%;">Confirm Add</button>
+            <button type="submit" class="stock-btn yellow-btn" style="background-color: #61C46E; color: #000; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; width: 100%;"> Add to Wishlist</button>
           </form>
         </div>
       </div>

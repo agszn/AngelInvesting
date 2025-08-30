@@ -6,7 +6,7 @@
         <h1 class="heading">Companies <span class="highlight">Listed</span> On Our Platform</h1>
       </div>
       <div class="logos-grid" id="logoContainer">
-        {% for stock in stocks|slice:":18" %}
+        {% for stock in stocks|slice:":19" %}
           {% if stock.company_name|lower != 'hdb financial service ltd' and stock.scrip_name|lower != 'hdb finance ltd' %}
               {% if stock.logo %}
               <div class="logo-cell">
@@ -71,13 +71,13 @@
           <div class="why-trade-step">
             <span class="step-number">1</span>
             <h3>Contact Us</h3>
-            <p>Connect with our RMs and get the best unlisted share price</p>
+            <p>Register on our website, An experienced RM will contact you and get the best available prices.</p>
           </div>
           <i class="bi bi-arrow-right step-arrow"></i>
           <div class="why-trade-step">
             <span class="step-number">2</span>
             <h3>Deal Processing</h3>
-            <p>First, the buyer sends payment to our bank then Angel Investing Team starts processing</p>
+            <p>Payment will be done to Thangiv Pvt. Ltd., post which the team starts the process.</p>
           </div>
 
           <i class="bi bi-arrow-right step-arrow"></i>
@@ -85,7 +85,7 @@
           <div class="why-trade-step">
             <span class="step-number">3</span>
             <h3>Deal Completion</h3>
-            <p>After getting the payment, our team transfers shares within 24 hours</p>
+            <p>Once payment is confirmed, shares are transferred within 24–48 working hours along with a deal letter.</p>
           </div>
         </div>
       </div>
@@ -255,7 +255,23 @@
         <h1 class="started-title">Lets Get You <span class="highlight">Started</span></h1>
         <p class="started-paragraph">Excellent plateform and very easy and takes less than few minutes to “Sell” and
           “Buy” Unlisted Shares</p>
-        <button class="started-btn">Join Our Platform</button>
+          {% if user.is_authenticated %}
+              <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" 
+                style="display:inline-block; padding:12px 24px; background-color:#0e213f; color:#fff; 
+                        font-size:16px; font-weight:bold; text-align:center; text-decoration:none; 
+                        border-radius:6px; border:none; cursor:pointer;">
+                Join Our Platform
+              </a>
+          {% else %}
+              <a href="{% url 'login' %}" 
+                style="display:inline-block; padding:12px 24px; background-color:#0e213f; color:#fff; 
+                        font-size:16px; font-weight:bold; text-align:center; text-decoration:none; 
+                        border-radius:6px; border:none; cursor:pointer;">
+                Join Our Platform
+              </a>
+          {% endif %}
+
+
       </div>
     </div>
   </section>
