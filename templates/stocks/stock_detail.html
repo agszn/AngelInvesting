@@ -335,12 +335,25 @@
           >Sell</a>
         </div>
         <div class="header-details-whishlist">
-          <button
+          <!-- <button
               data-stock-id="{{ stock.id }}" 
               data-stock-name="{{ stock.company_name }}" 
               data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
-          >Wishlist 🛒</button>
+          >Wishlist 🛒</button> -->
+
+
+
+          <button 
+            class="stock-btn yellow-btn wishlist-btn wishlist" 
+            data-stock-id="{{ stock.id }}" 
+            data-stock-name="{{ stock.company_name }}" 
+            data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
+            style="width: 100%;">
+            Wishlist 🛒
+          </button>
         </div>
+
+
     </div>
     <!-- stock data buy sell wishlist left options end -->
     <!-- stock data price LEP left options start -->

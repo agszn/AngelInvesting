@@ -401,6 +401,12 @@ def get_next_wishlist_group_name(request):
 
 
 
+from django.urls import reverse
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+
 @require_POST
 @login_required
 def add_to_wishlist(request):
@@ -413,14 +419,18 @@ def add_to_wishlist(request):
     stock = get_object_or_404(StockData, id=stock_id)
     group, _ = WishlistGroup.objects.get_or_create(user=request.user, name=group_name)
 
-    wishlist, created = Wishlist.objects.get_or_create(user=request.user, stock=stock, defaults={'group': group})
+    wishlist, created = Wishlist.objects.get_or_create(
+        user=request.user, stock=stock, defaults={'group': group}
+    )
 
     if not created:
         request.session['popup_message'] = f"{stock.company_name} already exists in {wishlist.group.name}"
     else:
         request.session['popup_message'] = f"{stock.company_name} added to {group.name}"
 
-    return redirect('profile')
+    # Redirect to profile with specific group id
+    return redirect(f"{reverse('profile')}?group={group.id}")
+
 
 # @login_required
 # def wish_list(request):

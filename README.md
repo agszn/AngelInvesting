@@ -122,3 +122,13 @@ sudo chown -R www-data:www-data /var/www/AngelInvesting/media
 
 ls -l /var/www/AngelInvesting/media/stock_logos/
 sudo chmod -R 777 /var/www/AngelInvesting/media
+
+
+source /var/www/AngelInvesting/venv/bin/activate
+
+sudo systemctl restart gunicorn
+sudo systemctl restart apache2
+
+git add .
+git commit -m "0"
+git push origin branch24

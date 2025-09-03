@@ -7,6 +7,12 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/listingview.css' %}" />
 
+<div class="hero-headers" style="text-align:center; margin-top:20px;">
+  <h1 class="heading">
+    Explore <span class="highlight" style="color:#25D366;">Unlisted Shares</span>
+  </h1>
+</div>
+
 <main class="stock-container">
   <form method="get" id="filter-form">
     <div class="controls">
@@ -20,6 +26,28 @@
         </select>
         entries
       </div>
+
+      <!-- Centered Grid/List Toggle -->
+      <div style="text-align:center;">
+        <div style="display:inline-flex; align-items:center; background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.2);">
+          
+          <!-- Grid View Button -->
+          <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" 
+            style="text-decoration:none; background:none; border:none; padding:10px 10px; font-size:16px; font-weight:bold; cursor:pointer; color:#222; display:inline-block;">
+            Grid View
+          </a>
+          
+          <div style="width:1px; background:#444; height:24px;"></div>
+          
+          <!-- List View Button -->
+          <a href="{% url 'unlisted_stock_marketplace:StockListingTableFormat' %}" 
+            style="text-decoration:none; background:none; border:none; padding:10px 20px; font-size:16px; font-weight:bold; cursor:pointer; color:#222; display:inline-block;">
+            List View
+          </a>
+        
+        </div>
+      </div>
+
       <!-- templates/stocks/stockListTable.html -->
       <div class="search-filter">
         <input type="text" name="search" placeholder="Search here..." id="search-input" value="{{ search_query }}">

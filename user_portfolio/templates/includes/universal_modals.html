@@ -4,12 +4,18 @@
     <div class="modal-content" style="border-radius: 10px; overflow: hidden;">
       <form method="POST" action="" id="buy-form">
         {% csrf_token %}
-        <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: relative;">
           <div>
             <strong id="buy-stock-name"></strong>
             <span style="color: #7cffaf; margin-left: 10px;" id="buy-share-price"></span>
           </div>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+            style="background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 10px; top: 5px;">
+            &times;
+          </button>
+
         </div>
+
 
         <div style="background-color: #f1f6ff; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
           <input type="hidden" name="stock_id" id="buy-stock-id">
@@ -65,12 +71,18 @@
     <div class="modal-content" style="background: white; border-radius: 10px; overflow: hidden;">
       <form method="POST" action="" id="sell-form">
         {% csrf_token %}
-        <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: relative;">
           <div>
             <strong id="sell-stock-name"></strong>
             <span style="color: #7cffaf; margin-left: 10px;" id="sell-stock-lot"></span>
           </div>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+            style="background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 10px; top: 5px;">
+            &times;
+          </button>
+
         </div>
+
 
         <div style="background-color: #f1f6ff; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
           <input type="hidden" name="stock_id" id="sell-stock-id">

@@ -74,10 +74,13 @@ a{
 
 /* home page unlisted share section */
 
+
+
 .unlisted-share-section {
   margin-bottom:50px;
   padding: 0 100px;
   width: 100%;
+  background-color: rgba(14, 33, 63, 1);
 }
 .unlisted-share-boxex {
   display: flex;
@@ -192,7 +195,7 @@ a{
 .search-bar-wrapper {
     display: flex;
     justify-content: center;
-    margin-bottom: 30px;
+    padding: 30px 0;
 }
 .search-bar-wrapper form{
   display: flex; 
@@ -213,7 +216,7 @@ a{
 .search-bar-button {
     width: 200px;
     height: 50px;
-    background: transparent;
+    background: #FFFFFF !important;
     color: black;
     border: 1px solid #000;
     cursor: pointer;
@@ -671,8 +674,8 @@ a{
 
 .hero-headers {
     text-align: center;
-    margin-bottom: 40px;
-    padding: 0;
+    padding-bottom: 40px;
+    /* padding: 0; */
 }
 
 .heading {
@@ -1678,8 +1681,9 @@ a{
   }
   .hero-headers {
     text-align: center;
-    margin-bottom: 20px;
-    padding: 0;
+    /* margin-bottom: 20px; */
+    /* padding: 0; */
+    padding-bottom: 20px;
 }
 
   .hero-headers .heading {

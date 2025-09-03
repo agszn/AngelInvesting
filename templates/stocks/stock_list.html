@@ -59,12 +59,18 @@
 }
 </style>  
 
-<section class="unlisted-share-section" style="margin-top: 50px; ">
-  <div class="hero-headers" style="text-align:center; margin-top:20px;">
-    <h1 class="heading" style="margin-bottom:20px;">
-      Explore <span class="highlight" style="color:#ff6600;">Unlisted Shares</span>
+
+<div class="hero-headers" style="text-align:center; padding-top:40px; background-color: #CFE2CE;">
+    <h1 class="heading" style="">
+      Explore <span class="highlight" style="color:#25D366;">Unlisted Shares</span>
     </h1>
-  </div>
+</div>
+<section class="unlisted-share-section">
+  <!-- <div class="hero-headers" style="text-align:center; margin-top:20px;">
+    <h1 class="heading" style="margin-bottom:20px;">
+      Explore <span class="highlight" style="color:#25D366;">Unlisted Shares</span>
+    </h1>
+  </div> -->
 
 
   <!-- templates/stocks/stock_list.html -->
@@ -76,7 +82,7 @@
   </div>
 
   <!-- Centered Grid/List Toggle -->
-  <div style="text-align:center; margin:20px 0;">
+  <div style="text-align:center; margin:0 0 20px 0;">
     <div style="display:inline-flex; align-items:center; background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.2);">
       
       <!-- Grid View Button -->
@@ -102,7 +108,7 @@
   </div>
 
   <div>
-    <div class="viewall3" style="margin-top: 40px;">
+    <div class="viewall3" style="padding:0 0 30px 0;">
       <button class="viewallbtn3">
         <a style="color: black; text-decoration: none;" href="{% url 'unlisted_stock_marketplace:StockListingTableFormat' %}">View All Listings</a>
       </button>

@@ -668,7 +668,11 @@
           <!-- <h3 style="margin-top: 0; font-size: 20px; color: #333;">Confirm Wishlist</h3> -->
           <!-- <p style="font-size: 16px; color: #555;">You're about to add <strong id="stockName" style="color: #000;"></strong> to <strong id="wishlistGroupName" style="color: #000;"></strong>.</p>   -->
 
-          <p style="font-size: 16px; color: #555;"><strong id="stockName" style="color: #000;"></strong> <strong id="wishlistGroupName" style="color: #000;"></strong></p> 
+          <p style="font-size: 16px; color: #555;"><strong id="stockName" style="color: #000;"></strong> 
+
+        <strong id="wishlistGroupName" style="color: #000;"></strong>
+
+        </p> 
 
 
           <form id="wishlistForm" method="POST" action="{% url 'unlisted_stock_marketplace:add_to_wishlist' %}" style="margin-top: 20px;">
@@ -817,7 +821,7 @@
               wishlistGroupName.textContent = `${data.group_name} (Already Added)`;
               wishlistGroupName.style.color = 'red';
             } else {
-              wishlistGroupName.textContent = data.group_name;
+              // wishlistGroupName.textContent = data.group_name;
               wishlistGroupName.style.color = '#000';
             }
 

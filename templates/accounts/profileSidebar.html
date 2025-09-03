@@ -5,7 +5,8 @@
     <!-- New Sidebar -->
     <div class="user-sidebar" id="userSidebar">
       <div class="user-sidebar-top-logo">
-        <img src="{% static 'Media/images/dashboardlogo.png' %}" alt="logo">
+        <a href="/"><img src="{% static 'Media/images/dashboardlogo.png' %}" alt="logo"></a>
+        
         <!-- <button class="" type="button" onclick="toggleSidebar()">
             X
         </button> -->
@@ -26,8 +27,8 @@
         </div>
       </div>
       <!-- templates/accounts/profileSidebar.html -->
-      <div class="user-serach-bar">
-        <input type="text" id="sidebarSearchInput" placeholder="Search Stocks..." autocomplete="off">
+      <div class="user-serach-bar" >
+        <input type="text" id="sidebarSearchInput" placeholder="Search Stocks..." autocomplete="off" style="background-color: white;color: #000; width: 100%; border-radius: 5px;">
 
         <!-- <button type="submit" style="background: none; border: none; cursor: pointer; padding: 0 8px;" title="Search">
             <span style="color: white; font-size: 18px;">&#128269;</span>

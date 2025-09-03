@@ -798,7 +798,7 @@ class WishlistGroup(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist_groups')
     name = models.CharField(max_length=100, editable=False)  # Auto-assigned, not user-editable
     created_on = models.DateTimeField(auto_now_add=True)
-
+    added_on = models.DateTimeField(auto_now_add=True,blank=True,null=True)
     class Meta:
         unique_together = ('user', 'name')
 

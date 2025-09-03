@@ -1,4 +1,4 @@
-<div class="user-stock-list-tab">
+<div class="user-stock-list-tab" >
   {% for stock in stock_list %}
     {% if stock.company_name and not stock.hide_company_overview %}
       <div class="user-stocks-sidebar">
@@ -17,9 +17,9 @@
           {% if stock.in_group %}
             <form method="POST" action="{% url 'unlisted_stock_marketplace:remove_from_group' stock.wishlist_id %}">
               {% csrf_token %}
-              <span style="background-color: #f7c948; margin-right: 10px;" class="group-button-user">
+              <!-- <span style="background-color: #f7c948; margin-right: 10px;" class="group-button-user">
                 G - {{ stock.group_number }}
-              </span>
+              </span> -->
               <button type="submit" title="Remove from Group" style="background-color: #e74c3c;">✖</button>
             </form>
           {% else %}

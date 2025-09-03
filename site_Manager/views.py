@@ -1411,12 +1411,11 @@ from django.contrib.auth.decorators import login_required
 
 from .forms import StockHistoryForm
 
-from datetime import datetime
-from datetime import datetime
+
 from django.db.models import Count
 
 # app/views.py
-from datetime import datetime
+
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Count, Window

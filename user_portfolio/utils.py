@@ -127,6 +127,7 @@ from unlisted_stock_marketplace.models import Wishlist, WishlistGroup, StockData
 #         'search_query': search_query,
 #         'current_group_id': int(group_id) if group_id else None, 
 #     }
+from django.db.models import Q, Exists, OuterRef, Subquery, IntegerField, Case, When
 
 def get_user_stock_context(user, request):
     show_all_unlisted = request.GET.get("unlisted") == "1"
@@ -134,22 +135,34 @@ def get_user_stock_context(user, request):
     group_id = request.GET.get("group")
     sidebar_search_query = request.GET.get("sidebar_search", "")
 
+    stock_list = StockData.objects.none()
+    preserved_order = None
+
     if group_id:
         group = WishlistGroup.objects.filter(id=group_id, user=user).first()
-        wishlist_stocks = Wishlist.objects.filter(group=group).values_list("stock", flat=True)
-        stock_list = StockData.objects.filter(id__in=wishlist_stocks)
+        wishlist_items = Wishlist.objects.filter(group=group).order_by('-added_on')
+        stock_ids = list(wishlist_items.values_list("stock", flat=True))
+        stock_list = StockData.objects.filter(id__in=stock_ids)
+
+        # Preserve wishlist order (most recently added first)
+        preserved_order = Case(
+            *[When(pk=pk, then=pos) for pos, pk in enumerate(stock_ids)],
+            output_field=IntegerField()
+        )
     elif show_all_angel:
         stock_list = StockData.objects.filter(stock_type__iexact="angel")
     else:
         stock_list = StockData.objects.filter(stock_type__iexact="unlisted")
         show_all_unlisted = True
 
+    # Apply sidebar search
     if sidebar_search_query:
         stock_list = stock_list.filter(
             Q(company_name__istartswith=sidebar_search_query) |
             Q(scrip_name__istartswith=sidebar_search_query)
         )
 
+    # Annotate additional info for template usage
     stock_list = stock_list.annotate(
         in_group=Exists(
             Wishlist.objects.filter(stock=OuterRef('pk'), group__user=user)
@@ -165,7 +178,12 @@ def get_user_stock_context(user, request):
         )
     )
 
-    groups = WishlistGroup.objects.filter(user=user)
+    # Apply preserved order only for group view
+    if preserved_order:
+        stock_list = stock_list.order_by(preserved_order)
+
+    # Sort groups by latest created
+    groups = WishlistGroup.objects.filter(user=user).order_by('-created_on')
 
     return {
         'stock_list': stock_list,

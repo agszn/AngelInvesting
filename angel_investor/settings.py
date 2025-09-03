@@ -24,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-z6fv(n05s3g%g^g=dc((3j-t+o@3dqi%-9w^4eq70kfbt&drfd'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
 # (Recommended for Prod)
-# DEBUG = False
+DEBUG = False
 # ALLOWED_HOSTS = ['theangelinvesting.com', 'www.theangelinvesting.com']
 ALLOWED_HOSTS = ['*']
 X_FRAME_OPTIONS = 'ALLOWALL'
