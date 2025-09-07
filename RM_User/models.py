@@ -18,27 +18,27 @@ class RMUserView(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='rm_user_views')
 
     # Auto-populated User Details (read-only)
-    full_name = models.CharField(max_length=150)
-    custom_user_id = models.CharField(max_length=100)
-    pan_number = models.CharField(max_length=20)
-    email = models.EmailField()
-    mobile_number = models.CharField(max_length=15)
+    full_name = models.CharField(max_length=150, null=True, blank=True)
+    custom_user_id = models.CharField(max_length=100, null=True, blank=True)
+    pan_number = models.CharField(max_length=20, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    mobile_number = models.CharField(max_length=15, null=True, blank=True)
 
     # Broker & CMR Copy Details
     broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, blank=True)
     client_id_input = models.CharField(max_length=50, blank=True, null=True)
 
     # Bank Info
-    bank_name = models.CharField(max_length=100)
-    account_number = models.CharField(max_length=20)
-    ifsc_code = models.CharField(max_length=11)
+    bank_name = models.CharField(max_length=100, null=True, blank=True)
+    account_number = models.CharField(max_length=20, null=True, blank=True)
+    ifsc_code = models.CharField(max_length=11, null=True, blank=True)
 
     # Transaction Data
-    transaction_type = models.CharField(max_length=4, choices=[('buy', 'Buy'), ('sell', 'Sell')])
-    order_id = models.CharField(max_length=20)
-    timestamp = models.DateTimeField()
-    stock = models.ForeignKey(StockData, on_delete=models.SET_NULL, null=True)
-    order_type = models.CharField(max_length=10)
+    transaction_type = models.CharField(max_length=4, choices=[('buy', 'Buy'), ('sell', 'Sell')], null=True, blank=True)
+    order_id = models.CharField(max_length=20, null=True, blank=True)
+    timestamp = models.DateTimeField(null=True, blank=True)
+    stock = models.ForeignKey(StockData, on_delete=models.SET_NULL, null=True, blank=True)
+    order_type = models.CharField(max_length=10, null=True, blank=True)
     isin_no = models.CharField(max_length=20, blank=True, null=True)
 
     # Buy fields (editable)

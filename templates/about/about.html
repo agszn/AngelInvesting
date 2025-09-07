@@ -16,7 +16,7 @@
             <h4 class="intro-heading" style="padding-top: 4%;">About Us</h4>
             <p class="intro-paragraph">Thangiv Consultancy Pvt. Ltd. is the company behind www.theangelinvesting.com, a platform dedicated to helping investors, startups, and stakeholders understand and navigate the landscape of unlisted, pre-IPO, and early-stage investing in India. We provide informative resources and consulting support to help individuals make informed investment decisions.</p>
             <p class="intro-paragraph">As a registered entity with the Ministry of Corporate Affairs (MCA), we are committed to ensuring compliance with regulatory standards while offering secure and transparent investment options. Our team is comprised of experienced professionals who bring deep insights into the world of private equity and emerging markets. Whether you're looking to diversify your portfolio through pre-IPO opportunities or seeking to engage with innovative startups at their inception, we offer tailored solutions to meet your investment goals.</p>
-            <p class="intro-paragraph">At The Angel Investing, we believe in empowering both investors and entrepreneurs by facilitating access to transformative opportunities. We strive to build long-term relationships based on trust, integrity, and mutual growth. Our mission is to be a bridge for forward-thinking investors seeking early access to the most promising businesses, and to provide visionary startups with the capital they need to scale and succeed.</p>
+            <p class="intro-paragraph">At Thangiv  Consultancy Pvt Ltd, we believe in empowering both investors and entrepreneurs by facilitating access to transformative opportunities. We strive to build long-term relationships based on trust, integrity, and mutual growth. Our mission is to be a bridge for forward-thinking investors seeking early access to the most promising businesses, and to provide visionary startups with the capital they need to scale and succeed.</p>
         </div>
     </div>
 </section>
@@ -66,7 +66,21 @@
         <div><h3>Why Choose Us</h3>
         <p>We believe that unlisted and startup investing is best approached with caution, education, and a long-term mindset. Our tools and resources are built to support thoughtful, well-informed investor journeys in this high-risk category.</p>
         </div>
-        <button>Join Our Platform</button>
+        {% if user.is_authenticated %}
+              <a href="{% url 'unlisted_stock_marketplace:stock_list' %}" 
+                style="display:inline-block; padding:12px 24px; background-color:#0e213f; color:#fff; 
+                        font-size:16px; font-weight:bold; text-align:center; text-decoration:none; 
+                        border-radius:6px; border:none; cursor:pointer;">
+                Join Our Platform
+              </a>
+        {% else %}
+              <a href="{% url 'login' %}" 
+                style="display:inline-block; padding:12px 24px; background-color:#0e213f; color:#fff; 
+                        font-size:16px; font-weight:bold; text-align:center; text-decoration:none; 
+                        border-radius:6px; border:none; cursor:pointer;">
+                Join Our Platform
+              </a>
+        {% endif %}
     </div>
 </section>
 

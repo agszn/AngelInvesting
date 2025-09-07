@@ -438,12 +438,17 @@ from django.db.models import Sum, F, Q
 
 #     def __str__(self):
 #         return f"{self.user.username} - {self.stock.company_name}"
+from django.conf import settings
+from django.db import models
+from decimal import Decimal
+from django.db.models import Sum, F
 
 class UserStockInvestmentSummary(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     stock = models.ForeignKey('unlisted_stock_marketplace.StockData', on_delete=models.CASCADE)
 
-    is_other_advisor = models.BooleanField(default=False)  # 👈 NEW FIELD to distinguish buy vs other-buy
+    # Separate bucket for holdings created via "Other" advisor buys
+    is_other_advisor = models.BooleanField(default=False)
 
     advisor = models.ForeignKey('site_Manager.Advisor', on_delete=models.SET_NULL, null=True, blank=True)
     broker = models.ForeignKey('site_Manager.Broker', on_delete=models.SET_NULL, null=True, blank=True)
@@ -451,14 +456,16 @@ class UserStockInvestmentSummary(models.Model):
     quantity_held = models.PositiveIntegerField(default=0)
     avg_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    share_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    ltp = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    share_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)   # current price
+    ltp = models.DecimalField(max_digits=12, decimal_places=2, default=0)           # previous price (or LTP as provided)
     previous_day_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     investment_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     market_value = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     overall_gain_loss = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    overall_gain_percent = models.DecimalField(max_digits=7, decimal_places=2, default=0)
     day_gain_loss = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    day_gain_percent = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 
     buy_order_count = models.PositiveIntegerField(default=0)
     buy_order_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
@@ -469,85 +476,84 @@ class UserStockInvestmentSummary(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('user', 'stock', 'is_other_advisor')  # 👈 ensure separation
-    from decimal import Decimal
+        unique_together = ('user', 'stock', 'is_other_advisor')
 
     def update_from_transactions(self):
-        from user_portfolio.models import BuyTransaction, SellTransaction, BuyTransactionOtherAdvisor
-        from django.db.models import Sum, F
+        """
+        Recompute the summary from transactions.
+        """
+        from user_portfolio.models import BuyTransaction, BuyTransactionOtherAdvisor, SellTransaction
 
-        total_bought_qty = 0
-        total_bought_cost = Decimal(0)
-
+        # Buys
         if self.is_other_advisor:
-            buy_txns = BuyTransactionOtherAdvisor.objects.filter(
+            buy_qs = BuyTransactionOtherAdvisor.objects.filter(
                 user=self.user, stock=self.stock, status='completed'
             )
-            total_bought_qty = sum(txn.quantity for txn in buy_txns)
-            total_bought_cost = sum(txn.quantity * txn.price_per_share for txn in buy_txns)
-            sell_txns = None
+            sell_qs = None
+            total_sold_qty = 0
         else:
-            buy_txns = BuyTransaction.objects.filter(
+            buy_qs = BuyTransaction.objects.filter(
                 user=self.user, stock=self.stock, status='completed'
             )
-            total_bought_qty = sum(txn.quantity for txn in buy_txns)
-            total_bought_cost = sum(txn.quantity * txn.price_per_share for txn in buy_txns)
-
-            sell_txns = SellTransaction.objects.filter(
+            sell_qs = SellTransaction.objects.filter(
                 user=self.user, stock=self.stock, status='completed'
             ).exclude(advisor__advisor_type='Other')
-            total_sold_qty = sell_txns.aggregate(total=Sum('quantity'))['total'] or 0
+            total_sold_qty = sell_qs.aggregate(total=Sum('quantity'))['total'] or 0
 
-        # Common buy data
-        self.buy_order_count = len(buy_txns)
-        self.buy_order_total = total_bought_cost or Decimal(0)
+        total_bought_qty = sum(b.quantity for b in buy_qs)
+        total_bought_cost = sum((b.quantity * b.price_per_share) for b in buy_qs) or Decimal(0)
+
+        self.buy_order_count = buy_qs.count()
+        self.buy_order_total = Decimal(total_bought_cost)
 
         # Quantity held
-        if self.is_other_advisor:
-            self.quantity_held = total_bought_qty
-        else:
-            self.quantity_held = max(total_bought_qty - total_sold_qty, 0)
+        self.quantity_held = (
+            total_bought_qty
+            if self.is_other_advisor else
+            max(total_bought_qty - total_sold_qty, 0)
+        )
 
-        # Avg price (Formula 1)
-        self.avg_price = (total_bought_cost / total_bought_qty) if total_bought_qty else Decimal(0)
+        # Weighted avg price
+        self.avg_price = (
+            (Decimal(total_bought_cost) / Decimal(total_bought_qty))
+            if total_bought_qty else Decimal(0)
+        )
 
-        # Set market prices from stock
+        # Price references from StockData
         self.share_price = self.stock.share_price or Decimal(0)
         self.ltp = self.stock.ltp or Decimal(0)
         self.previous_day_price = self.ltp
 
-        # Current Value (Formula 2)
+        # Values
         self.market_value = self.share_price * self.quantity_held
+        self.investment_amount = self.avg_price * self.quantity_held
 
-        # Invested
-        self.investment_amount = self.quantity_held * self.avg_price
-
-        # Overall Gain ₹ (Formula 3)
+        # P&L (₹) and % (guarding division-by-zero)
         self.overall_gain_loss = self.market_value - self.investment_amount
-
-        # Overall Gain % (Formula 4)
         self.overall_gain_percent = (
-            (self.overall_gain_loss / self.investment_amount) * 100 if self.investment_amount else Decimal(0)
+            (self.overall_gain_loss / self.investment_amount) * 100
+            if self.investment_amount else Decimal(0)
         )
 
-        # Day Gain ₹ (Formula 5)
-        self.day_gain_loss = (self.share_price - self.previous_day_price) * self.quantity_held
-
-        # Day Gain % (Formula 6)
+        self.day_gain_loss = self.quantity_held * (self.share_price - self.previous_day_price)
         self.day_gain_percent = (
             ((self.share_price - self.previous_day_price) / self.previous_day_price) * 100
             if self.previous_day_price else Decimal(0)
         )
 
-        # Sell side (only for non-other advisors)
-        if not self.is_other_advisor:
-            self.sell_order_count = sell_txns.count()
-            self.sell_order_total = sell_txns.aggregate(
+        # Sell-side totals only for non-"Other" bucket
+        if not self.is_other_advisor and sell_qs is not None:
+            self.sell_order_count = sell_qs.count()
+            self.sell_order_total = sell_qs.aggregate(
                 total=Sum(F('selling_price') * F('quantity'))
             )['total'] or Decimal(0)
 
-        # Advisor/broker from latest txn
-        latest_txn = sorted(buy_txns, key=lambda x: x.timestamp, reverse=True)[0] if buy_txns else None
-        if latest_txn:
-            self.advisor = getattr(latest_txn, 'advisor', None)
-            self.broker = getattr(latest_txn, 'broker', None)
+        # Advisor/Broker from the latest buy
+        latest = buy_qs.order_by('-timestamp').first()
+        if latest:
+            self.advisor = getattr(latest, 'advisor', None)
+            self.broker = getattr(latest, 'broker', None)
+
+    def __str__(self):
+        prefix = "Other - " if self.is_other_advisor else ""
+        return f"{self.user} | {prefix}{self.stock} | qty={self.quantity_held} avg={self.avg_price}"

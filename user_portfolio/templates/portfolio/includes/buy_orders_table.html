@@ -1,6 +1,7 @@
 <table class="user-portfolio-toptable">
   <thead class="user-portfolio-head1">
     <tr>
+      <th>Placed At</th>
       <th>Stock Name</th>
       <th>Advisor</th>
       <th>Broker</th>
@@ -14,54 +15,27 @@
     </tr>
   </thead>
   <tbody>
-    {% for order in page_obj %}
-      <tr style="background: {% cycle '#f5f9ff' 'white' %};">
-        <td>{{ order.stock.company_name }}</td>
-        <td>{{ order.advisor.advisor_type|default:"Others" }}</td>
-        <td>{{ order.broker.name|default:"N/A" }}</td>
-        <td>{{ order.quantity }}</td>
-        <td>₹{{ order.price_per_share }}</td>
-        <td>₹{{ order.total_amount }}</td>
-        <td>{{ order.order_type|title }}</td>
-        <td style="color:
-          {% if order.RM_status == 'completed' %}green
-          {% elif order.RM_status == 'processing' %}orange
-          {% elif order.RM_status == 'cancelled' %}red
-          {% else %}#cc6600{% endif %};">
-          {{ order.RM_status }}
-        </td>
-        <td style="color:
-          {% if order.AC_status == 'completed' %}green
-          {% elif order.AC_status == 'processing' %}orange
-          {% elif order.AC_status == 'cancelled' %}red
-          {% else %}#cc6600{% endif %};">
-          {{ order.AC_status }}
-        </td>
-        <td style="color:
-          {% if order.status == 'Completed' %}green
-          {% elif order.status == 'Processing' %}orange
-          {% elif order.status == 'Cancel' %}red
-          {% else %}#cc6600{% endif %};">
-          {{ order.status }}
-        </td>
-      </tr>
+    {% for order in orders %}
+    <tr style="background: {% cycle '#f5f9ff' 'white' %};">
+      <td>
+        {{ order.timestamp|date:"Y-m-d H:i" }}
+        {% if order.timestamp|time:"H" >= "18" %}
+          <div class="text-muted" style="font-size:11px">Processed next day 11:00 AM</div>
+        {% endif %}
+      </td>
+      <td>{{ order.stock.company_name }}</td>
+      <td>{{ order.advisor.advisor_type|default:"Others" }}</td>
+      <td>{{ order.broker.name|default:"N/A" }}</td>
+      <td>{{ order.quantity }}</td>
+      <td>₹{{ order.price_per_share }}</td>
+      <td>₹{{ order.total_amount }}</td>
+      <td>{{ order.order_type|title }}</td>
+      <td>{{ order.RM_status }}</td>
+      <td>{{ order.AC_status }}</td>
+      <td>{{ order.status }}</td>
+    </tr>
     {% empty %}
-      <tr><td colspan="8" style="text-align: center; padding: 15px;">No buy orders found.</td></tr>
+      <tr><td colspan="11" class="text-center p-3">No buy orders found.</td></tr>
     {% endfor %}
   </tbody>
 </table>
-
-<!-- Pagination -->
-<div class="user-portfolio-tpaginatioin">
-  {% if page_obj.has_previous %}
-    <a href="?page=1{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">&laquo; First</a>
-    <a href="?page={{ page_obj.previous_page_number }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">Previous</a>
-  {% endif %}
-
-  <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-
-  {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">Next</a>
-    <a href="?page={{ page_obj.paginator.num_pages }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">Last &raquo;</a>
-  {% endif %}
-</div>

@@ -197,6 +197,8 @@ def register_view(request):
 
     return render(request, 'Authentication/register.html', {'form': form})
 
+
+
 def resend_otp(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
 
@@ -264,7 +266,7 @@ def login_view(request):
             elif user_type == 'SM'  or user_type == 'AD':
                 return redirect('SM_User:UnlistedStocksUpdateSM')
             elif user_type == 'DF':
-                return redirect('profile')
+                return redirect('base')
             elif user_type == 'ST':
                 return redirect('ST_User:dashboardST')
             # elif user_type == 'AP':
@@ -880,6 +882,7 @@ def get_bank_account(request, bank_id):
         'account_number': bank.account_number,
         'ifsc_code': bank.ifsc_code,
         'bankDetails_doc_password': bank.bankDetails_doc_password,
+        'document_type': bank.document_type,
     }
     return JsonResponse(data)
 

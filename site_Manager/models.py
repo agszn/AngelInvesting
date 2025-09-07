@@ -73,6 +73,9 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from unlisted_stock_marketplace.models import StockData
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
 
 class Event(models.Model):
     user = models.ForeignKey(
@@ -84,9 +87,18 @@ class Event(models.Model):
     stock = models.ForeignKey(StockData, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=300, blank=True, null=True)
-    paragraph = models.TextField()
+    paragraph = models.TextField(blank=True, null=True)
     date_time = models.DateTimeField(default=timezone.now)  # default = created time, editable
     image = models.ImageField(upload_to="events/images/", blank=True, null=True)
+
+    # ✅ New field for document upload (e.g., PDF)
+    document = models.FileField(
+        upload_to="events/documents/",
+        blank=True,
+        null=True,
+        help_text="Upload a PDF document"
+    )
+
     show = models.BooleanField(default=True)
 
     created_on = models.DateTimeField(auto_now_add=True)  # system creation timestamp

@@ -1,65 +1,58 @@
-<!-- user_portfolio/templates/portfolio/includes/portfolio_table.html -->
- <div class="user-portfolio-toptable">
-                        <!-- Table Header -->
-                        {% if holdings %}
-                        <div class="user-portfolio-head">
-                            <div>Stock Name</div>
-                            <div>Quantity</div>
-                            <div>Avg. Price</div>
-                            <div>LTP</div>
-                            <div>Inv. Amt</div>
-                            <div>Mkt Value</div>
-                            <div>Overall G/L</div>
-                            <div>Day’s G/L</div>
-                        </div>
-                        {% endif %}
-                        <!-- Table Rows -->
-                        {% for h in holdings %}
-                        <div class="user-portfolio-tbody">
-                            <div>
-                                {{ h.stock.company_name }}
-                                        <span title="Buy {{ stock.company_name }}"
-                                        onclick='openBuyModal(
-                                            "{{ h.stock.id }}",
-                                            "{{ h.stock.company_name|escapejs }}",
-                                            "{{ h.stock.share_price }}",
-                                            "{{ h.stock.quantity }}",
-                                            "{% url 'user_portfolio:buy_stock' h.stock.id %}"
-                                        )' style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
+{% comment %} portfolio/includes/portfolio_table.html {% endcomment %}
+<div class="user-portfolio-toptable">
+  {% if holdings %}
+  <div class="user-portfolio-head">
+    <div>Stock Name</div>
+    <div>Quantity</div>
+    <div>Advisor</div>
+    <div>Broker</div>
+    <div>Avg. Price</div>
+    <!-- <div>DateTime</div> -->
+    <div>CMP</div>
+    <div>Inv. Amt</div>
+    <div>Mkt Value</div>
+    <div>Overall P/L</div>
+    <div>Day’s P/L</div>
+  </div>
+  {% endif %}
 
-                                    <span onclick='openSellModal(
-                                        "{{ h.stock.id }}",
-                                        "{{ h.stock.company_name|escapejs }}",
-                                        "{{ h.stock.share_price }}",
-                                        "{{ h.stock.quantity }}",
-                                        "{% url 'user_portfolio:sell_stock' h.stock.id %}"
-                                        )' style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
-                            </div>
-                            <div>{{ h.quantity_held }}</div>
-                            <div>{{ h.avg_price }}</div>
-                            <div>{{ h.ltp }}</div>
-                            <div>{{ h.investment_amount }}</div>
-                            <div>{{ h.market_value }}</div>
-                            <div style="color: {% if h.total_gain_loss >= 0 %}green{% else %}red{% endif %};">
-                                {{ h.overall_gain_loss }}<br><span style="font-size: 12px;">{{ h.total_gain_loss_percent }}%</span>
-                            </div>
-                            <div style="color: {% if h.daily_gain_loss >= 0 %}green{% else %}red{% endif %};">
-                                {{ h.day_gain_loss }}<br><span style="font-size: 12px;">{{ h.daily_gain_loss_percent }}%</span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                        <!-- other Advisor -->
+  {% for h in holdings %}
+  <div class="user-portfolio-tbody">
+    <div>{{ h.stock.company_name }}</div>
+    <div>{{ h.quantity_held }}</div>
+    <div>{{ h.advisor.advisor_type|default:"-" }}</div>
+    <div>{{ h.broker.name|default:"-" }}</div>
+    <div>₹{{ h.avg_price }}</div>
+    <!-- <div>{{ h.last_updated }}</div> -->
+    <div>
+      {% if h.stock and h.stock.ltp is not None %}
+        ₹{{ h.stock.ltp|floatformat:2 }}
+      {% else %}
+        -
+      {% endif %}
+    </div>
+    <div>₹{{ h.investment_amount }}</div>
+    <div>₹{{ h.market_value }}</div>
+    <div style="color: {% if h.overall_gain_loss > 0 %}green{% elif h.overall_gain_loss < 0 %}red{% else %}#333{% endif %};">
+      ₹{{ h.overall_gain_loss }} <small>({{ h.overall_gain_percent }}%)</small>
+    </div>
+    <div style="color: {% if h.day_gain_loss > 0 %}green{% elif h.day_gain_loss < 0 %}red{% else %}#333{% endif %};">
+      ₹{{ h.day_gain_loss }} <small>({{ h.day_gain_percent }}%)</small>
+    </div>
+  </div>
+  {% empty %}
+  <div class="p-3 text-muted">No holdings yet.</div>
+  {% endfor %}
 
-                        <!-- Pagination -->
-                        <div class="user-portfolio-tpaginatioin">
-                            {% if page_obj.has_previous %}
-                                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|cut:'page='|cut:'&' %}{% endif %}" class="btn btn-sm btn-outline-secondary me-1">‹ Prev</a>
-                            {% endif %}
-
-                            <span class="mx-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-
-                            {% if page_obj.has_next %}
-                                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|cut:'page='|cut:'&' %}{% endif %}" class="btn btn-sm btn-outline-secondary ms-1">Next ›</a>
-                            {% endif %}
-                        </div>
-                    </div>
+  <div class="user-portfolio-tpaginatioin">
+    {% if page_obj.has_previous %}
+      <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
+    {% endif %}
+  </div>
+</div>

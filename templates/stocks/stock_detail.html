@@ -308,7 +308,7 @@
 <div class="stock-page-header-1">
   <div class="header-content-details">
     <!-- stock data buy sell wishlist left options start -->
-    <div class="header-details-left" style="margin-left: 20px;">
+    <div class="header-details-left" style="">
         <div class="header-details-logo-left">
             {% if stock.logo %}
                 <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo-1">
@@ -348,8 +348,8 @@
             data-stock-id="{{ stock.id }}" 
             data-stock-name="{{ stock.company_name }}" 
             data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
-            style="width: 100%;">
-            Wishlist 🛒
+            style="width: 100%; margin:0;">
+            Wishlist
           </button>
         </div>
 
@@ -383,34 +383,42 @@
     </div> -->
 
 
-    <div class="header-details-right" style="background: linear-gradient(to right, #0a2342, #36144b); padding: 20px; border-radius: 10px; color: white; font-family: 'Georgia', serif;">
-      <h1 style="font-size: 36px; font-weight: bold; margin-bottom: 10px;">
-        {{ stock.company_name }} 
-      </h1>
+<div class="header-details-right" 
+     style="background: linear-gradient(to right, #0a2342, #36144b); 
+            padding: 20px; 
+            border-radius: 10px; 
+            color: white; 
+            font-family: 'Georgia', serif; 
+            text-align: right;">
+            
+  <h1 style="font-size: 36px; font-weight: bold; margin-bottom: 10px;">
+    {{ stock.company_name }} 
+  </h1>
 
-      <p style="color: gold; font-size: 20px; font-weight: bold; margin-bottom: 0;">
-        Last Traded Price
-      </p>
+  <p style="color: gold; font-size: 20px; font-weight: bold; margin-bottom: 0;">
+    Last Traded Price
+  </p>
 
-      <p style="font-size: 32px; margin: 5px 0;">
-        ₹{{ stock.share_price|floatformat:2 }}
-        {% if stock.profit > 0 %}
-          <span style="color: #00ff00; font-weight: bold;">
-            ( + {{ stock.profit_percentage|floatformat:2 }} % )
-          </span>
-          <span style="font-size: 24px;">⭐ ⭐</span>
-        {% elif stock.profit < 0 %}
-          <span style="color: #ff4c4c; font-weight: bold;">
-           ( {{ stock.profit_percentage|floatformat:2 }} % )
-          </span>
-          <span style="font-size: 24px;">🔻</span>
-        {% else %}
-          <span style="color: #ffffff;">
-           ( 0.00 % )
-          </span>
-        {% endif %}
-      </p>
-    </div>
+  <p style="font-size: 32px; margin: 5px 0;">
+    ₹{{ stock.share_price|floatformat:2 }}
+    {% if stock.profit > 0 %}
+      <span style="color: #00ff00; font-weight: bold;">
+        ( + {{ stock.profit_percentage|floatformat:2 }} % )
+      </span>
+      <span style="font-size: 24px;">⭐ ⭐</span>
+    {% elif stock.profit < 0 %}
+      <span style="color: #ff4c4c; font-weight: bold;">
+        ( {{ stock.profit_percentage|floatformat:2 }} % )
+      </span>
+      <span style="font-size: 24px;">🔻</span>
+    {% else %}
+      <span style="color: #ffffff;">
+        ( 0.00 % )
+      </span>
+    {% endif %}
+  </p>
+</div>
+
 
     <!-- stock data price LEP left options end -->
   </div>
@@ -515,261 +523,331 @@
     </div>
 
     <!-- RIGHT: Stock Performance -->
-    <div class="Sec2_3_PG_box">
-      <h2 class="Sec2_3_PG_heading">Stock <span>Performance</span></h2>
-      <div class="Sec2_3_PG_stockCard">
-        <div class="buttons">
-          <!-- <button class="filter-btn" data-range="7">1W</button> -->
-          <button class="filter-btn" data-range="30">1M</button>
-          <button class="filter-btn" data-range="90">3M</button>
-          <button class="filter-btn active" data-range="180">6M</button>
-          <button class="filter-btn" data-range="365">1Y</button>
-          <!-- <button class="filter-btn" data-range="730">2Y</button> -->
-          <!-- <button class="filter-btn" data-range="1095">3Y</button> -->
-          <!-- <button class="filter-btn" data-range="1825">5Y</button> -->
-          <button class="filter-btn" data-range="MAX">MAX</button>
-        </div>
-
-        <div class="chart">
-          <canvas id="stockPriceChart"></canvas>
-        </div>
-      </div>
+<div class="Sec2_3_PG_box">
+  <h2 class="Sec2_3_PG_heading">Stock <span>Performance</span></h2>
+  <div class="Sec2_3_PG_stockCard">
+    <div class="buttons">
+      <!-- <button class="filter-btn" data-range="7">1W</button> -->
+      <button class="filter-btn" data-range="30">1M</button>
+      <button class="filter-btn" data-range="90">3M</button>
+      <button class="filter-btn active" data-range="180">6M</button>
+      <button class="filter-btn" data-range="365">1Y</button>
+      <!-- <button class="filter-btn" data-range="730">2Y</button> -->
+      <!-- <button class="filter-btn" data-range="1095">3Y</button> -->
+      <!-- <button class="filter-btn" data-range="1825">5Y</button> -->
+      <button class="filter-btn" data-range="MAX">MAX</button>
     </div>
-  </section>
 
-  <style>
-    /* Layout */
-    .Sec2_3_PG_container {
-      display: flex;
-      gap: 20px;
-      align-items: stretch;
-      justify-content: center;
-      flex-wrap: wrap;
+    <div class="chart">
+      <canvas id="stockPriceChart"></canvas>
+    </div>
+  </div>
+</div>
+</section>
+
+<style>
+  /* Layout */
+  .Sec2_3_PG_container {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0 100px;
+    width: 100%;
+  }
+  .Sec2_3_PG_box {
+    display: flex;
+    flex-direction: column;
+    width: 49%;
+  }
+
+  /* Section Headers */
+  .Sec2_3_PG_heading {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+    color: #111;
+    text-align: center;
+  }
+  .Sec2_3_PG_heading span {
+    color: green;
+    font-weight: 800;
+  }
+
+  /* Principles (white card) */
+  .Sec2_3_PG_principlesBox {
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 20px;
+    flex: 1;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    color: #111;
+    position: relative;
+    z-index: 2;
+    isolation: isolate;
+  }
+  .Sec2_3_PG_principlesRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dotted #ccc;
+  }
+  .Sec2_3_PG_principlesRow:last-child { border-bottom: none; }
+  .Sec2_3_PG_col { width: 48%; min-width: 220px; }
+  .Sec2_3_PG_label { font-size: 14px; color: #555 !important; display: block; line-height: 1.3; }
+  .Sec2_3_PG_value { font-size: 16px; font-weight: bold; margin-top: 2px; color: #111 !important; line-height: 1.35; word-break: break-word; }
+
+  /* Stock card (dark) */
+  .Sec2_3_PG_stockCard {
+    background-color: #0d1b3d;
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1;
+    position: relative;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 360px;
+    overflow: hidden;
+  }
+
+  /* Buttons */
+  .buttons { position: absolute; top: 20px; right: 20px; }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid yellow;
+    color: yellow;
+    padding: 4px 10px;
+    margin-left: 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .filter-btn.active {
+    background: yellow;
+    color: #0d1b3d;
+    font-weight: 600;
+  }
+
+  /* Chart area */
+  .chart { width: 100%; flex: 1; margin-top: 60px; position: relative; min-height: 300px; }
+  .chart canvas { width: 100% !important; height: 100% !important; }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .Sec2_3_PG_container { flex-direction: column; align-items: center; }
+    .Sec2_3_PG_box { max-width: 95%; }
+  }
+</style>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const stockDates = JSON.parse('{{ stock_dates|safe }}');
+    const stockPrices = JSON.parse('{{ stock_prices|safe }}').map(Number);
+    const parsedDates = stockDates.map(d => new Date(d));
+
+    const ctx = document.getElementById('stockPriceChart').getContext('2d');
+
+    // ---------- Helpers anchored to LAST DATA POINT ----------
+    const lastIdx = Math.max(0, parsedDates.length - 1);
+    const anchorEnd = new Date(parsedDates[lastIdx]); // latest data point (end)
+
+    // Keep same day-of-month when adding/subtracting months; clamp to month-end when needed
+    function addMonthsSameDay(date, delta) {
+      const d = new Date(date);
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const day = d.getDate();
+      // go to the 1st of target month, then clamp day
+      const target = new Date(y, m + delta, 1);
+      const maxDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+      target.setDate(Math.min(day, maxDay));
+      target.setHours(0, 0, 0, 0);
+      return target;
     }
-    .Sec2_3_PG_box {
-      flex: 1 1 45%;
-      max-width: 600px;
-      min-width: 300px;
-      display: flex;
-      flex-direction: column;
-    }
-    /* Section Headers */
-    .Sec2_3_PG_heading {
-      font-size: 26px;     /* bigger than before */
-      font-weight: 700;    /* bold */
-      margin-bottom: 18px;
-      letter-spacing: 0.5px;
-      color: #111;         /* ensure visible */
-    }
 
-    .Sec2_3_PG_heading span {
-      color: green;
-      font-weight: 800;    /* make the green word extra bold */
+    // Monday helpers: previous Monday (<= date) and next Monday (> date)
+    function prevMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
+      const diff = (day + 6) % 7; // days since Monday
+      date.setDate(date.getDate() - diff);
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+    function nextMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const add = (8 - day) % 7 || 7; // at least +1..+7 to get strictly next Monday
+      date.setDate(date.getDate() + add);
+      date.setHours(23, 59, 59, 999);
+      return date;
     }
 
-    /* Principles (white card) — REPLACE YOUR BLOCK WITH THIS */
-    .Sec2_3_PG_principlesBox {
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 20px;
-      flex: 1;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-
-      /* ensure readable text even if a parent sets color:white */
-      color: #111;
-      position: relative;   /* allow z-index */
-      z-index: 2;           /* keep above any neighbors */
-      isolation: isolate;   /* contain z-index stacking context */
-    }
-
-    .Sec2_3_PG_principlesRow {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;            /* small gap so long labels don’t touch values */
-      padding: 8px 0;
-      border-bottom: 1px dotted #ccc;
-    }
-
-    .Sec2_3_PG_principlesRow:last-child { border-bottom: none; }
-
-    .Sec2_3_PG_col { width: 48%; min-width: 220px; }
-
-    .Sec2_3_PG_label {
-      font-size: 14px;
-      color: #555 !important;  /* protect against global overrides */
-      display: block;
-      line-height: 1.3;
-    }
-
-    .Sec2_3_PG_value {
-      font-size: 16px;
-      font-weight: bold;
-      margin-top: 2px;
-      color: #111 !important;  /* ensure dark text */
-      line-height: 1.35;
-      word-break: break-word;  /* handles long values like CIN/ISIN */
-    }
-
-    /* Helpful if right chart’s absolute elements were overlapping */
-    .Sec2_3_PG_stockCard { overflow: hidden; }
-
-    /* Stock card (dark) */
-    .Sec2_3_PG_stockCard {
-      background-color: #0d1b3d;
-      border-radius: 12px;
-      padding: 20px;
-      flex: 1;
-      position: relative;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 360px; /* gives the card a bit of height */
-    }
-
-    /* Keep original chart-related class names */
-    .buttons {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-    .filter-btn {
-      background: transparent;
-      border: 1px solid yellow;
-      color: yellow;
-      padding: 4px 10px;
-      margin-left: 5px;
-      border-radius: 3px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .filter-btn.active {
-      background: yellow;
-      color: #0d1b3d;
-      font-weight: 600;
-    }
-    .chart {
-      width: 100%;
-      flex: 1;
-      margin-top: 60px;
-      position: relative;
-      min-height: 300px; /* ensures the canvas has drawing space */
-    }
-    .chart canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    /* Responsive */
-    @media (max-width: 1200px) {
-      .Sec2_3_PG_container {
-        flex-direction: column;
-        align-items: center;
-      }
-      .Sec2_3_PG_box { max-width: 95%; }
-    }
-  </style>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const stockDates = JSON.parse('{{ stock_dates|safe }}');               // e.g. ["2025-01-01","2025-02-01"]
-      const stockPrices = JSON.parse('{{ stock_prices|safe }}').map(Number); // e.g. ["123.45","130.22"] -> [123.45,130.22]
-      const parsedDates = stockDates.map(d => new Date(d));
-
-      const ctx = document.getElementById('stockPriceChart').getContext('2d');
-
-      function getDateBefore(days) {
-        const d = new Date();
-        d.setDate(d.getDate() - days);
-        return d;
-      }
-
-      function filterData(range) {
-        if (range === "MAX") return { labels: parsedDates, data: stockPrices };
-
-        const days = parseInt(range, 10);
-        if (!isNaN(days)) {
-          const startDate = getDateBefore(days);
-          const endDate = new Date();
-          const labels = [];
-          const data = [];
-          for (let i = 0; i < parsedDates.length; i++) {
-            if (parsedDates[i] >= startDate && parsedDates[i] <= endDate) {
-              labels.push(parsedDates[i]);
-              data.push(stockPrices[i]);
-            }
-          }
-          return { labels, data };
+    // Filter in [start, end] inclusive
+    function filterBetween(start, end) {
+      const labels = [], data = [];
+      for (let i = 0; i < parsedDates.length; i++) {
+        const t = parsedDates[i];
+        if (t >= start && t <= end) {
+          labels.push(t);
+          data.push(stockPrices[i]);
         }
-        return { labels: parsedDates, data: stockPrices };
+      }
+      return { labels, data, min: start, max: end };
+    }
+
+    function filterRangeByMonthsEndingAtAnchor(monthCount, { snapWeeks = false } = {}) {
+      const end = new Date(anchorEnd);
+      end.setHours(23, 59, 59, 999);
+
+      const startAnchor = addMonthsSameDay(anchorEnd, -monthCount); // same day-of-month back
+      let start = new Date(startAnchor);
+      let max = new Date(end);
+
+      // For 1M, snap to full Monday→Monday windows for clean weekly ticks
+      if (snapWeeks) {
+        start = prevMonday(startAnchor);
+        max = nextMonday(anchorEnd);
       }
 
-      // Default: 6 months
-      const defaultRange = 180;
-      const initial = filterData(defaultRange);
+      return filterBetween(start, max);
+    }
 
-      let stockChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: initial.labels,
-          datasets: [{
-            label: 'Stock Price',
-            data: initial.data,
-            borderColor: 'yellow',
-            backgroundColor: 'rgba(255, 255, 0, 0.2)',
-            borderWidth: 2,
-            pointRadius: 3,
-            pointBackgroundColor: 'yellow',
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          scales: {
-            x: {
-              type: 'time',
-              time: {
-                unit: 'month',
-                tooltipFormat: 'MMM dd, yyyy',
-                displayFormats: { month: 'MMM yyyy' }
-              },
-              ticks: { color: 'white' },
-              grid: { color: 'rgba(255,255,255,0.15)' }
+    function filterData(rangeAttr) {
+      if (rangeAttr === "MAX") {
+        const start = new Date(parsedDates[0]); start.setHours(0, 0, 0, 0);
+        const end = new Date(anchorEnd); end.setHours(23, 59, 59, 999);
+        return filterBetween(start, end);
+      }
+      const map = { "30": 1, "90": 3, "180": 6, "365": 12 };
+      const months = map[String(rangeAttr)] ?? 6;
+      const snapWeeks = rangeAttr === "30"; // only 1M snaps Monday→Monday
+      return filterRangeByMonthsEndingAtAnchor(months, { snapWeeks });
+    }
+
+    // ---------- Scales ----------
+    function scaleOptions(rangeAttr) {
+      if (rangeAttr === "30") {
+        // 1M → weekly ticks (we've snapped min/max to Monday→Monday)
+        return {
+          x: {
+            type: 'time',
+            bounds: 'ticks',
+            offset: false,
+            time: {
+              unit: 'week',
+              stepSize: 1,
+              displayFormats: { week: 'dd MMM' },
+              tooltipFormat: 'MMM dd, yyyy'
             },
-            y: {
-              ticks: { color: 'white' },
-              grid: { color: 'rgba(255,255,255,0.15)' }
-            }
+            ticks: {
+              color: 'white',
+              autoSkip: false,
+              maxRotation: 45,
+              minRotation: 45
+            },
+            grid: { color: 'rgba(255,255,255,0.15)' }
           },
-          plugins: {
-            legend: { labels: { color: 'white' } },
-            tooltip: { mode: 'index', intersect: false }
+          y: {
+            ticks: { color: 'white' },
+            grid: { color: 'rgba(255,255,255,0.15)' }
           }
+        };
+      }
+
+      // Other ranges → monthly ticks
+      return {
+        x: {
+          type: 'time',
+          bounds: 'ticks',
+          offset: false,
+          time: {
+            unit: 'month',
+            stepSize: 1,
+            displayFormats: { month: 'MMM yyyy' },
+            tooltipFormat: 'MMM dd, yyyy'
+          },
+          ticks: {
+            color: 'white',
+            autoSkip: false,
+            maxRotation: 45,
+            minRotation: 45
+          },
+          grid: { color: 'rgba(255,255,255,0.15)' }
+        },
+        y: {
+          ticks: { color: 'white' },
+          grid: { color: 'rgba(255,255,255,0.15)' }
         }
-      });
+      };
+    }
 
-      // Range button interactions + active state
-      document.querySelectorAll(".filter-btn").forEach(btn => {
-        btn.addEventListener("click", function () {
-          const range = this.getAttribute("data-range");
-          const { labels, data } = filterData(range);
-          stockChart.data.labels = labels;
-          stockChart.data.datasets[0].data = data;
-          stockChart.update();
+    // ---------- Build chart (default 6M) ----------
+    const defaultRange = "180";
+    const initial = filterData(defaultRange);
 
-          document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-          this.classList.add("active");
-        });
+    let stockChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: initial.labels,
+        datasets: [{
+          label: 'Stock Price',
+          data: initial.data,
+          borderColor: 'yellow',
+          backgroundColor: 'rgba(255, 255, 0, 0.2)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: 'yellow',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        scales: scaleOptions(defaultRange),
+        plugins: {
+          legend: { labels: { color: 'white' } },
+          tooltip: { mode: 'index', intersect: false }
+        }
+      }
+    });
+
+    stockChart.options.scales.x.min = initial.min;
+    stockChart.options.scales.x.max = initial.max;
+    stockChart.update();
+
+    // ---------- Range buttons ----------
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", function () {
+        const range = this.getAttribute("data-range");
+        const { labels, data, min, max } = filterData(range);
+
+        stockChart.options.scales = scaleOptions(range);
+        stockChart.data.labels = labels;
+        stockChart.data.datasets[0].data = data;
+        stockChart.options.scales.x.min = min;
+        stockChart.options.scales.x.max = max;
+
+        stockChart.update();
+
+        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
       });
     });
-  </script>
+  });
+</script>
+
 
 <!-- principles and graph section 2 and 3 end -->
 
@@ -841,7 +919,7 @@
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 2fr);
     gap: 20px;
-    margin: 40px 100px;
+    margin: 20px 100px 40px 100px;
   }
 
   .cs-all-details {
@@ -891,7 +969,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 40px 100px 20px 100px;
+    margin: 40px 100px 0 100px;
     text-align: center;
   }
 
@@ -911,7 +989,7 @@
   }
 
   .cs-buttons button {
-    width: 130px;
+    width: 150px;
     height: 50px;
     font-size: 16px;
     font-weight: 600;
@@ -1044,10 +1122,10 @@
 <div class="cs-container">
   <!-- Top Centered Header + Buttons -->
   <div class="cs-top-center">
-    <h1 class="cs-heading" style="font-size: larger;">Share <span class="highlight">Details</span></h1>
+    <h1 class="cs-heading" style="font-size: 38px;">Share <span class="highlight">Details</span></h1>
 
     <div class="cs-buttons">
-      <button type="button" onclick="csShowSection('overview')">Overview</button>
+      <button type="button" onclick="csShowSection('overview')" class="cs-active">Overview</button>
       <button type="button" onclick="csShowSection('balance-sheet')">Balance Sheet</button>
       <button type="button" onclick="csShowSection('pl-account')">P&L Account</button>
       <button type="button" onclick="csShowSection('cash-flow')">Cash Flow</button>
@@ -1281,7 +1359,8 @@
 </div>
 
 <script>
-  function csShowSection(id) {
+  function csShowSection(id) 
+  {
     const sections = document.querySelectorAll('.cs-content-section, #overview');
     const buttons = document.querySelectorAll('.cs-buttons button');
     const sidebar = document.getElementById('cs-events');
@@ -1306,13 +1385,13 @@
     if (activeBtn) activeBtn.classList.add('cs-active');
 
     // Smooth scroll
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 900, behavior: 'smooth' });
   }
 
   // Default
-  window.onload = () => {
-    csShowSection('overview');
-  };
+  // window.onload = () => {
+  //   csShowSection('overview');
+  // };
 </script>
 
 

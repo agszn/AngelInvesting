@@ -303,7 +303,7 @@
                 <ul class="user-custom-subnav-list">
                     <li><a href="{% url 'user_portfolio:profile_overview' %}" class="{% if request.resolver_match.url_name == 'profile_overview' %}active{% endif %}">Overview</a></li>
                     <li><a href="{% url 'user_portfolio:unlisted_view' %}" class="{% if request.resolver_match.url_name == 'unlisted_view' %}active{% endif %}">Unlisted</a></li>
-                    <li><a href="{% url 'user_portfolio:angel_invest' %}" class="{% if request.resolver_match.url_name == 'angel_invest' %}active{% endif %}">Angel Invest</a></li>
+                    <!-- <li><a href="{% url 'user_portfolio:angel_invest' %}" class="{% if request.resolver_match.url_name == 'angel_invest' %}active{% endif %}">Angel Invest</a></li> -->
                     <li><a href="{% url 'user_portfolio:portfolio_view' %}" class="{% if request.resolver_match.url_name == 'portfolio_view' %}active{% endif %}">Portfolio</a></li>
                     <li><a href="{% url 'user_portfolio:buy_orders' %}" class="{% if request.resolver_match.url_name == 'buy_orders' %}active{% endif %}">Buy Orders</a></li>
                     <li><a href="{% url 'user_portfolio:sell_orders' %}" class="{% if request.resolver_match.url_name == 'sell_orders' %}active{% endif %}">Sell Orders</a></li>
@@ -315,16 +315,17 @@
             <div class="user-main-dashboardcontent">
                 <div class="user-dashboard-heading"><h3>Profile</h3></div>
 
+    <!-- errors start -->
                 <!-- Feedback Messages -->
-                {% if messages %}
+                <!-- {% if messages %}
                     <ul>
                         {% for message in messages|slice:":4" %}
                             <li style="color: {% if message.tags == 'success' %}green{% else %}red{% endif %};">{{ message }}</li>
                         {% endfor %}
                     </ul>
-                {% endif %}
+                {% endif %} -->
 
-                {% if form.errors %}
+                <!-- {% if form.errors %}
                     <div style="color: red; margin-top: 10px;">
                         <strong>Form Errors:</strong>
                         <ul>
@@ -334,8 +335,9 @@
                             {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
                         </ul>
                     </div>
-                {% endif %}
+                {% endif %} -->
 
+    <!-- error end -->
                 <!-- Profile header -->
                 <div class="user-profile-dashboard">
                     <div class="user-nameProfile">

@@ -1,96 +1,143 @@
 {% extends "accounts/profile.html" %}
 {% block title %}My Profile{% endblock %}
-
 {% block profile_content %}
 <div class="user-porfolio-dashboard">
   <div class="user-portfolio-top">
     <div class="user-dashboard-heading"><h3>Buy Order Summary</h3></div>
 
-    <!-- Search Bar -->
-    <div class="search-details-user">
-      <form method="get" class="d-flex" style="gap: 10px;">
-        <input id="buy-search-input" type="text" 
-               name="search" 
-               value="{{ current_filters.search|default_if_none:'' }}" 
-               placeholder="Search or type command..." 
-               autocomplete="off" />
-      </form>
-    </div>
+    <div class="d-flex align-items-center" style="gap: 12px; flex-wrap: wrap;">
+      <!-- Search -->
+      <div class="search-details-user">
+        <form method="get" class="d-flex" style="gap: 10px;">
+          <input id="buy-search-input"
+                 type="text"
+                 name="search"
+                 value="{{ search_query|default_if_none:'' }}"
+                 placeholder="Search or type command..."
+                 autocomplete="off" />
+        </form>
+      </div>
 
-    <!-- Dropdown Filters -->
-    <div class="search-details-dropdown">
-      <!-- Advisor Dropdown -->
+      <!-- Advisor Filter -->
       <div class="dropdown">
-        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <button id="buyAdvisorBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           {{ selected_advisor.advisor_type|default:"Advisor" }}
         </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="?{% if current_filters.broker %}broker={{ current_filters.broker }}&{% endif %}{% if current_filters.type %}type={{ current_filters.type }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}">All Advisors</a></li>
+        <ul id="buyAdvisorMenu" class="dropdown-menu">
+          <li>
+            <a class="dropdown-item ajax-filter {% if not selected_advisor %}active{% endif %}"
+               data-filter="advisor" data-value=""
+               href="?{% if selected_broker %}broker={{ selected_broker.id }}{% endif %}{% if search_query %}{% if selected_broker %}&{% endif %}search={{ search_query|urlencode }}{% endif %}{% if sort %}{% if selected_broker or search_query %}&{% endif %}sort={{ sort }}{% endif %}">
+              {% if not selected_advisor %}✓ {% endif %}All Advisors
+            </a>
+          </li>
           {% for adv in advisors %}
-            <li><a class="dropdown-item" href="?advisor={{ adv.id }}{% if current_filters.broker %}&broker={{ current_filters.broker }}{% endif %}{% if current_filters.type %}&type={{ current_filters.type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">{{ adv.advisor_type|upper }}</a></li>
+          <li>
+            <a class="dropdown-item ajax-filter {% if selected_advisor and adv.id == selected_advisor.id %}active{% endif %}"
+               data-filter="advisor" data-value="{{ adv.id }}"
+               href="?advisor={{ adv.id }}{% if selected_broker %}&broker={{ selected_broker.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+              {% if selected_advisor and adv.id == selected_advisor.id %}✓ {% endif %}{{ adv.advisor_type|upper }}
+            </a>
+          </li>
           {% endfor %}
         </ul>
       </div>
 
-      <!-- Broker Dropdown -->
+      <!-- Broker Filter -->
       <div class="dropdown">
-        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <button id="buyBrokerBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           {{ selected_broker.name|default:"Broker" }}
         </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="?{% if current_filters.advisor %}advisor={{ current_filters.advisor }}&{% endif %}{% if current_filters.type %}type={{ current_filters.type }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}">All Brokers</a></li>
+        <ul id="buyBrokerMenu" class="dropdown-menu">
+          <li>
+            <a class="dropdown-item ajax-filter {% if not selected_broker %}active{% endif %}"
+               data-filter="broker" data-value=""
+               href="?{% if selected_advisor %}advisor={{ selected_advisor.id }}{% endif %}{% if search_query %}{% if selected_advisor %}&{% endif %}search={{ search_query|urlencode }}{% endif %}{% if sort %}{% if selected_advisor or search_query %}&{% endif %}sort={{ sort }}{% endif %}">
+              {% if not selected_broker %}✓ {% endif %}All Brokers
+            </a>
+          </li>
           {% for bro in brokers %}
-            <li><a class="dropdown-item" href="?broker={{ bro.id }}{% if current_filters.advisor %}&advisor={{ current_filters.advisor }}{% endif %}{% if current_filters.type %}&type={{ current_filters.type }}{% endif %}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}">{{ bro.name }}</a></li>
+          <li>
+            <a class="dropdown-item ajax-filter {% if selected_broker and bro.id == selected_broker.id %}active{% endif %}"
+               data-filter="broker" data-value="{{ bro.id }}"
+               href="?broker={{ bro.id }}{% if selected_advisor %}&advisor={{ selected_advisor.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+              {% if selected_broker and bro.id == selected_broker.id %}✓ {% endif %}{{ bro.name }}
+            </a>
+          </li>
           {% endfor %}
         </ul>
       </div>
     </div>
   </div>
 
-  <!-- Table Section -->
-  <div style="overflow-x: auto;">
-    <div style="min-width: 800px;">
-      <div class="user-portfolio-table">
-        {% include "portfolio/includes/buy_orders_table.html" %}
-      </div>
-    </div>
+  <div class="user-portfolio-table" id="buy-orders-table-container">
+    {% include "portfolio/includes/buy_orders_table.html" %}
   </div>
 </div>
 
-<!-- AJAX Script -->
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('buy-search-input');
-    const tableContainer = document.querySelector('.user-portfolio-table');
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('buy-search-input');
+  const container = document.getElementById('buy-orders-table-container');
+  const advBtn = document.getElementById('buyAdvisorBtn');
+  const broBtn = document.getElementById('buyBrokerBtn');
 
-    if (!searchInput || !tableContainer) return;
-
-    let debounceTimer;
-
-    searchInput.addEventListener('input', function () {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(function () {
-        const query = encodeURIComponent(searchInput.value);
-
-        const advisor = "{{ current_filters.advisor|default_if_none:'' }}";
-        const broker = "{{ current_filters.broker|default_if_none:'' }}";
-        const type = "{{ current_filters.type|default_if_none:'' }}";
-
-        let url = `{% url 'user_portfolio:buy_orders' %}?search=${query}`;
-        if (advisor) url += `&advisor=${advisor}`;
-        if (broker) url += `&broker=${broker}`;
-        if (type) url += `&type=${type}`;
-
-        fetch(url, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.text())
+  // Search (AJAX)
+  let timer;
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const p = new URLSearchParams(window.location.search);
+      p.set('search', input.value);
+      const url = window.location.pathname + '?' + p.toString();
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
         .then(html => {
-          tableContainer.innerHTML = html;
-        })
-        .catch(err => console.error('Buy search failed:', err));
-      }, 300);
-    });
+          container.innerHTML = html;
+          history.replaceState(null, '', url);
+        });
+    }, 300);
   });
+
+  // Advisor/Broker filters (AJAX)
+  function wireFilterLinks() {
+    document.querySelectorAll('.ajax-filter').forEach(a => {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = a.getAttribute('href');
+        const filterType = a.dataset.filter; // 'advisor' or 'broker'
+        const labelText = a.textContent.trim().replace(/^✓\s*/, '');
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(r => r.text())
+          .then(html => {
+            container.innerHTML = html;
+            history.replaceState(null, '', url);
+
+            // Update the dropdown label
+            if (filterType === 'advisor') advBtn.textContent = labelText;
+            if (filterType === 'broker')  broBtn.textContent  = labelText;
+
+            // Update active state & checkmark in menu
+            const menuId = filterType === 'advisor' ? 'buyAdvisorMenu' : 'buyBrokerMenu';
+            const menu = document.getElementById(menuId);
+            if (menu) {
+              Array.from(menu.querySelectorAll('.dropdown-item')).forEach(item => {
+                item.classList.remove('active');
+                item.innerHTML = item.textContent.trim().replace(/^✓\s*/, '');
+              });
+              a.classList.add('active');
+              if (!a.textContent.trim().startsWith('✓')) {
+                a.innerHTML = '✓ ' + a.textContent.trim();
+              }
+            }
+          })
+          .catch(console.error);
+      });
+    });
+  }
+
+  wireFilterLinks();
+});
 </script>
 {% endblock %}

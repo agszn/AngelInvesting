@@ -179,10 +179,10 @@
           <nav class="footer-nav">
             <ul class="footer-links">
               <li><a href="/" class="footer-link">Home</a></li>
-              <li><a href="#" class="footer-link">Companies</a></li>
-              <li><a href="#" class="footer-link">Blog</a></li>
-              <li><a href="#" class="footer-link">Services</a></li>
-              <li><a href="#" class="footer-link">Contact us</a></li>
+              <li><a href="{% url 'unlisted_stock_marketplace:stock_list' %}" class="footer-link">Unlisted Share's</a></li>
+              <li><a href="{%  url 'blog' %}" class="footer-link">Blog</a></li>
+              <li><a href="{%  url 'about' %}" class="footer-link">About Us</a></li>
+              <li><a href="{%  url 'contact' %}" class="footer-link">Contact us</a></li>
             </ul>
           </nav>
         </section>
@@ -191,11 +191,11 @@
           <h3 class="column-title">Company</h3>
           <nav class="footer-nav">
             <ul class="footer-links">
-              <li><a href="{%  url 'about' %}" class="footer-link">About</a></li>
+              <!-- <li><a href="{%  url 'about' %}" class="footer-link">About Us</a></li> -->
               <li><a href="{%  url 'terms' %}" class="footer-link">Terms & Conditions</a></li>
               <li><a href="{%  url 'privacy' %}" class="footer-link">Privacy Policy</a></li>
               <li><a href="{%  url 'disclaimer' %}" class="footer-link">Disclaimer</a></li>
-              <li><a href="{%  url 'faq' %}" class="footer-link">FAQ</a></li>
+              <li><a href="{%  url 'faq' %}" class="footer-link">FAQ's</a></li>
               <li><a href="#" class="footer-link">Refund and Cancellation</a></li>
             </ul>
           </nav>
@@ -204,15 +204,40 @@
         <section class="footer-column legal-column">
           <h3 class="column-title highlight-head">Thangiv Consultancy Pvt Ltd</h3>
           <address class="footer-contact">
-            No 3543/02, Marsur Village, Anekal, Bangalore, Anekal, Karnataka, India, 562106
+            No 3543/02, Marsur, Bangalore, Karnataka, <br>India - 562106
           </address>
-          <p class="footer-contact"><strong>Email:</strong> info@theangelinvesting.com</p>
+          <p class="footer-contact"><strong>Email:</strong> Info@thangiv.com</p>
           <p class="footer-contact"><strong>Phone:</strong> 9740940369</p>
           <div class="social-iocons-footer">
-            <a><img src="{% static 'Media/images/tweeter.png' %}" alt="tweeter"></a>
-            <a><img src="{% static 'Media/images/instagram.png' %}" alt="instagram"></a>
-            <a><img src="{% static 'Media/images/youtube.png' %}" alt="youtube"></a>
-            <a><img src="{% static 'Media/images/facebook.png' %}" alt="facebook"></a>
+
+          <style>
+          .social-icons a {
+              margin: 0 10px;
+              text-decoration: none;
+          }
+
+          .social-icons i {
+              transition: transform 0.3s ease, color 0.3s ease;
+          }
+
+          .social-icons i:hover {
+              transform: scale(1.2);
+          }
+
+          /* Brand colors */
+          .fa-twitter { color: #1DA1F2; }
+          .fa-instagram { color: #E4405F; }
+          .fa-youtube { color: #FF0000; }
+          .fa-facebook { color: #1877F2; }
+          </style>
+
+          <div class="social-icons">
+              <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter fa-2x"></i></a>
+              <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram fa-2x"></i></a>
+              <a href="https://youtube.com" target="_blank"><i class="fab fa-youtube fa-2x"></i></a>
+              <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook fa-2x"></i></a>
+          </div>
+
           </div>
             <!-- theme start -->
             <!-- <br>

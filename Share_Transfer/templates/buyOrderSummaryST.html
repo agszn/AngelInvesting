@@ -234,7 +234,7 @@
                 </table>
                 <div class="STpayment-process">
                     <h4><strong>Deal Value: </strong> {{ order.total_amount }}</h4>
-                    <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ order.order_id }}" class="STpayment-button">
+                    <a href="{% url 'ST_User:buyDealLetterrST' %}?order_id={{ order.order_id }}" class="STpayment-button"    target="_blank" rel="noopener noreferrer">
                         Generate Deal Letter
                     </a>
                 </div>

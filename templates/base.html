@@ -21,6 +21,8 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <link rel="stylesheet" href="{% static 'css/Style.css' %}" />
     <link rel="stylesheet" href="{% static 'css/header.css' %}" />
     <link rel="stylesheet" href="{% static 'css/Style_sidebar.css' %}" />
@@ -401,7 +403,7 @@
 
 
     <!-- navbar search Script start -->
-    <script>
+    <!-- <script>
       const searchOverlay = document.getElementById('searchOverlay');
       const searchInput = document.getElementById('stockSearchInput');
       const searchResults = document.getElementById('searchResults');
@@ -495,7 +497,117 @@
         }
       });
 
-    </script>
+    </script> -->
+<script>
+  const searchOverlay = document.getElementById('searchOverlay');
+  const searchInput = document.getElementById('stockSearchInput');
+  const searchResults = document.getElementById('searchResults');
+
+  // Stock list from Django context
+  const stocks = [
+    {% for stock in marquee_stocks %}
+      {% if stock.percentage_diff is not None and not stock.hide_company_overview %}
+        {
+          name: "{{ stock.company_name|escapejs }}",
+          scrip: "{{ stock.scrip_name|default:''|escapejs }}",
+          isin: "{{ stock.isin_no|default:''|escapejs }}",
+          url: "{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}"
+        },
+      {% endif %}
+    {% endfor %}
+  ];
+
+  let selectedIndex = -1;
+
+  // Open overlay on search icon click
+  document.querySelector('.unlisted-deals').addEventListener('click', () => {
+    searchOverlay.classList.add('active');
+    searchInput.focus();
+  });
+
+  function closeSearch() {
+    searchOverlay.classList.remove('active');
+    searchInput.value = '';
+    searchResults.innerHTML = '';
+    selectedIndex = -1;
+  }
+
+  function renderResults(filtered, query) {
+    searchResults.innerHTML = '';
+    filtered.forEach((stock, index) => {
+      const li = document.createElement('li');
+
+      // Show company name + optional details
+      li.innerHTML = `
+        <strong>${stock.name}</strong><br>
+        <small>Scrip: ${stock.scrip || '-'} | ISIN: ${stock.isin || '-'}</small>
+      `;
+
+      li.addEventListener('click', () => {
+        window.location.href = stock.url;
+      });
+
+      if(index === selectedIndex) li.classList.add('selected');
+      searchResults.appendChild(li);
+    });
+  }
+
+  // Live search filter
+  searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase();
+    selectedIndex = -1;
+
+    if(query === '') {
+      searchResults.innerHTML = '';
+      return;
+    }
+
+    const filtered = stocks.filter(stock =>
+      (stock.name && stock.name.toLowerCase().includes(query)) ||
+      (stock.scrip && stock.scrip.toLowerCase().includes(query)) ||
+      (stock.isin && stock.isin.toLowerCase().includes(query))
+    );
+
+    renderResults(filtered, query);
+  });
+
+  // Keyboard navigation
+  searchInput.addEventListener('keydown', function(e) {
+    const items = searchResults.querySelectorAll('li');
+    if(items.length === 0) return;
+
+    if(e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex + 1) % items.length;
+      renderResults(
+        Array.from(items).map(li => ({
+          name: li.querySelector('strong').textContent,
+          scrip: "", isin: "",
+          url: stocks.find(s => s.name === li.querySelector('strong').textContent).url
+        })),
+        searchInput.value
+      );
+    } else if(e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+      renderResults(
+        Array.from(items).map(li => ({
+          name: li.querySelector('strong').textContent,
+          scrip: "", isin: "",
+          url: stocks.find(s => s.name === li.querySelector('strong').textContent).url
+        })),
+        searchInput.value
+      );
+    } else if(e.key === 'Enter') {
+      e.preventDefault();
+      if(selectedIndex >= 0) {
+        const selectedStock = stocks.find(s => s.name === items[selectedIndex].querySelector('strong').textContent);
+        if(selectedStock) window.location.href = selectedStock.url;
+      }
+    }
+  });
+</script>
+
     <!-- navbar search Script end -->
 
         <main class="main_class" style="padding-top:121px;">
@@ -511,12 +623,11 @@
                 {% include 'landing/index/index2.html' %}
 
                 <!-- whatsApp start part 3  -->
-
                 <div class="rm-whatsapp-container text-end">
-                  <div class="rm-contact-list shadow rounded">
-
+                  <div class="rm-contact-list shadow rounded" style="display: none;">
                     {% for rm in rms %}
-                      <div class="rm-contact-card d-flex align-items-center p-2" onclick="sendWhatsApp('{{ rm.phone_number }}', 'Hi {{ rm.get_full_name|default:rm.username }}!')">
+                      <div class="rm-contact-card d-flex align-items-center p-2" 
+                          onclick="sendWhatsApp('{{ rm.phone_number }}', 'Hi {{ rm.get_full_name|default:rm.username }}!')">
                         <div class="rm-icon-wrapper">
                           <i class="bi bi-person"></i>
                         </div>
@@ -526,14 +637,12 @@
                         </div>
                       </div>
                     {% endfor %}
-
                   </div>
 
                   <button class="rm-main-whatsapp-btn" onclick="toggleRMList()">
-                    <i class="bi bi-whatsapp"></i>
+                    <i id="rm-toggle-icon" class="bi bi-whatsapp"></i>
                   </button>
                 </div>
-
 
                 <script>
                   function sendWhatsApp(phone, message) {
@@ -543,9 +652,20 @@
 
                   function toggleRMList() {
                     const list = document.querySelector('.rm-contact-list');
-                    list.style.display = list.style.display === 'block' ? 'none' : 'block';
+                    const icon = document.getElementById('rm-toggle-icon');
+
+                    if (list.style.display === 'block') {
+                      list.style.display = 'none';
+                      icon.classList.remove('bi-x');
+                      icon.classList.add('bi-whatsapp');
+                    } else {
+                      list.style.display = 'block';
+                      icon.classList.remove('bi-whatsapp');
+                      icon.classList.add('bi-x');
+                    }
                   }
                 </script>
+
 
 
                 <!-- whatsApp end part 3  -->
@@ -558,14 +678,14 @@
                         <h1 class="contact-heading">Contact Us</h1>
                         <p class="contact-description">
                           If you'd like to learn more about The Angel Investing and how we can assist
-                          you in navigating your unlisted share investment journey, please get
+                          you in navigating your unlisted shares investment journey, Please get
                           in touch with us.
                         </p>
                     </div>
                     <div class="contact-info">
                       <p class="contact-info-label">Reach out to us</p>
                       <p class="contact-info-details">
-                        <b>Email:</b> info@theangelinvesting.com, <b>Phone:</b>+91 9740940369
+                        <b>Email:</b> Info@thangiv.com, <b>Phone:</b>+91 9740940369
                       </p>
                       <p class="contact-assistance">
                         Our expert would be happy to provide you personal assistance for your queries.

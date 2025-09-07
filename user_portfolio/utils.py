@@ -42,35 +42,64 @@
 #         summary.update_from_transactions()  
 #         summary.save()
 
+from decimal import Decimal
 
 def update_user_holdings(user):
-    from user_portfolio.models import BuyTransaction, BuyTransactionOtherAdvisor, SellTransaction
+    """
+    Recompute UserStockInvestmentSummary for this user.
+
+    - For "normal" advisors: quantity_held = total_buys - total_sells (excluding 'Other' advisor sells)
+    - For "Other" advisor: quantity_held = total_buys (no sells applied)
+    - Weighted Avg Price = sum(qty * price) / sum(qty)
+    """
+    from user_portfolio.models import (
+        BuyTransaction, BuyTransactionOtherAdvisor,
+        SellTransaction, UserStockInvestmentSummary
+    )
     from unlisted_stock_marketplace.models import StockData
-    from .models import UserStockInvestmentSummary
 
-    # Normal BuyTransaction
-    buy_stock_ids = BuyTransaction.objects.filter(user=user, status='completed').values_list('stock_id', flat=True).distinct()
+    # Distinct stocks by side
+    normal_stock_ids = list(
+        BuyTransaction.objects.filter(user=user, status='completed')
+        .values_list('stock_id', flat=True).distinct()
+    )
+    other_stock_ids = list(
+        BuyTransactionOtherAdvisor.objects.filter(user=user, status='completed')
+        .values_list('stock_id', flat=True).distinct()
+    )
 
-    # BuyTransactionOtherAdvisor
-    other_buy_stock_ids = BuyTransactionOtherAdvisor.objects.filter(user=user, status='completed').values_list('stock_id', flat=True).distinct()
-
-    # ✅ Update non-Other advisor holdings
-    for stock_id in buy_stock_ids:
-        stock = StockData.objects.filter(id=stock_id).first()
+    # Normal bucket
+    for sid in normal_stock_ids:
+        stock = StockData.objects.filter(id=sid).first()
         if not stock:
             continue
-        summary, _ = UserStockInvestmentSummary.objects.get_or_create(user=user, stock=stock, is_other_advisor=False)
+        summary, _ = UserStockInvestmentSummary.objects.get_or_create(
+            user=user, stock=stock, is_other_advisor=False
+        )
         summary.update_from_transactions()
-        summary.save()
+        summary.save(update_fields=[
+            'quantity_held', 'avg_price', 'share_price', 'ltp', 'previous_day_price',
+            'market_value', 'investment_amount', 'overall_gain_loss', 'overall_gain_percent',
+            'day_gain_loss', 'day_gain_percent',
+            'buy_order_count', 'buy_order_total', 'sell_order_count', 'sell_order_total',
+            'advisor', 'broker', 'last_updated'
+        ])
 
-    # ✅ Update "Other" advisor holdings
-    for stock_id in other_buy_stock_ids:
-        stock = StockData.objects.filter(id=stock_id).first()
+    # "Other advisor" bucket
+    for sid in other_stock_ids:
+        stock = StockData.objects.filter(id=sid).first()
         if not stock:
             continue
-        summary, _ = UserStockInvestmentSummary.objects.get_or_create(user=user, stock=stock, is_other_advisor=True)
+        summary, _ = UserStockInvestmentSummary.objects.get_or_create(
+            user=user, stock=stock, is_other_advisor=True
+        )
         summary.update_from_transactions()
-        summary.save()
+        summary.save(update_fields=[
+            'quantity_held', 'avg_price', 'share_price', 'ltp', 'previous_day_price',
+            'market_value', 'investment_amount', 'overall_gain_loss', 'overall_gain_percent',
+            'day_gain_loss', 'day_gain_percent',
+            'buy_order_count', 'buy_order_total', 'advisor', 'broker', 'last_updated'
+        ])
 
 
 

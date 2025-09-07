@@ -124,6 +124,7 @@ class StockDataForm(forms.ModelForm):
             'transfer_agent_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
 
             'stock_type': forms.Select(attrs={'class': 'form-select'}),
+            'youtube_video_link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://youtube.com/...'}),
         }
 
 # ===================== Inline Formsets =====================
@@ -221,11 +222,22 @@ from .models import Event
 
 from django import forms
 from .models import Event
+from django import forms
+from .models import Event
 
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ["stock", "title", "subtitle", "paragraph", "date_time", "image", "show"]
+        fields = [
+            "stock", 
+            "title", 
+            "subtitle", 
+            "paragraph", 
+            "date_time", 
+            "image", 
+            "document",   # ✅ Added document field
+            "show"
+        ]
 
         widgets = {
             "stock": forms.Select(attrs={
@@ -250,6 +262,10 @@ class EventForm(forms.ModelForm):
             }),
             "image": forms.ClearableFileInput(attrs={
                 "class": "form-control"
+            }),
+            "document": forms.ClearableFileInput(attrs={   # ✅ File input for PDF
+                "class": "form-control",
+                "accept": "application/pdf"   # ensures only PDF selection in file picker
             }),
             "show": forms.CheckboxInput(attrs={
                 "class": "form-check-input"

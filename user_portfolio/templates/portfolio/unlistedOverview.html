@@ -5,43 +5,69 @@
 {% load static%}
 {% block profile_content %}
 <div class="user-login-overview">
+    <!-- Invested Amount -->
     <div class="user-overview-feilds">
-        <div class="user-overview-icons">
-            <img src="{% static 'Media/images/overview1.png' %}" alt="overview-login">
-        </div>
+        <!-- <div class="user-overview-icons">
+            <i class="bi bi-coin text-warning fs-2"></i>
+        </div> -->
         <div class="user-overview-details">
             <h3>Invested Amount</h3>
             <p>₹{{ total_invested|floatformat:2 }}</p>
         </div>
     </div>
+
+    <!-- Current Value -->
     <div class="user-overview-feilds">
-        <div class="user-overview-icons">
-            <img src="{% static 'Media/images/overview2.png' %}" alt="overview-login">
-        </div>
+        <!-- <div class="user-overview-icons">
+            <i class="bi bi-cash-stack text-primary fs-2"></i>
+        </div> -->
         <div class="user-overview-details">
             <h3>Current Value</h3>
             <p>₹{{ total_market_value|floatformat:2 }}</p>
         </div>
     </div>
+
+    <!-- Overall Loss/Gain -->
     <div class="user-overview-feilds">
-        <div class="user-overview-icons">
-            <img src="{% static 'Media/images/overview3.png' %}" alt="overview-login">
-        </div>
+        <!-- <div class="user-overview-icons">
+            {% if total_gain_loss > 0 %}
+                <i class="bi bi-arrow-up-short text-success fs-2"></i>
+            {% elif total_gain_loss < 0 %}
+                <i class="bi bi-arrow-down-short text-danger fs-2"></i>
+            {% else %}
+                <i class="bi bi-dash text-secondary fs-2"></i>
+            {% endif %}
+        </div> -->
         <div class="user-overview-details">
-            <h3>Overall Loss/Gain</h3>
-            <p class="{% if total_gain_loss >= 0 %}overviewgain{% else %}overviewloss{% endif %}">₹{{ total_gain_loss|floatformat:2 }} <span>{{ overall_gain_loss_percent }}%</span></p>
+            <h3>Overall P/L</h3>
+            <p class="{% if total_gain_loss > 0 %}overviewgain{% elif total_gain_loss < 0 %}overviewloss{% else %}overviewneutral{% endif %}">
+                ₹{{ total_gain_loss|floatformat:2 }}
+                <span>{{ overall_gain_loss_percent }}%</span>
+            </p>
         </div>
     </div>
+
+    <!-- Today's Gain -->
     <div class="user-overview-feilds">
-        <div class="user-overview-icons">
-            <img src="{% static 'Media/images/overview4.png' %}" alt="overview-login">
-        </div>
+        <!-- <div class="user-overview-icons">
+            {% if todays_gain > 0 %}
+                <i class="bi bi-arrow-up-short text-success fs-2"></i>
+            {% elif todays_gain < 0 %}
+                <i class="bi bi-arrow-down-short text-danger fs-2"></i>
+            {% else %}
+                <i class="bi bi-dash text-secondary fs-2"></i>
+            {% endif %}
+        </div> -->
         <div class="user-overview-details">
-            <h3>Today's Gain</h3>
-            <p class="{% if total_gain_loss >= 0 %}overviewgain{% else %}overviewloss{% endif %}">₹{{ todays_gain|floatformat:2 }} <span>{{ todays_gain_percent }}%</span></p>
+            <h3>Today's P/L</h3>
+            <p class="{% if todays_gain > 0 %}overviewgain{% elif todays_gain < 0 %}overviewloss{% else %}overviewneutral{% endif %}">
+                ₹{{ todays_gain|floatformat:2 }}
+                <span>{{ todays_gain_percent }}%</span>
+            </p>
         </div>
     </div>
 </div>
+
 <div style="overflow-x: auto;">
 <div style="min-width: 800px;">
     <!-- Table Header -->
@@ -49,8 +75,8 @@
         <div></div>
         <div>Invested Amt</div>
         <div>Market Value</div>
-        <div>Overall G/L</div>
-        <div>Today's G/L</div>
+        <div>Overall P/L</div>
+        <div>Today's P/L</div>
     </div>
     <!-- Row 1 -->
     <div class="user-login-overview3">

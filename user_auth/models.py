@@ -23,6 +23,11 @@ class CustomUser(AbstractUser):
         ('Other', 'Other'),
     ]
 
+    RESIDENCY_CHOICES = [
+        ('Resident', 'Resident'),
+        ('Non-Resident', 'Non-Resident'),
+    ]
+    
     phone_number = models.CharField(
         max_length=12,
         validators=[RegexValidator(r'^\+?\d{10,12}$', 'Enter valid phone number')],
@@ -35,6 +40,11 @@ class CustomUser(AbstractUser):
     otp_created_at = models.DateTimeField(null=True, blank=True)
     user_type = models.CharField(max_length=5, choices=USER_TYPE_CHOICES, default='DF')
 
+    residency_status = models.CharField(
+        max_length=20,
+        choices=RESIDENCY_CHOICES,
+        default='Resident'
+    )
     groups = models.ManyToManyField(
         Group,
         related_name="customuser_set",
@@ -196,6 +206,12 @@ from django.core.validators import RegexValidator
 from django.core.validators import RegexValidator, MaxLengthValidator, MinLengthValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+DOCUMENT_TYPE_CHOICES = [
+    ('cancelled_cheque', 'Cancelled Cheque'),
+    ('bank_statement', 'One Month Bank Statement'),
+    ('passbook', 'Front Page of Passbook'),
+]
+
 class BankAccount(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='bank_accounts')
     account_holder_name = models.CharField(max_length=100)
@@ -234,6 +250,14 @@ class BankAccount(models.Model):
         ]
     )
 
+
+    # Dropdown to choose what document is uploaded
+    document_type = models.CharField(
+        max_length=20,
+        choices=DOCUMENT_TYPE_CHOICES,
+        default='cancelled_cheque'
+    )
+    
     bankDetails_doc_password = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):

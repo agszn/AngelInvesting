@@ -12,7 +12,7 @@ from .models import CustomUser
 class CustomUserCreationForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'phone_number']
+        fields = ['username', 'email', 'phone_number', 'residency_status']
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -29,6 +29,8 @@ class CustomUserCreationForm(forms.ModelForm):
                 'placeholder': 'Enter your phone number',
                 'style': 'padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%;',
             }),
+            'residency_status': forms.RadioSelect(choices=CustomUser.RESIDENCY_CHOICES),
+
         }
 
     def clean_phone_number(self):
@@ -38,6 +40,8 @@ class CustomUserCreationForm(forms.ModelForm):
         if len(phone) < 6:
             raise forms.ValidationError("Phone number must be at least 6 digits.")
         return phone
+
+
 
 from django import forms
 from .models import CustomUser
@@ -143,6 +147,7 @@ class BankAccountForm(forms.ModelForm):
             'linked_phone_number', 
             'ifsc_code', 
             'statementPaper', 
+            'document_type', 
             'bankDetails_doc_password'
         ]
     def clean_account_number(self):

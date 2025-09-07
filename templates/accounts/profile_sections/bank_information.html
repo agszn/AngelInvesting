@@ -41,8 +41,10 @@
                                 '{{ account.ifsc_code }}',
                                 '{{ account.account_status }}',
                                 '{{ account.linked_phone_number|default:'' }}',
-                                '{{ account.bankDetails_doc_password|default:'' }}'
-                            )" 
+                                '{{ account.bankDetails_doc_password|default:'' }}',
+                                '{{ account.document_type|default:'' }}'
+                              )"
+
                             class="edit-bank-button">
                             ✏️ Edit
                         </button>
@@ -158,14 +160,20 @@
             <div class="field-error" id="err_linked_phone_number"></div>
           </div>
 
-          <!-- Doc password -->
+          <!-- Document Type -->
           <div style="flex:1; min-width:250px;">
-            <label style="font-weight:bold;">Document Password (Optional)</label>
-            <input id="doc_password" name="bankDetails_doc_password" type="text"
-              placeholder="Enter document password"
-              style="width:100%; padding:8px; border:1px solid #7d8fa0; border-radius:5px;">
-            <div class="field-error" id="err_bankDetails_doc_password"></div>
+            <label style="font-weight:bold;">Document Type</label>
+            <select id="document_type" name="document_type" required
+              style="width:100%; padding:8px; border:1px solid #7d8fa0; border-radius:5px;"
+              onchange="toggleDocPassword()">
+              <option value="">Select Document Type</option>
+              <option value="cancelled_cheque">Cancelled Cheque</option>
+              <option value="bank_statement">One Month Bank Statement</option>
+              <option value="passbook">Front Page of Passbook</option>
+            </select>
+            <div class="field-error" id="err_document_type"></div>
           </div>
+
 
           <!-- Statement -->
           <div style="flex:1; min-width:250px;">
@@ -175,6 +183,16 @@
             <div class="field-error" id="err_statementPaper"></div>
           </div>
         </div>
+
+          <!-- Doc password (conditional) -->
+          <div style="flex:1; min-width:250px; display:none;" id="doc_password_wrapper">
+            <label style="font-weight:bold;">Document Password (Optional)</label>
+            <input id="doc_password" name="bankDetails_doc_password" type="text"
+              placeholder="Enter document password"
+              style="width:100%; padding:8px; border:1px solid #7d8fa0; border-radius:5px;">
+            <div class="field-error" id="err_bankDetails_doc_password"></div>
+          </div>
+
       </form>
 
       <!-- Error summary (optional) -->
@@ -223,7 +241,19 @@
     form.submit();
   }
 
-  function editBank(id, holder, bank, type, number, ifsc, status, linkedPhone, docPassword) {
+  function toggleDocPassword() {
+    const docType = document.getElementById('document_type').value;
+    const wrapper = document.getElementById('doc_password_wrapper');
+
+    if (docType === 'bank_statement') {
+      wrapper.style.display = 'block';
+    } else {
+      wrapper.style.display = 'none';
+      document.getElementById('doc_password').value = '';
+    }
+  }
+
+  function editBank(id, holder, bank, type, number, ifsc, status, linkedPhone, docPassword, docType) {
     openBankModal('edit');
     document.getElementById('account_id').value = id;
     document.getElementById('holder_name').value = holder;
@@ -234,7 +264,10 @@
     document.getElementById('account_status').value = status || 'active';
     document.getElementById('linked_phone_number').value = linkedPhone || '';
     document.getElementById('doc_password').value = docPassword || '';
+    document.getElementById('document_type').value = docType || '';
+    toggleDocPassword();
   }
+
 
   // ---- helpers to apply server-side errors to fields ----
   function setFieldError(name, messages) {
@@ -298,21 +331,23 @@
       try { errs = JSON.parse(errScript.textContent); } catch(e) {}
       const fields = [
         'account_holder_name','bank_name','account_type','account_number',
-        'ifsc_code','account_status','linked_phone_number','bankDetails_doc_password','statementPaper'
+        'ifsc_code','account_status','linked_phone_number','bankDetails_doc_password',
+        'document_type','statementPaper'
       ];
       let firstInvalid = null;
       fields.forEach(f => {
-        const idMap = {
-          account_holder_name:'holder_name',
-          bank_name:'bank_name',
-          account_type:'account_type',
-          account_number:'account_number',
-          ifsc_code:'ifsc_code',
-          account_status:'account_status',
-          linked_phone_number:'linked_phone_number',
-          bankDetails_doc_password:'doc_password',
-          statementPaper:'statementPaper'
-        };
+      const idMap = {
+        account_holder_name:'holder_name',
+        bank_name:'bank_name',
+        account_type:'account_type',
+        account_number:'account_number',
+        ifsc_code:'ifsc_code',
+        account_status:'account_status',
+        linked_phone_number:'linked_phone_number',
+        bankDetails_doc_password:'doc_password',
+        document_type:'document_type',
+        statementPaper:'statementPaper'
+      };
         const msgList = errs[f];
         setFieldError(idMap[f], msgList);
         if (!firstInvalid && msgList && msgList.length) {

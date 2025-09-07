@@ -29,6 +29,8 @@ class StockData(models.Model):
     company_name = models.CharField(max_length=775, blank=True, null=True)
     scrip_name = models.CharField(max_length=775, blank=True, null=True)
     isin_no = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    youtube_video_link = models.URLField(max_length=500, blank=True, null=True) 
+    
     cin = models.CharField(max_length=50, unique=True, blank=True, null=True)
     sector = models.CharField(max_length=100, blank=True, null=True)  # Renamed from industry
     category = models.CharField(max_length=775, blank=True, null=True)  # Category/Sub-Category

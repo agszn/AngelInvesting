@@ -47,6 +47,20 @@ from django.shortcuts import render
 from user_portfolio.models import UserStockInvestmentSummary
 from user_portfolio.utils import get_user_stock_context
 
+
+def _parse_sort(request, default='-timestamp'):
+    sort = request.GET.get('sort')
+    if sort == 'date_asc':
+        return 'timestamp'
+    elif sort == 'date_desc':
+        return '-timestamp'
+    return default
+
+def _market_closed_note():
+    now = timezone.localtime()
+    if now.hour >= 18:
+        return "The market is closed. Your order will be processed tomorrow at 11:00 AM."
+    return None
 @login_required
 def profile_overview(request):
     user = request.user
@@ -213,84 +227,63 @@ from user_portfolio.models import UserStockInvestmentSummary
 
 
 # this is portfolio with other advisor in different table
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render
+from .models import UserStockInvestmentSummary, Advisor, Broker
+from .utils import update_user_holdings  # make sure this is in utils.py
+
 @login_required
 def portfolio_view(request):
     user = request.user
-
-    # 🔄 Update holdings summary
     update_user_holdings(user)
 
-    # 📌 Initial queryset
-    holdings = UserStockInvestmentSummary.objects.filter(user=user).order_by('-id')
+    qs = UserStockInvestmentSummary.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
 
-    # 📌 GET filters
-    advisor_id = request.GET.get('advisor')
+    advisor_param = request.GET.get('advisor')        # could be None, 'all', or an id string
     broker_id = request.GET.get('broker')
-    transaction_type = request.GET.get('type')  # buy or sell
-    search_query = request.GET.get('search')
+    search = request.GET.get('search', '').strip()
 
-    # 📌 Apply filters to holdings
-    if advisor_id:
-        holdings = holdings.filter(advisor__id=advisor_id)
+    selected_advisor = None
+
+    # Default only when the advisor param is truly absent (first load)
+    if advisor_param is None:
+        default_adv = Advisor.objects.filter(advisor_type__iexact='Thangiv').first()
+        if default_adv:
+            qs = qs.filter(advisor=default_adv)
+            selected_advisor = default_adv
+    else:
+        # advisor explicitly provided
+        if advisor_param and advisor_param.lower() != 'all':
+            qs = qs.filter(advisor__id=advisor_param)
+            selected_advisor = Advisor.objects.filter(id=advisor_param).first()
+        # else: advisor=all (or empty) -> no advisor filter
+
     if broker_id:
-        holdings = holdings.filter(broker__id=broker_id)
-    if transaction_type == 'buy':
-        holdings = holdings.filter(total_buys__gt=0)
-    elif transaction_type == 'sell':
-        holdings = holdings.filter(total_sells__gt=0)
-    if search_query:
-        holdings = holdings.filter(stock__company_name__icontains=search_query)
+        qs = qs.filter(broker__id=broker_id)
+    if search:
+        qs = qs.filter(Q(stock__company_name__icontains=search) | Q(stock__scrip_name__icontains=search))
 
-    # 📌 Pagination
-    paginator = Paginator(holdings, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    qs = qs.order_by('-last_updated', '-id')
 
-    # 📌 Filtered "Other Advisor" Sell Transactions
-    other_sells = SellTransaction.objects.filter(
-        user=user,
-        status='completed',
-        advisor__advisor_type='Other'
-    ).select_related('stock', 'advisor', 'broker').order_by('-timestamp')
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
-    if advisor_id:
-        holdings = holdings.filter(advisor__id=advisor_id)
-    if broker_id:
-        holdings = holdings.filter(broker__id=broker_id)
-    if transaction_type == 'buy':
-        holdings = holdings.filter(buy_order_count__gt=0)  # ✅ FIXED
-    elif transaction_type == 'sell':
-        holdings = holdings.filter(sell_order_count__gt=0)  # ✅ FIXED
-    if search_query:
-        holdings = holdings.filter(stock__company_name__icontains=search_query)
-
-
-    # 📌 Dropdown options
-    advisors = Advisor.objects.all()
-    brokers = Broker.objects.all()
-    selected_advisor = Advisor.objects.filter(id=advisor_id).first() if advisor_id else None
-    selected_broker = Broker.objects.filter(id=broker_id).first() if broker_id else None
-
-    # 📌 Additional context (if any custom logic)
     stock_context = get_user_stock_context(user, request)
-
-    # ✅ Final render
-    return render(request, 'portfolio/PortfolioList.html', {
+    context = {
         'holdings': page_obj,
-        'advisors': advisors,
-        'brokers': brokers,
+        'advisors': Advisor.objects.all(),
+        'brokers': Broker.objects.all(),
         'selected_advisor': selected_advisor,
-        'selected_broker': selected_broker,
-        'current_filters': {
-            'advisor': advisor_id,
-            'broker': broker_id,
-            'type': transaction_type,
-            'search': search_query,
-        },
+        'selected_broker': Broker.objects.filter(id=broker_id).first() if broker_id else None,
+        'search_query': search,
         'page_obj': page_obj,
-        'other_sells': other_sells,  # 👈 Included in template context
-        **stock_context
-    })
+        **stock_context,
+    }
+    tpl = 'portfolio/includes/portfolio_table.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else 'portfolio/PortfolioList.html'
+    return render(request, tpl, context)
+
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -312,80 +305,45 @@ from .models import BuyTransaction, BuyTransactionOtherAdvisor, Advisor, Broker
 @login_required
 def buy_orders(request):
     user = request.user
-
-    # GET filters
-    search_query = request.GET.get('search', '')
+    search = request.GET.get('search', '').strip()
     advisor_id = request.GET.get('advisor')
     broker_id = request.GET.get('broker')
-    transaction_type = request.GET.get('type')  # optional if needed
+    ordering = _parse_sort(request, default='-timestamp')
 
-    # Fetch base buy orders
-    buy_orders = BuyTransaction.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
-    buy_orders_other = BuyTransactionOtherAdvisor.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
+    qs1 = BuyTransaction.objects.filter(user=user).select_related('stock','advisor','broker')
+    qs2 = BuyTransactionOtherAdvisor.objects.filter(user=user).select_related('stock','advisor','broker')
 
-    # Apply filters
     if advisor_id:
-        buy_orders = buy_orders.filter(advisor__id=advisor_id)
-        buy_orders_other = buy_orders_other.filter(advisor__id=advisor_id)
-
+        qs1 = qs1.filter(advisor__id=advisor_id)
+        qs2 = qs2.filter(advisor__id=advisor_id)
     if broker_id:
-        buy_orders = buy_orders.filter(broker__id=broker_id)
-        buy_orders_other = buy_orders_other.filter(broker__id=broker_id)
+        qs1 = qs1.filter(broker__id=broker_id)
+        qs2 = qs2.filter(broker__id=broker_id)
+    if search:
+        for_q = Q(stock__company_name__icontains=search) | Q(stock__scrip_name__icontains=search)
+        qs1 = qs1.filter(for_q)
+        qs2 = qs2.filter(for_q)
 
-    if transaction_type == 'buy':  # Optional use case
-        pass  # You can add specific filtering if needed
-    elif transaction_type == 'other':
-        pass
+    orders = sorted(chain(qs1, qs2), key=attrgetter('timestamp'), reverse=(ordering.startswith('-')))
 
-    if search_query:
-        buy_orders = buy_orders.filter(stock__company_name__icontains=search_query)
-        buy_orders_other = buy_orders_other.filter(stock__company_name__icontains=search_query)
-
-    # Mark whether from other advisor
-    for order in buy_orders:
-        order.is_other = False
-    for order in buy_orders_other:
-        order.is_other = True
-
-    # Combine and sort
-    combined_orders = sorted(
-        chain(buy_orders, buy_orders_other),
-        key=attrgetter('timestamp'),
-        reverse=True
-    )
-
-    # Pagination
-    paginator = Paginator(combined_orders, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    # Filter selections
-    advisors = Advisor.objects.all()
-    brokers = Broker.objects.all()
-    selected_advisor = Advisor.objects.filter(id=advisor_id).first() if advisor_id else None
-    selected_broker = Broker.objects.filter(id=broker_id).first() if broker_id else None
+    paginator = Paginator(orders, 15)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
     stock_context = get_user_stock_context(user, request)
-
     context = {
+        'orders': page_obj,
+        'advisors': Advisor.objects.all(),
+        'brokers': Broker.objects.all(),
+        'selected_advisor': Advisor.objects.filter(id=advisor_id).first() if advisor_id else None,
+        'selected_broker': Broker.objects.filter(id=broker_id).first() if broker_id else None,
+        'sort': ordering,
+        'search_query': search,
         'page_obj': page_obj,
-        'advisors': advisors,
-        'brokers': brokers,
-        'selected_advisor': selected_advisor,
-        'selected_broker': selected_broker,
-        'current_filters': {
-            'advisor': advisor_id,
-            'broker': broker_id,
-            'type': transaction_type,
-            'search': search_query,
-        },
+        'now': timezone.localtime(),
         **stock_context,
     }
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'portfolio/includes/buy_orders_table.html', context)
-
-    return render(request, 'portfolio/BuyOrdersList.html', context)
+    tpl = 'portfolio/includes/buy_orders_table.html' if request.headers.get('X-Requested-With')=='XMLHttpRequest' else 'portfolio/BuyOrdersList.html'
+    return render(request, tpl, context)
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
@@ -400,75 +358,54 @@ from django.shortcuts import render
 from .models import SellTransaction, SellTransactionOtherAdvisor, Advisor, Broker
 from .utils import get_user_stock_context
 
+
 @login_required
 def sell_orders(request):
     user = request.user
-    search_query = request.GET.get('search', '')
+    search = request.GET.get('search', '').strip()
     advisor_id = request.GET.get('advisor')
     broker_id = request.GET.get('broker')
-    transaction_type = request.GET.get('type')  # optional
+    ordering = _parse_sort(request, default='-timestamp')
 
-    # Fetch base querysets
-    sell_orders = SellTransaction.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
-    sell_orders_other = SellTransactionOtherAdvisor.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
+    qs1 = SellTransaction.objects.filter(user=user).select_related('stock','advisor','broker')
+    qs2 = SellTransactionOtherAdvisor.objects.filter(user=user).select_related('stock','advisor','broker')
 
-    # Apply filters
+    status_filter = request.GET.get('status')
+    if status_filter:
+        qs1 = qs1.filter(status=status_filter)
+        qs2 = qs2.filter(status=status_filter)
+
     if advisor_id:
-        sell_orders = sell_orders.filter(advisor__id=advisor_id)
-        sell_orders_other = sell_orders_other.filter(advisor__id=advisor_id)
-
+        qs1 = qs1.filter(advisor__id=advisor_id)
+        qs2 = qs2.filter(advisor__id=advisor_id)
     if broker_id:
-        sell_orders = sell_orders.filter(broker__id=broker_id)
-        sell_orders_other = sell_orders_other.filter(broker__id=broker_id)
+        qs1 = qs1.filter(broker__id=broker_id)
+        qs2 = qs2.filter(broker__id=broker_id)
+    if search:
+        for_q = Q(stock__company_name__icontains=search) | Q(stock__scrip_name__icontains=search)
+        qs1 = qs1.filter(for_q)
+        qs2 = qs2.filter(for_q)
 
-    if search_query:
-        sell_orders = sell_orders.filter(stock__company_name__icontains=search_query)
-        sell_orders_other = sell_orders_other.filter(stock__company_name__icontains=search_query)
+    orders = sorted(chain(qs1, qs2), key=attrgetter('timestamp'), reverse=(ordering.startswith('-')))
 
-    # Mark origin for template (optional)
-    for o in sell_orders:
-        o.is_other = False
-    for o in sell_orders_other:
-        o.is_other = True
+    paginator = Paginator(orders, 15)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
-    # Combine + sort by timestamp desc
-    combined = sorted(chain(sell_orders, sell_orders_other), key=attrgetter('timestamp'), reverse=True)
-
-    # Pagination
-    paginator = Paginator(combined, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    # Dropdown data
-    advisors = Advisor.objects.all()
-    brokers = Broker.objects.all()
-    selected_advisor = Advisor.objects.filter(id=advisor_id).first() if advisor_id else None
-    selected_broker = Broker.objects.filter(id=broker_id).first() if broker_id else None
-
-    # Extra context
     stock_context = get_user_stock_context(user, request)
-
     context = {
+        'orders': page_obj,
+        'advisors': Advisor.objects.all(),
+        'brokers': Broker.objects.all(),
+        'selected_advisor': Advisor.objects.filter(id=advisor_id).first() if advisor_id else None,
+        'selected_broker': Broker.objects.filter(id=broker_id).first() if broker_id else None,
+        'sort': ordering,
+        'search_query': search,
         'page_obj': page_obj,
-        'advisors': advisors,
-        'brokers': brokers,
-        'selected_advisor': selected_advisor,
-        'selected_broker': selected_broker,
-        'current_filters': {
-            'advisor': advisor_id,
-            'broker': broker_id,
-            'type': transaction_type,
-            'search': search_query,
-        },
+        'now': timezone.localtime(),
         **stock_context,
     }
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'portfolio/includes/sell_orders_table.html', context)
-
-    return render(request, 'portfolio/SellOrdersList.html', context)
-
-
+    tpl = 'portfolio/includes/sell_orders_table.html' if request.headers.get('X-Requested-With')=='XMLHttpRequest' else 'portfolio/SellOrdersList.html'
+    return render(request, tpl, context)
 
 # testing
 
@@ -514,57 +451,45 @@ from user_auth.decorators import require_complete_profile
 
 @require_POST
 @login_required
-@require_complete_profile
 def buy_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
-    advisor_id = request.POST.get('advisor')
-    broker = get_object_or_404(Broker, id=request.POST.get('broker'))
-    quantity = int(request.POST.get('quantity'))
-    price_per_share = Decimal(request.POST.get('price_per_share'))
-    order_type = request.POST.get('order_type')
 
-    # ✅ Force correct price for market orders
-    if order_type == "market":
-        price_per_share = stock.share_price  # use DB's latest price
-    else:
-        price_str = request.POST.get('price_per_share')
-        if not price_str:
-            messages.error(request, "Please enter a price per share for limit orders.")
-            return redirect(request.META.get('HTTP_REFERER', '/'))
-        try:
-            price_per_share = Decimal(price_str)
-        except (TypeError, ValueError, InvalidOperation):
-            messages.error(request, "Invalid price per share.")
-            return redirect(request.META.get('HTTP_REFERER', '/'))
+    if request.method != 'POST':
+        return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    total_amount = quantity * price_per_share
+    try:
+        advisor = get_object_or_404(Advisor, id=request.POST.get('advisor'))
+        broker = get_object_or_404(Broker, id=request.POST.get('broker'))
+        quantity = int(request.POST.get('quantity'))
+        order_type = request.POST.get('order_type', 'market')
 
-    advisor = get_object_or_404(Advisor, id=advisor_id)
+        if order_type == 'market':
+            price_per_share = stock.share_price or Decimal('0')
+        else:
+            price_per_share = Decimal(request.POST.get('price_per_share'))
 
-    if advisor.advisor_type.lower() != 'other':
-        BuyTransaction.objects.create(
-            user=request.user,
-            stock=stock,
-            advisor=advisor,
-            broker=broker,
-            quantity=quantity,
-            price_per_share=price_per_share,
-            order_type=order_type,
-            total_amount=total_amount,
-        )
-        messages.success(request, f"Buy order placed for {stock.company_name} with Advisor '{advisor.advisor_type}'.")
-    else:
-        BuyTransactionOtherAdvisor.objects.create(
-            user=request.user,
-            stock=stock,
-            advisor=advisor,
-            broker=broker,
-            quantity=quantity,
-            price_per_share=price_per_share,
-            order_type=order_type,
-            total_amount=total_amount,
-        )
-        messages.success(request, f"Buy order placed for {stock.company_name} with Advisor 'Other'.")
+        total_amount = price_per_share * quantity
+
+        if advisor.advisor_type.lower() == 'other':
+            BuyTransactionOtherAdvisor.objects.create(
+                user=request.user, stock=stock, advisor=advisor, broker=broker,
+                quantity=quantity, price_per_share=price_per_share,
+                order_type=order_type, total_amount=total_amount, status='completed'
+            )
+        else:
+            BuyTransaction.objects.create(
+                user=request.user, stock=stock, advisor=advisor, broker=broker,
+                quantity=quantity, price_per_share=price_per_share,
+                order_type=order_type, total_amount=total_amount, status='processing'
+            )
+
+        note = _market_closed_note()
+        if note:
+            messages.info(request, note)
+        messages.success(request, f"Buy order placed for {stock.company_name}.")
+
+    except Exception as e:
+        messages.error(request, f"Failed to place order: {e}")
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -601,73 +526,35 @@ from django.db.models import Sum  # add this
 def sell_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
 
+    if request.method != 'POST':
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
     try:
-        advisor_id = request.POST.get('advisor')
-        broker_id = request.POST.get('broker')
+        advisor = get_object_or_404(Advisor, id=request.POST.get('advisor'))
+        broker = get_object_or_404(Broker, id=request.POST.get('broker'))
         quantity = int(request.POST.get('quantity'))
 
-        # selling price
-        selling_price_str = request.POST.get('selling_price')
-        if selling_price_str:
-            try:
-                selling_price = Decimal(selling_price_str)
-            except InvalidOperation:
-                raise ValueError("Invalid selling price format.")
-        elif stock.share_price is not None:
-            selling_price = stock.share_price
-        else:
-            raise ValueError("Selling price is required and stock price is not available.")
-
-        advisor = get_object_or_404(Advisor, id=advisor_id)
-        broker = get_object_or_404(Broker, id=broker_id)
-
-        # Only enforce availability for non-Other advisors
-        if advisor.advisor_type.lower() != 'other':
-            try:
-                # 🔑 disambiguate the summary row
-                summary = UserStockInvestmentSummary.objects.get(
-                    user=request.user, stock=stock, is_other_advisor=False
-                )
-            except UserStockInvestmentSummary.DoesNotExist:
-                messages.error(request, f"You do not hold any shares of {stock.company_name}. Cannot sell.")
-                return redirect(request.META.get('HTTP_REFERER', '/'))
-
-            held_qty = summary.quantity_held
-
-            # pending qty (processing/on_hold)
-            pending_qty = SellTransaction.objects.filter(
-                user=request.user,
-                stock=stock,
-                status__in=['processing', 'on_hold']
-            ).aggregate(total=Sum('quantity'))['total'] or 0  # ✅ use django.db.models.Sum
-
-            available_qty = held_qty - pending_qty
-            if quantity > available_qty:
-                messages.error(
-                    request,
-                    f"You only have {available_qty} shares available for selling. Cannot sell {quantity} shares."
-                )
-                return redirect(request.META.get('HTTP_REFERER', '/'))
-
-        # Save transaction
-        SellTransaction.objects.create(
-            user=request.user,
-            advisor=advisor,
-            broker=broker,
-            stock=stock,
-            quantity=quantity,
-            selling_price=selling_price,
-        )
+        price_str = request.POST.get('selling_price')
+        selling_price = Decimal(price_str) if price_str else (stock.share_price or Decimal('0'))
 
         if advisor.advisor_type.lower() == 'other':
-            messages.success(request, f"Sell order placed for {stock.company_name} with Advisor 'Other'")
+            SellTransactionOtherAdvisor.objects.create(
+                user=request.user, stock=stock, advisor=advisor, broker=broker,
+                quantity=quantity, selling_price=selling_price, status='processing'
+            )
         else:
-            messages.success(request, f"Sell order placed for {stock.company_name} ({quantity} shares at ₹{selling_price})")
+            SellTransaction.objects.create(
+                user=request.user, stock=stock, advisor=advisor, broker=broker,
+                quantity=quantity, selling_price=selling_price, status='processing'
+            )
+
+        note = _market_closed_note()
+        if note:
+            messages.info(request, note)
+        messages.success(request, f"Sell order placed for {stock.company_name}.")
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        messages.error(request, f"Failed to place sell order: {str(e)}")
+        messages.error(request, f"Failed to place sell order: {e}")
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -679,34 +566,49 @@ from Share_Transfer.models import DealLetterRecord
 
 
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .utils import get_user_stock_context  # if you use this elsewhere
 
 @login_required
 def view_deal_letters(request):
     user = request.user
-    stock_context = get_user_stock_context(user, request)
+    stock_context = {}
+
+    # Optional helper, safe if missing
+    try:
+        stock_context = get_user_stock_context(user, request)
+    except Exception:
+        pass
 
     # Filters
-    deal_type = request.GET.get('deal_type')
-    sort_by = request.GET.get('sort_by', '-generated_on')  # default sort
+    raw_deal_type = request.GET.get('deal_type', '').strip()  # may be "", "BUY", "SELL" (or lower)
+    sort_key = request.GET.get('sort_by', 'date_desc')        # one of: date_desc, date_asc, amount_desc, amount_asc
 
     records = DealLetterRecord.objects.filter(user=user)
 
-    if deal_type:
-        records = records.filter(deal_type=deal_type)
+    # Be lenient: accept either upper/lower values
+    if raw_deal_type:
+        # If your model stores uppercase choice values ("BUY"/"SELL"), __iexact keeps it robust.
+        records = records.filter(deal_type__iexact=raw_deal_type)
 
-    # Apply sorting
+    # Apply sorting (correct directions)
     allowed_sorts = {
-        'date_asc': '-generated_on',
-        'date_desc': 'generated_on',
-        'amount_asc': 'total_amount',
-        'amount_desc': '-total_amount'
+        'date_desc':   '-generated_on',  # newest first
+        'date_asc':     'generated_on',  # oldest first
+        'amount_desc': '-total_amount',  # high -> low
+        'amount_asc':   'total_amount',  # low -> high
     }
-    records = records.order_by(allowed_sorts.get(sort_by, '-generated_on'))
+    records = records.order_by(allowed_sorts.get(sort_key, '-generated_on'))
+
+    # Normalize selected values for the template
+    selected_deal_type = raw_deal_type.upper() if raw_deal_type else ''
+    selected_sort = sort_key
 
     return render(request, 'portfolio/view_deal_letters.html', {
         'records': records,
-        'selected_deal_type': deal_type,
-        'selected_sort': sort_by,
+        'selected_deal_type': selected_deal_type,  # "BUY"/"SELL" or ""
+        'selected_sort': selected_sort,            # e.g. "date_desc"
         **stock_context
     })
 

@@ -233,13 +233,37 @@
 
 .user-stock-list-tab
 {
-    height:500px;
+    /* height:100vh;
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;  
+    padding-bottom: 100px; */
+
+    height: 80vh;
+    overflow-y: auto;
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #888 #f1f1f1; /* thumb color | track color */
+    padding-bottom: 100px;
+
 }
 .user-stock-list-tab::-webkit-scrollbar {
+    width: 6px; /* scrollbar width */
+}
+/* .user-stock-list-tab::-webkit-scrollbar {
   display: none;
+} */
+.user-stock-list-tab::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Track color */
+    border-radius: 3px;
+}
+
+.user-stock-list-tab::-webkit-scrollbar-thumb {
+    background: #888; /* Scroll thumb color */
+    border-radius: 3px;
+}
+
+.user-stock-list-tab::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Scroll thumb color on hover */
 }
 .user-stocks-sidebar
 {
@@ -1292,3 +1316,16 @@ form.p-4 .btn {
 .order-details-transaction::-webkit-scrollbar {
     display: none;
 }
+
+
+.getIN
+{
+    /* padding: 10px; */
+    /* background-color: #0E213F; */
+}
+/* .side-image
+{
+    background-color: #0E213F;
+    padding: 10px;
+    margin-top: 20px;
+} */

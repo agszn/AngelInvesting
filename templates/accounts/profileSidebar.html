@@ -2,173 +2,119 @@
 {% load sidebar_tags %}
 {% load static%}
 
-    <!-- New Sidebar -->
-    <div class="user-sidebar" id="userSidebar">
-      <div class="user-sidebar-top-logo">
-        <a href="/"><img src="{% static 'Media/images/dashboardlogo.png' %}" alt="logo"></a>
-        
-        <!-- <button class="" type="button" onclick="toggleSidebar()">
-            X
-        </button> -->
-      </div>
-      <div class="user-group-tap">
-        <div class="user-number-group">
-          {% for group in groups %}
-            <a href="?group={{ group.id }}"
-              class="{% if group.id == current_group_id %}active{% endif %}">
-              {{ group.name }} 
-            </a>
-          {% endfor %}
-        </div>
-        <div class="user-name-group">
-          <div>
-              <a href="?unlisted=1" class="{% if group.id == current_group_id %}active{% endif %}">Unlisted</a> | <a href="?angel=1" class="{% if group.id == show_all_angel %}active{% endif %}">Angel Invest</a>
-          </div>
-        </div>
-      </div>
-      <!-- templates/accounts/profileSidebar.html -->
-      <div class="user-serach-bar" >
-        <input type="text" id="sidebarSearchInput" placeholder="Search Stocks..." autocomplete="off" style="background-color: white;color: #000; width: 100%; border-radius: 5px;">
+<!-- New Sidebar -->
+<div class="user-sidebar" id="userSidebar">
+  <div class="user-sidebar-top-logo">
+    <a href="/"><img src="{% static 'Media/images/dashboardlogo.png' %}" alt="logo"></a>
+  </div>
 
-        <!-- <button type="submit" style="background: none; border: none; cursor: pointer; padding: 0 8px;" title="Search">
-            <span style="color: white; font-size: 18px;">&#128269;</span>
-        </button> -->
-      </div>
-      <!-- <div class="user-stock-list-tab">
-        {% for stock in stock_list %}
-          {% if stock.company_name and not stock.hide_company_overview %}
-            <div class="user-stocks-sidebar">
-              <div class="user-sidebar-stockname"> 
-                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">{{ stock.company_name }}</a>
-              </div>
-              <div class="user-sidebar-price">
-                <div><span style="color: {% if stock.profit %}green{% else %}red{% endif %}; font-weight: bold;">₹{{ stock.share_price }}</span></div>
-                <div><span>₹{{ stock.profit }} {{ stock.profit_percentage }}%</span></div>
-              </div>
-              <div class="stock-action-buttons">
-                    {% if stock.in_group %}
-                      <form method="POST" action="{% url 'unlisted_stock_marketplace:remove_from_group' stock.wishlist_id %}">
-                        {% csrf_token %}
-                        <span style="background-color: #f7c948; margin-right: 10px;" class="group-button-user">
-                          G - {{ stock.group_number }}
-                        </span>
-                        <button type="submit" title="Remove from Group"
-                                style="background-color: #e74c3c;">
-                          ✖
-                        </button>
-                      </form>
-                    {% else %}
-                      <button class="wishlist-btn plus-btn"
-                              data-stock-id="{{ stock.id }}"
-                              data-stock-name="{{ stock.company_name }}"
-                              data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}"
-                              >
-                        ➕
-                      </button>
-                    {% endif %}
-                <button class="buy-btn"
-                  title="Buy {{ stock.company_name }}"
-                  onclick='openBuyModal(
-                    "{{ stock.id }}",
-                    "{{ stock.company_name|escapejs }}",
-                    "{{ stock.share_price }}",
-                    "{{ stock.quantity }}",
-                    "{% url 'user_portfolio:buy_stock' stock.id %}"
-                  )'
-                >B</button>
-                <button class="sell-btn"
-                  onclick='openSellModal(
-                        "{{ stock.id }}",
-                        "{{ stock.company_name|escapejs }}",
-                        "{{ stock.share_price }}",
-                        "{{ stock.quantity }}",
-                        "{% url 'user_portfolio:sell_stock' stock.id %}"
-                      )'
-                >S</button>
-              </div>
-            </div>
-          {% endif %}
-        {% empty %}
-          <p style="color: white; text-align: center;">No stocks found.</p>
-        {% endfor %}
-      </div> -->
-      <div id="stockListContainer">
-        {% include 'accounts/includes/sidebar_stock_list.html' %}
-      </div>
-
+  <div class="user-group-tap">
+    <div class="user-number-group">
+      {% for group in groups %}
+        <a href="?group={{ group.id }}" class="{% if group.id == current_group_id %}active{% endif %}">
+          {{ group.name }}
+        </a>
+      {% endfor %}
     </div>
-    <script>
-        function setCookie(name, value, hours) {
-            let expires = "";
-            if (hours) {
-                const date = new Date();
-                date.setTime(date.getTime() + (hours * 60 * 60 * 1000)); // hours → milliseconds
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (value || "") + expires + "; path=/";
-        }
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) === ' ') c = c.substring(1);
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
-        }
-        function toggleSidebar() {
-            const sidebar = document.getElementById('userSidebar');
-            const mainContent = document.querySelector('.user-main-content');
-            const isCollapsed = sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('collapsed');
-            setCookie("sidebarState", isCollapsed ? "collapsed" : "expanded", 1);
-        }
+    <div class="user-name-group">
+      <div>
+        <a href="?unlisted=1" class="{% if unlisted_active %}active{% endif %}">Unlisted</a> |
+        <a href="?angel=1" class="{% if show_all_angel %}active{% endif %}">Angel Invest</a>
+      </div>
+    </div>
+  </div>
 
-        // Initialize sidebar state based on screen size
-        document.addEventListener('DOMContentLoaded', function () {
-            const sidebar = document.getElementById('userSidebar');
-            const mainContent = document.querySelector('.user-main-content');
-            const sidebarState = getCookie("sidebarState");
-            if (sidebarState) {
-                if (sidebarState === "collapsed") {
-                  sidebar.classList.add('collapsed');
-                  mainContent.classList.add('collapsed');
-              } else {
-                  sidebar.classList.remove('collapsed');
-                  mainContent.classList.remove('collapsed');
-              }
-            }else {
-                // Default behavior based on screen size
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('collapsed');
-                    mainContent.classList.add('collapsed');
-                    setCookie("sidebarState", "collapsed", 1);
-                }
-            }
+  <!-- Search -->
+  <div class="user-serach-bar">
+    <input
+      type="text"
+      id="sidebarSearchInput"
+      placeholder="Search Stocks..."
+      autocomplete="off"
+      style="background-color: white;color: #000; width: 100%; border-radius: 5px;"
+    >
+  </div>
 
-            // Handle window resize
-            window.addEventListener('resize', function () 
-            {
-              if (!getCookie("sidebarState")) {
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('collapsed');
-                    mainContent.classList.add('collapsed');
-                } else {
-                    sidebar.classList.remove('collapsed');
-                    mainContent.classList.remove('collapsed');
-                }
-              }
-            });
-        });
-    </script>
+  <!-- Stock list (server-rendered partial) -->
+  <div id="stockListContainer">
+    {% include 'accounts/includes/sidebar_stock_list.html' %}
+  </div>
+</div>
+
+<script>
+  /* ---------------- Cookie helpers + sidebar toggle ---------------- */
+  function setCookie(name, value, hours) {
+    let expires = "";
+    if (hours) {
+      const date = new Date();
+      date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+  }
+
+  function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('userSidebar');
+    const mainContent = document.querySelector('.user-main-content');
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    if (mainContent) mainContent.classList.toggle('collapsed');
+    setCookie("sidebarState", isCollapsed ? "collapsed" : "expanded", 1);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const sidebar = document.getElementById('userSidebar');
+    const mainContent = document.querySelector('.user-main-content');
+    const sidebarState = getCookie("sidebarState");
+
+    if (sidebarState) {
+      const collapsed = sidebarState === "collapsed";
+      sidebar.classList.toggle('collapsed', collapsed);
+      if (mainContent) mainContent.classList.toggle('collapsed', collapsed);
+    } else {
+      if (window.innerWidth < 768) {
+        sidebar.classList.add('collapsed');
+        if (mainContent) mainContent.classList.add('collapsed');
+        setCookie("sidebarState", "collapsed", 1);
+      }
+    }
+
+    window.addEventListener('resize', function () {
+      if (!getCookie("sidebarState")) {
+        if (window.innerWidth < 768) {
+          sidebar.classList.add('collapsed');
+          if (mainContent) mainContent.classList.add('collapsed');
+        } else {
+          sidebar.classList.remove('collapsed');
+          if (mainContent) mainContent.classList.remove('collapsed');
+        }
+      }
+    });
+  });
+</script>
 
 <!-- Wishlist Modal -->
 <div id="wishlistModal" class="wishlist-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6);">
   <div class="wishlist-modal-content" style="background-color: #fff; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative;">
     <span class="close" onclick="document.getElementById('wishlistModal').style.display='none'" style="position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #aaa; cursor: pointer;">&times;</span>
-    <h3 style="margin-top: 0; font-size: 20px; color: #333;">Confirm Wishlist</h3>
-    <p style="font-size: 16px; color: #555;">You're about to add <strong id="stockName" style="color: #000;"></strong> to <strong id="wishlistGroupName" style="color: #000;"></strong>.</p>
+
+    <!-- Keep simple text; group name is optional -->
+    <p style="font-size: 16px; color: #555;">
+      <strong id="stockName" style="color: #000;"></strong>
+      <!-- Optional: uncomment to display suggested group name -->
+      <!-- <span id="wishlistGroupName" style="color:#000;"></span> -->
+    </p>
+
     <form id="wishlistForm" method="POST" action="{% url 'unlisted_stock_marketplace:add_to_wishlist' %}" style="margin-top: 20px;">
       {% csrf_token %}
       <input type="hidden" name="stock_id" id="stockIdInput">
@@ -181,37 +127,64 @@
 <div id="popup-message" style="display: none; background-color: #333; color: white; padding: 10px 20px; position: fixed; top: 20px; right: 20px; border-radius: 8px; z-index: 1100;"></div>
 
 <script>
+  /* ---------------- Wishlist: event delegation (works after search updates) ---------------- */
   document.addEventListener("DOMContentLoaded", function () {
-    const wishlistBtns = document.querySelectorAll(".wishlist-btn");
     const modal = document.getElementById("wishlistModal");
     const stockNameDisplay = document.getElementById("stockName");
-    const wishlistGroupName = document.getElementById("wishlistGroupName");
+    const wishlistGroupName = document.getElementById("wishlistGroupName"); // may be null (optional element)
     const stockIdInput = document.getElementById("stockIdInput");
     const customListName = document.getElementById("customListName");
+    const stockListContainer = document.getElementById("stockListContainer");
 
-    wishlistBtns.forEach(btn => {
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        const stockId = this.dataset.stockId;
-        const stockName = this.dataset.stockName;
-        const fetchUrl = this.dataset.url + `?stock_id=${stockId}`;
+    // Delegate clicks from stock list to any current/future `.wishlist-btn`
+    stockListContainer.addEventListener("click", function (e) {
+      const btn = e.target.closest(".wishlist-btn");
+      if (!btn) return;
+
+      e.preventDefault();
+
+      const stockId = btn.dataset.stockId;
+      const stockName = btn.dataset.stockName;
+      const fetchUrl = btn.dataset.url ? (btn.dataset.url + `?stock_id=${encodeURIComponent(stockId)}`) : null;
+
+      // If API for suggested group exists, fetch it; otherwise open modal directly
+      if (fetchUrl) {
         fetch(fetchUrl)
-          .then(res => res.json())
+          .then(res => res.ok ? res.json() : Promise.reject())
           .then(data => {
-            stockNameDisplay.textContent = stockName;
-            wishlistGroupName.textContent = data.group_name;
-            stockIdInput.value = stockId;
-            customListName.value = data.group_name;
+            stockNameDisplay.textContent = stockName || "";
+            if (wishlistGroupName) wishlistGroupName.textContent = data.group_name || "";
+            stockIdInput.value = stockId || "";
+            customListName.value = data.group_name || "";
+            modal.style.display = "block";
+          })
+          .catch(() => {
+            // fallback open without group suggestion
+            stockNameDisplay.textContent = stockName || "";
+            if (wishlistGroupName) wishlistGroupName.textContent = "";
+            stockIdInput.value = stockId || "";
+            customListName.value = "";
             modal.style.display = "block";
           });
-      });
+      } else {
+        stockNameDisplay.textContent = stockName || "";
+        if (wishlistGroupName) wishlistGroupName.textContent = "";
+        stockIdInput.value = stockId || "";
+        customListName.value = "";
+        modal.style.display = "block";
+      }
     });
 
+    // Close modal on backdrop click or ESC
     window.addEventListener("click", (e) => {
       if (e.target === modal) modal.style.display = "none";
     });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") modal.style.display = "none";
+    });
   });
 
+  /* ---------------- Simple toast ---------------- */
   function showPopupMessage(message) {
     const popup = document.getElementById("popup-message");
     popup.innerText = message;
@@ -225,10 +198,8 @@
   {% endif %}
 </script>
 
-
-
-
 <script>
+  /* ---------------- Search (kept) ---------------- */
   document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("sidebarSearchInput");
     const stockListContainer = document.getElementById("stockListContainer");
@@ -241,20 +212,22 @@
     });
 
     function performSearch() {
-      const query = searchInput.value;
+      const query = searchInput.value || "";
       const params = new URLSearchParams(window.location.search);
       params.set("sidebar_search", query);
 
       const ajaxUrl = "{% url 'user_portfolio:ajax_filtered_stocks' %}";
       fetch(`${ajaxUrl}?${params.toString()}`, {
-
-        headers: {
-          "X-Requested-With": "XMLHttpRequest"
-        }
+        headers: { "X-Requested-With": "XMLHttpRequest" }
       })
-        .then(res => res.json())
+        .then(res => res.ok ? res.json() : Promise.reject())
         .then(data => {
           stockListContainer.innerHTML = data.html;
+          // No need to re-bind wishlist button handlers — event delegation above handles it.
+        })
+        .catch(() => {
+          // Optional: show a small error toast
+          // showPopupMessage("Search failed. Please try again.");
         });
     }
   });

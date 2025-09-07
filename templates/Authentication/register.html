@@ -112,6 +112,17 @@
       text-align: center;
     }
   }
+    .form-group ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .form-group li {
+      display: inline-block;
+      margin-right: 15px;
+    }
+
 </style>
 
 <div class="ai-register-container">
@@ -160,11 +171,172 @@
           <div style="color: red;">{{ form.phone_number.errors }}</div>
         {% endif %}
       </div>
-
       <!-- Note -->
       <div class="ai-register-note">
         Note : Mobile Number Is Your Password
       </div>
+      <!-- Residency Status start -->
+          <style>
+              .residency-container {
+                  display: flex;
+                  flex-direction: row;   /* horizontal layout */
+                  justify-content: flex-start;
+                  align-items: stretch;
+                  gap: 20px;
+                  flex-wrap: nowrap;     /* prevent wrapping unless small screen */
+              }
+
+              .residency-card {
+                  flex: 1 1 280px;
+                  border: 2px solid #ddd;
+                  border-radius: 12px;
+                  padding: 18px 20px;
+                  cursor: pointer;
+                  transition: box-shadow .18s ease, border-color .18s ease, transform .08s ease;
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 14px;
+                  background: #fff;
+                  position: relative;
+                  min-height: 100px;
+              }
+
+              .residency-card:hover { transform: translateY(-2px); }
+
+              /* radio button styling */
+              .residency-card input[type="radio"] {
+                  margin-top: 6px;
+                  cursor: pointer;
+                  flex: 0 0 auto;
+                  accent-color: #4CAF50; /* green accent */
+                  width: 18px;
+                  height: 18px;
+              }
+
+              .residency-card label {
+                  cursor: pointer;
+                  width: 100%;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
+                  user-select: none;
+              }
+
+              .residency-card h4 {
+                  font-size: 18px;
+                  margin: 0;
+                  font-weight: 700;
+                  color: #222;
+              }
+
+              /* restore and force list markers to show */
+              .residency-card ul {
+                list-style-type: disc;           /* show discs */
+                list-style-position: outside;    /* marker sits outside the content box */
+                padding-left: 1.25rem;           /* keep your left padding */
+                margin: 6px 0 0 0;
+              }
+
+              /* ensure li behaves like a list item (in case some reset changed it) */
+              .residency-card li {
+                display: list-item;
+                margin-bottom: 6px;
+              }
+
+              /* strengthen marker styling (webkit + modern) */
+              .residency-card li::marker {
+                color: #555;
+                font-size: 0.95em;
+              }
+
+              /* fallback for some WebKit resets */
+              .residency-card ul::-webkit-list-marker {
+                color: #555;
+              }
+
+
+              /* active card */
+              .residency-card.active {
+                  border-color: #4CAF50;
+                  box-shadow: 0 6px 18px rgba(76,175,80,0.15);
+              }
+
+              /* mobile tweaks */
+              @media (max-width:520px){
+                  .residency-card { padding: 14px; }
+                  .residency-card h4 { font-size: 16px; }
+              }
+          </style>
+
+          <div class="form-group">
+              <!-- <label style="font-weight:600; display:block; margin-bottom:10px;">Residency Status:</label> -->
+
+              <div class="residency-container" role="radiogroup" aria-label="Residency Status">
+
+                  <!-- Resident -->
+                  <div class="residency-card" id="resident-card" role="radio" aria-checked="false" tabindex="0">
+                      <input type="radio" name="residency_status" id="resident" value="Resident" aria-labelledby="resident-label">
+                      <label for="resident" id="resident-label">
+                          <h4>Resident</h4>
+                          <ul>
+                              <li>Buy and Sell Unlisted Shares Effortlessly with Tan.</li>
+                              <li>Join India’s Most Trusted Platform for Unlisted Investments!</li>
+                          </ul>
+                      </label>
+                  </div>
+
+                  <!-- Non-Resident -->
+                  <div class="residency-card" id="nonresident-card" role="radio" aria-checked="false" tabindex="0">
+                      <input type="radio" name="residency_status" id="nonresident" value="Non-Resident" aria-labelledby="nonresident-label">
+                      <label for="nonresident" id="nonresident-label">
+                          <h4>Non-Resident</h4>
+                          <ul>
+                              <li>NRIs Trust Thangiv Consultancy Pvt Ltd for Seamless Unlisted Share Transactions.</li>
+                              <li>Buy India’s Top Unlisted Shares from Anywhere in the World!</li>
+                          </ul>
+                      </label>
+                  </div>
+
+              </div>
+          </div>
+
+          <script>
+              document.addEventListener('DOMContentLoaded', function(){
+                  const cards = document.querySelectorAll('.residency-card');
+                  const radios = document.querySelectorAll('input[name="residency_status"]');
+
+                  function setActiveCard(card){
+                      cards.forEach(c => { c.classList.remove('active'); c.setAttribute('aria-checked','false'); });
+                      card.classList.add('active');
+                      card.setAttribute('aria-checked','true');
+                      const radio = card.querySelector('input[type="radio"]');
+                      if(radio){ radio.checked = true; radio.dispatchEvent(new Event('change', { bubbles: true })); }
+                  }
+
+                  cards.forEach(card => {
+                      card.addEventListener('click', () => setActiveCard(card));
+                      card.addEventListener('keydown', e => {
+                          if(e.key === ' ' || e.key === 'Enter'){
+                              e.preventDefault();
+                              setActiveCard(card);
+                          }
+                      });
+                  });
+
+                  radios.forEach(radio => {
+                      radio.addEventListener('change', () => setActiveCard(radio.closest('.residency-card')));
+                  });
+
+                  // activate if already selected
+                  const checked = document.querySelector('input[name="residency_status"]:checked');
+                  if(checked){ setActiveCard(checked.closest('.residency-card')); }
+              });
+          </script>
+
+
+
+      <!-- residency statuc end  -->
+
 
       <!-- Submit Button -->
       <button type="submit" class="ai-register-button">Sign Up</button>

@@ -310,15 +310,22 @@ from django.db.models import Q
 import json
 from .models import StockData, StockHistory
 
+from django.db.models import Q
+from django.core.paginator import Paginator
+import json
 
 def StockListingTableFormat(request):
     stocks = StockData.objects.all()
 
-    search_query = request.GET.get('search', '')
+    search_query = request.GET.get('search', '').strip()
     if search_query:
-        stocks = stocks.filter(company_name__icontains=search_query)
+        stocks = stocks.filter(
+            Q(company_name__icontains=search_query) |
+            Q(scrip_name__icontains=search_query) |
+            Q(isin_no__icontains=search_query)
+        )
 
-    selected_sector = request.GET.get('sector', '')
+    selected_sector = request.GET.get('sector', '').strip()
     if selected_sector:
         stocks = stocks.filter(sector=selected_sector)
 
@@ -332,7 +339,11 @@ def StockListingTableFormat(request):
     page_obj = paginator.get_page(page_number)
 
     stock_history_data = {
-        stock.id: list(StockHistory.objects.filter(stock=stock).order_by('-timestamp')[:30].values('timestamp', 'price'))
+        stock.id: list(
+            StockHistory.objects.filter(stock=stock)
+            .order_by('-timestamp')[:30]
+            .values('timestamp', 'price')
+        )
         for stock in page_obj
     }
 

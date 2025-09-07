@@ -1614,15 +1614,24 @@ from django.conf import settings
 from weasyprint import HTML
 from .models import Event  # adjust import if needed
 
+from django.http import FileResponse, Http404
+from django.shortcuts import get_object_or_404
+import os
+
 def event_pdf(request, pk):
     event = get_object_or_404(Event, pk=pk)
-    ctx = {
-        "event": event,
-        "image_abs_url": request.build_absolute_uri(event.image.url) if event.image else None,
-    }
-    html_string = render_to_string("events/event_pdf_template.html", ctx)
-    pdf_bytes = HTML(string=html_string, base_url=request.build_absolute_uri("/")).write_pdf()
-    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
-    resp["Content-Disposition"] = f'attachment; filename="event_{event.pk}.pdf"'
-    return resp
+
+    # Check if document exists
+    if not event.document:
+        raise Http404("No document uploaded for this event.")
+
+    # Use Django's FileResponse to serve the PDF
+    file_path = event.document.path
+    if not os.path.exists(file_path):
+        raise Http404("Document file not found.")
+
+    response = FileResponse(open(file_path, "rb"), content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{os.path.basename(file_path)}"'
+    return response
+
 
