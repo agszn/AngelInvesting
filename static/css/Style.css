@@ -82,11 +82,12 @@ a{
   width: 100%;
   background-color: rgba(14, 33, 63, 1);
 }
+
 .unlisted-share-boxex {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  justify-content: space-between;
+  /* justify-content: space-between; */
 }
 
 .card-boxes
@@ -191,6 +192,20 @@ a{
 {
     background-color: #FF4F48;
 }
+
+.card-link {
+    display: block;       /* Makes the anchor fill the card */
+    text-decoration: none; /* Remove underline */
+    color: inherit;        /* Keep the text color same */
+}
+.card-link:hover {
+    color: inherit;        /* Prevent color change on hover */
+}
+
+.card-icons i:hover {
+    color: #39B54A;
+}
+
 /* all list stock */
 .search-bar-wrapper {
     display: flex;
@@ -2445,9 +2460,9 @@ a{
 .header-details-logo-left{
   width: 200px;
   height: 100px;
-  border: 1px solid yellow;
+  /* border: 1px solid yellow; */
   border-radius: 8px;
-  padding: 10px;
+  /* padding: 10px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2457,6 +2472,7 @@ a{
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border-radius: 10px;
 }
 .header-details-buttons
 {

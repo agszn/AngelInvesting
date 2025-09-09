@@ -3,13 +3,14 @@
   {% if stock.company_overview and not stock.hide_company_overview %}
     <!-- <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}"> -->
       <div class="card-boxes">
+        <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" class="card-link">
         <div class="cards">
           <div class="cards-first-info">
             {% if stock.logo %}
               <div class="logo-wrapper">
-                <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">
+                <!-- <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}"> -->
                   <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
-                </a>
+                <!-- </a> -->
               </div>
             {% endif %}
             <div class="card-icons">
@@ -19,9 +20,16 @@
                 data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}">
                 <i class="bi bi-heart" title="Wishlist"></i>
               </button>
-              <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" target="_blank" style="text-decoration: none; color: #666;">
+              <!-- <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" target="_blank" style="text-decoration: none; color: #666;">
                       <i class="bi bi-info-circle" title="{{ stock.description }}"></i>
-              </a>
+              </a> -->
+               <span 
+                    onclick="event.stopPropagation(); window.open('{{ stock.youtube_video_link|default:'#' }}', '_blank', 'noopener')" 
+                    style="cursor: pointer; color: #666;"
+                    title="{{ stock.description }}"
+                >
+                    <i class="bi bi-info-circle"></i>
+                </span>
 
               <!-- {% if stock.youtube_video_link %}
                   <a href="{{ stock.youtube_video_link }}" target="_blank" style="text-decoration: none; color: #666;">
@@ -62,6 +70,7 @@
               )'>Sell</button>
           </div>
         </div>
+        </a>
       </div>
     <!-- </a> -->
   {% endif %}

@@ -1,11 +1,11 @@
 {% comment %} portfolio/includes/portfolio_table.html {% endcomment %}
+<div class="user-portfolio-table-wrapper">
 <div class="user-portfolio-toptable">
-  {% if holdings %}
+  {% if holdings.object_list %}
   <div class="user-portfolio-head">
     <div>Stock Name</div>
     <div>Quantity</div>
     <div>Advisor</div>
-    <div>Broker</div>
     <div>Avg. Price</div>
     <!-- <div>DateTime</div> -->
     <div>CMP</div>
@@ -18,26 +18,51 @@
 
   {% for h in holdings %}
   <div class="user-portfolio-tbody">
-    <div>{{ h.stock.company_name }}</div>
+    <div>
+      {{ h.stock.company_name }}
+      <span title="Buy {{ h.stock.company_name }}"
+            onclick='openBuyModal(
+              "{{ h.stock.id }}",
+              "{{ h.stock.company_name|escapejs }}",
+              "{{ h.stock.share_price }}",
+              "{{ h.stock.quantity }}",
+              "{% url 'user_portfolio:buy_stock' h.stock.id %}"
+            )'
+            style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
+
+      <span onclick='openSellModal(
+              "{{ h.stock.id }}",
+              "{{ h.stock.company_name|escapejs }}",
+              "{{ h.stock.share_price }}",
+              "{{ h.stock.quantity }}",
+              "{% url 'user_portfolio:sell_stock' h.stock.id %}"
+            )'
+            style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
+    </div>
+
     <div>{{ h.quantity_held }}</div>
     <div>{{ h.advisor.advisor_type|default:"-" }}</div>
-    <div>{{ h.broker.name|default:"-" }}</div>
-    <div>₹{{ h.avg_price }}</div>
+    <div>₹{{ h.avg_price|floatformat:2 }}</div>
     <!-- <div>{{ h.last_updated }}</div> -->
+
     <div>
-      {% if h.stock and h.stock.ltp is not None %}
-        ₹{{ h.stock.ltp|floatformat:2 }}
+      {% if h.share_price is not None %}
+        ₹{{ h.share_price|floatformat:2 }}
+      {% elif h.stock and h.stock.share_price is not None %}
+        ₹{{ h.stock.share_price|floatformat:2 }}
       {% else %}
         -
       {% endif %}
     </div>
+
     <div>₹{{ h.investment_amount }}</div>
     <div>₹{{ h.market_value }}</div>
     <div style="color: {% if h.overall_gain_loss > 0 %}green{% elif h.overall_gain_loss < 0 %}red{% else %}#333{% endif %};">
-      ₹{{ h.overall_gain_loss }} <small>({{ h.overall_gain_percent }}%)</small>
+      ₹{{ h.overall_gain_loss }} <small>({{ h.overall_gain_percent|floatformat:2 }}%)</small>
     </div>
     <div style="color: {% if h.day_gain_loss > 0 %}green{% elif h.day_gain_loss < 0 %}red{% else %}#333{% endif %};">
-      ₹{{ h.day_gain_loss }} <small>({{ h.day_gain_percent }}%)</small>
+      ₹{{ h.day_gain_loss }} <small>({{ h.day_gain_percent|floatformat:2 }}%)</small>
+
     </div>
   </div>
   {% empty %}
@@ -55,4 +80,5 @@
       <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
     {% endif %}
   </div>
+</div>
 </div>

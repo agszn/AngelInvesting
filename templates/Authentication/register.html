@@ -6,7 +6,8 @@
     display: flex;
     flex-wrap: wrap;
     width: 90%;
-    max-width: 900px;
+    /* max-width: 900px; */
+    max-width: 67%;
     background-color: white;
     border-radius: 20px;
     overflow: hidden;
@@ -182,23 +183,27 @@
                   flex-direction: row;   /* horizontal layout */
                   justify-content: flex-start;
                   align-items: stretch;
-                  gap: 20px;
-                  flex-wrap: nowrap;     /* prevent wrapping unless small screen */
+                  gap: 2%;
+                  width: 100%;
+                  flex-wrap: nowrap; 
+                  margin-bottom: 20px;    /* prevent wrapping unless small screen */
               }
 
               .residency-card {
-                  flex: 1 1 280px;
+                  /* flex: 1 1 280px; */
+                  width: 48%;
                   border: 2px solid #ddd;
                   border-radius: 12px;
-                  padding: 18px 20px;
+                  padding: 18px 10px;
                   cursor: pointer;
                   transition: box-shadow .18s ease, border-color .18s ease, transform .08s ease;
                   display: flex;
                   align-items: flex-start;
-                  gap: 14px;
+                  gap: 10px;
                   background: #fff;
                   position: relative;
-                  min-height: 100px;
+                  /* min-height: 100px; */
+                  height: auto;
               }
 
               .residency-card:hover { transform: translateY(-2px); }
@@ -210,7 +215,7 @@
                   flex: 0 0 auto;
                   accent-color: #4CAF50; /* green accent */
                   width: 18px;
-                  height: 18px;
+                  /* height: 18px; */
               }
 
               .residency-card label {
@@ -223,7 +228,7 @@
               }
 
               .residency-card h4 {
-                  font-size: 18px;
+                  font-size: 14px;
                   margin: 0;
                   font-weight: 700;
                   color: #222;
@@ -233,14 +238,15 @@
               .residency-card ul {
                 list-style-type: disc;           /* show discs */
                 list-style-position: outside;    /* marker sits outside the content box */
-                padding-left: 1.25rem;           /* keep your left padding */
+                padding-left: 0;           /* keep your left padding */
                 margin: 6px 0 0 0;
               }
 
               /* ensure li behaves like a list item (in case some reset changed it) */
               .residency-card li {
                 display: list-item;
-                margin-bottom: 6px;
+                margin-bottom: 3px;
+                font-size: 12px;
               }
 
               /* strengthen marker styling (webkit + modern) */

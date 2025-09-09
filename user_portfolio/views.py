@@ -233,17 +233,22 @@ from django.db.models import Q
 from django.shortcuts import render
 from .models import UserStockInvestmentSummary, Advisor, Broker
 from .utils import update_user_holdings  # make sure this is in utils.py
-
 @login_required
 def portfolio_view(request):
+    from decimal import Decimal  # local import to keep this function self-contained
+
     user = request.user
     update_user_holdings(user)
 
-    qs = UserStockInvestmentSummary.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
+    qs = (
+        UserStockInvestmentSummary.objects
+        .filter(user=user)
+        .select_related('stock', 'advisor', 'broker')
+    )
 
     advisor_param = request.GET.get('advisor')        # could be None, 'all', or an id string
-    broker_id = request.GET.get('broker')
-    search = request.GET.get('search', '').strip()
+    broker_id     = request.GET.get('broker')
+    search        = request.GET.get('search', '').strip()
 
     selected_advisor = None
 
@@ -260,14 +265,101 @@ def portfolio_view(request):
             selected_advisor = Advisor.objects.filter(id=advisor_param).first()
         # else: advisor=all (or empty) -> no advisor filter
 
+    # Optional narrowing by broker (still supported), but UI will merge rows ignoring broker
     if broker_id:
         qs = qs.filter(broker__id=broker_id)
+
     if search:
-        qs = qs.filter(Q(stock__company_name__icontains=search) | Q(stock__scrip_name__icontains=search))
+        qs = qs.filter(
+            Q(stock__company_name__icontains=search) |
+            Q(stock__scrip_name__icontains=search)
+        )
 
-    qs = qs.order_by('-last_updated', '-id')
+    # Hide zero-quantity rows
+    qs = qs.exclude(quantity_held=0)
 
-    paginator = Paginator(qs, 20)
+    # We’ll merge by (stock, advisor) for FRONTEND display (ignore broker)
+    buckets = {}  # key=(stock_id, advisor_id) -> aggregated dict
+
+    for row in qs:
+        key = (row.stock_id, row.advisor_id)
+        agg = buckets.get(key)
+        if not agg:
+            agg = {
+                'stock': row.stock,
+                'advisor': row.advisor,
+                # sums
+                'quantity_held': 0,
+                'investment_amount': Decimal('0'),
+                'market_value': Decimal('0'),
+                'overall_gain_loss': Decimal('0'),
+                'day_gain_loss': Decimal('0'),
+                'buy_order_count': 0,
+                'buy_order_total': Decimal('0'),
+                'sell_order_count': 0,
+                'sell_order_total': Decimal('0'),
+                # carry-forward / latest
+                'share_price': row.share_price,
+                'previous_day_price': row.previous_day_price,
+                'last_updated': row.last_updated,
+            }
+            buckets[key] = agg
+
+        # accumulate
+        agg['quantity_held']     += int(row.quantity_held or 0)
+        agg['investment_amount'] += row.investment_amount or Decimal('0')
+        agg['market_value']      += row.market_value or Decimal('0')
+        agg['overall_gain_loss'] += row.overall_gain_loss or Decimal('0')
+        agg['day_gain_loss']     += row.day_gain_loss or Decimal('0')
+        agg['buy_order_count']   += int(row.buy_order_count or 0)
+        agg['buy_order_total']   += row.buy_order_total or Decimal('0')
+        agg['sell_order_count']  += int(row.sell_order_count or 0)
+        agg['sell_order_total']  += row.sell_order_total or Decimal('0')
+
+        # keep freshest timestamp & latest non-null prices
+        if row.last_updated and (not agg['last_updated'] or row.last_updated > agg['last_updated']):
+            agg['last_updated'] = row.last_updated
+            if row.share_price is not None:
+                agg['share_price'] = row.share_price
+            if row.previous_day_price is not None:
+                agg['previous_day_price'] = row.previous_day_price
+
+    # Finalize merged rows (compute avg_price and percents)
+    merged = []
+    for (stock_id, advisor_id), a in buckets.items():
+        qty = a['quantity_held']
+        inv = a['investment_amount'] or Decimal('0')
+        avg_price = (inv / qty) if qty else Decimal('0')
+
+        overall_gain_percent = (a['overall_gain_loss'] / inv * 100) if inv > 0 else Decimal('0')
+        day_gain_percent     = (a['day_gain_loss'] / inv * 100)     if inv > 0 else Decimal('0')
+
+        class Row:  # simple container for template dot-access
+            pass
+
+        h = Row()
+        h.stock                = a['stock']
+        h.advisor              = a['advisor']
+        h.quantity_held        = qty
+        h.avg_price            = avg_price
+        h.share_price          = a['share_price']
+        h.previous_day_price   = a['previous_day_price']
+        h.market_value         = a['market_value']
+        h.investment_amount    = inv
+        h.overall_gain_loss    = a['overall_gain_loss']
+        h.overall_gain_percent = overall_gain_percent
+        h.day_gain_loss        = a['day_gain_loss']
+        h.day_gain_percent     = day_gain_percent
+        h.last_updated         = a['last_updated']
+        # keep attribute for backward-compat in template (but we won't render it)
+        h.broker               = None
+        merged.append(h)
+
+    # Sort newest first (same behavior as before)
+    merged.sort(key=lambda x: (x.last_updated or 0, x.stock.id if x.stock else 0), reverse=True)
+
+    # Paginate the merged list
+    paginator = Paginator(merged, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     stock_context = get_user_stock_context(user, request)
@@ -281,7 +373,12 @@ def portfolio_view(request):
         'page_obj': page_obj,
         **stock_context,
     }
-    tpl = 'portfolio/includes/portfolio_table.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else 'portfolio/PortfolioList.html'
+
+    tpl = (
+        'portfolio/includes/portfolio_table.html'
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        else 'portfolio/PortfolioList.html'
+    )
     return render(request, tpl, context)
 
 

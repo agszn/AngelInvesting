@@ -5,9 +5,10 @@
         <button onclick="openBankModal('add')" class="add-button">➕ Add Bank</button>
     </div>
     <div class="user-personal_Information-feilds">
-        <div class="profile-container">
+        <div class="profile-containerBank">
             {% if bank_accounts %}
                 {% for account in bank_accounts %}
+                <div class="bank-account-card">
                     <div class="heading-feilds"><span>Account Holder Name</span>{{ account.account_holder_name }}</div>
                     <div class="heading-feilds"><span>Bank Name</span>{{ account.bank_name }}</div>
                     <div class="heading-feilds"><span>Account Type</span>{{ account.account_type }}</div>
@@ -30,7 +31,7 @@
                         </div>
                     {% endif %}
                     
-                    <div class="heading-feilds1">
+                    <div class="bank-account-actions">
                         <button 
                             onclick="editBank(
                                 {{ account.id }},
@@ -55,6 +56,8 @@
                             <button type="submit" class="delete-bank-button">🗑 Delete</button>
                         </form>
                     </div>
+                </div>
+                <hr/>
                 {% endfor %}
             {% else %}
                 <div class="no-data-message">No bank accounts added yet.</div>

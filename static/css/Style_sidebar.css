@@ -490,6 +490,14 @@
     gap:15px;
 }
 
+.bank-account-card
+{
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:15px;
+}
+
 .heading-feilds {
     font-weight: 600;
     font-size: 18px;
@@ -633,14 +641,20 @@
     padding: 0 20px;
     width: 100%;
 }
+.user-portfolio-table-wrapper
+{
+    overflow-x: auto;
+    width: 100%;
+}
 .user-portfolio-toptable
 {
     width: 100%;
+    width: max-content;
 }
 .user-portfolio-head
 {
     display: grid; 
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.7fr;
     background-color: #0B1A32;
     padding: 10px;
     border-top-left-radius: 10px;
@@ -664,21 +678,22 @@
 }
 .user-portfolio-head div,.user-portfolio-head1 tr>th
 { 
-    font-size: 16px;
+    font-size: 17px;
     font-weight: medium;
     color: white;
 }
 .user-portfolio-tbody
 {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.7fr;
     padding: 10px;
     background-color: #FCFCFC;
     border-bottom: 1px solid #ddd;
 }
 .user-portfolio-tbody div{
-    font-size: 14px;
+    font-size: 15px;
     font-weight: medium;
+    padding-right: 10px;
 }
 .user-portfolio-tpaginatioin
 {

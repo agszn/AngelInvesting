@@ -476,7 +476,12 @@ class UserStockInvestmentSummary(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('user', 'stock', 'is_other_advisor')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'stock', 'advisor', 'broker', 'is_other_advisor'],
+                name='uniq_user_stock_advisor_broker_bucket'
+            )
+        ]
 
     def update_from_transactions(self):
         """

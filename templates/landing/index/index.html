@@ -14,88 +14,88 @@
       <div class="unlisted-share-boxex">
         {% for stock in stocks|slice:":10" %}
           {% if stock.company_overview and not stock.hide_company_overview %}
-              <!-- <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}"> -->
                 <div class="card-boxes">
-                  <div class="cards">
-                    <div class="cards-first-info">
-                      {% if stock.logo %}
-                        <div class="logo-wrapper">
-                          <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}">
-                            <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
-                          </a>
+                    <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" class="card-link">
+                        <div class="cards">
+                            <div class="cards-first-info">
+                                {% if stock.logo %}
+                                    <div class="logo-wrapper">
+                                        <!-- <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}"> -->
+                                            <img class="stock-card-image" src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo">
+                                        <!-- </a> -->
+                                    </div>
+                                {% endif %}
+                                <div class="card-icons">
+                                    <button 
+                                        class="wishlist-btn" style="border: none; background-color: #F9FCF4;" 
+                                        data-stock-id="{{ stock.id }}" 
+                                        data-stock-name="{{ stock.company_name }}" 
+                                        data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}">
+                                        <i class="bi bi-heart" title="Wishlist"></i>
+                                    </button>
+
+                                    <!-- more info i button start -->
+                                    <button type="button"
+                                        class="wishlist-btn"
+                                        style="border: none; background-color: #F9FCF4; cursor:pointer"
+                                        data-stock-id="{{ stock.id }}"
+                                        data-stock-name="{{ stock.company_name }}"
+                                        data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}"
+                                        onclick="window.open('{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}', '_blank', 'noopener')"
+                                        aria-label="View {{ stock.company_name }} details"
+                                    >
+                                        <i class="bi bi-info-circle" title="{{ stock.description }}"></i>
+                                    </button>
+
+                                    <!-- more info i button end -->
+
+                                    <!-- i yputube link  start -->
+                                        <!-- {% if stock.youtube_video_link %}
+                                            <a href="{{ stock.youtube_video_link }}" target="_blank" style="text-decoration: none; color: #666;">
+                                                <i class="bi bi-info-circle" title="Watch Video"></i>
+                                            </a>
+                                        {% endif %} -->
+                                    <!-- i yputube link  end -->
+                                </div>
+                            </div>
+
+                            <div class="cards-second-info">
+                                <div class="cards-share-name"><strong>{{ stock.sector }}</strong></div>
+                                <div class="cards-share-level">
+                                    Conviction level
+                                    <strong>Very High</strong>
+                                </div>
+                            </div>
+
+                            <div class="cards-third-info">
+                                <div>Lot Size: <strong>{{ stock.lot }} Shares</strong></div>
+                                <div>Share Price: <strong>₹{{ stock.share_price }}</strong></div>
+                            </div>
+
+                            <div class="cards-fourth-info">
+                                <button class="cards-buy-button" type="button"
+                                    title="Buy {{ stock.company_name }}"
+                                    onclick='openBuyModal(
+                                    "{{ stock.id }}",
+                                    "{{ stock.company_name|escapejs }}",
+                                    "{{ stock.share_price }}",
+                                    "{{ stock.quantity }}",
+                                    "{% url 'user_portfolio:buy_stock' stock.id %}"
+                                    )'
+                                >Buy</button>
+                                <button class="cards-sell-button"
+                                    onclick='openSellModal(
+                                    "{{ stock.id }}",
+                                    "{{ stock.company_name|escapejs }}",
+                                    "{{ stock.share_price }}",
+                                    "{{ stock.quantity }}",
+                                    "{% url 'user_portfolio:sell_stock' stock.id %}"
+                                )'
+                                >Sell</button>
+                            </div>
                         </div>
-                      {% endif %}
-                      <div class="card-icons">
-                        <button 
-                            class="wishlist-btn" style="border: none; background-color: #F9FCF4;" 
-                            data-stock-id="{{ stock.id }}" 
-                            data-stock-name="{{ stock.company_name }}" 
-                            data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}">
-                            <i class="bi bi-heart" title="Wishlist"></i>
-                          </button>
-
-                        <!-- more info i button start -->
-                          <button type="button"
-                            class="wishlist-btn"
-                            style="border: none; background-color: #F9FCF4; cursor:pointer"
-                            data-stock-id="{{ stock.id }}"
-                            data-stock-name="{{ stock.company_name }}"
-                            data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}"
-                            onclick="window.open('{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}', '_blank', 'noopener')"
-                            aria-label="View {{ stock.company_name }} details"
-                          >
-                            <i class="bi bi-info-circle" title="{{ stock.description }}"></i>
-                          </button>
-
-                        <!-- more info i button end -->
-
-                        <!-- i yputube link  start -->
-                            <!-- {% if stock.youtube_video_link %}
-                                <a href="{{ stock.youtube_video_link }}" target="_blank" style="text-decoration: none; color: #666;">
-                                    <i class="bi bi-info-circle" title="Watch Video"></i>
-                                </a>
-                            {% endif %} -->
-                        <!-- i yputube link  end -->
-                      </div>
-                    </div>
-
-                    <div class="cards-second-info">
-                      <div class="cards-share-name"><strong>{{ stock.sector }}</strong></div>
-                      <div class="cards-share-level">
-                        Conviction level
-                        <strong>Very High</strong>
-                      </div>
-                    </div>
-
-                    <div class="cards-third-info">
-                      <div>Lot Size: <strong>{{ stock.lot }} Shares</strong></div>
-                      <div>Share Price: <strong>₹{{ stock.share_price }}</strong></div>
-                    </div>
-
-                    <div class="cards-fourth-info">
-                      <button class="cards-buy-button" type="button"
-                        title="Buy {{ stock.company_name }}"
-                        onclick='openBuyModal(
-                          "{{ stock.id }}",
-                          "{{ stock.company_name|escapejs }}",
-                          "{{ stock.share_price }}",
-                          "{{ stock.quantity }}",
-                          "{% url 'user_portfolio:buy_stock' stock.id %}"
-                        )'
-                      >Buy</button>
-                      <button class="cards-sell-button"
-                        onclick='openSellModal(
-                        "{{ stock.id }}",
-                        "{{ stock.company_name|escapejs }}",
-                        "{{ stock.share_price }}",
-                        "{{ stock.quantity }}",
-                        "{% url 'user_portfolio:sell_stock' stock.id %}"
-                      )'
-                      >Sell</button>
-                    </div>
-                  </div>
+                    </a>
                 </div>
-              <!-- </a> -->
           {% endif %}
         {% endfor %}
       </div>
