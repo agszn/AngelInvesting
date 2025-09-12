@@ -104,19 +104,9 @@ class CustomUser(AbstractUser):
 from django.db import models
 from django.conf import settings
 
-ACCOUNT_TYPE_CHOICES = [
-    ('saving', 'Saving'),
-    ('current', 'Current'),
-    ('salary', 'Salary'),
-    ('nre', 'NRE'),
-    ('nro', 'NRO'),
-]
 
-ACCOUNT_STATUS_CHOICES = [
-    ('active', 'Active'),
-    ('inactive', 'Inactive'),
-    ('closed', 'Closed'),
-]
+
+
 
 from django.db import models
 from django.conf import settings
@@ -205,33 +195,69 @@ from django.core.validators import FileExtensionValidator
 from django.core.validators import RegexValidator
 from django.core.validators import RegexValidator, MaxLengthValidator, MinLengthValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
+# models.py
+from django.db import models
+from django.core.validators import (
+    MinValueValidator, MaxValueValidator, FileExtensionValidator, RegexValidator
+)
+from django.core.exceptions import ValidationError
+
+# ---- Reuse your own constants if you already define them elsewhere ----
+ACCOUNT_TYPE_CHOICES = [
+    ('saving', 'Saving'),
+    ('current', 'Current'),
+    ('salary', 'Salary'),
+    ('nre', 'NRE'),
+    ('nro', 'NRO'),
+    ('jointAcc', 'Joint Account'),
+]
+
+ACCOUNT_STATUS_CHOICES = [
+    ('active', 'Active'),
+    ('inactive', 'Inactive'),
+    ('closed', 'Closed'),
+]
 
 DOCUMENT_TYPE_CHOICES = [
     ('cancelled_cheque', 'Cancelled Cheque'),
-    ('bank_statement', 'One Month Bank Statement'),
-    ('passbook', 'Front Page of Passbook'),
+    ('bank_statement', 'Bank Statement'),
+    ('passbook', 'Passbook'),
 ]
 
+# adjust this import for your project structure
+from user_auth.models import UserProfile  # or wherever your UserProfile lives
+
+
+def _is_pdf(upload) -> bool:
+    return bool(upload) and str(upload.name).lower().endswith('.pdf')
+
+
 class BankAccount(models.Model):
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='bank_accounts')
+    user_profile = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE, related_name='bank_accounts'
+    )
     account_holder_name = models.CharField(max_length=100)
     bank_name = models.CharField(max_length=100)
+
+    # NOTE: BigIntegerField drops leading zeros. If they matter, switch to CharField with a regex.
     account_number = models.BigIntegerField(
         validators=[
-            MinValueValidator(10**9),              # minimum 10 digits
-            MaxValueValidator(10**20 - 1)          # maximum 20 digits
+            MinValueValidator(10**9),          # minimum 10 digits
+            MaxValueValidator(10**20 - 1)      # maximum 20 digits
         ]
     )
-    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES,default="saving")
-    
+
+    account_type = models.CharField(
+        max_length=10, choices=ACCOUNT_TYPE_CHOICES, default="saving"
+    )
+
     account_status = models.CharField(
-        max_length=10,
-        choices=ACCOUNT_STATUS_CHOICES,
-        default="active"
+        max_length=10, choices=ACCOUNT_STATUS_CHOICES, default="active"
     )
 
     linked_phone_number = models.CharField(max_length=15, blank=True, null=True)
-    # IFSC Code - regex to enforce the pattern
+
+    # IFSC Code - regex to enforce the pattern (e.g., SBIN0001234)
     ifsc_code = models.CharField(
         max_length=11,
         validators=[
@@ -239,30 +265,83 @@ class BankAccount(models.Model):
                 regex=r'^[A-Z]{4}0[A-Z0-9]{6}$',
                 message='Enter a valid IFSC code (e.g., SBIN0001234)'
             )
-        ], blank=True, null=True
-    )
-    statementPaper = models.FileField(
-        upload_to='bank_statements/',
-        blank=True,
-        null=True,
-        validators=[
-            FileExtensionValidator(allowed_extensions=['pdf', 'xlsx'])
-        ]
+        ],
+        blank=True, null=True
     )
 
+    statementPaper = models.FileField(
+        upload_to='bank_statements/',
+        blank=True, null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'xlsx'])]
+    )
 
     # Dropdown to choose what document is uploaded
     document_type = models.CharField(
-        max_length=20,
-        choices=DOCUMENT_TYPE_CHOICES,
-        default='cancelled_cheque'
+        max_length=20, choices=DOCUMENT_TYPE_CHOICES, default='cancelled_cheque'
     )
-    
+
     bankDetails_doc_password = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.bank_name} - {self.account_number}"
 
+    def clean(self):
+        """
+        Keep model-level checks that don't require knowing related objects.
+        Enforcing "requires at least one joint holder when jointAcc" is best done in the formset layer.
+        """
+        # Example: if you want to ensure statementPaper password when PDF (optional)
+        if self.statementPaper and str(self.statementPaper.name).lower().endswith('.pdf'):
+            # If you have password rules for this doc, enforce here (optional).
+            pass
+
+
+class JointAccountHolder(models.Model):
+    """
+    Stores KYC for each joint holder. Required ONLY when `BankAccount.account_type == 'jointAcc'`.
+    Use an inline formset in the view/form to enforce at least one row when jointAcc.
+    """
+    bank_account = models.ForeignKey(
+        BankAccount, on_delete=models.CASCADE, related_name='joint_holders'
+    )
+
+    full_name = models.CharField(max_length=120)
+
+    # Aadhaar document (image/pdf) + optional password if PDF
+    aadhaar_doc = models.FileField(
+        upload_to='kyc/aadhaar/',
+        validators=[FileExtensionValidator(['pdf', 'jpg', 'jpeg', 'png'])]
+    )
+    aadhaar_doc_password = models.CharField(max_length=100, blank=True, null=True)
+
+    # PAN document (image/pdf) + optional password if PDF
+    pan_doc = models.FileField(
+        upload_to='kyc/pan/',
+        validators=[FileExtensionValidator(['pdf', 'jpg', 'jpeg', 'png'])]
+    )
+    pan_doc_password = models.CharField(max_length=100, blank=True, null=True)
+
+    def clean(self):
+        errors = {}
+
+        if not self.full_name:
+            errors['full_name'] = 'Joint account holder name is required.'
+
+        if not self.aadhaar_doc:
+            errors['aadhaar_doc'] = 'Aadhaar document is required.'
+        elif _is_pdf(self.aadhaar_doc) and not self.aadhaar_doc_password:
+            errors['aadhaar_doc_password'] = 'Password is required for Aadhaar PDF.'
+
+        if not self.pan_doc:
+            errors['pan_doc'] = 'PAN document is required.'
+        elif _is_pdf(self.pan_doc) and not self.pan_doc_password:
+            errors['pan_doc_password'] = 'Password is required for PAN PDF.'
+
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self):
+        return f"Joint Holder: {self.full_name}"
 
 from site_Manager.models import Broker 
 from django.core.validators import FileExtensionValidator

@@ -132,36 +132,161 @@ class UserProfileForm(forms.ModelForm):
 
 
 # bank acc
+# forms.py
 from django import forms
+from django.forms import inlineformset_factory
+from django.core.exceptions import ValidationError
 from .models import BankAccount
 
+# If you created JointAccountHolder as suggested
+try:
+    from .models import JointAccountHolder
+    HAS_JOINT_HOLDER = True
+except Exception:
+    HAS_JOINT_HOLDER = False
+
+
+def _is_pdf(upload) -> bool:
+    return bool(upload) and str(upload.name).lower().endswith('.pdf')
+
+
 class BankAccountForm(forms.ModelForm):
+    # Override to control messages and digit counting (and hide 9223… message)
+    # Because your model is BigIntegerField, we cap at 19 digits here.
+    account_number = forms.CharField(
+        max_length=19,
+        strip=True,
+        label="Account Number",
+        widget=forms.TextInput(attrs={
+            "inputmode": "numeric",
+            "pattern": r"\d{10,19}",
+            "placeholder": "Enter 10–19 digit account number",
+        })
+    )
+
     class Meta:
         model = BankAccount
         fields = [
-            'account_holder_name', 
-            'bank_name', 
-            'account_type', 
-            'account_number', 
-            'account_status', 
-            'linked_phone_number', 
-            'ifsc_code', 
-            'statementPaper', 
-            'document_type', 
-            'bankDetails_doc_password'
+            "account_holder_name",
+            "bank_name",
+            "account_type",
+            "account_number",
+            "account_status",
+            "linked_phone_number",
+            "ifsc_code",
+            "statementPaper",
+            "document_type",
+            "bankDetails_doc_password",
         ]
+        labels = {
+            "account_holder_name": "Primary Account Holder Name",
+            "bank_name": "Bank Name",
+            "account_type": "Account Type",
+            "account_number": "Account Number",
+            "account_status": "Account Status",
+            "linked_phone_number": "Linked Phone Number (SMS/OTP)",
+            "ifsc_code": "IFSC Code",
+            "statementPaper": "Statement / Cheque / Passbook (PDF/XLSX)",
+            "document_type": "Uploaded Document Type",
+            "bankDetails_doc_password": "Document Password (if PDF)",
+        }
+        widgets = {
+            "linked_phone_number": forms.TextInput(attrs={"placeholder": "e.g. +91XXXXXXXXXX"}),
+            "ifsc_code": forms.TextInput(attrs={"placeholder": "e.g. SBIN0001234", "style": "text-transform:uppercase"}),
+            "statementPaper": forms.ClearableFileInput(attrs={"accept": ".pdf,.xlsx"}),
+        }
+
+    # ----- Field-level validations -----
+
     def clean_account_number(self):
-        data = self.cleaned_data['account_number']
+        raw = (self.cleaned_data.get("account_number") or "").strip()
+        digits = "".join(ch for ch in raw if ch.isdigit())
+        count = len(digits)
 
-        # Convert to string for length check
-        data_str = str(data)
+        # For BigIntegerField, allow 10–19 digits
+        if count < 10:
+            raise ValidationError(f"Account number must be at least 10 digits. You entered {count}.")
+        if count > 19:
+            raise ValidationError(f"Account number can be at most 19 digits on this system. You entered {count}.")
 
-        if len(data_str) < 10:
-            raise forms.ValidationError("Account number must be at least 10 digits long.")
+        # Convert to int for the model (BigIntegerField).
+        # If you migrate the model to CharField(20), just `return digits` and adjust limits to 20.
+        return int(digits)
 
-        return data
+    # ----- Form-level validations -----
+
+    def clean(self):
+        cleaned = super().clean()
+
+        # Normalize IFSC to uppercase (model regex expects uppercase)
+        ifsc = cleaned.get("ifsc_code")
+        if ifsc:
+            cleaned["ifsc_code"] = ifsc.upper()
+
+        # Require password ONLY for bank_statement PDFs
+        statement = cleaned.get("statementPaper")
+        doc_password = (cleaned.get("bankDetails_doc_password") or "").strip()
+        doc_type = cleaned.get("document_type")
+
+        if doc_type == "bank_statement":
+            if _is_pdf(statement) and not doc_password:
+                self.add_error("bankDetails_doc_password", "Password is required for bank statement PDFs.")
+        else:
+            # Clear password for other doc types to avoid confusion
+            cleaned["bankDetails_doc_password"] = ""
+
+        return cleaned
 
 
+# ---------- Joint Holder (optional; if your model has it) ----------
+
+if HAS_JOINT_HOLDER:
+    class JointAccountHolderForm(forms.ModelForm):
+        class Meta:
+            model = JointAccountHolder
+            fields = [
+                "full_name",
+                "aadhaar_doc",
+                "aadhaar_doc_password",
+                "pan_doc",
+                "pan_doc_password",
+            ]
+            labels = {
+                "full_name": "Joint Holder Full Name",
+                "aadhaar_doc": "Aadhaar (PDF/JPG/PNG)",
+                "aadhaar_doc_password": "Aadhaar PDF Password (if PDF)",
+                "pan_doc": "PAN (PDF/JPG/PNG)",
+                "pan_doc_password": "PAN PDF Password (if PDF)",
+            }
+            widgets = {
+                "aadhaar_doc": forms.ClearableFileInput(attrs={"accept": ".pdf,.jpg,.jpeg,.png"}),
+                "pan_doc": forms.ClearableFileInput(attrs={"accept": ".pdf,.jpg,.jpeg,.png"}),
+            }
+
+        def clean(self):
+            cleaned = super().clean()
+            aadhaar = cleaned.get("aadhaar_doc")
+            pan = cleaned.get("pan_doc")
+
+            if _is_pdf(aadhaar) and not cleaned.get("aadhaar_doc_password"):
+                self.add_error("aadhaar_doc_password", "Password is required for Aadhaar PDF.")
+            if _is_pdf(pan) and not cleaned.get("pan_doc_password"):
+                self.add_error("pan_doc_password", "Password is required for PAN PDF.")
+
+            return cleaned
+
+    JointHolderFormSet = inlineformset_factory(
+        BankAccount,
+        JointAccountHolder,
+        form=JointAccountHolderForm,
+        extra=1,
+        can_delete=True,
+        min_num=1,
+        validate_min=True,
+    )
+else:
+    JointAccountHolderForm = None
+    JointHolderFormSet = None
 
 
 # CMR

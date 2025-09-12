@@ -5,8 +5,8 @@
       <th>Stock Name</th>
       <th>Advisor</th>
       <th>Broker</th>
-      <th>Quantity</th>
       <th>Buy Price</th>
+      <th>Quantity</th>
       <th>Total Amt</th>
       <th>Order Type</th>
       <th>RM Status</th>
@@ -26,8 +26,8 @@
       <td>{{ order.stock.company_name }}</td>
       <td>{{ order.advisor.advisor_type|default:"Others" }}</td>
       <td>{{ order.broker.name|default:"N/A" }}</td>
-      <td>{{ order.quantity }}</td>
       <td>₹{{ order.price_per_share }}</td>
+      <td>{{ order.quantity }}</td>
       <td>₹{{ order.total_amount }}</td>
       <td>{{ order.order_type|title }}</td>
       <td>{{ order.RM_status }}</td>

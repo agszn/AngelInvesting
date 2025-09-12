@@ -233,9 +233,12 @@ from django.db.models import Q
 from django.shortcuts import render
 from .models import UserStockInvestmentSummary, Advisor, Broker
 from .utils import update_user_holdings  # make sure this is in utils.py
+
 @login_required
 def portfolio_view(request):
-    from decimal import Decimal  # local import to keep this function self-contained
+    from decimal import Decimal
+    from django.utils import timezone
+    from datetime import datetime
 
     user = request.user
     update_user_holdings(user)
@@ -249,6 +252,12 @@ def portfolio_view(request):
     advisor_param = request.GET.get('advisor')        # could be None, 'all', or an id string
     broker_id     = request.GET.get('broker')
     search        = request.GET.get('search', '').strip()
+
+    # New: sort parameters
+    sort = (request.GET.get('sort') or '').lower()          # 'inv' or 'mkt'
+    dir_ = (request.GET.get('dir') or 'desc').lower()       # 'asc' or 'desc'
+    if dir_ not in ('asc', 'desc'):
+        dir_ = 'desc'
 
     selected_advisor = None
 
@@ -278,7 +287,7 @@ def portfolio_view(request):
     # Hide zero-quantity rows
     qs = qs.exclude(quantity_held=0)
 
-    # We’ll merge by (stock, advisor) for FRONTEND display (ignore broker)
+    # Merge by (stock, advisor) for FRONTEND display (ignore broker)
     buckets = {}  # key=(stock_id, advisor_id) -> aggregated dict
 
     for row in qs:
@@ -334,7 +343,7 @@ def portfolio_view(request):
         overall_gain_percent = (a['overall_gain_loss'] / inv * 100) if inv > 0 else Decimal('0')
         day_gain_percent     = (a['day_gain_loss'] / inv * 100)     if inv > 0 else Decimal('0')
 
-        class Row:  # simple container for template dot-access
+        class Row:
             pass
 
         h = Row()
@@ -351,14 +360,23 @@ def portfolio_view(request):
         h.day_gain_loss        = a['day_gain_loss']
         h.day_gain_percent     = day_gain_percent
         h.last_updated         = a['last_updated']
-        # keep attribute for backward-compat in template (but we won't render it)
         h.broker               = None
         merged.append(h)
 
-    # Sort newest first (same behavior as before)
-    merged.sort(key=lambda x: (x.last_updated or 0, x.stock.id if x.stock else 0), reverse=True)
+    # Default sort: newest first
+    merged.sort(
+        key=lambda x: (x.last_updated or datetime.min, x.stock.id if x.stock else 0),
+        reverse=True
+    )
 
-    # Paginate the merged list
+    # Apply requested sort (stable sort keeps newest-first within equal values)
+    if sort in ('inv', 'mkt'):
+        if sort == 'inv':
+            merged.sort(key=lambda x: x.investment_amount or Decimal('0'), reverse=(dir_ == 'desc'))
+        else:
+            merged.sort(key=lambda x: x.market_value or Decimal('0'), reverse=(dir_ == 'desc'))
+
+    # Pagination
     paginator = Paginator(merged, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
@@ -371,6 +389,9 @@ def portfolio_view(request):
         'selected_broker': Broker.objects.filter(id=broker_id).first() if broker_id else None,
         'search_query': search,
         'page_obj': page_obj,
+        # expose sort state to template
+        'sort': sort,
+        'dir': dir_,
         **stock_context,
     }
 
@@ -617,32 +638,102 @@ from decimal import Decimal, InvalidOperation
 from .models import StockData, SellTransaction, Advisor, Broker, UserStockInvestmentSummary
 # at the imports near sell_stock
 from django.db.models import Sum  # add this
-
 @require_POST
 @login_required
 def sell_stock(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
 
+    # (Redundant because of @require_POST, but keeping your original guard)
     if request.method != 'POST':
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
     try:
         advisor = get_object_or_404(Advisor, id=request.POST.get('advisor'))
         broker = get_object_or_404(Broker, id=request.POST.get('broker'))
-        quantity = int(request.POST.get('quantity'))
 
+        # Parse quantity
+        try:
+            quantity = int(request.POST.get('quantity') or 0)
+            if quantity <= 0:
+                messages.error(request, "Please enter a valid quantity greater than 0.")
+                return redirect(request.META.get('HTTP_REFERER', '/'))
+        except (TypeError, ValueError):
+            messages.error(request, "Invalid quantity.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        # Parse price (fallback to stock.share_price if blank)
         price_str = request.POST.get('selling_price')
-        selling_price = Decimal(price_str) if price_str else (stock.share_price or Decimal('0'))
+        try:
+            selling_price = (
+                Decimal(price_str)
+                if price_str not in (None, "",)
+                else (stock.share_price or Decimal('0'))
+            )
+        except (InvalidOperation, TypeError):
+            messages.error(request, "Invalid price.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
 
-        if advisor.advisor_type.lower() == 'other':
+        # ✅ Only enforce holdings check for Thangiv (non-Other) advisor
+        if (advisor.advisor_type or "").strip().lower() == 'thangiv':
+            # Count finalized Thangiv buys across ANY broker
+            bought_thangiv = (
+                BuyTransaction.objects
+                .filter(
+                    user=request.user,
+                    stock=stock,
+                    advisor__advisor_type__iexact='Thangiv',
+                    AC_status='completed',           # treat AC-completed as finalized buy
+                )
+                .aggregate(total=Sum('quantity'))['total'] or 0
+            )
+
+            # Count all Thangiv sells except cancelled (includes pending to prevent double-queue oversell)
+            sold_thangiv = (
+                SellTransaction.objects
+                .filter(
+                    user=request.user,
+                    stock=stock,
+                    advisor__advisor_type__iexact='Thangiv',
+                )
+                .exclude(status='cancelled')
+                .aggregate(total=Sum('quantity'))['total'] or 0
+            )
+
+            available = max(0, bought_thangiv - sold_thangiv)
+
+            if quantity > available:
+                shortfall = quantity - available
+                messages.error(
+                    request,
+                    (
+                        f"{stock.company_name}: Requested {quantity} shares, but  {available} available "
+                        f"under Thangiv Advisor (shortfall {shortfall}). "
+                        f"Please reduce to {available} or fewer and try again."
+                    )
+                )
+                return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+        # Create the sell order (route based on advisor type)
+        if (advisor.advisor_type or "").strip().lower() == 'other':
             SellTransactionOtherAdvisor.objects.create(
-                user=request.user, stock=stock, advisor=advisor, broker=broker,
-                quantity=quantity, selling_price=selling_price, status='processing'
+                user=request.user,
+                stock=stock,
+                advisor=advisor,
+                broker=broker,
+                quantity=quantity,
+                selling_price=selling_price,
+                status='processing',
             )
         else:
             SellTransaction.objects.create(
-                user=request.user, stock=stock, advisor=advisor, broker=broker,
-                quantity=quantity, selling_price=selling_price, status='processing'
+                user=request.user,
+                stock=stock,
+                advisor=advisor,
+                broker=broker,
+                quantity=quantity,
+                selling_price=selling_price,
+                status='processing',
             )
 
         note = _market_closed_note()

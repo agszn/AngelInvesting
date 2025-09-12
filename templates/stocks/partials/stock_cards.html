@@ -47,11 +47,19 @@
 
           <div class="cards-third-info">
             <div>Lot Size: <strong>{{ stock.lot }} Shares</strong> </div>
-            <div>Share Price: <strong>₹{{ stock.share_price }}</strong></div>
+                <div>Share Price: <strong>₹{{ stock.share_price }}</strong>
+                {% if stock.percentage_diff > 0 %}
+                    <span class="up" style="color:green">▲ ({{ stock.percentage_diff|floatformat:2 }}%)</span >
+                {% elif stock.percentage_diff < 0 %}
+                    <span class="down" style="color:red">▼ ({{ stock.percentage_diff|floatformat:2 }}%)</span>
+                {% else %}
+                    <span style="color: black;">(0.00%)</span>
+                {% endif %}
+                </div>
           </div>
-
+        </a>
           <div class="cards-fourth-info">
-            <button class="cards-buy-button" type="button"
+            <button class="cards-buy-button" 
               onclick='openBuyModal(
                 "{{ stock.id }}",
                 "{{ stock.company_name|escapejs }}",
@@ -70,7 +78,7 @@
               )'>Sell</button>
           </div>
         </div>
-        </a>
+        
       </div>
     <!-- </a> -->
   {% endif %}

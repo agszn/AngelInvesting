@@ -4,15 +4,14 @@
 {% load custom_filters %}
 {% load custom_filter_overviewDetailedStock %}
 {% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-    /* .stock-page-header {
-        text-align: center;
-        margin-bottom: 20px;
-        padding: 75px;
-        background-color: #f8f9fa; 
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-        font-size: 2em;
-        color: aliceblue;
+/* css Exactly */
+    .stock-page-header-1 {
+        display: flex;
+        align-items: center;
+        height: 312px;
+        margin-bottom: 40px;
         background: radial-gradient(
             64.54% 23.63% at 69.24% 61.54%,
             #271b3f 0%,
@@ -20,111 +19,515 @@
             #341a47 68.59%,
             #0e213f 100%
         );
-    } */
-
-    /* .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        max-width: 80%;
-        margin: auto;
-    } */
-
-    /* .header-left {
-        flex: 1;
-        max-width: 40%;
-    } */
-
-    /* .company-logo {
-        max-width: 100px;
-        height: auto;
-        margin-bottom: 10px;
-    } */
-
-    /* .header-buttons {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-    } */
-
-    /* .stock-btn {
-        padding: 10px 15px;
-        font-size: 16px;
-        text-decoration: none;
-        color: white;
-        border-radius: 5px;
-        font-weight: bold;
-        transition: 0.3s;
-        width: 100px;
-        text-align: center;
-    }
-
-    .buy-btn {
-        background-color: #28a745;
-        width: 100px;
-    }
-
-    .sell-btn {
-        background-color: #dc3545;
-    }
-
-    .stock-btn:hover {
-        opacity: 0.8;
-    } */
-
-    /* .header-right {
-        flex: 2;
-        max-width: 60%;
-    }
-
-
-    .header-right h2 {
-        margin: 0;
-        font-size: 24px;
-        color: #fff;
-    }
-
-    .header-right p {
-        margin: 5px 0;
-        font-size: 18px;
-        color: #ddd;
-    } */
-
-    /* Stock Details Section */
-    .stock-details {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        margin-top: 20px;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        max-width: 80%;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .details-column {
-        padding: 10px;
-        text-align: center;
-    }
-
-    .details-column p {
-        margin: 5px 0;
-        font-size: 16px;
-        color: #fff;
-    }
-
-    /* Table Styling */
-    .stock-table-container {
-        margin: 40px auto;
-        width: 90%;
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
         box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     }
+    .header-content-details {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0 100px;
+        color: #fff;
+    }
+    .header-details-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        width: 220px;
+        gap: 10px;
+    }
+    
+    
+    .header-details-logo-left{
+        width: 200px;
+        height: 100px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .company-logo-1 {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 10px;
+    }
+    .header-details-buttons
+    {
+        display: flex;
+        width: 200px; 
+        gap:10px;
+    }
+    .header-details-buttons a {
+        flex: 1;
+        text-align: center;
+    }
+    .header-details-whishlist{
+        width: 200px;
+        display: flex;
+        justify-content: center;
+    }
+    .header-details-whishlist button {
+        width: 100%;
+        text-align: center;
+    }
+    .header-details-buttons a,
+    .header-details-whishlist button {
+        padding: 10px 20px;
+        color: #fff;
+        background-color: transparent;
+        border: 2px solid yellow;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
 
+    .header-details-buttons a:hover,
+    .header-details-whishlist button:hover {
+        background-color: yellow;
+        color: #000;
+        transform: scale(1.05);
+    }
+    .header-details-right
+    {
+        background: linear-gradient(to right, #0a2342, #36144b); 
+        padding: 20px; 
+        border-radius: 10px; 
+        color: white; 
+        text-align: right;
+    }
+    .header-details-right h2 {
+        font-size: 36px; 
+        font-weight: bold; 
+        margin-bottom: 10px;
+        text-align: right;
+    }
+
+    .header-details-right p {
+        margin: 6px 0;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    .Sec2_3_PG_container {
+        display: flex;
+        gap: 10px;
+        align-items: stretch;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        padding: 0 100px;
+        width: 100%;
+    }
+    .Sec2_3_PG_box {
+        display: flex;
+        flex-direction: column;
+        width: 49%;
+    }
+    .Sec2_3_PG_heading {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 18px;
+        letter-spacing: 0.5px;
+        color: #111;
+        text-align: center;
+
+    }
+    .Sec2_3_PG_heading span {
+        color: green;
+        font-weight: 800;
+    }
+
+    .Sec2_3_PG_principlesBox {
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 20px;
+        flex: 1;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        color: #111;
+        position: relative;
+        z-index: 2;
+        isolation: isolate;
+    }
+    .Sec2_3_PG_principlesRow {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px dotted #ccc;
+    }
+    .Sec2_3_PG_principlesRow:last-child { border-bottom: none; }
+    .Sec2_3_PG_col { width: 48%; min-width: 220px; }
+    .Sec2_3_PG_label { font-size: 14px; color: #555 !important; display: block; line-height: 1.3; }
+    .Sec2_3_PG_value { font-size: 16px; font-weight: bold; margin-top: 2px; color: #111 !important; line-height: 1.35; word-break: break-word; }
+
+
+    .Sec2_3_PG_stockCard {
+        background-color: #0d1b3d;
+        border-radius: 12px;
+        padding: 20px;
+        flex: 1;
+        position: relative;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 360px;
+        overflow: hidden;
+    }
+    .buttons { position: absolute; top: 20px; right: 20px; }
+    .filter-btn {
+        background: transparent;
+        border: 1px solid yellow;
+        color: yellow;
+        padding: 4px 10px;
+        margin-left: 5px;
+        border-radius: 3px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .filter-btn.active {
+        background: yellow;
+        color: #0d1b3d;
+        font-weight: 600;
+    }
+
+    /* Chart area */
+    .chart { width: 100%; flex: 1; margin-top: 60px; position: relative; min-height: 300px; }
+    .chart canvas { width: 100% !important; height: 100% !important; }
+
+
+    .cs-container {
+        /* font-family: 'Newsreader', serif;
+        font-size: 16px;
+        line-height: 1.5; */
+        margin: 40px 100px;
+    }
+
+    /* .cs-container h1,
+    .cs-container h2,
+    .cs-container h3,
+    .cs-container h5,
+    .cs-container p,
+    .cs-container li,
+    .cs-container small,
+    .cs-container table,
+    .cs-container th,
+    .cs-container td,
+    .cs-container button {
+        font-family: 'Newsreader', serif;
+        font-size: 16px;
+        margin: 0;
+        padding: 0;
+        line-height: 1.5;
+    } */
+
+    .cs-top-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* margin: 40px 100px 0 100px; */
+        text-align: center;
+    }
+    .cs-heading {
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-size: 38px;
+    }
+    .cs-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding-bottom: 10px;
+        justify-content: center;
+    }
+
+    .cs-buttons button {
+        width: 150px;
+        height: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        background-color: #0e213f;
+        cursor: pointer;
+        transition: 0.3s ease;
+        border-radius: 5px;
+        border: none;
+        flex-shrink: 0;
+    }
+
+    .cs-buttons button:hover {
+        transform: scale(1.05);
+    }
+
+    .cs-buttons button.cs-active {
+        color: #00c853; /* Active tab text in green */
+    }
+
+    .cs-wrapper {
+        display: flex;
+        /* grid-template-columns: minmax(0, 5fr) minmax(0, 2fr); */
+        /* gap: 20px; */
+        /* margin: 20px 100px 40px 100px; */
+        padding-top: 20px;
+        width: 100%;
+    }
+    .cs-all-details 
+    {
+        /* display: flex; */
+        /* flex-direction: column; */
+        /* text-align: justify; */
+        width: 75%;
+    }
+    .cs-left-inner {
+        /* display: flex;
+        flex-direction: column;
+        gap: 20px; */
+    }
+
+    /* .cs-wrapper .cs-overview-section,
+    .cs-wrapper .cs-content-section {
+        margin: 20px 0;
+    } */
+    .cs-overview-section {
+        display: block;
+        /* margin: 20px 0; */
+    }
+
+    .cs-overview-box {
+        padding-right:20px ;
+    }
+
+    .cs-overview-text h2 {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 10px 0;
+    }
+
+    .cs-overview-text h3 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 10px 0;
+    }
+
+    .cs-overview-text p {
+        font-size: 17px;
+        font-weight: 400;
+        padding-bottom: 10px;
+        margin: 0;
+    }
+
+    .cs-overview-text p > span,
+    .cs-overview-text ul li > span {
+        font-weight: 700;
+        color: #000;
+    }
+
+    .cs-overview-text ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .cs-overview-text ul li {
+        font-size: 17px;
+        font-weight: 400;
+        padding-bottom: 10px;
+        margin: 0;
+    }
+
+    .cs-overview-text table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .cs-overview-text table,
+    .cs-overview-text table th,
+    .cs-overview-text table td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .cs-overview-text table th:nth-child(2),
+    .cs-overview-text table td:nth-child(2),
+    .cs-overview-text table th:nth-child(3),
+    .cs-overview-text table td:nth-child(3) {
+        text-align: right;
+    }
+
+    .cs-overview-text table tr:last-child td {
+        font-weight: 600;
+    }
+
+    .cs-right-sidebar {
+        background: #0e213f;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
+        height: fit-content;
+        color: white;
+        /* margin-top: 40px; */
+        width: 25%;
+    }
+    /* .list-group-item
+    {
+        font-size: 16px;
+    } */
+
+    @media (min-width: 1025px) {
+        .cs-right-sidebar {
+        position: sticky;
+        top: 190px;
+        }
+    }
+
+    @media (min-width: 320px) and (max-width: 767px) 
+    {
+        .stock-page-header-1 {
+            flex-direction: column;
+            height: auto;
+            padding: 20px;
+            margin-bottom: 0;
+        }
+
+        .header-content-details {
+            flex-direction: column;
+            padding: 0 20px;
+            gap: 20px;
+        }
+
+        .header-details-left {
+            width: 100%;
+            align-items: center;
+        }
+
+        .header-details-logo-left {
+            width: 100%;
+            height: auto;
+        }
+
+        .header-details-buttons {
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .header-details-whishlist {
+            width: 100%;
+        }
+
+        .header-details-whishlist button,
+        .header-details-buttons a {
+            width: 100%;
+        }
+
+        .header-details-right {
+            text-align: center;
+            padding: 10px; 
+        }
+        .header-details-right h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .header-details-right p {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+
+        .Sec2_3_PG_container
+        {
+            display: block;
+            gap: 10px;
+            align-items: stretch;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding: 0 10px;
+            width: 100%;
+        }
+        .Sec2_3_PG_box
+        {
+            width: 98%;
+        }
+        .Sec2_3_PG_heading
+        {
+            margin-top: 20px;
+        }
+        .Sec2_3_PG_principlesRow {
+            flex-direction: column; /* Stack the two columns */
+            gap: 8px;
+        }
+
+        .Sec2_3_PG_col {
+            width: 100% !important; /* Full width for mobile */
+        }
+
+        .Sec2_3_PG_label,
+        .Sec2_3_PG_value {
+            font-size: 14px;
+            line-height: 1.4;
+            word-break: break-word; /* Break long text */
+            overflow-wrap: break-word;
+            white-space: normal; /* Allow wrapping */
+            display: block;
+        }
+        .cs-top-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 10px 0 10px;
+            text-align: center;
+        }
+        .cs-heading {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 30px;
+        }
+        .cs-buttons {
+            gap: 5px;
+        }
+
+        .cs-container
+        {
+            margin: 20px 10px 20px 10px;
+        }
+
+        .cs-wrapper 
+        {
+            display: block;
+            /* gap: 10px; */
+            /* margin: 20px; */
+            padding: 10px;
+            width: 100%;
+        }
+        .cs-all-details 
+        {
+            width: 100%;
+        }
+        .cs-overview-box {
+            padding-bottom:20px ;
+        }
+        .cs-right-sidebar {
+            background: #0e213f;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            height: fit-content;
+            color: white;
+            /* margin-top: 40px; */
+            width: 98%;
+        }
+    }
+
+    /* End */
     .stock-table {
         width: 100%;
         border-collapse: collapse;
@@ -144,64 +547,7 @@
     .stock-table tr:nth-child(even) {
         background: #f2f2f2;
     }
-    /* .chart-container {
-        width: 80%;
-        max-width: 900px;
-        height: 400px;
-        margin: 40px auto;
-        background: #0E213F;  
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-        color: white;
-    } */
-
     
-    /* .chart-container {
-        width: 100%;
-        padding: 80px 30px 50px 20px;
-        background: #0E213F;
-        border-radius: 10px;
-        margin-top: 20px;
-        text-align: center;
-        color: white;
-    }
-     */
-   /* .chart-wrapper {
-        position: relative;
-        max-width: 90%;
-        margin: auto;
-    } */
-
-    /* .filter-buttons {
-        position: absolute;
-        top: 0;
-        right: 0;
-        border-radius: 10px;
-    } */
-
-    /* .filter-btn {
-        padding: 6px 8px;
-        font-size: 12px;
-        margin: 15px 0px 3px 0px;
-        cursor: pointer;
-        border: 1px solid yellow;
-        background: transparent;
-        color: white;
-        font-weight: bold;
-        transition: 0.3s;
-    } */
-
-    /* .filter-btn:hover {
-        background: yellow;
-        color: black;
-    } */
-
-
-    /* canvas {
-        max-width: 100%;
-        height: 400px !important;
-    } */
     .styled-card {
       border: 2px solid yellow;
       padding: px;
@@ -210,19 +556,6 @@
       border-radius: 10px;
       background-color: transparent;
     }
-
-    /* .company-logo {
-      width: 100%;
-      height: auto;
-      border: 2px solid yellow;
-      margin-bottom: 15px;
-    } */
-
-    /* .header-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
-    } */
 
     .stock-btn.yellow-btn {
       flex: 1;
@@ -238,414 +571,292 @@
       text-align: center;
     }
 
-  /* Arrow styles */
-  .nav-arrow {
-    cursor: pointer;
-    z-index: 2;
-  }
-
-  @media screen and (max-width: 1200px) {
+    /* Arrow styles */
     .nav-arrow {
-      width: 35px;
-      height: 35px;
+        cursor: pointer;
+        z-index: 2;
     }
 
-    .nav-arrow.left {
-      left: -35px;
+    @media screen and (max-width: 1200px) {
+        .nav-arrow {
+        width: 35px;
+        height: 35px;
+        }
+
+        .nav-arrow.left {
+        left: -35px;
+        }
+
+        .nav-arrow.right {
+        right: -35px;
+        }
     }
 
-    .nav-arrow.right {
-      right: -35px;
-    }
-  }
+    @media screen and (max-width: 992px) {
+        .nav-arrow {
+        width: 30px;
+        height: 30px;
+        }
 
-  @media screen and (max-width: 992px) {
-    .nav-arrow {
-      width: 30px;
-      height: 30px;
-    }
+        .nav-arrow.left {
+        left: -30px;
+        }
 
-    .nav-arrow.left {
-      left: -30px;
-    }
-
-    .nav-arrow.right {
-      right: -30px;
-    }
-  }
-
-  @media screen and (max-width: 768px) {
-    .nav-arrow {
-      width: 26px;
-      height: 26px;
+        .nav-arrow.right {
+        right: -30px;
+        }
     }
 
-    .nav-arrow.left {
-      left: -20px;
+    @media screen and (max-width: 768px) {
+        .nav-arrow {
+        width: 26px;
+        height: 26px;
+        }
+
+        .nav-arrow.left {
+        left: -20px;
+        }
+
+        .nav-arrow.right {
+        right: -20px;
+        }
     }
 
-    .nav-arrow.right {
-      right: -20px;
-    }
-  }
+    @media screen and (max-width: 480px) {
+        .nav-arrow {
+        width: 22px;
+        height: 22px;
+        }
 
-  @media screen and (max-width: 480px) {
-    .nav-arrow {
-      width: 22px;
-      height: 22px;
+        .nav-arrow.left {
+        left: -10px;
+        }
+
+        .nav-arrow.right {
+        right: -10px;
+        }
     }
 
-    .nav-arrow.left {
-      left: -10px;
-    }
-
-    .nav-arrow.right {
-      right: -10px;
-    }
-  }
+    
 </style>
 <!-- part 1 start -->
 <div class="stock-page-header-1">
-  <div class="header-content-details">
-    <!-- stock data buy sell wishlist left options start -->
-    <div class="header-details-left" style="">
-        <div class="header-details-logo-left">
-            {% if stock.logo %}
-                <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo-1">
-            {% endif %}
-        </div>
-        <div class="header-details-buttons">
-          <a href="javascript:void(0);"
-            onclick='openBuyModal(
+    <div class="header-content-details">
+        <!-- stock data buy sell wishlist left options start -->
+        <div class="header-details-left">
+            <div class="header-details-logo-left">
+                {% if stock.logo %}
+                    <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo-1">
+                {% endif %}
+            </div>
+            <div class="header-details-buttons">
+                <a href="javascript:void(0);"
+                    onclick='openBuyModal(
+                                "{{ stock.id }}",
+                                "{{ stock.company_name|escapejs }}",
+                                "{{ stock.share_price }}",
+                                "{{ stock.quantity }}",
+                                "{% url 'user_portfolio:buy_stock' stock.id %}"
+                            )'
+                >Buy</a>
+                <a href="javascript:void(0);"
+                    onclick='openSellModal(
                         "{{ stock.id }}",
                         "{{ stock.company_name|escapejs }}",
                         "{{ stock.share_price }}",
                         "{{ stock.quantity }}",
-                        "{% url 'user_portfolio:buy_stock' stock.id %}"
-                      )'
-          >Buy</a>
-          <a href="javascript:void(0);"
-            onclick='openSellModal(
-                "{{ stock.id }}",
-                "{{ stock.company_name|escapejs }}",
-                "{{ stock.share_price }}",
-                "{{ stock.quantity }}",
-                "{% url 'user_portfolio:sell_stock' stock.id %}"
-              )'
-          >Sell</a>
+                        "{% url 'user_portfolio:sell_stock' stock.id %}"
+                    )'
+                >Sell</a>
+                </div>
+                <div class="header-details-whishlist">
+                <!-- <button
+                    data-stock-id="{{ stock.id }}" 
+                    data-stock-name="{{ stock.company_name }}" 
+                    data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
+                >Wishlist 🛒</button> -->
+
+
+
+                <button 
+                    class="stock-btn yellow-btn wishlist-btn wishlist" 
+                    data-stock-id="{{ stock.id }}" 
+                    data-stock-name="{{ stock.company_name }}" 
+                    data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
+                    style="width: 100%; margin:0;">
+                    Wishlist
+                </button>
+            </div>
         </div>
-        <div class="header-details-whishlist">
-          <!-- <button
-              data-stock-id="{{ stock.id }}" 
-              data-stock-name="{{ stock.company_name }}" 
-              data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
-          >Wishlist 🛒</button> -->
+            <!-- stock data buy sell wishlist left options end -->
+            <!-- stock data price LEP left options start -->
 
 
+            <!-- <div class="header-details-right">
+            <h2>{{ stock.company_name }}</h2>
+            <p><strong>Price:</strong> ₹{{ stock.share_price }}</p>
+            <p><strong>Last Entry Price:</strong> ₹{{ stock.ltp }}</p>
+            {% if stock.profit > 0 %}
+                <p>
+                <strong>Profit/Loss:</strong>
+                <span style="color: green;">&#9650; ₹{{ stock.profit|floatformat:2 }} ({{ stock.profit_percentage|floatformat:2 }}%)</span>
+                </p>
+                {% elif stock.profit < 0 %}
+                <p>
+                    <strong>Profit/Loss:</strong>
+                    <span style="color: red;">&#9660; ₹{{ stock.profit|floatformat:2 }} ({{ stock.profit_percentage|floatformat:2 }}%)</span>
+                </p>
+                {% else %}
+                <p>
+                    <strong>Profit/Loss:</strong>
+                    <span style="color: white;">₹0.00 (0.00%)</span>
+                </p>
+                {% endif %}
 
-          <button 
-            class="stock-btn yellow-btn wishlist-btn wishlist" 
-            data-stock-id="{{ stock.id }}" 
-            data-stock-name="{{ stock.company_name }}" 
-            data-url="{% url 'unlisted_stock_marketplace:get_next_wishlist_group_name' %}" 
-            style="width: 100%; margin:0;">
-            Wishlist
-          </button>
+            </div> -->
+
+
+        <div class="header-details-right">
+            <h2>
+                {{ stock.company_name }} 
+            </h2>
+            <p style="color: gold;">
+                Last Traded Price
+            </p>
+            <p style="font-size: 32px; margin: 5px 0;">
+                ₹{{ stock.share_price|floatformat:2 }}
+                {% if stock.profit > 0 %}
+                <span style="color: #00ff00; font-weight: bold;">
+                    ( + {{ stock.profit_percentage|floatformat:2 }} % )
+                </span>
+                <span style="font-size: 24px;">⭐ ⭐</span>
+                {% elif stock.profit < 0 %}
+                <span style="color: #ff4c4c; font-weight: bold;">
+                    ( {{ stock.profit_percentage|floatformat:2 }} % )
+                </span>
+                <span style="font-size: 24px;">🔻</span>
+                    {% else %}
+                    <span style="color: #ffffff;">
+                        ( 0.00 % )
+                    </span>
+                    {% endif %}
+            </p>
         </div>
-
-
+        <!-- stock data price LEP left options end -->
     </div>
-    <!-- stock data buy sell wishlist left options end -->
-    <!-- stock data price LEP left options start -->
-
-
-    <!-- <div class="header-details-right">
-      <h2>{{ stock.company_name }}</h2>
-      <p><strong>Price:</strong> ₹{{ stock.share_price }}</p>
-      <p><strong>Last Entry Price:</strong> ₹{{ stock.ltp }}</p>
-      {% if stock.profit > 0 %}
-        <p>
-          <strong>Profit/Loss:</strong>
-          <span style="color: green;">&#9650; ₹{{ stock.profit|floatformat:2 }} ({{ stock.profit_percentage|floatformat:2 }}%)</span>
-        </p>
-        {% elif stock.profit < 0 %}
-          <p>
-            <strong>Profit/Loss:</strong>
-            <span style="color: red;">&#9660; ₹{{ stock.profit|floatformat:2 }} ({{ stock.profit_percentage|floatformat:2 }}%)</span>
-          </p>
-        {% else %}
-          <p>
-            <strong>Profit/Loss:</strong>
-            <span style="color: white;">₹0.00 (0.00%)</span>
-          </p>
-        {% endif %}
-
-    </div> -->
-
-
-<div class="header-details-right" 
-     style="background: linear-gradient(to right, #0a2342, #36144b); 
-            padding: 20px; 
-            border-radius: 10px; 
-            color: white; 
-            font-family: 'Georgia', serif; 
-            text-align: right;">
-            
-  <h1 style="font-size: 36px; font-weight: bold; margin-bottom: 10px;">
-    {{ stock.company_name }} 
-  </h1>
-
-  <p style="color: gold; font-size: 20px; font-weight: bold; margin-bottom: 0;">
-    Last Traded Price
-  </p>
-
-  <p style="font-size: 32px; margin: 5px 0;">
-    ₹{{ stock.share_price|floatformat:2 }}
-    {% if stock.profit > 0 %}
-      <span style="color: #00ff00; font-weight: bold;">
-        ( + {{ stock.profit_percentage|floatformat:2 }} % )
-      </span>
-      <span style="font-size: 24px;">⭐ ⭐</span>
-    {% elif stock.profit < 0 %}
-      <span style="color: #ff4c4c; font-weight: bold;">
-        ( {{ stock.profit_percentage|floatformat:2 }} % )
-      </span>
-      <span style="font-size: 24px;">🔻</span>
-    {% else %}
-      <span style="color: #ffffff;">
-        ( 0.00 % )
-      </span>
-    {% endif %}
-  </p>
-</div>
-
-
-    <!-- stock data price LEP left options end -->
-  </div>
 </div>
 <!-- part 1 end -->
 
 <!-- principles and graph section 2 and 3 start -->
-  <section class="Sec2_3_PG_container">
+<section class="Sec2_3_PG_container">
     <!-- LEFT: Principles -->
     <div class="Sec2_3_PG_box">
-      <h2 class="Sec2_3_PG_heading">Principles</h2>
-      <div class="Sec2_3_PG_principlesBox" style="color: #000;">
-        <div class="Sec2_3_PG_principlesRow">
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">Company Name</span>
-            <span class="Sec2_3_PG_value">{{ stock.company_name }}</span>
-          </div>
-          <div class="Sec2_3_PG_col">
-            <!-- <span class="Sec2_3_PG_label">Market Capitalization (in Cr)</span> -->
-            <span class="Sec2_3_PG_label">Market Cap</span>
-            <span class="Sec2_3_PG_value">₹ {{ stock.market_capitalization }}</span>
-          </div>
+        <h2 class="Sec2_3_PG_heading">Principles</h2>
+        <div class="Sec2_3_PG_principlesBox" style="color: #000;">
+            <div class="Sec2_3_PG_principlesRow">
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">Company Name</span>
+                    <span class="Sec2_3_PG_value">{{ stock.company_name }}</span>
+                </div>
+                <div class="Sec2_3_PG_col">
+                    <!-- <span class="Sec2_3_PG_label">Market Capitalization (in Cr)</span> -->
+                    <span class="Sec2_3_PG_label">Market Cap</span>
+                    <span class="Sec2_3_PG_value">₹ {{ stock.market_capitalization }}</span>
+                </div>
+            </div>
+            <div class="Sec2_3_PG_principlesRow">
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">ISIN No.</span>
+                    <span class="Sec2_3_PG_value">{{ stock.isin_no }}</span>
+                </div>
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">No. of Outstanding Shares</span>
+                    <span class="Sec2_3_PG_value">{{ stock.outstanding_shares }}</span>
+                </div>
+            </div>
+            <div class="Sec2_3_PG_principlesRow">
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">PAN No.</span>
+                    <span class="Sec2_3_PG_value">{{ stock.pan_no }}</span>
+                </div>
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">PE ratio</span>
+                    <span class="Sec2_3_PG_value">{{ stock.pe_ratio }}</span>
+                </div>
+            </div>
+            <div class="Sec2_3_PG_principlesRow">
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">CIN</span>
+                    <span class="Sec2_3_PG_value">{{ stock.cin }}</span>
+                </div>
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">Book value</span>
+                    <span class="Sec2_3_PG_value">₹ {{ stock.book_value }}</span>
+                </div>
+            </div>
+            <div class="Sec2_3_PG_principlesRow">
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">Sector</span>
+                    <span class="Sec2_3_PG_value">{{ stock.sector }}</span>
+                </div>
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">P/BV</span>
+                    <span class="Sec2_3_PG_value">{{ stock.pbv }}</span>
+                </div>
+            </div>
+            <div class="Sec2_3_PG_principlesRow">
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">DRHP Filed?</span>
+                    <span class="Sec2_3_PG_value">{% if stock.drhp_filed %}Yes{% else %}No{% endif %}</span>
+                </div>
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">P/S Ratio</span>
+                    <span class="Sec2_3_PG_value">{{ stock.ps_ratio }}</span>
+                </div>
+            </div>
+            <div class="Sec2_3_PG_principlesRow">
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">Available on</span>
+                    <span class="Sec2_3_PG_value">{{ stock.available_on }}</span>
+                </div>
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">EPS</span>
+                    <span class="Sec2_3_PG_value">₹ {{ stock.eps }}</span>
+                </div>
+            </div>
+            <div class="Sec2_3_PG_principlesRow">
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">Registration Date</span>
+                    <span class="Sec2_3_PG_value">{{ stock.registration_date }}</span>
+                </div>
+                <div class="Sec2_3_PG_col">
+                    <span class="Sec2_3_PG_label">Face Value</span>
+                    <span class="Sec2_3_PG_value">₹ {{ stock.face_value }}</span>
+                </div>
+            </div>
         </div>
-        <div class="Sec2_3_PG_principlesRow">
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">ISIN No.</span>
-            <span class="Sec2_3_PG_value">{{ stock.isin_no }}</span>
-          </div>
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">No. of Outstanding Shares</span>
-            <span class="Sec2_3_PG_value">{{ stock.outstanding_shares }}</span>
-          </div>
-        </div>
-        <div class="Sec2_3_PG_principlesRow">
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">PAN No.</span>
-            <span class="Sec2_3_PG_value">{{ stock.pan_no }}</span>
-          </div>
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">PE ratio</span>
-            <span class="Sec2_3_PG_value">{{ stock.pe_ratio }}</span>
-          </div>
-
-        </div>
-        <div class="Sec2_3_PG_principlesRow">
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">CIN</span>
-            <span class="Sec2_3_PG_value">{{ stock.cin }}</span>
-          </div>
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">Book value</span>
-            <span class="Sec2_3_PG_value">₹ {{ stock.book_value }}</span>
-          </div>
-        </div>
-        <div class="Sec2_3_PG_principlesRow">
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">Sector</span>
-            <span class="Sec2_3_PG_value">{{ stock.sector }}</span>
-          </div>
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">P/BV</span>
-            <span class="Sec2_3_PG_value">{{ stock.pbv }}</span>
-          </div>
-
-        </div>
-        <div class="Sec2_3_PG_principlesRow">
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">DRHP Filed?</span>
-            <span class="Sec2_3_PG_value">{% if stock.drhp_filed %}Yes{% else %}No{% endif %}</span>
-          </div>
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">P/S Ratio</span>
-            <span class="Sec2_3_PG_value">{{ stock.ps_ratio }}</span>
-          </div>
-
-
-        </div>
-        <div class="Sec2_3_PG_principlesRow">
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">Available on</span>
-            <span class="Sec2_3_PG_value">{{ stock.available_on }}</span>
-          </div>
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">EPS</span>
-            <span class="Sec2_3_PG_value">₹ {{ stock.eps }}</span>
-          </div>
-
-
-        </div>
-        <div class="Sec2_3_PG_principlesRow">
-
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">Registration Date</span>
-            <span class="Sec2_3_PG_value">{{ stock.registration_date }}</span>
-          </div>
-          <div class="Sec2_3_PG_col">
-            <span class="Sec2_3_PG_label">Face Value</span>
-            <span class="Sec2_3_PG_value">₹ {{ stock.face_value }}</span>
-          </div>
-        </div>
-      </div>
     </div>
-
     <!-- RIGHT: Stock Performance -->
-<div class="Sec2_3_PG_box">
-  <h2 class="Sec2_3_PG_heading">Stock <span>Performance</span></h2>
-  <div class="Sec2_3_PG_stockCard">
-    <div class="buttons">
-      <!-- <button class="filter-btn" data-range="7">1W</button> -->
-      <button class="filter-btn" data-range="30">1M</button>
-      <button class="filter-btn" data-range="90">3M</button>
-      <button class="filter-btn active" data-range="180">6M</button>
-      <button class="filter-btn" data-range="365">1Y</button>
-      <!-- <button class="filter-btn" data-range="730">2Y</button> -->
-      <!-- <button class="filter-btn" data-range="1095">3Y</button> -->
-      <!-- <button class="filter-btn" data-range="1825">5Y</button> -->
-      <button class="filter-btn" data-range="MAX">MAX</button>
+    <div class="Sec2_3_PG_box">
+        <h2 class="Sec2_3_PG_heading">Stock <span>Performance</span></h2>
+        <div class="Sec2_3_PG_stockCard">
+            <div class="buttons">
+                <!-- <button class="filter-btn" data-range="7">1W</button> -->
+                <button class="filter-btn" data-range="30">1M</button>
+                <button class="filter-btn" data-range="90">3M</button>
+                <button class="filter-btn active" data-range="180">6M</button>
+                <button class="filter-btn" data-range="365">1Y</button>
+                <!-- <button class="filter-btn" data-range="730">2Y</button> -->
+                <!-- <button class="filter-btn" data-range="1095">3Y</button> -->
+                <!-- <button class="filter-btn" data-range="1825">5Y</button> -->
+                <button class="filter-btn" data-range="MAX">MAX</button>
+            </div>
+            <div class="chart">
+                <canvas id="stockPriceChart"></canvas>
+            </div>
+        </div>
     </div>
-
-    <div class="chart">
-      <canvas id="stockPriceChart"></canvas>
-    </div>
-  </div>
-</div>
 </section>
-
-<style>
-  /* Layout */
-  .Sec2_3_PG_container {
-    display: flex;
-    gap: 10px;
-    align-items: stretch;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    padding: 0 100px;
-    width: 100%;
-  }
-  .Sec2_3_PG_box {
-    display: flex;
-    flex-direction: column;
-    width: 49%;
-  }
-
-  /* Section Headers */
-  .Sec2_3_PG_heading {
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 18px;
-    letter-spacing: 0.5px;
-    color: #111;
-    text-align: center;
-  }
-  .Sec2_3_PG_heading span {
-    color: green;
-    font-weight: 800;
-  }
-
-  /* Principles (white card) */
-  .Sec2_3_PG_principlesBox {
-    border: 1px solid #333;
-    border-radius: 6px;
-    padding: 20px;
-    flex: 1;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    color: #111;
-    position: relative;
-    z-index: 2;
-    isolation: isolate;
-  }
-  .Sec2_3_PG_principlesRow {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px dotted #ccc;
-  }
-  .Sec2_3_PG_principlesRow:last-child { border-bottom: none; }
-  .Sec2_3_PG_col { width: 48%; min-width: 220px; }
-  .Sec2_3_PG_label { font-size: 14px; color: #555 !important; display: block; line-height: 1.3; }
-  .Sec2_3_PG_value { font-size: 16px; font-weight: bold; margin-top: 2px; color: #111 !important; line-height: 1.35; word-break: break-word; }
-
-  /* Stock card (dark) */
-  .Sec2_3_PG_stockCard {
-    background-color: #0d1b3d;
-    border-radius: 12px;
-    padding: 20px;
-    flex: 1;
-    position: relative;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 360px;
-    overflow: hidden;
-  }
-
-  /* Buttons */
-  .buttons { position: absolute; top: 20px; right: 20px; }
-  .filter-btn {
-    background: transparent;
-    border: 1px solid yellow;
-    color: yellow;
-    padding: 4px 10px;
-    margin-left: 5px;
-    border-radius: 3px;
-    font-size: 12px;
-    cursor: pointer;
-  }
-  .filter-btn.active {
-    background: yellow;
-    color: #0d1b3d;
-    font-weight: 600;
-  }
-
-  /* Chart area */
-  .chart { width: 100%; flex: 1; margin-top: 60px; position: relative; min-height: 300px; }
-  .chart canvas { width: 100% !important; height: 100% !important; }
-
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .Sec2_3_PG_container { flex-direction: column; align-items: center; }
-    .Sec2_3_PG_box { max-width: 95%; }
-  }
-</style>
-
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
@@ -847,181 +1058,31 @@
     });
   });
 </script>
-
-
 <!-- principles and graph section 2 and 3 end -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* Scoped container */
-  .cs-container {
-    font-family: 'Newsreader', serif;
-    font-size: 16px;
-    line-height: 1.5;
-  }
-
-  .cs-container h1,
-  .cs-container h2,
-  .cs-container h3,
-  .cs-container h5,
-  .cs-container p,
-  .cs-container li,
-  .cs-container small,
-  .cs-container table,
-  .cs-container th,
-  .cs-container td,
-  .cs-container button {
-    font-family: 'Newsreader', serif;
-    font-size: 16px;
-    margin: 0;
-    padding: 0;
-    line-height: 1.5;
-  }
-
-  /* --- Layout --- */
-  .cs-wrapper {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 2fr);
-    gap: 20px;
-    margin: 20px 100px 40px 100px;
-  }
-
-  .cs-all-details {
-    display: flex;
-    flex-direction: column;
-    text-align: justify;
-  }
-
-  .cs-left-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  /* Right column */
-  .cs-right-sidebar {
-    background: #0e213f;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    font-size: 14px;
-    height: fit-content;
-    color: white;
-    margin-top: 40px;
-  }
-
-  @media (min-width: 1025px) {
-    .cs-right-sidebar {
-      position: sticky;
-      top: 190px;
-    }
-  }
-
-  .cs-wrapper .cs-overview-section,
-  .cs-wrapper .cs-content-section {
-    margin: 20px 0;
-  }
-
-  @media (max-width: 1024px) {
+  /* @media (max-width: 1024px) {
     .cs-wrapper {
       grid-template-columns: 1fr;
     }
-  }
+  } */
 
   /* Top center header */
-  .cs-top-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 40px 100px 0 100px;
-    text-align: center;
-  }
-
-  .cs-heading {
-    font-size: 32px;
-    font-weight: bold;
-    margin-bottom: 20px;
-  }
-
   /* Tabs (buttons) */
-  .cs-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding-bottom: 10px;
-    justify-content: center;
-  }
-
-  .cs-buttons button {
-    width: 150px;
-    height: 50px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    background-color: #0e213f;
-    cursor: pointer;
-    transition: 0.3s ease;
-    border-radius: 5px;
-    border: none;
-    flex-shrink: 0;
-  }
-
-  .cs-buttons button:hover {
-    transform: scale(1.05);
-  }
-
-  .cs-buttons button.cs-active {
-    color: #00c853; /* Active tab text in green */
-  }
 
   /* Table styling */
   .cs-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 16px;
+    font-size: 15px;
     min-width: 600px;
   }
 
   .cs-table th,
   .cs-table td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 6px;
   }
 
   .cs-table th {
@@ -1047,115 +1108,42 @@
   }
 
   /* Overview styling */
-  .cs-overview-section {
-    display: block;
-    margin: 20px 0;
-  }
-
-  .cs-overview-box {
-    padding: 10px 0;
-  }
-
-  .cs-overview-text h2 {
-    font-size: 24px;
-    font-weight: 600;
-    margin: 10px 0;
-  }
-
-  .cs-overview-text h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 10px 0;
-  }
-
-  .cs-overview-text p {
-    font-size: 16px;
-    font-weight: 300;
-    padding-bottom: 10px;
-    margin: 0;
-  }
-
-  .cs-overview-text p > span,
-  .cs-overview-text ul li > span {
-    font-weight: 600;
-    color: #000;
-  }
-
-  .cs-overview-text ul {
-    margin: 0;
-    padding-left: 20px;
-  }
-
-  .cs-overview-text ul li {
-    font-size: 16px;
-    font-weight: 300;
-    padding-bottom: 10px;
-    margin: 0;
-  }
-
-  .cs-overview-text table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-
-  .cs-overview-text table,
-  .cs-overview-text table th,
-  .cs-overview-text table td {
-    border: 1px solid #000;
-    padding: 8px;
-    text-align: left;
-  }
-
-  .cs-overview-text table th:nth-child(2),
-  .cs-overview-text table td:nth-child(2),
-  .cs-overview-text table th:nth-child(3),
-  .cs-overview-text table td:nth-child(3) {
-    text-align: right;
-  }
-
-  .cs-overview-text table tr:last-child td {
-    font-weight: 600;
-  }
 </style>
 
 <div class="cs-container">
-  <!-- Top Centered Header + Buttons -->
-  <div class="cs-top-center">
-    <h1 class="cs-heading" style="font-size: 38px;">Share <span class="highlight">Details</span></h1>
-
-    <div class="cs-buttons">
-      <button type="button" onclick="csShowSection('overview')" class="cs-active">Overview</button>
-      <button type="button" onclick="csShowSection('balance-sheet')">Balance Sheet</button>
-      <button type="button" onclick="csShowSection('pl-account')">P&L Account</button>
-      <button type="button" onclick="csShowSection('cash-flow')">Cash Flow</button>
-      <button type="button" onclick="csShowSection('dividend-history')">Dividend</button>
-      <button type="button" onclick="csShowSection('financial-ratios')">Financial Ratios</button>
+    <!-- Top Centered Header + Buttons -->
+    <div class="cs-top-center">
+        <h1 class="cs-heading">Company <span class="highlight">Details</span></h1>
+        <div class="cs-buttons">
+            <button type="button" onclick="csShowSection('overview')" class="cs-active">Overview</button>
+            <button type="button" onclick="csShowSection('balance-sheet')">Balance Sheet</button>
+            <button type="button" onclick="csShowSection('pl-account')">P&L Account</button>
+            <button type="button" onclick="csShowSection('cash-flow')">Cash Flow</button>
+            <button type="button" onclick="csShowSection('dividend-history')">Dividend</button>
+            <button type="button" onclick="csShowSection('financial-ratios')">Financial Ratios</button>
+        </div>
     </div>
-  </div>
 
-  <section class="cs-wrapper">
-    <!-- Left (80%) -->
-    <section class="cs-all-details">
-      <div class="cs-left-inner">
-
-        <!-- Overview -->
-        <section id="overview" class="cs-overview-section">
-          <section class="cs-overview-box">
-            <div class="cs-overview-text">
-              {{ stock.company_overview|safe }}
-            </div>
-            {% if reports %}
-            <div class="cs-overview-text">
-              {% for report in reports %}
-                {{ report.summary|safe }}
-              {% endfor %}
-            </div>
-            {% endif %}
-          </section>
-        </section>
-
-        <!-- Balance Sheet -->
+    <section class="cs-wrapper">
+        <!-- Left (80%) -->
+        <section class="cs-all-details">
+            <div class="cs-left-inner">
+                <!-- Overview -->
+                <section id="overview" class="cs-overview-section">
+                    <section class="cs-overview-box">
+                        <div class="cs-overview-text">
+                            {{ stock.company_overview|safe }}
+                        </div>
+                        {% if reports %}
+                        <div class="cs-overview-text">
+                            {% for report in reports %}
+                                {{ report.summary|safe }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </section>
+                </section>
+                <!-- Balance Sheet -->
         <section id="balance-sheet" class="cs-content-section" style="display: none;">
           <h2>{{ stock.company_name }} - Balance Sheet</h2>
           {% with data=balance_sheet_data %}
@@ -1339,7 +1327,7 @@
                       style="width: 60px; height: 60px; object-fit: cover; margin-right: 15px;">
                 {% endif %}
                 <div>
-                  <h5 class="mb-1">{{ event.title }}</h5>
+                  <h5 class="mb-1" style="font-size: 16px;">{{ event.title }}</h5>
                   <small class="text-muted">{{ event.subtitle|default:"" }}</small>
                 </div>
               </div>
@@ -1393,30 +1381,6 @@
   //   csShowSection('overview');
   // };
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   <!-- part 5 start -->
 
@@ -1577,7 +1541,7 @@
 
 <!-- part 6 Start  most searched -->  
             <!-- most searched  start -->
-            <main>          
+            <!-- <main>          
                 <div class="carousel-container-main">
                     <div class="carousel-title-main">
                         <span style="color: #000;"> Most Searched </span> <span style="color: #39B54A;">Unlisted</span>
@@ -1596,14 +1560,6 @@
                         <div class="scroll-container-main" id="scrollContainer1">
                           {% for stock in all_stocks %}
                             <div class="company-card-main">
-                                <!-- <div class="logo-main">
-                                  {% if stock.logo %}
-                                      <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo-main">
-                                  {% endif %}
-                                </div>
-                                <div class="company-name-main">
-                                    {{ stock.company_name }}
-                                </div> -->
                                 <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" 
                                   style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
                                   
@@ -1617,7 +1573,6 @@
                                   <div style="font-weight: 600; font-size: 1rem;">
                                     {{ stock.company_name }}
                                   </div>
-                                  
                                 </a>
 
                                 <div class="company-sector-main"><span>Sector:</span>&nbsp;&nbsp;{{stock.sector}}</div>
@@ -1672,8 +1627,94 @@
                         </div>
                     </div>
                 </div>
-            </main>
-          <!-- most searched  start -->
+            </main> -->
+    <section class="carousel-container-main">
+        <div class="carousel-title-main">
+            Most Searched <span class="highlight">Unlisted</span> & <span class="highlight">Pre IPO</span> Companies Stocks in india
+        </div>
+        <div class="carousel-content">
+            <div class="nav-arrow left" onclick="scrollLeftsroll()">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-arrow left" style="width: 40px; height: 40px; cursor: pointer">
+                    <path d="M19.9052 14.8528L17.3342 12.2818L9.61789 19.9964L17.3324 27.7109L19.9033 25.1382L16.5815 21.8146H30.2852V18.1782H16.5815L19.9052 14.8528Z" fill="black"></path>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818ZM8.42909 8.42909C6.90958 9.9486 5.70424 11.7525 4.88188 13.7379C4.05952 15.7232 3.63626 17.8511 3.63626 20C3.63626 22.1489 4.05952 24.2768 4.88188 26.2621C5.70424 28.2475 6.90958 30.0514 8.42909 31.5709C9.9486 33.0904 11.7525 34.2958 13.7379 35.1181C15.7232 35.9405 17.8511 36.3637 20 36.3637C22.1489 36.3637 24.2768 35.9405 26.2621 35.1181C28.2475 34.2958 30.0514 33.0904 31.5709 31.5709C34.6397 28.5021 36.3637 24.3399 36.3637 20C36.3637 15.6601 34.6397 11.4979 31.5709 8.42909C28.5021 5.36029 24.3399 3.63626 20 3.63626C15.6601 3.63626 11.4979 5.36029 8.42909 8.42909Z" fill="black"></path>
+                </svg>
+            </div>
+            <div class="scroll-container-main" id="scrollContainer1">
+                {% for stock in all_stocks %}
+                    <div class="company-card-main">
+                        <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" class="card-link">
+                            <div class="logo-main">
+                                {% if stock.logo %}
+                                    <img src="{{ stock.logo.url }}" alt="{{ stock.company_name }} Logo" class="company-logo-main">
+                                {% endif %}
+                            </div>
+                            <div class="company-name-main">
+                                {{ stock.company_name }}
+                            </div>
+                            <div class="company-sector-main"><span>Sector:</span>&nbsp;&nbsp;{{stock.sector}}</div>
+                            <div class="company-ltp-main">
+                                  <span>CMP:</span>
+                                  {% if stock.ltp and stock.share_price %}
+                                      {{ stock.ltp }}
+
+                                      {% load humanize %}
+
+                                      {% if stock.profit > 0 %}
+                                        <p><span style="color: green;">
+                                          &#9650; ₹{{ stock.profit|floatformat:2|intcomma }} ({{ stock.profit_percentage|floatformat:2 }}%)
+                                        </span></p>
+                                      {% elif stock.profit < 0 %}
+                                        <p><span style="color: red;">
+                                          &#9660; ₹{{ stock.profit|floatformat:2|intcomma }} ({{ stock.profit_percentage|floatformat:2 }}%)
+                                        </span></p>
+                                      {% else %}
+                                        <p><span>
+                                          ₹{{ stock.profit|floatformat:2 }} ({{ stock.profit_percentage|floatformat:2 }}%)
+                                        </span></p>
+                                      {% endif %}
+
+                                  {% else %}
+                                      <span>No LTP data available</span>
+                                  {% endif %}
+                            </div>
+                            <div class="details-company-main">
+                                <div class="company-eps-div"><span>Lot :</span>₹{{ stock.lot }}</div>
+                            </div>
+                            <div class="market-cap-main"><span>Market Cap:</span>&nbsp;&nbsp;₹{{stock.market_capitalization}} Crore</div>
+                            <div class="details-company-main">
+                                <div class="company-eps-div"><span>Face Value:</span>₹{{stock.face_value}}</div>
+                                <div class="company-eps-div"><span>PE Ratio:</span>{{stock.pe_ratio}}</div>
+                            </div>
+                        </a>
+                        <div class="details-cards-fourth-info">
+                            <button class="cards-buy-button" onclick='openBuyModal(
+                            "{{ stock.id }}",
+                            "{{ stock.company_name|escapejs }}",
+                            "{{ stock.share_price }}",
+                            "{{ stock.quantity }}",
+                            "{% url 'user_portfolio:buy_stock' stock.id %}"
+                          )'>Buy</button>
+
+                            <button class="cards-sell-button" onclick='openSellModal(
+                            "{{ stock.id }}",
+                            "{{ stock.company_name|escapejs }}",
+                            "{{ stock.share_price }}",
+                            "{{ stock.quantity }}",
+                            "{% url 'user_portfolio:sell_stock' stock.id %}"
+                          )'>Sell</button>
+
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="nav-arrow right" onclick="scrollRightscroll()">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-arrow right" style="width: 40px; height: 40px; cursor: pointer">
+                    <path d="M20.0948 25.1472L22.6658 27.7182L30.3821 20.0036L22.6676 12.2891L20.0967 14.8618L23.4185 18.1854H9.71484V21.8218H23.4185L20.0948 25.1472Z" fill="black"></path>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418ZM31.5709 31.5709C33.0904 30.0514 34.2958 28.2475 35.1181 26.2621C35.9405 24.2768 36.3637 22.1489 36.3637 20C36.3637 17.8511 35.9405 15.7232 35.1181 13.7379C34.2958 11.7525 33.0904 9.9486 31.5709 8.42909C30.0514 6.90958 28.2475 5.70423 26.2621 4.88188C24.2768 4.05952 22.1489 3.63626 20 3.63626C17.8511 3.63626 15.7232 4.05952 13.7379 4.88188C11.7525 5.70423 9.9486 6.90958 8.42909 8.42909C5.3603 11.4979 3.63626 15.6601 3.63626 20C3.63626 24.3399 5.3603 28.5021 8.42909 31.5709C11.4979 34.6397 15.6601 36.3637 20 36.3637C24.3399 36.3637 28.5021 34.6397 31.5709 31.5709Z" fill="black"></path>
+                </svg>
+            </div>
+        </div>
+    </section>
 <!-- part 6 end most searched  -->            
 
     <!-- js for most searched start -->

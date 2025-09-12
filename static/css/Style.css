@@ -74,10 +74,7 @@ a{
 
 /* home page unlisted share section */
 
-
-
 .unlisted-share-section {
-  /* margin-bottom:50px; */
   padding: 0 100px;
   width: 100%;
   background-color: rgba(14, 33, 63, 1);
@@ -112,6 +109,7 @@ a{
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-bottom: 10px;
 }
 
 .logo-wrapper {
@@ -142,12 +140,18 @@ a{
   color: #39B54A;
 }
 
+.cards-second-info
+{
+  min-height: 30px;
+  max-height: auto;
+}
 .cards-second-info,
 .cards-third-info,
 .cards-fourth-info {
   display: flex;
   justify-content: space-between;
   /* align-items: center; */
+  margin-bottom: 10px;
 }
 
 .cards-share-name {
@@ -711,7 +715,7 @@ a{
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 30px;
+  padding: 15px;
   position: relative;
   background-color: white;
 }
@@ -750,7 +754,7 @@ a{
 }
 .logo-cell img {
   max-width: 100%;
-  max-height: 60px;
+  max-height: 70px;
   object-fit: contain;
 }
 .logo-cell img:hover {
@@ -1131,7 +1135,7 @@ a{
 
 
 
-
+/* most searched stock */
 /* Individual Stock Details */
 
 .carousel-container-main {
@@ -1146,7 +1150,7 @@ a{
 }
   
 .carousel-title-main {
-    color: #fff;
+    color: #000;
     font-family: 'Newsreader', serif;
     font-size: 40px;
     font-weight: 700;
@@ -1160,6 +1164,7 @@ a{
     align-items: center;
     gap: 10px;
     position: relative;
+    width: 100%;
 }
   
 .scroll-container-main {
@@ -1179,16 +1184,21 @@ a{
     display: none;
   }
   
-.company-card-main {    
+.company-card-main 
+{    
     min-width: calc(25% - 15px);
+    display: flex;
+    flex-direction: column;       /* Stack content vertically */
+    justify-content: space-between;
     scroll-snap-align: start;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     padding: 20px;
     transition: transform 0.3s ease;
-    flex: 0 0 auto;
+    flex: 1 1 auto;   
     border: 1px solid #eee;
+    min-height: 350px; 
 }
   
   .company-card-main:hover {
@@ -1197,10 +1207,10 @@ a{
   }
 
   .logo-main {
-    height: 50px;
+    height: 70px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: left;
+    justify-content: left;
     margin-bottom: 12px;
   }
   .company-logo-main {
@@ -1209,25 +1219,26 @@ a{
     object-fit: contain;
   }
    .company-name-main {
-    font-size: 15px;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 8px;
-    /* text-align: center; */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+        font-size: 15px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        text-align: left;
+        white-space: normal;         
+        overflow-wrap: break-word;  
+        word-break: break-word; 
+    }
    .company-sector-main {
     font-size: 14px;
-    color: #555;
+    color: #393838;
     margin-bottom: 12px;
     /* text-align: center; */
   }
   
   .company-sector-main span {
-    font-weight: 600;
-    color: #333;
+    font-weight: 700;
+    color: #2e2e2e;
+    font-size: 14px;
   }
 
   .company-ltp-main {
@@ -1240,12 +1251,13 @@ a{
     text-overflow: ellipsis;
     display: flex;
     gap: 6px;
+    font-size: 14px;
     /* text-align: center; */
   }
   
   .company-ltp-main span:first-child {
-    font-weight: 600;
-    color: #333;
+    font-weight: 700;
+    color: #2e2e2e;
     margin-right: 6px;
   }
   
@@ -1257,13 +1269,13 @@ a{
   
   .market-cap-main {
     font-size: 14px;
-    color: #555;
+    color: #393838;
     margin-bottom: 15px;
     /* text-align: center; */
   }
   
   .market-cap-main span {
-    font-weight: 600;
+    font-weight: 700;
     color: #333;
   }
   
@@ -1275,16 +1287,33 @@ a{
   
   .company-eps-div {
     font-size: 13px;
-    color: #555;
+    color: #2e2e2e;
     width: 48%;
   }
   
   .company-eps-div span {
-    font-weight: 600;
-    color: #333;
+    font-weight: 700;
+    color: #2e2e2e;
     display: inline-block;
     margin-right: 4px;
   }
+  .details-cards-fourth-info
+  {
+        display: flex;
+        justify-content: space-between;
+        margin-top: auto; 
+        gap: 10px;
+  }
+  .details-cards-fourth-info button 
+  {
+    width: 48%;
+    padding: 6px 0;
+    font-size: 13px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    }
 
    @media (max-width: 1024px) {
     .company-card-main {
@@ -2298,6 +2327,7 @@ a{
   padding: 20px;
   background-color: #0E213F;
   margin-top: 20px;
+  margin-bottom: 90px;
 }
 
 .getIN_details
@@ -2425,7 +2455,7 @@ a{
 .blog-detail-content{
   margin-bottom: 20px;
 }
-.stock-page-header-1 {
+/* .stock-page-header-1 {
   display: flex;
   align-items: center;
   height: 312px;
@@ -2438,43 +2468,41 @@ a{
     #0e213f 100%
   );
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-}
-.header-content-details {
+} */
+
+/* .header-content-details {
   display: flex;
   justify-content: space-between;
-  /* align-items: center; */
   width: 100%;
   padding: 0 100px;
   color: #fff;
-  /* gap:30%; */
-}
-.header-details-left {
+} */
+
+/* .header-details-left {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
   width: 220px;
   gap: 10px;
-}
+} */
 
-.header-details-logo-left{
+/* .header-details-logo-left{
   width: 200px;
   height: 100px;
-  /* border: 1px solid yellow; */
   border-radius: 8px;
-  /* padding: 10px; */
   display: flex;
   align-items: center;
   justify-content: center;
-}
+} */
 
-.company-logo-1 {
+/* .company-logo-1 {
   width: 100%;
   height: 100%;
   object-fit: contain;
   border-radius: 10px;
-}
-.header-details-buttons
+} */
+/* .header-details-buttons
 {
   display: flex;
   width: 200px; 
@@ -2510,9 +2538,9 @@ a{
   background-color: yellow;
   color: #000;
   transform: scale(1.05);
-}
+} */
 
-.header-details-right h2 {
+/* .header-details-right h2 {
   font-size: 28px;
   margin-bottom: 10px;
 }
@@ -2520,7 +2548,7 @@ a{
 .header-details-right p {
   margin: 6px 0;
   font-size: 16px;
-}
+} */
 
 
 
@@ -2955,7 +2983,7 @@ a{
     margin-bottom: 0;
   }
 
-  .stock-page-header-1 {
+  /* .stock-page-header-1 {
     flex-direction: column;
     height: auto;
     padding: 20px;
@@ -2994,7 +3022,7 @@ a{
 
   .header-details-right {
     text-align: center;
-  }
+  } */
 
   /* principles */
   .stock-info-container {

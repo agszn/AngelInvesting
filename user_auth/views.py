@@ -250,7 +250,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            messages.success(request, "Login successful!")
+            # messages.success(request, "Login successful!")
 
             # Superuser redirect
             if user.is_superuser:
@@ -286,7 +286,7 @@ def login_view(request):
 @login_required
 def logout_view(request):
     logout(request)
-    messages.success(request, "Logged out successfully.")
+    # messages.success(request, "Logged out successfully.")
     return redirect('login')
 
 # the below form is for the user to update their user type

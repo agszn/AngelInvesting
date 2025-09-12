@@ -298,6 +298,33 @@
                 </div>
             </div>
 
+            {# messages start #}
+            {% if messages %}
+            <div class="position-fixed top-0 start-50 translate-middle-x p-3"
+                style="z-index:1080; width:min(720px, 96vw)">
+                {% for message in messages %}
+                <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'debug' in message.tags %}secondary{% else %}{{ message.level_tag }}{% endif %} alert-dismissible fade show shadow-sm mb-2" role="alert">
+                    {{ message|safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <script>
+                // Auto-dismiss after 5 seconds (optional)
+                setTimeout(() => {
+                document.querySelectorAll('.alert.fade.show').forEach(el => {
+                    el.classList.remove('show');
+                    setTimeout(() => el.remove(), 150);
+                });
+                }, 2000);
+            </script>
+            {% endif %}
+            {# messages end #}
+
+
+
+
             <!-- Subnav -->
             <div class="user-main-navigation">
                 <ul class="user-custom-subnav-list">

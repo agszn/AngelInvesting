@@ -1,73 +1,108 @@
 {% comment %} portfolio/includes/portfolio_table.html {% endcomment %}
 <div class="user-portfolio-table-wrapper">
-<div class="user-portfolio-toptable">
+  <style>
+    /* Simple borders even without Bootstrap */
+    table.user-portfolio-table { width:100%; border-collapse:collapse; }
+    table.user-portfolio-table th, table.user-portfolio-table td {
+      border:1px solid #dee2e6; padding:8px; vertical-align:middle;
+    }
+    table.user-portfolio-table thead th { background:#f8f9fa; font-weight:600; white-space:nowrap; }
+    table.user-portfolio-table thead th a { text-decoration:none; color:inherit; }
+    .sort-arrow { margin-left:4px; opacity:0.7; font-size:12px; }
+  </style>
+
   {% if holdings.object_list %}
-  <div class="user-portfolio-head">
-    <div>Stock Name</div>
-    <div>Quantity</div>
-    <div>Advisor</div>
-    <div>Avg. Price</div>
-    <!-- <div>DateTime</div> -->
-    <div>CMP</div>
-    <div>Inv. Amt</div>
-    <div>Mkt Value</div>
-    <div>Overall P/L</div>
-    <div>Day’s P/L</div>
+  <div class="user-portfolio-toptable">
+    <table class="user-portfolio-head1 table-bordered">
+      <thead>
+        <tr>
+          <th>Stock Name</th>
+          <th>Advisor</th>
+          <th>CMP</th>
+          <th>Avg. Price</th>
+          <th>Quantity</th>
+          <!-- <th>DateTime</th> -->
+
+          {# ---- Sortable: Inv. Amt (static arrow) ---- #}
+          <th>
+            <a href="?{% if selected_advisor %}advisor={{ selected_advisor.id }}&{% endif %}{% if selected_broker %}broker={{ selected_broker.id }}&{% endif %}{% if search_query %}search={{ search_query|urlencode }}&{% endif %}sort=inv&dir={% if sort == 'inv' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color: white;text-decoration: none;">
+              Inv. Amt <span class="sort-arrow" aria-hidden="true">↕</span>
+            </a>
+          </th>
+
+          {# ---- Sortable: Mkt Value (static arrow) ---- #}
+          <th>
+            <a href="?{% if selected_advisor %}advisor={{ selected_advisor.id }}&{% endif %}{% if selected_broker %}broker={{ selected_broker.id }}&{% endif %}{% if search_query %}search={{ search_query|urlencode }}&{% endif %}sort=mkt&dir={% if sort == 'mkt' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color: white;text-decoration: none;">
+              Mkt Value <span class="sort-arrow" aria-hidden="true">↕</span>
+            </a>
+          </th>
+
+          <th>Overall P/L</th>
+          <th>Day’s P/L</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in holdings %}
+        <tr style="background: {% cycle '#f5f9ff' 'white' %};">
+          <td>
+            {{ h.stock.company_name }}
+            <span title="Buy {{ h.stock.company_name }}"
+                  onclick='openBuyModal(
+                    "{{ h.stock.id }}",
+                    "{{ h.stock.company_name|escapejs }}",
+                    "{{ h.stock.share_price }}",
+                    "{{ h.stock.quantity }}",
+                    "{% url "user_portfolio:buy_stock" h.stock.id %}"
+                  )'
+                  style="background-color:#39B54A;color:#fff;padding:2px 6px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px;">B</span>
+            <span onclick='openSellModal(
+                    "{{ h.stock.id }}",
+                    "{{ h.stock.company_name|escapejs }}",
+                    "{{ h.stock.share_price }}",
+                    "{{ h.stock.quantity }}",
+                    "{% url "user_portfolio:sell_stock" h.stock.id %}"
+                  )'
+                  style="background-color:#FF4E4E;color:#fff;padding:2px 6px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:4px;">S</span>
+          </td>
+
+          <td>{{ h.advisor.advisor_type|default:"-" }}</td>
+
+          <td>
+            {% if h.share_price is not None %}
+              ₹{{ h.share_price|floatformat:2 }}
+            {% elif h.stock and h.stock.share_price is not None %}
+              ₹{{ h.stock.share_price|floatformat:2 }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+
+          <td>₹{{ h.avg_price|floatformat:2 }}</td>
+          <td>{{ h.quantity_held }}</td>
+          {# <td>{{ h.last_updated }}</td> #}
+
+          <td>₹{{ h.investment_amount }}</td>
+          <td>₹{{ h.market_value }}</td>
+
+          <td>
+            <span style="color:{% if h.overall_gain_loss > 0 %}green{% elif h.overall_gain_loss < 0 %}red{% else %}#333{% endif %};">
+              ₹{{ h.overall_gain_loss }} <small>({{ h.overall_gain_percent|floatformat:2 }}%)</small>
+            </span>
+          </td>
+
+          <td>
+            <span style="color:{% if h.day_gain_loss > 0 %}green{% elif h.day_gain_loss < 0 %}red{% else %}#333{% endif %};">
+              ₹{{ h.day_gain_loss }} <small>({{ h.day_gain_percent|floatformat:2 }}%)</small>
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-  {% endif %}
-
-  {% for h in holdings %}
-  <div class="user-portfolio-tbody">
-    <div>
-      {{ h.stock.company_name }}
-      <span title="Buy {{ h.stock.company_name }}"
-            onclick='openBuyModal(
-              "{{ h.stock.id }}",
-              "{{ h.stock.company_name|escapejs }}",
-              "{{ h.stock.share_price }}",
-              "{{ h.stock.quantity }}",
-              "{% url 'user_portfolio:buy_stock' h.stock.id %}"
-            )'
-            style="background-color: #49c5b6; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">B</span>
-
-      <span onclick='openSellModal(
-              "{{ h.stock.id }}",
-              "{{ h.stock.company_name|escapejs }}",
-              "{{ h.stock.share_price }}",
-              "{{ h.stock.quantity }}",
-              "{% url 'user_portfolio:sell_stock' h.stock.id %}"
-            )'
-            style="background-color: #a8575b; color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 12px;">S</span>
-    </div>
-
-    <div>{{ h.quantity_held }}</div>
-    <div>{{ h.advisor.advisor_type|default:"-" }}</div>
-    <div>₹{{ h.avg_price|floatformat:2 }}</div>
-    <!-- <div>{{ h.last_updated }}</div> -->
-
-    <div>
-      {% if h.share_price is not None %}
-        ₹{{ h.share_price|floatformat:2 }}
-      {% elif h.stock and h.stock.share_price is not None %}
-        ₹{{ h.stock.share_price|floatformat:2 }}
-      {% else %}
-        -
-      {% endif %}
-    </div>
-
-    <div>₹{{ h.investment_amount }}</div>
-    <div>₹{{ h.market_value }}</div>
-    <div style="color: {% if h.overall_gain_loss > 0 %}green{% elif h.overall_gain_loss < 0 %}red{% else %}#333{% endif %};">
-      ₹{{ h.overall_gain_loss }} <small>({{ h.overall_gain_percent|floatformat:2 }}%)</small>
-    </div>
-    <div style="color: {% if h.day_gain_loss > 0 %}green{% elif h.day_gain_loss < 0 %}red{% else %}#333{% endif %};">
-      ₹{{ h.day_gain_loss }} <small>({{ h.day_gain_percent|floatformat:2 }}%)</small>
-
-    </div>
-  </div>
-  {% empty %}
+  {% else %}
   <div class="p-3 text-muted">No holdings yet.</div>
-  {% endfor %}
+  {% endif %}
 
   <div class="user-portfolio-tpaginatioin">
     {% if page_obj.has_previous %}
@@ -80,5 +115,4 @@
       <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
     {% endif %}
   </div>
-</div>
 </div>
