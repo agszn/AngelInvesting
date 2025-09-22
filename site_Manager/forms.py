@@ -224,50 +224,51 @@ from django import forms
 from .models import Event
 from django import forms
 from .models import Event
+# forms.py
+from django import forms
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from .models import Event
 
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = [
-            "stock", 
-            "title", 
-            "subtitle", 
-            "paragraph", 
-            "date_time", 
-            "image", 
-            "document",   # ✅ Added document field
-            "show"
+            "stock",
+            "title",
+            "subtitle",
+            "paragraph",
+            "date_time",
+            "image",
+            "document",
+            "show",
         ]
-
         widgets = {
-            "stock": forms.Select(attrs={
-                "class": "form-control",
-            }),
-            "title": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Enter event title"
-            }),
-            "subtitle": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Enter event subtitle"
-            }),
-            "paragraph": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 5,
-                "placeholder": "Enter event details"
-            }),
-            "date_time": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local"
-            }),
-            "image": forms.ClearableFileInput(attrs={
-                "class": "form-control"
-            }),
-            "document": forms.ClearableFileInput(attrs={   # ✅ File input for PDF
-                "class": "form-control",
-                "accept": "application/pdf"   # ensures only PDF selection in file picker
-            }),
-            "show": forms.CheckboxInput(attrs={
-                "class": "form-check-input"
-            }),
+            "stock": forms.Select(attrs={"class": "form-control"}),
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter event title"}),
+            "subtitle": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter event subtitle"}),
+            "paragraph": forms.Textarea(attrs={"class": "form-control", "rows": 5, "placeholder": "Enter event details"}),
+            "date_time": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "image": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "document": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "application/pdf"}),
+            "show": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
+
+    def clean_document(self):
+        doc = self.cleaned_data.get("document")
+        if not doc:
+            return doc
+        # Basic validations
+        if hasattr(doc, "content_type") and doc.content_type != "application/pdf":
+            raise ValidationError("Only PDF files are allowed.")
+        max_mb = 10
+        if doc.size > max_mb * 1024 * 1024:
+            raise ValidationError(f"File too large. Max size: {max_mb} MB.")
+        return doc
+
+    def clean_date_time(self):
+        dt = self.cleaned_data.get("date_time")
+        # Optional sanity check: allow past/future, but ensure timezone aware
+        if dt and timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.get_current_timezone())
+        return dt

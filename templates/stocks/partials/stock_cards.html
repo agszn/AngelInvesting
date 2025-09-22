@@ -48,13 +48,7 @@
           <div class="cards-third-info">
             <div>Lot Size: <strong>{{ stock.lot }} Shares</strong> </div>
                 <div>Share Price: <strong>₹{{ stock.share_price }}</strong>
-                {% if stock.percentage_diff > 0 %}
-                    <span class="up" style="color:green">▲ ({{ stock.percentage_diff|floatformat:2 }}%)</span >
-                {% elif stock.percentage_diff < 0 %}
-                    <span class="down" style="color:red">▼ ({{ stock.percentage_diff|floatformat:2 }}%)</span>
-                {% else %}
-                    <span style="color: black;">(0.00%)</span>
-                {% endif %}
+                {% include 'includes/percentage_diff.html' %}
                 </div>
           </div>
         </a>

@@ -1,37 +1,66 @@
-<table class="user-portfolio-toptable" style="width: 100%;">
-  <thead class="user-portfolio-head1" >
-    <tr>
-      <th>Date</th>
-      <th>Stock Name</th>
-      <th>Advisor</th>
-      <th>Broker</th>
-      <th>Quantity</th>
-      <th>Selling Price</th>
-      <th>RM Status</th>
-      <th>Acc Status</th>
-      <th>ST Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for order in orders %}
-    <tr style="background: {% cycle '#f5f9ff' 'white' %};">
-      <td>
-        {{ order.timestamp|date:"Y-m-d H:i" }}
-        {% if order.timestamp|time:"H" >= "18" %}
-          <div class="text-muted" style="font-size:11px">Processed next day 11:00 AM</div>
-        {% endif %}
-      </td>
-      <td>{{ order.stock.company_name }}</td>
-      <td>{{ order.advisor.advisor_type|default:"Others" }}</td>
-      <td>{{ order.broker.name|default:"N/A" }}</td>
-      <td>{{ order.quantity }}</td>
-      <td>₹{{ order.selling_price|default:"-" }}</td>
-      <td>{{ order.RM_status }}</td>
-      <td>{{ order.AC_status }}</td>
-      <td>{{ order.status }}</td>
-    </tr>
-    {% empty %}
-      <tr><td colspan="7" class="text-center p-3">No sell orders found.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+{# portfolio/includes/sell_orders_table.html #}
+<div class="table-responsive">
+  <table class="user-portfolio-toptable">
+    <thead class="user-portfolio-head1">
+      <tr>
+        <th scope="col">Date</th>
+        <th scope="col">Stock Name</th>
+        <th scope="col">Advisor</th>
+        <th scope="col">Broker</th>
+        <th scope="col" class="text-end">Quantity</th>
+        <th scope="col" class="text-end">Selling Price</th>
+        <th scope="col">RM Status</th>
+        <th scope="col">Acc Status</th>
+        <th scope="col">ST Status</th>
+        <th scope="col" class="text-center">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% if orders %}
+        {% for order in orders %}
+        <tr data-order-id="{{ order.order_id }}" style="background: {% cycle '#f5f9ff' 'white' %};">
+          <td>
+            {{ order.timestamp|date:"Y-m-d H:i" }}
+            {% if order.timestamp|time:"H" >= "18" %}
+              <div class="text-muted" style="font-size:11px">Processed next day 11:00 AM</div>
+            {% endif %}
+          </td>
+          <td>
+            {{ order.stock.company_name|default:"—" }}
+            {% if order.stock.scrip_name and order.stock.scrip_name != order.stock.company_name %}
+              <!-- <div class="text-muted small">{{ order.stock.scrip_name }}</div> -->
+            {% endif %}
+          </td>
+          <td>{{ order.advisor.advisor_type|default:"Others" }}</td>
+          <td>{{ order.broker.name|default:"N/A" }}</td>
+          <td class="text-end">{{ order.quantity|default:"-" }}</td>
+          <td class="text-end">
+            {% if order.selling_price is not None and order.selling_price != "" %}
+              ₹{{ order.selling_price|floatformat:2 }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>{{ order.RM_status|default:"-" }}</td>
+          <td>{{ order.AC_status|default:"-" }}</td>
+          <td>{{ order.status|default:"-" }}</td>
+          <td class="text-center">
+            {% if order.can_delete %}
+              <button type="button" class="btn btn-sm btn-outline-danger delete-order">
+                Remove
+              </button>
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="10" class="text-center p-3">No sell orders found.</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>

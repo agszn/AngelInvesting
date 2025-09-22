@@ -1,0 +1,18 @@
+{# templates/includes/profit_diff.html #}
+{% with text_color=text_color|default:"black" %}
+  {% if stock.profit is not None and stock.profit_percentage is not None %}
+    {% if stock.profit > 0 %}
+      <span class="up" >
+        ▲ ({{ stock.profit_percentage|floatformat:2 }}%)
+      </span>
+    {% elif stock.profit < 0 %}
+      <span class="down">
+        ▼ ({{ stock.profit_percentage|floatformat:2 }}%)
+      </span>
+    {% else %}
+      <span style="color: {{ text_color }};">(0.00%)</span>
+    {% endif %}
+  {% else %}
+    <span style="color: {{ text_color }};">(—)</span>
+  {% endif %}
+{% endwith %}

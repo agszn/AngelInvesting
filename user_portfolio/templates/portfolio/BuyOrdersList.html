@@ -1,5 +1,6 @@
 {% extends "accounts/profile.html" %}
 {% block title %}My Profile{% endblock %}
+
 {% block profile_content %}
 <div class="user-porfolio-dashboard">
   <div class="user-portfolio-top">
@@ -8,7 +9,7 @@
     <div class="d-flex align-items-center" style="gap: 12px; flex-wrap: wrap;">
       <!-- Search -->
       <div class="search-details-user">
-        <form method="get" class="d-flex" style="gap: 10px;">
+        <form method="get" class="d-flex" style="gap: 10px;" onsubmit="return false;">
           <input id="buy-search-input"
                  type="text"
                  name="search"
@@ -20,22 +21,22 @@
 
       <!-- Advisor Filter -->
       <div class="dropdown">
-        <button id="buyAdvisorBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          {{ selected_advisor.advisor_type|default:"Advisor" }}
+        <button id="buyAdvisorBtn"
+                class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ selected_advisor.advisor_type|default:"All Advisors" }}
         </button>
         <ul id="buyAdvisorMenu" class="dropdown-menu">
           <li>
             <a class="dropdown-item ajax-filter {% if not selected_advisor %}active{% endif %}"
-               data-filter="advisor" data-value=""
-               href="?{% if selected_broker %}broker={{ selected_broker.id }}{% endif %}{% if search_query %}{% if selected_broker %}&{% endif %}search={{ search_query|urlencode }}{% endif %}{% if sort %}{% if selected_broker or search_query %}&{% endif %}sort={{ sort }}{% endif %}">
+               data-filter="advisor" data-value="all" href="#">
               {% if not selected_advisor %}✓ {% endif %}All Advisors
             </a>
           </li>
           {% for adv in advisors %}
           <li>
             <a class="dropdown-item ajax-filter {% if selected_advisor and adv.id == selected_advisor.id %}active{% endif %}"
-               data-filter="advisor" data-value="{{ adv.id }}"
-               href="?advisor={{ adv.id }}{% if selected_broker %}&broker={{ selected_broker.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+               data-filter="advisor" data-value="{{ adv.id }}" href="#">
               {% if selected_advisor and adv.id == selected_advisor.id %}✓ {% endif %}{{ adv.advisor_type|upper }}
             </a>
           </li>
@@ -45,22 +46,22 @@
 
       <!-- Broker Filter -->
       <div class="dropdown">
-        <button id="buyBrokerBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          {{ selected_broker.name|default:"Broker" }}
+        <button id="buyBrokerBtn"
+                class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ selected_broker.name|default:"All Brokers" }}
         </button>
         <ul id="buyBrokerMenu" class="dropdown-menu">
           <li>
             <a class="dropdown-item ajax-filter {% if not selected_broker %}active{% endif %}"
-               data-filter="broker" data-value=""
-               href="?{% if selected_advisor %}advisor={{ selected_advisor.id }}{% endif %}{% if search_query %}{% if selected_advisor %}&{% endif %}search={{ search_query|urlencode }}{% endif %}{% if sort %}{% if selected_advisor or search_query %}&{% endif %}sort={{ sort }}{% endif %}">
+               data-filter="broker" data-value="all" href="#">
               {% if not selected_broker %}✓ {% endif %}All Brokers
             </a>
           </li>
           {% for bro in brokers %}
           <li>
             <a class="dropdown-item ajax-filter {% if selected_broker and bro.id == selected_broker.id %}active{% endif %}"
-               data-filter="broker" data-value="{{ bro.id }}"
-               href="?broker={{ bro.id }}{% if selected_advisor %}&advisor={{ selected_advisor.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+               data-filter="broker" data-value="{{ bro.id }}" href="#">
               {% if selected_broker and bro.id == selected_broker.id %}✓ {% endif %}{{ bro.name }}
             </a>
           </li>
@@ -76,37 +77,62 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const input = document.getElementById('buy-search-input');
-  const container = document.getElementById('buy-orders-table-container');
-  const advBtn = document.getElementById('buyAdvisorBtn');
-  const broBtn = document.getElementById('buyBrokerBtn');
+// ---- CSRF helper ----
+function getCookie(name) {
+  const v = `; ${document.cookie}`;
+  const parts = v.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+const CSRF = getCookie('csrftoken');
 
-  // Search (AJAX)
+document.addEventListener('DOMContentLoaded', function() {
+  const input     = document.getElementById('buy-search-input');
+  const container = document.getElementById('buy-orders-table-container');
+  const advBtn    = document.getElementById('buyAdvisorBtn');
+  const broBtn    = document.getElementById('buyBrokerBtn');
+
+  // --- Search (AJAX, debounced) ---
   let timer;
   input.addEventListener('input', function() {
     clearTimeout(timer);
     timer = setTimeout(() => {
       const p = new URLSearchParams(window.location.search);
       p.set('search', input.value);
+      // keep advisor/broker if already present; otherwise leave as-is
       const url = window.location.pathname + '?' + p.toString();
       fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.text())
         .then(html => {
           container.innerHTML = html;
           history.replaceState(null, '', url);
-        });
+        })
+        .catch(console.error);
     }, 300);
   });
 
-  // Advisor/Broker filters (AJAX)
+  // --- Build URL and preserve both advisor+broker always ---
+  function buildUrl(filterType, value) {
+    const url = new URL(window.location.href);
+    const p = url.searchParams;
+
+    p.set(filterType, value);
+    if (!p.has('advisor')) p.set('advisor', 'all');
+    if (!p.has('broker'))  p.set('broker', 'all');
+
+    url.search = p.toString();
+    return url.toString();
+  }
+
+  // --- Advisor/Broker filters (AJAX) ---
   function wireFilterLinks() {
     document.querySelectorAll('.ajax-filter').forEach(a => {
       a.addEventListener('click', function(e) {
         e.preventDefault();
-        const url = a.getAttribute('href');
-        const filterType = a.dataset.filter; // 'advisor' or 'broker'
-        const labelText = a.textContent.trim().replace(/^✓\s*/, '');
+        const filterType = a.dataset.filter;
+        const value      = a.dataset.value;
+        const labelText  = a.textContent.trim().replace(/^✓\s*/, '');
+
+        const url = buildUrl(filterType, value);
 
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
           .then(r => r.text())
@@ -114,11 +140,11 @@ document.addEventListener('DOMContentLoaded', function() {
             container.innerHTML = html;
             history.replaceState(null, '', url);
 
-            // Update the dropdown label
+            // Update dropdown button label
             if (filterType === 'advisor') advBtn.textContent = labelText;
-            if (filterType === 'broker')  broBtn.textContent  = labelText;
+            if (filterType === 'broker')  broBtn.textContent = labelText;
 
-            // Update active state & checkmark in menu
+            // Update active state + checkmark
             const menuId = filterType === 'advisor' ? 'buyAdvisorMenu' : 'buyBrokerMenu';
             const menu = document.getElementById(menuId);
             if (menu) {
@@ -127,9 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 item.innerHTML = item.textContent.trim().replace(/^✓\s*/, '');
               });
               a.classList.add('active');
-              if (!a.textContent.trim().startsWith('✓')) {
-                a.innerHTML = '✓ ' + a.textContent.trim();
-              }
+              a.innerHTML = '✓ ' + labelText;
             }
           })
           .catch(console.error);
@@ -138,6 +162,53 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   wireFilterLinks();
+
+  // --- Cancel button (event delegation; survives partial reloads) ---
+  container.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.delete-order');
+    if (!btn) return;
+
+    const row = btn.closest('tr');
+    const orderId = row?.dataset.orderId;
+    const endpoint = btn.dataset.endpoint; // set in partial
+    if (!orderId || !endpoint) return;
+
+    if (!confirm('Cancel this order?')) return;
+
+    btn.disabled = true;
+
+    try {
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-CSRFToken': CSRF,
+        },
+        body: new URLSearchParams({ order_id: orderId }),
+      });
+
+      const data = await resp.json().catch(() => ({}));
+
+      if (!resp.ok || data.ok === false) {
+        let msg = 'Unable to cancel this order.';
+        if (data.reason === 'locked_status') msg = "Order can't be cancelled now (status is locked).";
+        else if (data.reason === 'has_payment') msg = 'Payment already recorded; cancellation not allowed.';
+        else if (resp.status === 403) msg = 'Forbidden. Are you logged in as this order’s owner?';
+        alert(msg);
+        btn.disabled = false;
+        return;
+      }
+
+      // Success – remove the row smoothly
+      row.style.opacity = '0.4';
+      setTimeout(() => row.remove(), 160);
+    } catch (err) {
+      console.error(err);
+      alert('Network error. Please try again.');
+      btn.disabled = false;
+    }
+  });
 });
 </script>
 {% endblock %}

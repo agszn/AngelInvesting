@@ -59,6 +59,10 @@ body {
     border-radius: 3px;
     cursor: pointer;
 }
+#stock-table-container
+{
+    margin-bottom: 20px !important;
+}
 
 .table-container {
     width: 100%;
@@ -115,6 +119,22 @@ th {
 }
 
 tr:nth-child(even) {
+    background-color: #0E213F;
+}
+
+thead th:first-child,
+tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 999;
+    background-color: #0E213F;
+}
+
+thead th:nth-child(2),
+tbody td:nth-child(2) {
+    position: sticky;
+    left:20px;
+    z-index: 999;
     background-color: #0E213F;
 }
 

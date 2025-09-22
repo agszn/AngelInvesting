@@ -1,7 +1,7 @@
           {% for stock in page_obj %}
             {% if stock.company_name and not stock.hide_company_overview %}
                 <tr>
-                  <td>{{ forloop.counter }}</td>
+                  <td>{{ forloop.counter0|add:start_index }}</td>
                   <!-- <td class="clogo">
                     {% if stock.logo %}
                     <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" style="text-decoration: none; color: inherit;">
@@ -18,13 +18,8 @@
                     </td>
                   <td>{{ stock.sector }}</td>
                   <td>₹ {{ stock.share_price }}
-                  {% if stock.percentage_diff > 0 %}
-                    <span class="up" style="color:black">▲ ({{ stock.percentage_diff|floatformat:2 }}%)</span >
-                  {% elif stock.percentage_diff < 0 %}
-                    <span class="down">▼ ({{ stock.percentage_diff|floatformat:2 }}%)</span>
-                  {% else %}
-                    <span>(0.00%)</span>
-                  {% endif %}
+                  {% include "includes/percentage_diff.html" with text_color="white" %}
+
                   </td>
                   <td>{{ stock.market_capitalization }}</td>
                   <td>{{ stock.outstanding_shares }}</td>

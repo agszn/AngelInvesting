@@ -1,0 +1,423 @@
+{% comment %} portfolio/includes/portfolio_table.html {% endcomment %}
+<div class="user-portfolio-table-wrapper">
+  <style>
+    /* Simple borders even without Bootstrap */
+    table.user-portfolio-table { width:100%; border-collapse:collapse; }
+    table.user-portfolio-table th, table.user-portfolio-table td {
+      border:1px solid #dee2e6; padding:8px; vertical-align:middle;
+    }
+    table.user-portfolio-table thead th { background:#f8f9fa; font-weight:600; white-space:nowrap; }
+    table.user-portfolio-table thead th a { text-decoration:none; color:inherit; }
+    .sort-arrow { margin-left:4px; opacity:0.7; font-size:12px; }
+  </style>
+
+  {% if holdings.object_list %}
+  <div class="user-portfolio-toptable">
+    <table class="user-portfolio-head1 table-bordered user-portfolio-table">
+      <thead>
+        <tr>
+          <th>Stock Name</th>
+          <th>Advisor</th>
+          <th>CMP</th>
+          <th>Avg. Price</th>
+          <th>Quantity</th>
+
+          {# ---- Sortable: Inv. Amt ---- #}
+          <th>
+            <a href="?{% if selected_advisor %}advisor={{ selected_advisor.id }}&{% endif %}{% if selected_broker %}broker={{ selected_broker.id }}&{% endif %}{% if search_query %}search={{ search_query|urlencode }}&{% endif %}sort=inv&dir={% if sort == 'inv' and dir == 'asc' %}desc{% else %}asc{% endif %}"
+               style="color: white;text-decoration: none;">
+              Inv. Amt <span class="sort-arrow" aria-hidden="true">↕</span>
+            </a>
+          </th>
+
+          {# ---- Sortable: Mkt Value ---- #}
+          <th>
+            <a href="?{% if selected_advisor %}advisor={{ selected_advisor.id }}&{% endif %}{% if selected_broker %}broker={{ selected_broker.id }}&{% endif %}{% if search_query %}search={{ search_query|urlencode }}&{% endif %}sort=mkt&dir={% if sort == 'mkt' and dir == 'asc' %}desc{% else %}asc{% endif %}"
+               style="color: white;text-decoration: none;">
+              Mkt Value <span class="sort-arrow" aria-hidden="true">↕</span>
+            </a>
+          </th>
+
+          <th>Overall P/L</th>
+          <th>Day’s P/L</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for h in holdings %}
+        <tr style="background: {% cycle '#f5f9ff' 'white' %};">
+          <td>
+            <a href="{% url 'unlisted_stock_marketplace:stock_detail' h.stock.id %}" style="text-decoration: none;color: black;">
+              {{ h.stock.company_name }} - 
+            </a>
+
+            {# BUY: pass CMP, qty held, advisor/broker IDs #}
+            <span title="Buy {{ h.stock.company_name }}"
+                  onclick='openBuyModal(
+                    "{{ h.stock.id }}",
+                    "{{ h.stock.company_name|escapejs }}",
+                    "{{ h.share_price|default_if_none:h.stock.share_price }}",
+                    "{{ h.quantity_held }}",
+                    "{{ h.advisor.id|default_if_none:'' }}",
+                    "{{ h.broker.id|default_if_none:'' }}",
+                    "{% url "user_portfolio:buy_stock" h.stock.id %}"
+                  )'
+                  style="background-color:#39B54A;color:#fff;padding:2px 6px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px;">B</span>
+
+            {# SELL: pass CMP, qty held, advisor/broker IDs #}
+            <span title="Sell {{ h.stock.company_name }}"
+                  onclick='openSellModal(
+                    "{{ h.stock.id }}",
+                    "{{ h.stock.company_name|escapejs }}",
+                    "{{ h.share_price|default_if_none:h.stock.share_price }}",
+                    "{{ h.quantity_held }}",
+                    "{{ h.advisor.id|default_if_none:'' }}",
+                    "{{ h.broker.id|default_if_none:'' }}",
+                    "{% url "user_portfolio:sell_stock" h.stock.id %}"
+                  )'
+                  style="background-color:#FF4E4E;color:#fff;padding:2px 6px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:4px;">S</span>
+          </td>
+
+          <td>{{ h.advisor.advisor_type|default:"-" }}</td>
+          <td>{{ h.broker.name|default:"-" }}</td>
+
+          <td>
+            {% if h.share_price is not None %}
+              ₹{{ h.share_price|floatformat:2 }}
+            {% elif h.stock and h.stock.share_price is not None %}
+              ₹{{ h.stock.share_price|floatformat:2 }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+
+          <td>₹{{ h.avg_price|floatformat:2 }}</td>
+          <td>{{ h.quantity_held }}</td>
+
+          <td>₹{{ h.investment_amount }}</td>
+          <td>₹{{ h.market_value }}</td>
+
+          <td>
+            <span style="color:{% if h.overall_gain_loss > 0 %}green{% elif h.overall_gain_loss < 0 %}red{% else %}#333{% endif %};">
+              ₹{{ h.overall_gain_loss }} <small>({{ h.overall_gain_percent|floatformat:2 }}%)</small>
+            </span>
+          </td>
+
+          <td>
+            <span style="color:{% if h.day_gain_loss > 0 %}green{% elif h.day_gain_loss < 0 %}red{% else %}#333{% endif %};">
+              ₹{{ h.day_gain_loss }} <small>({{ h.day_gain_percent|floatformat:2 }}%)</small>
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="p-3 text-muted">No holdings yet.</div>
+  {% endif %}
+
+  <div class="user-portfolio-tpaginatioin">
+    {% if page_obj.has_previous %}
+      <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Buy Modal -->
+<div class="modal fade" id="universalBuyModal" tabindex="-1" role="dialog" aria-labelledby="universalBuyModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="border-radius: 10px; overflow: hidden;">
+      <form method="POST" action="" id="buy-form">
+        {% csrf_token %}
+        <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: relative;">
+          <div>
+            <strong id="buy-stock-name"></strong>
+            <span style="color: #7cffaf; margin-left: 10px;" id="buy-share-price"></span>
+            <small id="buy-available-qty" style="margin-left:10px; opacity:.9;"></small>
+          </div>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                  style="background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 10px; top: 5px;">&times;</button>
+        </div>
+
+        <div style="background-color: #f1f6ff; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+          <input type="hidden" name="stock_id" id="buy-stock-id">
+
+          <div>
+            <label for="buy-advisor">Advisor</label>
+            <select name="advisor" id="buy-advisor" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+              <!-- Populated via JS -->
+            </select>
+          </div>
+
+          <div>
+            <label for="buy-broker">Broker</label>
+            <select name="broker" id="buy-broker" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+              <!-- Populated via JS -->
+            </select>
+          </div>
+
+          <div>
+            <label>Quantity</label>
+            <input type="number" name="quantity" id="stock-quantity" required min="1" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+          </div>
+
+          <div>
+            <label>Price per Share</label>
+            <input type="number" step="0.01" name="price_per_share" id="buy-price-per-share" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" data-default-price="0">
+          </div>
+
+          <div>
+            <label>Order Type</label>
+            <div style="margin-top: 5px; font-size: 12px;">
+              <label><input type="radio" name="order_type" value="market" checked> Market</label>
+              <label style="margin-left: 10px;"><input type="radio" name="order_type" value="limit"> Limit</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="background-color: #3a456d; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #fff; font-weight: bold;">Total: ₹<span id="buy-total">0.00</span></span>
+          <button type="submit" style="background-color: #4caf50; color: white; padding: 10px 20px; border-radius: 20px; border: none; font-weight: bold;">
+            ✔ Place Buy Order
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Sell Modal -->
+<div class="modal fade" id="universalSellModal" tabindex="-1" role="dialog" aria-labelledby="universalSellModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="background: white; border-radius: 10px; overflow: hidden;">
+      <form method="POST" action="" id="sell-form">
+        {% csrf_token %}
+        <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: relative;">
+          <div>
+            <strong id="sell-stock-name"></strong>
+            <span style="color: #7cffaf; margin-left: 10px;" id="sell-stock-cmp"></span>
+            <small id="sell-available-qty" style="margin-left:10px; opacity:.9;"></small>
+          </div>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                  style="background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 10px; top: 5px;">&times;</button>
+        </div>
+
+        <div style="background-color: #f1f6ff; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+          <input type="hidden" name="stock_id" id="sell-stock-id">
+
+          <div>
+            <label for="sell-advisor">Advisor</label>
+            <select name="advisor" id="sell-advisor" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+              <!-- Populated via JS -->
+            </select>
+          </div>
+
+          <div>
+            <label for="sell-broker">Broker</label>
+            <select name="broker" id="sell-broker" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+              <!-- Populated via JS -->
+            </select>
+          </div>
+
+          <div>
+            <label for="sell-quantity">Quantity</label>
+            <input type="number" name="quantity" id="sell-quantity" required min="1" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+          </div>
+        </div>
+
+        <div style="background-color: #3a456d; padding: 15px; text-align: right;">
+          <button type="submit" style="background-color: #f44336; color: white; padding: 10px 20px; border-radius: 20px; border: none; font-weight: bold;">
+            ✘ Place Sell Order
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* Buy modal totals & price mode */
+  document.addEventListener("DOMContentLoaded", function () {
+    const priceInput = document.getElementById("buy-price-per-share");
+    const qtyInput   = document.getElementById("stock-quantity");
+    const buyTotal   = document.getElementById("buy-total");
+    const orderTypeRadios = document.querySelectorAll("input[name='order_type']");
+
+    function togglePriceInput() {
+      const selectedOrderType = document.querySelector("input[name='order_type']:checked").value;
+      const defaultPrice = priceInput.getAttribute("data-default-price");
+
+      if (selectedOrderType === "market") {
+        priceInput.value = defaultPrice || 0;
+        priceInput.readOnly = true;
+      } else {
+        priceInput.readOnly = false;
+      }
+      updateBuyTotal();
+    }
+
+    function updateBuyTotal() {
+      const qty   = parseFloat(qtyInput.value) || 0;
+      const price = parseFloat(priceInput.value) || 0;
+      buyTotal.textContent = (qty * price).toFixed(2);
+    }
+
+    orderTypeRadios.forEach(r => r.addEventListener("change", togglePriceInput));
+    qtyInput.addEventListener("input", updateBuyTotal);
+    priceInput.addEventListener("input", updateBuyTotal);
+
+    togglePriceInput();
+    updateBuyTotal();
+  });
+</script>
+
+<script>
+  /* Buy/Sell wiring - ID-only preselection + console logs */
+  const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
+  function redirectToLogin() {
+    window.location.href = "{% url 'login' %}?next=" + encodeURIComponent(window.location.pathname + window.location.search);
+  }
+
+  async function fetchAdvisorsBrokers() {
+    try {
+      const response = await fetch("{% url 'user_portfolio:load_advisors_brokers' %}");
+      if (!response.ok) throw new Error("Failed to load advisors/brokers.");
+      const data = await response.json();
+
+      console.groupCollapsed("[load_advisors_brokers] JSON payload");
+      try { console.log("raw:", JSON.stringify(data, null, 2)); }
+      catch (e) { console.log("raw (stringify failed):", data); }
+      console.log("advisors count:", Array.isArray(data.advisors) ? data.advisors.length : 0);
+      console.log("brokers  count:", Array.isArray(data.brokers)  ? data.brokers.length  : 0);
+      if (Array.isArray(data.advisors)) console.table(data.advisors);
+      if (Array.isArray(data.brokers))  console.table(data.brokers);
+      console.groupEnd();
+
+      return data;
+    } catch (err) {
+      console.error("[load_advisors_brokers] ERROR:", err);
+      alert("Failed to load advisor/broker data. Please try again.");
+      return { advisors: [], brokers: [] };
+    }
+  }
+
+  // ID-only selection (no label fallback)
+  function populateSelectById(id, list, labelField, selectedId) {
+    const select = document.getElementById(id);
+    select.innerHTML = "";
+
+    console.groupCollapsed(`[populateSelectById:${id}] inputs`);
+    console.log("labelField:", labelField);
+    console.log("selectedId:", selectedId);
+    console.log("list sample (first 3):", Array.isArray(list) ? list.slice(0,3) : list);
+    console.groupEnd();
+
+    if (!list || list.length === 0) {
+      const option = document.createElement("option");
+      option.textContent = "No options available";
+      option.disabled = true;
+      option.selected = true;
+      select.appendChild(option);
+      console.warn(`[populateSelectById:${id}] no options provided`);
+      return;
+    }
+
+    const selId = selectedId != null && selectedId !== "" ? String(selectedId) : null;
+    let matchedById = false;
+
+    list.forEach(item => {
+      const opt = document.createElement("option");
+      const itemId = String(item.id);
+      const text = (item[labelField] ?? item.name ?? item.broker_name ?? item.title ?? "").toString();
+      opt.value = itemId;
+      opt.textContent = text;
+
+      if (!matchedById && selId && itemId === selId) {
+        opt.selected = true;
+        matchedById = true;
+      }
+      select.appendChild(opt);
+    });
+
+    const chosen = select.options[select.selectedIndex] || null;
+    console.log(`[populateSelectById:${id}] selected ->`, {
+      value: chosen ? chosen.value : null,
+      text:  chosen ? chosen.text  : null,
+      matchedBy: matchedById ? "id" : "none"
+    });
+  }
+
+  async function openBuyModal(
+    stockId, stockName, cmpPrice, qtyHeld,
+    advisorId, brokerId,
+    formAction
+  ) {
+    if (!isAuthenticated) return redirectToLogin();
+
+    console.groupCollapsed("[openBuyModal] args");
+    console.log({ stockId, stockName, cmpPrice, qtyHeld, advisorId, brokerId, formAction });
+    console.groupEnd();
+
+    // Header
+    document.getElementById("buy-stock-name").innerText = stockName;
+    document.getElementById("buy-share-price").innerText = `₹${cmpPrice}`;
+    document.getElementById("buy-available-qty").innerText = `(You own: ${qtyHeld})`;
+
+    // Fields
+    document.getElementById("buy-stock-id").value = stockId;
+    const priceEl = document.getElementById("buy-price-per-share");
+    priceEl.value = cmpPrice;
+    priceEl.setAttribute("data-default-price", cmpPrice);
+
+    const qtyEl = document.getElementById("stock-quantity");
+    qtyEl.value = 1; qtyEl.min = 1;
+
+    document.getElementById("buy-form").action = formAction;
+
+    // Lists & preselect
+    const data = await fetchAdvisorsBrokers();
+    populateSelectById("buy-advisor", data.advisors, "advisor_type", advisorId);
+    populateSelectById("buy-broker",  data.brokers,  "name",         brokerId);
+
+    $('#universalBuyModal').modal('show');
+  }
+
+  async function openSellModal(
+    stockId, stockName, cmpPrice, qtyHeld,
+    advisorId, brokerId,
+    formAction
+  ) {
+    if (!isAuthenticated) return redirectToLogin();
+
+    console.groupCollapsed("[openSellModal] args");
+    console.log({ stockId, stockName, cmpPrice, qtyHeld, advisorId, brokerId, formAction });
+    console.groupEnd();
+
+    // Header
+    document.getElementById("sell-stock-name").innerText = stockName;
+    document.getElementById("sell-stock-cmp").innerText  = `₹${cmpPrice}`;
+    document.getElementById("sell-available-qty").innerText = `(Available: ${qtyHeld})`;
+
+    // Fields
+    document.getElementById("sell-stock-id").value = stockId;
+    const sellQtyEl = document.getElementById("sell-quantity");
+    sellQtyEl.value = qtyHeld; sellQtyEl.min = 1; sellQtyEl.max = qtyHeld;
+
+    document.getElementById("sell-form").action = formAction;
+
+    // Lists & preselect
+    const data = await fetchAdvisorsBrokers();
+    populateSelectById("sell-advisor", data.advisors, "advisor_type", advisorId);
+    populateSelectById("sell-broker",  data.brokers,  "name",         brokerId);
+
+    $('#universalSellModal').modal('show');
+  }
+</script>

@@ -1,36 +1,50 @@
 {% extends "baseStructureSM.html" %}
-{% load static %}
-{% block title %}Banner{% endblock %}
-{% block subtitle %}Homepage Banner{% endblock %}
+{% block title %}Event: {{ event.title }}{% endblock %}
+{% block subtitle %}Event Details{% endblock %}
 
 {% block SMprofile_content %}
 <div class="container mt-4">
-  <h2>{{ event.title }}</h2>
-  <h4>{{ event.subtitle }}</h4>
-  <p><strong>Date & Time:</strong> {{ event.date_time }}</p>
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h3 class="mb-1">{{ event.title }}</h3>
+      {% if event.subtitle %}<div class="text-muted">{{ event.subtitle }}</div>{% endif %}
+      <div class="mt-2 d-flex flex-wrap gap-2">
+        {% if event.stock %}
+          <span class="badge text-bg-light border">{{ event.stock.company_name }}{% if event.stock.ticker %} • {{ event.stock.ticker }}{% endif %}</span>
+        {% else %}
+          <span class="badge text-bg-light border">No stock linked</span>
+        {% endif %}
+        {% if event.date_time %}
+          <span class="badge text-bg-secondary">{{ event.date_time|date:"d M Y, h:i A" }}</span>
+        {% endif %}
+        <span class="badge {{ event.show|yesno:'text-bg-success,text-bg-danger' }}">{{ event.show|yesno:"Visible,Hidden" }}</span>
+        {% if event.document %}
+          <a class="badge text-bg-warning text-decoration-none" href="{% url 'SM_User:event_pdf' event.pk %}">PDF</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      {% if event.document %}
+        <a href="{% url 'SM_User:event_pdf' event.pk %}" class="btn btn-outline-primary">Download PDF</a>
+      {% endif %}
+      {% if request.user.is_authenticated and (request.user == event.user or request.user.is_staff) %}
+        <a href="{% url 'SM_User:event_update' event.pk %}" class="btn btn-warning">Edit</a>
+        <a href="{% url 'SM_User:event_delete' event.pk %}" class="btn btn-outline-danger">Delete</a>
+      {% endif %}
+    </div>
+  </div>
 
   {% if event.image %}
-    <img src="{{ event.image.url }}" class="img-fluid mb-3">
+    <img src="{{ event.image.url }}" class="img-fluid rounded mb-3" alt="{{ event.title }}">
   {% endif %}
 
-  <p>{{ event.paragraph }}</p>
-
-  {% if event.document %}
-    <div class="mb-3">
-      <h5>Event Document</h5>
-      <!-- ✅ Download button -->
-      <a href="{{ event.document.url }}" target="_blank" class="btn btn-primary mb-2">
-        Download PDF
-      </a>
-
-      <!-- ✅ Inline PDF viewer -->
-      <embed src="{{ event.document.url }}" type="application/pdf" width="100%" height="600px"/>
+  {% if event.paragraph %}
+    <div class="card">
+      <div class="card-body">
+        {{ event.paragraph|linebreaks }}
+      </div>
     </div>
-  {% endif %}
-
-  {% if user == event.user %}
-    <a href="{% url 'SM_User:event_update' event.pk %}" class="btn btn-warning">Edit</a>
-    <a href="{% url 'SM_User:event_delete' event.pk %}" class="btn btn-danger">Delete</a>
   {% endif %}
 </div>
 {% endblock %}

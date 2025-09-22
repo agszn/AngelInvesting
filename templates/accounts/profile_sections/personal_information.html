@@ -1,179 +1,468 @@
 {% load static %}
 <div class="user-profile-dashboard">
 
-    <!-- Personal Information -->
-    <div class="user-personal_Information">
-        <div class="user-personal_Information-label">
-            <div>Personal Information</div>
-            <button onclick="openModalEditProfile('personal')">✏️ Edit</button>
-        </div>
-        <div class="user-personal_Information-feilds">
-            <div class="profile-container">
-                <div class="heading-feilds">First Name<span>{{ profile.first_name }}</span></div>
-                <div class="heading-feilds">Middle Name<span>{{ profile.middle_name }}</span></div>
-                <div class="heading-feilds">Last Name<span>{{ profile.last_name }}</span></div>
-                <div class="heading-feilds">Email<span>{{ profile.email }}</span></div>
-                <div class="heading-feilds">WhatsApp Number<span>{{ profile.whatsapp_number }}</span></div>
-                <div class="heading-feilds">Mobile Number<span>{{ profile.mobile_number }}</span></div>
-            </div>
-        </div>
+  <!-- Personal Information -->
+  <div class="user-personal_Information">
+    <div class="user-personal_Information-label">
+      <div>Personal Information</div>
+      <button type="button" onclick="openModalEditProfile('personal')">✏️ Edit</button>
     </div>
-
-    <!-- Identity Information -->
-    <div class="user-personal_Information">
-        <div class="user-personal_Information-label">
-            <div>Identity Information</div>
-            <button onclick="openModalEditProfile('identity')">✏️ Edit</button>
-        </div>
-        <div class="user-personal_Information-feilds">
-            <div class="profile-container">
-                <!-- PAN -->
-                <div class="heading-feilds">
-                    PAN Number
-                    {% if profile.pan_card_photo %}
-                        <span onclick="toggleImage('pan-file')" style="cursor:pointer; margin-left:8px;">👁</span>
-                    {% endif %}
-                    <span>{{ profile.pan_number }}</span>
-                    {% if profile.pan_card_photo %}
-                        <div id="pan-file" style="display:none; margin-top:8px;">
-                            {% if profile.is_pan_pdf %}
-                                <a href="{{ profile.pan_card_photo.url }}" target="_blank">📄 View PAN PDF</a>
-                            {% else %}
-                                <img src="{{ profile.pan_card_photo.url }}" style="width:100px; border:1px solid #ccc;">
-                            {% endif %}
-                        </div>
-                    {% else %}
-                        Not Uploaded
-                    {% endif %}
-                    <div style="margin-top:8px;">
-                        <strong>Document Password:</strong>
-                        <div class="input-group" style="max-width:250px;">
-                            <input type="password" class="form-control" value="{{ profile.pan_doc_password }}" readonly id="pan_doc_password">
-                            <span class="input-group-text" onclick="togglePassword('pan_doc_password', this)">
-                                <i class="bi bi-eye-slash"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Aadhaar -->
-                <div class="heading-feilds">
-                    Aadhaar Number
-                    {% if profile.adhar_card_photo %}
-                        <span onclick="toggleImage('aadhaar-file')" style="cursor:pointer; margin-left:8px;">👁</span>
-                    {% endif %}
-                    <span>{{ profile.adhar_number }}</span>
-                    {% if profile.adhar_card_photo %}
-                        <div id="aadhaar-file" style="display:none; margin-top:8px;">
-                            {% if profile.is_aadhaar_pdf %}
-                                <a href="{{ profile.adhar_card_photo.url }}" target="_blank">📄 View Aadhaar PDF</a>
-                            {% else %}
-                                <img src="{{ profile.adhar_card_photo.url }}" style="width:100px; border:1px solid #ccc;">
-                            {% endif %}
-                        </div>
-                    {% else %}
-                        Not Uploaded
-                    {% endif %}
-                    <div style="margin-top:8px;">
-                        <strong>Document Password:</strong>
-                        <div class="input-group" style="max-width:250px;">
-                            <input type="password" class="form-control" value="{{ profile.adhar_doc_password }}" readonly id="adhar_doc_password">
-                            <span class="input-group-text" onclick="togglePassword('adhar_doc_password', this)">
-                                <i class="bi bi-eye-slash"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="user-personal_Information-feilds">
+      <div class="profile-container">
+        <div class="heading-feilds">First Name<span>{{ profile.first_name }}</span></div>
+        <div class="heading-feilds">Middle Name<span>{{ profile.middle_name }}</span></div>
+        <div class="heading-feilds">Last Name<span>{{ profile.last_name }}</span></div>
+        <div class="heading-feilds">Email<span>{{ profile.email }}</span></div>
+        <div class="heading-feilds">WhatsApp Number<span>{{ profile.whatsapp_number }}</span></div>
+        <div class="heading-feilds">Mobile Number<span>{{ profile.mobile_number }}</span></div>
+      </div>
     </div>
+  </div>
+
+  <!-- Identity Information -->
+  <div class="user-personal_Information">
+    <div class="user-personal_Information-label">
+      <div>Identity Information</div>
+      <button type="button" onclick="openModalEditProfile('identity')">✏️ Edit</button>
+    </div>
+    <div class="user-personal_Information-feilds">
+      <div class="profile-container">
+
+        <!-- PAN -->
+        <div class="heading-feilds">
+          PAN Number
+          {% if profile.pan_card_photo %}
+            <span onclick="toggleImage('pan-file')" style="cursor:pointer; margin-left:8px;"><i class="bi bi-eye"></i></span>
+          {% endif %}
+          <span>{{ profile.pan_number }}</span>
+          {% if profile.pan_card_photo %}
+            <div id="pan-file" style="display:none; margin-top:8px;">
+              {% if profile.is_pan_pdf %}
+                <a href="{{ profile.pan_card_photo.url }}" target="_blank">📄 View PAN PDF</a>
+              {% else %}
+                <img src="{{ profile.pan_card_photo.url }}" style="width:100px; border:1px solid #ccc;">
+              {% endif %}
+            </div>
+          {% else %}
+            Not Uploaded
+          {% endif %}
+          <div style="margin-top:8px;">
+            <strong>Document Password:</strong>
+            <div class="input-group" style="max-width:250px;">
+              <input type="password" class="form-control" value="{{ profile.pan_doc_password }}" readonly id="pan_doc_password">
+              <span class="input-group-text" onclick="togglePassword('pan_doc_password', this)">
+                <i class="bi bi-eye-slash"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aadhaar -->
+        <div class="heading-feilds">
+          Aadhaar Number
+          {% if profile.adhar_card_photo %}
+            <span onclick="toggleImage('aadhaar-file')" style="cursor:pointer; margin-left:8px;"><i class="bi bi-eye"></i></span>
+          {% endif %}
+          <span>{{ profile.adhar_number }}</span>
+          {% if profile.adhar_card_photo %}
+            <div id="aadhaar-file" style="display:none; margin-top:8px;">
+              {% if profile.is_aadhaar_pdf %}
+                <a href="{{ profile.adhar_card_photo.url }}" target="_blank">📄 View Aadhaar PDF</a>
+              {% else %}
+                <img src="{{ profile.adhar_card_photo.url }}" style="width:100px; border:1px solid #ccc;">
+              {% endif %}
+            </div>
+          {% else %}
+            Not Uploaded
+          {% endif %}
+          <div style="margin-top:8px;">
+            <strong>Document Password:</strong>
+            <div class="input-group" style="max-width:250px;">
+              <input type="password" class="form-control" value="{{ profile.adhar_doc_password }}" readonly id="adhar_doc_password">
+              <span class="input-group-text" onclick="togglePassword('adhar_doc_password', this)">
+                <i class="bi bi-eye-slash"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Edit Profile Modal -->
-<div id="edit-profile-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
-    <div style="background:#fff; margin:3% auto; padding:0; border-radius:12px; width:80%; max-width:900px; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.3); overflow:hidden;">
-        
-        <!-- Modal Header -->
-        <div style="background:#0E213F; padding:15px 25px; display:flex; justify-content:space-between; align-items:center; color:#fff;">
-            <h3 style="margin:0; font-size:20px;">Edit Profile</h3>
-            <div>
-                <button type="submit" form="profile-form" style="background-color:#4CAF50; color:#fff; border:none; padding:8px 18px; border-radius:20px; font-weight:bold; cursor:pointer; margin-right:10px;">✔ Save</button>
-                <button type="button" onclick="closeModalEditProfile()" style="background-color:#f44336; color:#fff; border:none; padding:8px 18px; border-radius:20px; font-weight:bold; cursor:pointer;">❌ Close</button>
+<!-- =================== POPUP: Edit Profile (with error summary) =================== -->
+<style>
+  .ai-modal{position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:rgba(8,17,35,.55);backdrop-filter:blur(2px);}
+  .ai-modal__panel{width:min(920px,92vw);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.28);}
+  .ai-modal__header{background:#0E213F;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+  .ai-modal__title{margin:0;font-size:18px;font-weight:600;}
+  .ai-actions{display:flex;gap:10px;}
+  .ai-btn{border:0;border-radius:22px;font-weight:700;padding:8px 16px;cursor:pointer;transition:.15s ease;}
+  .ai-btn--save{background:#2EB872;color:#fff;} .ai-btn--save:hover{filter:brightness(.95);}
+  .ai-btn--close{background:#E44F52;color:#fff;} .ai-btn--close:hover{filter:brightness(.95);}
+  .ai-modal__body{padding:18px;background:#f6f8fb;}
+  .ai-section-hint{margin:0 0 14px 0;color:#333;font-size:14px;}
+
+  .ai-grid-3{display:grid;gap:14px;grid-template-columns:repeat(3,1fr);}
+  .ai-grid-2{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);}
+  @media(max-width:900px){.ai-grid-3{grid-template-columns:1fr 1fr}}
+  @media(max-width:640px){.ai-grid-3,.ai-grid-2{grid-template-columns:1fr}}
+
+  .ai-field{background:#fff;border:1px solid #e6e9ef;border-radius:10px;padding:10px 12px;}
+  .ai-label{display:block;font-size:12px;letter-spacing:.3px;color:#6b7280;margin-bottom:6px;}
+
+  #profile-form input,#profile-form textarea,#profile-form select{
+    width:100%;border:1px solid #d8dbe2;border-radius:8px;padding:8px 10px;outline:none;background:#fbfcfe;
+  }
+  #profile-form input:focus,#profile-form textarea:focus,#profile-form select:focus{
+    border-color:#8aa7ff;box-shadow:0 0 0 3px rgba(83,120,255,.12);
+  }
+
+  .ai-input-group{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;}
+  .ai-eye{border:1px solid #d8dbe2;background:#fff;border-radius:8px;padding:7px 10px;cursor:pointer;line-height:0;}
+  .ai-file-note{font-size:12px;color:#6b7280;margin-top:6px;}
+
+  .ai-error{margin-top:6px;font-size:12px;color:#c53030;}
+  .ai-field:has(.ai-error){border-color:#e11d48;background:#fff7f8;}
+  .ai-error-summary{background:#fff1f2;border:1px solid #fecdd3;color:#991b1b;padding:10px 12px;border-radius:10px;margin-bottom:14px;}
+  .ai-error-summary ul{margin:6px 0 0 16px;padding:0;}
+  .ai-error-summary a{color:#991b1b;text-decoration:underline;cursor:pointer;}
+
+  .user-personal_Information-label button{background:#0E213F;color:#fff;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;}
+  .user-personal_Information-label button:hover{filter:brightness(1.05);}
+  .no-scroll{overflow:hidden;}
+
+  /* two-column identity doc rows */
+  .ai-doc-row{
+    display:grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap:14px;
+    margin-bottom:16px;
+  }
+  @media(max-width:900px){
+    .ai-doc-row{ grid-template-columns: 1fr; }
+  }
+
+  /* left column = stacked (number over password) */
+  .ai-doc-left{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  /* upload card on right */
+  .ai-upload-card{
+    background:#fff;
+    border:2px dashed #cfd6e4;
+    border-radius:14px;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:160px;
+  }
+  .ai-upload-title{
+    font-size:12px;
+    color:#6b7280;
+    letter-spacing:.3px;
+    margin-bottom:2px;
+  }
+  .ai-upload-card .ai-file-note{ margin-top:auto; }
+</style>
+
+<div id="edit-profile-modal" class="ai-modal" aria-hidden="true">
+  <div class="ai-modal__panel" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle">
+    <div class="ai-modal__header">
+      <h3 class="ai-modal__title" id="editProfileTitle">Edit Profile</h3>
+      <div class="ai-actions">
+        <button type="submit" form="profile-form" class="ai-btn ai-btn--save">✔ Save</button>
+        <button type="button" class="ai-btn ai-btn--close" onclick="closeModalEditProfile()">❌ Close</button>
+      </div>
+    </div>
+
+    <div class="ai-modal__body">
+      <p class="ai-section-hint" id="which-section">Updating…</p>
+
+      {% if form.errors %}
+      <div class="ai-error-summary" id="form-error-summary">
+        <strong>Please fix the following:</strong>
+        <ul>
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><a onclick="focusField('{{ field.id_for_label }}')">{{ field.label }}: {{ error }}</a></li>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <form id="profile-form" method="POST" action="{% url 'profile' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" id="form_type" name="form_type" value="">
+
+        <!-- Personal Fields -->
+        <div id="personal-fields" style="display:none">
+          <div class="ai-grid-3">
+            <div class="ai-field">
+              <label class="ai-label" for="{{ form.first_name.id_for_label }}">First Name</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<div class="ai-error">{{ form.first_name.errors }}</div>{% endif %}
             </div>
+            <div class="ai-field">
+              <label class="ai-label" for="{{ form.middle_name.id_for_label }}">Middle Name</label>
+              {{ form.middle_name }}
+              {% if form.middle_name.errors %}<div class="ai-error">{{ form.middle_name.errors }}</div>{% endif %}
+            </div>
+            <div class="ai-field">
+              <label class="ai-label" for="{{ form.last_name.id_for_label }}">Last Name</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<div class="ai-error">{{ form.last_name.errors }}</div>{% endif %}
+            </div>
+            <div class="ai-field">
+              <label class="ai-label" for="{{ form.email.id_for_label }}">Email</label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="ai-error">{{ form.email.errors }}</div>{% endif %}
+            </div>
+            <div class="ai-field">
+              <label class="ai-label" for="{{ form.whatsapp_number.id_for_label }}">WhatsApp</label>
+              {{ form.whatsapp_number }}
+              {% if form.whatsapp_number.errors %}<div class="ai-error">{{ form.whatsapp_number.errors }}</div>{% endif %}
+            </div>
+            <div class="ai-field">
+              <label class="ai-label" for="{{ form.mobile_number.id_for_label }}">Mobile</label>
+              {{ form.mobile_number }}
+              {% if form.mobile_number.errors %}<div class="ai-error">{{ form.mobile_number.errors }}</div>{% endif %}
+            </div>
+            <div class="ai-field" style="grid-column:1/-1">
+              <label class="ai-label" for="{{ form.photo.id_for_label }}">Photo</label>
+              {{ form.photo }}
+              <div class="ai-file-note" id="photo-file-note"></div>
+              {% if form.photo.errors %}<div class="ai-error">{{ form.photo.errors }}</div>{% endif %}
+            </div>
+          </div>
         </div>
 
-        <!-- Modal Form -->
-        <form id="profile-form" method="POST" action="{% url 'profile' %}" enctype="multipart/form-data" style="padding:25px; background-color:#f9f9f9;">
-            {% csrf_token %}
-            <input type="hidden" id="form_type" name="form_type" value="">
+        <!-- Identity Fields (2 rows: left stacked, right upload) -->
+        <div id="identity-fields" style="display:none">
 
-            <!-- Personal Fields -->
-            <div id="personal-fields" class="edit-profile-modal-user" style="display:none; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px;">
-                <div><label>First Name</label>{{ form.first_name }}</div>
-                <div><label>Middle Name</label>{{ form.middle_name }}</div>
-                <div><label>Last Name</label>{{ form.last_name }}</div>
-                <div><label>Email</label>{{ form.email }}</div>
-                <div><label>WhatsApp</label>{{ form.whatsapp_number }}</div>
-                <div><label>Mobile</label>{{ form.mobile_number }}</div>
-                <div style="grid-column:span 3;"><label>Photo</label>{{ form.photo }}</div>
+          <!-- PAN row -->
+          <div class="ai-doc-row">
+            <!-- LEFT: PAN number above password -->
+            <div class="ai-doc-left">
+              <div class="ai-field">
+                <label class="ai-label" for="{{ form.pan_number.id_for_label }}">PAN Number</label>
+                {{ form.pan_number }}
+                {% if form.pan_number.errors %}<div class="ai-error">{{ form.pan_number.errors }}</div>{% endif %}
+              </div>
+
+              <div class="ai-field">
+                <label class="ai-label" for="{{ form.pan_doc_password.id_for_label }}">PAN Document Password</label>
+                <div class="ai-input-group">
+                  {{ form.pan_doc_password }}
+                  <button type="button" class="ai-eye" onclick="togglePasswordByName('pan_doc_password', this)">
+                    <i class="bi bi-eye-slash"></i>
+                  </button>
+                </div>
+                {% if form.pan_doc_password.errors %}<div class="ai-error">{{ form.pan_doc_password.errors }}</div>{% endif %}
+              </div>
             </div>
 
-            <!-- Identity Fields -->
-            <div id="identity-fields" class="edit-profile-modal-user" style="display:none; grid-template-columns:repeat(2,1fr); gap:20px;">
-                <div><label>PAN Number</label>{{ form.pan_number }}</div>
-                <div><label>PAN Card Photo</label>{{ form.pan_card_photo }}</div>
-                <div><label>PAN Document Password</label>{{ form.pan_doc_password }}</div>
-                <div><label>Aadhaar Number</label>{{ form.adhar_number }}</div>
-                <div><label>Aadhaar Card Photo</label>{{ form.adhar_card_photo }}</div>
-                <div><label>Aadhaar Document Password</label>{{ form.adhar_doc_password }}</div>
+            <!-- RIGHT: upload card -->
+            <div class="ai-upload-card">
+              <div>
+                <div class="ai-upload-title">PAN Card Photo / PDF</div>
+                <label class="ai-label" for="{{ form.pan_card_photo.id_for_label }}">Upload</label>
+                {{ form.pan_card_photo }}
+                {% if form.pan_card_photo.errors %}<div class="ai-error">{{ form.pan_card_photo.errors }}</div>{% endif %}
+              </div>
+              <div class="ai-file-note" id="pan-file-note"></div>
             </div>
-        </form>
+          </div>
+
+          <!-- Aadhaar row -->
+          <div class="ai-doc-row">
+            <!-- LEFT: Aadhaar number above password -->
+            <div class="ai-doc-left">
+              <div class="ai-field">
+                <label class="ai-label" for="{{ form.adhar_number.id_for_label }}">Aadhaar Number</label>
+                {{ form.adhar_number }}
+                {% if form.adhar_number.errors %}<div class="ai-error">{{ form.adhar_number.errors }}</div>{% endif %}
+              </div>
+
+              <div class="ai-field">
+                <label class="ai-label" for="{{ form.adhar_doc_password.id_for_label }}">Aadhaar Document Password</label>
+                <div class="ai-input-group">
+                  {{ form.adhar_doc_password }}
+                  <button type="button" class="ai-eye" onclick="togglePasswordByName('adhar_doc_password', this)">
+                    <i class="bi bi-eye-slash"></i>
+                  </button>
+                </div>
+                {% if form.adhar_doc_password.errors %}<div class="ai-error">{{ form.adhar_doc_password.errors }}</div>{% endif %}
+              </div>
+            </div>
+
+            <!-- RIGHT: upload card -->
+            <div class="ai-upload-card">
+              <div>
+                <div class="ai-upload-title">Aadhaar Card Photo / PDF</div>
+                <label class="ai-label" for="{{ form.adhar_card_photo.id_for_label }}">Upload</label>
+                {{ form.adhar_card_photo }}
+                {% if form.adhar_card_photo.errors %}<div class="ai-error">{{ form.adhar_card_photo.errors }}</div>{% endif %}
+              </div>
+              <div class="ai-file-note" id="aadhaar-file-note"></div>
+            </div>
+          </div>
+
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="ai-error" style="margin-top:10px;">{{ form.non_field_errors }}</div>
+        {% endif %}
+      </form>
     </div>
+  </div>
 </div>
 
 <!-- JS -->
 <script>
-function openModalEditProfile(section) {
-    document.getElementById("edit-profile-modal").style.display = "block";
-    document.getElementById("personal-fields").style.display = "none";
-    document.getElementById("identity-fields").style.display = "none";
+  const modalEl = document.getElementById("edit-profile-modal");
+  const formEl  = document.getElementById("profile-form");
+
+  function lockScroll(lock){
+    document.documentElement.classList.toggle('no-scroll', !!lock);
+    document.body.classList.toggle('no-scroll', !!lock);
+  }
+
+  function qall(sel){ return Array.from(document.querySelectorAll(sel)); }
+  function setSectionEnabled(section){
+    const enable = (nodes, on) => nodes.forEach(n => n.disabled = !on);
+    const personal = qall('#personal-fields input, #personal-fields select, #personal-fields textarea');
+    const identity = qall('#identity-fields input, #identity-fields select, #identity-fields textarea');
+    if (section === 'personal'){ enable(personal, true); enable(identity, false); }
+    else { enable(personal, false); enable(identity, true); }
+  }
+
+  function openModalEditProfile(section) {
+    const personal = document.getElementById("personal-fields");
+    const identity = document.getElementById("identity-fields");
+    const hint = document.getElementById("which-section");
+
+    modalEl.style.display = "grid";
+    modalEl.setAttribute("aria-hidden", "false");
+    lockScroll(true);
+
+    personal.style.display = "none";
+    identity.style.display = "none";
 
     if (section === "personal") {
-        document.getElementById("personal-fields").style.display = "grid";
-        document.getElementById("form_type").value = "personal";
-    } else if (section === "identity") {
-        document.getElementById("identity-fields").style.display = "grid";
-        document.getElementById("form_type").value = "identity";
-    }
-}
-
-function closeModalEditProfile() {
-    document.getElementById("edit-profile-modal").style.display = "none";
-}
-
-function toggleImage(id) {
-    const el = document.getElementById(id);
-    el.style.display = (el.style.display === "none") ? "block" : "none";
-}
-
-function togglePassword(fieldId, iconElem) {
-    const field = document.getElementById(fieldId);
-    const icon = iconElem.querySelector("i");
-    if (field.type === "password") {
-        field.type = "text";
-        icon.classList.remove("bi-eye-slash");
-        icon.classList.add("bi-eye");
+      personal.style.display = "block";
+      document.getElementById("form_type").value = "personal";
+      if (hint) hint.textContent = "Personal Information";
+      const first = document.querySelector('#personal-fields input, #personal-fields select, #personal-fields textarea');
+      if(first) first.focus();
     } else {
-        field.type = "password";
-        icon.classList.remove("bi-eye");
-        icon.classList.add("bi-eye-slash");
+      identity.style.display = "block";
+      document.getElementById("form_type").value = "identity";
+      if (hint) hint.textContent = "Identity Information";
+      const first = document.querySelector('#identity-fields input, #identity-fields select, #identity-fields textarea');
+      if(first) first.focus();
     }
-}
 
-// Auto-open modal on validation errors
-window.onload = function () {
+    setSectionEnabled(section);
+
+    const firstError = document.querySelector('.ai-field .ai-error');
+    if (firstError) firstError.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function closeModalEditProfile() {
+    modalEl.style.display = "none";
+    modalEl.setAttribute("aria-hidden", "true");
+    lockScroll(false);
+  }
+
+  // close on overlay click / ESC
+  let pressedOnOverlay = false;
+  modalEl?.addEventListener('mousedown', (e) => {
+    pressedOnOverlay = (e.target === modalEl);
+  });
+  modalEl?.addEventListener('click', (e) => {
+    if (pressedOnOverlay && e.target === modalEl) {
+      closeModalEditProfile();
+    }
+    pressedOnOverlay = false;
+  });
+  document.addEventListener('keydown', (e) => {
+    if (modalEl.style.display === "grid" && e.key === "Escape") closeModalEditProfile();
+  });
+  const panel = document.querySelector('.ai-modal__panel');
+  panel?.addEventListener('mousedown', (e) => e.stopPropagation());
+  panel?.addEventListener('click', (e) => e.stopPropagation());
+
+  function toggleImage(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = (el.style.display === "none" || el.style.display === "") ? "block" : "none";
+  }
+
+  // read-only passwords (outside modal)
+  function togglePassword(fieldId, iconElem) {
+    const field = document.getElementById(fieldId);
+    const icon = iconElem?.querySelector("i");
+    if (!field) return;
+    if (field.type === "password") { field.type = "text"; icon?.classList.replace("bi-eye-slash","bi-eye"); }
+    else { field.type = "password"; icon?.classList.replace("bi-eye","bi-eye-slash"); }
+  }
+
+  // modal password toggle
+  function togglePasswordByName(fieldName, btn){
+    const field = document.querySelector(`#profile-form [name="${fieldName}"]`);
+    const icon  = btn.querySelector("i");
+    if(!field || !icon) return;
+
+    if (field.type === "password") {
+      field.type = "text";
+      icon.classList.replace("bi-eye-slash", "bi-eye");
+    } else {
+      field.type = "password";
+      icon.classList.replace("bi-eye", "bi-eye-slash");
+    }
+  }
+
+  function focusField(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.focus();
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function bindFileNote(inputSelector, noteSelector){
+    const input = document.querySelector(inputSelector);
+    const note = document.querySelector(noteSelector);
+    if(!input || !note) return;
+    input.addEventListener('change', () => {
+      const f = input.files && input.files[0];
+      note.textContent = f ? `Selected: ${f.name}` : '';
+    });
+  }
+
+  formEl?.addEventListener('submit', () => {
+    const section = document.getElementById('form_type').value || 'personal';
+    setSectionEnabled(section);
+  });
+
+  window.onload = function () {
+    bindFileNote('#id_photo', '#photo-file-note');
+    bindFileNote('#id_pan_card_photo', '#pan-file-note');
+    bindFileNote('#id_adhar_card_photo', '#aadhaar-file-note');
+
     {% if form.errors %}
-        openModalEditProfile('{{ request.POST.form_type|default:"personal" }}');
+      {% with section_to_open=last_form_type|default:request.POST.form_type|default:"personal" %}
+        openModalEditProfile('{{ section_to_open }}');
+      {% endwith %}
     {% endif %}
-};
+  };
 </script>

@@ -133,124 +133,59 @@ def get_sheet_data(stock_id, model_type):
     }
 # unlisted_stock_marketplace/views.py
 # Stock Detail - onclick on stock name
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
+from datetime import timedelta
+import json
 
 def stock_detail(request, stock_id):
     stock = get_object_or_404(StockData, id=stock_id)
-    price_history = StockHistory.objects.filter(stock=stock).order_by('timestamp')
-    
+    # Limit to last 5 years to reduce data size
+    five_years_ago = timezone.now() - timedelta(days=5*365)
+    price_history = StockHistory.objects.filter(stock=stock, timestamp__gte=five_years_ago).order_by('timestamp')
 
     if not price_history.exists():
         print("❌ No stock history found for this stock.")
 
-    # stock_dates = [
-    #     localtime(timestamp).strftime('%Y-%m-%d')
-    #     for timestamp in price_history.values_list('timestamp', flat=True)
-    #     if timestamp is not None
-    # ]
     stock_dates = [
         ts.isoformat()
         for ts in price_history.values_list('timestamp', flat=True)
         if ts is not None
     ]
-
     
     stock_prices = [float(price) for price in price_history.values_list('price', flat=True)]
 
-    # 
-    # 
-    # 
     # Fetching related directors
-    # 
-    # 
     directors = stock.directors.all()
 
-    # 
-    # 
-    # 
     # Fetch the most searched stocks
-    # 
-    # 
     stock_searched = StockData.objects.order_by('-number_of_times_searched').first()
 
     if stock_searched and stock_searched.share_price is not None and stock_searched.ltp is not None:
         percentage_diff = ((stock_searched.ltp - stock_searched.share_price) / stock_searched.share_price) * 100
     else:
         percentage_diff = 0
-    # 
-    # 
-    # 
 
+    # Report
+    reports = Report.objects.filter(stock=stock)
 
-
-    # 
-    # 
-    # 
-    # 
-    # report
-    # 
-    # 
-    # 
-    reports = Report.objects.filter(stock=stock)  
-    # 
-    # 
-    # 
-    
-
-    # 
-    # 
-    # 
-    # 
-    #  company subsidiary and associate    
+    # Company subsidiary and associate
     relations = stock.related_companies.all()
-    # 
-    # 
-    # 
-    # 
 
-    # 
-    # 
-    # 
-    # 
     # PrincipalBusinessActivity
-    # 
-    # 
-    # principalBusinessActivity = StockData.PrincipalBusinessActivity.all()
     principal_activities = stock.business_activities.all()
-    # 
-    # 
-    # 
-    
 
-    # 
-    # 
-    # 
+    # Shareholdings
     stock_holder = get_object_or_404(StockData, pk=stock_id)
-    shareholdings = stock_holder.shareholdings.all()  # uses related_name
-    # 
-    # 
-    # 
-    
+    shareholdings = stock_holder.shareholdings.all()
 
-    # company FAQ
+    # Company FAQ
     faqs = stock.faqs.all()
-    # 
-    # 
-    # 
-    
 
-    # 
-    # 
-    # 
     # Fetching multiple stocks to display in the cards section
-    all_stocks = StockData.objects.all()  # Fetch all stocks or customize this query as needed
-    # 
-    # 
-    # 
+    all_stocks = StockData.objects.all()
 
-
-
-    # events
-    # Fetch latest 3 visible events (sorted by date_time)
+    # Events
     events = (
         Event.objects
         .filter(show=True, stock_id=stock_id)
@@ -258,8 +193,6 @@ def stock_detail(request, stock_id):
         .order_by('-date_time')
     )
 
-    # events = Event.objects.filter(show=True).order_by('-date_time')[:3]
-            
     context = {
         'stock': stock,
         'directors': directors,
@@ -267,34 +200,20 @@ def stock_detail(request, stock_id):
         'percentage_diff': percentage_diff,
         'stock_dates': json.dumps(stock_dates),
         'stock_prices': json.dumps(stock_prices),
-
-        # balance sheet, cashflow, and other tables
         'balance_sheet_data': get_sheet_data(stock.id, 'BalanceSheet'),
         'pl_account_data': get_sheet_data(stock.id, 'ProfitLossStatement'),
         'cash_flow_data': get_sheet_data(stock.id, 'CashFlow'),
         'financial_ratios_data': get_sheet_data(stock.id, 'FinancialRatios'),
         'dividend_data': get_sheet_data(stock.id, 'DividendHistory'),
-        # end balance sheet, cashflow, and other tables
-        
-            
         'reports': reports,
-        # 'report_html': [(report.title, report.formatted_summary()) for report in reports],
-
-        'principalBusinessActivity':principal_activities,
-
+        'principalBusinessActivity': principal_activities,
         'relations': relations,
-
         'shareholdings': shareholdings,
-
         'faqs': faqs,
-
-        'all_stocks': all_stocks, 
-        
-        "events": events,
-
+        'all_stocks': all_stocks,
+        'events': events,
     }
     return render(request, 'stocks/stock_detail.html', context)
-
 
 # stock list in table list format  other page/ blue page list DO not delete
 from django.contrib.auth.decorators import login_required
@@ -313,11 +232,17 @@ from .models import StockData, StockHistory
 from django.db.models import Q
 from django.core.paginator import Paginator
 import json
+from django.db.models import Q
 
 def StockListingTableFormat(request):
-    stocks = StockData.objects.all()
+    stocks = (
+        StockData.objects
+        .filter(hide_company_overview=False)          # only visible stocks
+        .exclude(company_name__isnull=True)           # ensure named
+        .exclude(company_name='')                     # ensure named
+    )
 
-    search_query = request.GET.get('search', '').strip()
+    search_query = (request.GET.get('search', '')).strip()
     if search_query:
         stocks = stocks.filter(
             Q(company_name__icontains=search_query) |
@@ -325,7 +250,7 @@ def StockListingTableFormat(request):
             Q(isin_no__icontains=search_query)
         )
 
-    selected_sector = request.GET.get('sector', '').strip()
+    selected_sector = (request.GET.get('sector', '')).strip()
     if selected_sector:
         stocks = stocks.filter(sector=selected_sector)
 
@@ -354,7 +279,7 @@ def StockListingTableFormat(request):
         'selected_sector': selected_sector,
         'per_page': per_page,
         'total_count': paginator.count,
-        'start_index': page_obj.start_index(),
+        'start_index': page_obj.start_index(),  # 1-based
         'end_index': page_obj.end_index(),
     }
 

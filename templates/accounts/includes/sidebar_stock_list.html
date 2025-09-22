@@ -11,7 +11,7 @@
               ₹ {{ stock.share_price }}
             </span>
           </div>
-          <div><span>{{ stock.profit }}₹ ({{ stock.profit_percentage }}%)</span></div>
+          <div><span>{% include "includes/percentage_diff.html" with text_color="white" %}</span></div>
         </div>
         <div class="stock-action-buttons">
           {% if stock.in_group %}

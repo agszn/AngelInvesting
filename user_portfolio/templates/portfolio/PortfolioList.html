@@ -4,8 +4,25 @@
 <div class="user-porfolio-dashboard">
   <div class="user-portfolio-top">
     <div class="user-dashboard-heading"><h3>Holdings</h3></div>
-
     <div class="d-flex align-items-center" style="gap: 12px; flex-wrap: wrap;">
+      <!-- Download start xlsx -->
+      <a id="download-xlsx-btn" class="btn btn-sm btn-success" href="#">
+        ⬇️ Download .xlsx
+      </a>
+      <script>
+        (function () {
+          const btn = document.getElementById('download-xlsx-btn');
+          if (!btn) return;
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const url = new URL(window.location.href);
+            url.searchParams.set('download', 'xlsx');
+            window.location.href = url.toString();
+          });
+        })();
+      </script>
+      <!-- Download end xlsx -->
+
       <!-- Search -->
       <div class="search-details-user">
         <form method="get" class="d-flex" style="gap: 10px;">
@@ -20,50 +37,59 @@
 
       <!-- Advisor Filter -->
       <div class="dropdown">
-        <button id="advisorFilterBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <button id="advisorFilterBtn"
+                class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
           {{ selected_advisor.advisor_type|default:"Thangiv" }}
         </button>
-
         <ul id="advisorMenu" class="dropdown-menu">
           <li>
             <a class="dropdown-item ajax-filter {% if not selected_advisor %}active{% endif %}"
-              data-filter="advisor" data-value="all"
-              href="?advisor=all{% if selected_broker %}&broker={{ selected_broker.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">
+               data-filter="advisor"
+               data-value="all"
+               href="#">
               {% if not selected_advisor %}✓ {% endif %}All Advisors
             </a>
           </li>
-
           {% for adv in advisors %}
-            <li>
-              <a class="dropdown-item ajax-filter {% if selected_advisor and adv.id == selected_advisor.id %}active{% endif %}"
-                data-filter="advisor" data-value="{{ adv.id }}"
-                href="?advisor={{ adv.id }}{% if selected_broker %}&broker={{ selected_broker.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">
-                {% if selected_advisor and adv.id == selected_advisor.id %}✓ {% endif %}{{ adv.advisor_type|upper }}
-              </a>
-            </li>
+          <li>
+            <a class="dropdown-item ajax-filter {% if selected_advisor and adv.id == selected_advisor.id %}active{% endif %}"
+               data-filter="advisor"
+               data-value="{{ adv.id }}"
+               href="#">
+              {% if selected_advisor and adv.id == selected_advisor.id %}✓ {% endif %}{{ adv.advisor_type|upper }}
+            </a>
+          </li>
           {% endfor %}
         </ul>
       </div>
 
-
       <!-- Broker Filter -->
       <div class="dropdown">
-        <button id="brokerFilterBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          {{ selected_broker.name|default:"Broker" }}
+        <button id="brokerFilterBtn"
+                class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+          {{ selected_broker.name|default:"All Brokers" }}
         </button>
         <ul id="brokerMenu" class="dropdown-menu">
           <li>
             <a class="dropdown-item ajax-filter {% if not selected_broker %}active{% endif %}"
-               data-filter="broker" data-value=""
-               href="?{% if selected_advisor %}advisor={{ selected_advisor.id }}{% endif %}{% if search_query %}{% if selected_advisor %}&{% endif %}search={{ search_query|urlencode }}{% endif %}">
+               data-filter="broker"
+               data-value="all"
+               href="#">
               {% if not selected_broker %}✓ {% endif %}All Brokers
             </a>
           </li>
           {% for bro in brokers %}
           <li>
             <a class="dropdown-item ajax-filter {% if selected_broker and bro.id == selected_broker.id %}active{% endif %}"
-               data-filter="broker" data-value="{{ bro.id }}"
-               href="?broker={{ bro.id }}{% if selected_advisor %}&advisor={{ selected_advisor.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">
+               data-filter="broker"
+               data-value="{{ bro.id }}"
+               href="#">
               {% if selected_broker and bro.id == selected_broker.id %}✓ {% endif %}{{ bro.name }}
             </a>
           </li>
@@ -73,7 +99,7 @@
     </div>
   </div>
 
-  <div class="user-portfolio-table" id="portfolio-table-container" >
+  <div class="user-portfolio-table" id="portfolio-table-container">
     {% include "portfolio/includes/portfolio_table.html" %}
   </div>
 </div>
@@ -83,22 +109,49 @@ document.addEventListener('DOMContentLoaded', function() {
   const input = document.getElementById('portfolio-search-input');
   const tableContainer = document.getElementById('portfolio-table-container');
   const advisorBtn = document.getElementById('advisorFilterBtn');
-  const brokerBtn  = document.getElementById('brokerFilterBtn');
+  const brokerBtn = document.getElementById('brokerFilterBtn');
+
+  // Build new URL with all parameters preserved
+  function buildUrl(params) {
+    const url = new URL(window.location.href);
+    const p = url.searchParams;
+
+    // Update or set new parameters
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        p.set(key, value);
+      } else {
+        p.delete(key);
+      }
+    });
+
+    // Preserve existing parameters if not overridden
+    if (!params.hasOwnProperty('advisor')) p.set('advisor', p.get('advisor') || 'all');
+    if (!params.hasOwnProperty('broker')) p.set('broker', p.get('broker') || 'all');
+    if (!params.hasOwnProperty('search')) p.set('search', p.get('search') || '');
+    if (!params.hasOwnProperty('page')) p.set('page', p.get('page') || '1');
+    if (!params.hasOwnProperty('sort')) p.set('sort', p.get('sort') || '');
+    if (!params.hasOwnProperty('dir')) p.set('dir', p.get('dir') || 'desc');
+
+    url.search = p.toString();
+    return url.toString();
+  }
 
   // --- Search with AJAX ---
   let t;
   input.addEventListener('input', function() {
     clearTimeout(t);
     t = setTimeout(() => {
-      const p = new URLSearchParams(window.location.search);
-      p.set('search', input.value);
-      const url = window.location.pathname + '?' + p.toString();
+      const url = buildUrl({ search: input.value, page: '1' });
       fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.text())
         .then(html => {
           tableContainer.innerHTML = html;
           history.replaceState(null, '', url);
-        });
+          wireFilterLinks();
+          wireSortLinks();
+        })
+        .catch(console.error);
     }, 300);
   });
 
@@ -107,9 +160,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.ajax-filter').forEach(a => {
       a.addEventListener('click', function(e) {
         e.preventDefault();
-        const url = a.getAttribute('href');
         const filterType = a.dataset.filter; // 'advisor' or 'broker'
-        const labelText  = a.textContent.trim().replace(/^✓\s*/, ''); // strip leading check
+        const value = a.dataset.value;
+        const labelText = a.textContent.trim().replace(/^✓\s*/, '');
+
+        const url = buildUrl({ [filterType]: value, page: '1' });
 
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
           .then(r => r.text())
@@ -117,11 +172,11 @@ document.addEventListener('DOMContentLoaded', function() {
             tableContainer.innerHTML = html;
             history.replaceState(null, '', url);
 
-            // update the dropdown button label instantly in the UI
+            // Update dropdown button label
             if (filterType === 'advisor') advisorBtn.textContent = labelText;
-            if (filterType === 'broker')  brokerBtn.textContent  = labelText;
+            if (filterType === 'broker') brokerBtn.textContent = labelText;
 
-            // update active state + checkmark in the open dropdown
+            // Update active state + checkmark
             const menuId = filterType === 'advisor' ? 'advisorMenu' : 'brokerMenu';
             const menu = document.getElementById(menuId);
             if (menu) {
@@ -130,10 +185,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 item.innerHTML = item.textContent.trim().replace(/^✓\s*/, '');
               });
               a.classList.add('active');
-              if (!a.textContent.trim().startsWith('✓')) {
-                a.innerHTML = '✓ ' + a.textContent.trim();
-              }
+              a.innerHTML = '✓ ' + labelText;
             }
+
+            wireSortLinks(); // Re-wire sort links after filter update
+          })
+          .catch(console.error);
+      });
+    });
+  }
+
+  // --- Sort with AJAX ---
+  function wireSortLinks() {
+    document.querySelectorAll('.sort-link').forEach(a => {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        const sort = a.dataset.sort; // 'inv' or 'mkt'
+        const dir = a.dataset.dir; // 'asc' or 'desc'
+
+        const url = buildUrl({ sort: sort, dir: dir, page: '1' });
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(r => r.text())
+          .then(html => {
+            tableContainer.innerHTML = html;
+            history.replaceState(null, '', url);
+            wireFilterLinks();
+            wireSortLinks(); // Re-wire sort links after update
           })
           .catch(console.error);
       });
@@ -141,6 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   wireFilterLinks();
+  wireSortLinks();
 });
 </script>
 {% endblock %}

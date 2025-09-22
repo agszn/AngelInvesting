@@ -12,11 +12,12 @@
       <th>RM Status</th>
       <th>Acc Status</th>
       <th>ST Status</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
     {% for order in orders %}
-    <tr style="background: {% cycle '#f5f9ff' 'white' %};">
+    <tr data-order-id="{{ order.order_id }}" style="background: {% cycle '#f5f9ff' 'white' %};">
       <td>
         {{ order.timestamp|date:"Y-m-d H:i" }}
         {% if order.timestamp|time:"H" >= "18" %}
@@ -33,9 +34,20 @@
       <td>{{ order.RM_status }}</td>
       <td>{{ order.AC_status }}</td>
       <td>{{ order.status }}</td>
+      <td>
+        {% if order.can_delete %}
+          <button
+            class="btn btn-sm btn-outline-danger delete-order"
+            data-endpoint="{% url 'user_portfolio:delete_buy_order' %}">
+            Cancel
+          </button>
+        {% else %}
+          <span class="text-muted small">—</span>
+        {% endif %}
+      </td>
     </tr>
     {% empty %}
-      <tr><td colspan="11" class="text-center p-3">No buy orders found.</td></tr>
+      <tr><td colspan="12" class="text-center p-3">No buy orders found.</td></tr>
     {% endfor %}
   </tbody>
 </table>

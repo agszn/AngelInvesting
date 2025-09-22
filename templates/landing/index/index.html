@@ -3,7 +3,7 @@
     .unlisted-share-section-home 
     {
         width: 100%;
-        background-color: rgba(14, 33, 63, 1);/*  #0e213f */
+        background-color: rgba(14, 33, 63, 1);
         padding: 50px;
     }
     .stock-card-image {
@@ -35,7 +35,7 @@
         }   
         .hero-headers-home {
             text-align: center;
-            padding-bottom: 20px;
+            padding-bottom: 0;
         }
         .heading-home
         {
@@ -110,13 +110,9 @@
                                 <div class="cards-third-info">
                                     <div>Lot Size: <strong>{{ stock.lot }} Shares</strong></div>
                                     <div>Share Price: <strong>₹{{ stock.share_price }}</strong>
-                                        {% if stock.percentage_diff > 0 %}
-                                            <span class="up" style="color:green">▲ ({{ stock.percentage_diff|floatformat:2 }}%)</span >
-                                        {% elif stock.percentage_diff < 0 %}
-                                            <span class="down" style="color:red">▼ ({{ stock.percentage_diff|floatformat:2 }}%)</span>
-                                        {% else %}
-                                            <span style="color: black;">(0.00%)</span>
-                                        {% endif %}
+
+                                        {% include "includes/percentage_diff.html" with text_color="black" %}
+
                                     </div>
                                 </div>
                             </a>

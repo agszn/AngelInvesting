@@ -244,13 +244,7 @@
                     <span class="stock">
                       {{ stock.company_name|upper }}:
                       <span class="yellow-profit">₹{{ stock.share_price|floatformat:2 }}</span>
-                      {% if stock.percentage_diff > 0 %}
-                        <span class="up">▲ ({{ stock.percentage_diff|floatformat:2 }}%)</span>
-                      {% elif stock.percentage_diff < 0 %}
-                        <span class="down">▼ ({{ stock.percentage_diff|floatformat:2 }}%)</span>
-                      {% else %}
-                        <span>(0.00%)</span>
-                      {% endif %}
+                      {% include "includes/percentage_diff.html" with text_color="white" %}
                     </span></a>
                     &nbsp;&nbsp;&nbsp;
                   {% endif %}
@@ -610,7 +604,7 @@
 
     <!-- navbar search Script end -->
 
-        <main class="main_class" style="padding-top:121px;">
+        <main class="main_class" style="">
             {% block content %}
 
                 <!-- base.html Banner changeable -->
@@ -808,84 +802,121 @@
 
 <!-- sell and buy script -->
 <script>
-  const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
 
-  function redirectToLogin() {
-      window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
-  }
+function redirectToLogin() {
+    window.location.href = "{% url 'login' %}?next=" + encodeURIComponent(window.location.pathname);
+}
 
-  async function fetchAdvisorsBrokers() {
-      try {
-          const response = await fetch("{% url 'user_portfolio:load_advisors_brokers' %}");
-          if (!response.ok) throw new Error("Failed to load advisors/brokers.");
-          return await response.json();
-      } catch (error) {
-          console.error("Error fetching advisors/brokers:", error);
-          alert("Failed to load advisor/broker data. Please try again.");
-          return { advisors: [], brokers: [] };
-      }
-  }
+async function fetchAdvisorsBrokers() {
+    try {
+        const response = await fetch("{% url 'user_portfolio:load_advisors_brokers' %}");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        console.log("Advisors/Brokers fetched:", data); // Debug: Log response
+        return data;
+    } catch (error) {
+        console.error("Error fetching advisors/brokers:", error);
+        alert("Failed to load advisor/broker data. Please try again.");
+        return { advisors: [], brokers: [] };
+    }
+}
 
-  async function openBuyModal(stockId, stockName, price, quantity, formAction) {
-      if (!isAuthenticated) {
-          redirectToLogin();
-          return;
-      }
+async function openBuyModal(stockId, stockName, price, quantity, formAction, advisorId = null, brokerId = null) {
+    if (!isAuthenticated) {
+        redirectToLogin();
+        return;
+    }
 
-      document.getElementById('buy-stock-name').innerText = stockName;
-      document.getElementById('buy-share-price').innerText = `₹${price}`;
-      document.getElementById('buy-stock-id').value = stockId;
-      document.getElementById('buy-price-per-share').value = price;
-      document.getElementById('buy-price-per-share').setAttribute('data-default-price', price);
-      document.getElementById('stock-quantity').value = quantity;
-      document.getElementById('buy-form').action = formAction;
+    console.log("openBuyModal called with:", { stockId, stockName, price, quantity, formAction, advisorId, brokerId }); // Debug
 
-      const data = await fetchAdvisorsBrokers();
-      populateSelect('buy-advisor', data.advisors, 'advisor_type');
-      populateSelect('buy-broker', data.brokers, 'name');
+    // Populate modal fields
+    document.getElementById('buy-stock-name').innerText = stockName || "Unknown Stock";
+    document.getElementById('buy-share-price').innerText = `₹${parseFloat(price || 0).toFixed(2)}`;
+    document.getElementById('buy-stock-id').value = stockId || "";
+    document.getElementById('buy-price-per-share').value = parseFloat(price || 0).toFixed(2);
+    document.getElementById('buy-price-per-share').setAttribute('data-default-price', parseFloat(price || 0).toFixed(2));
+    document.getElementById('stock-quantity').value = quantity || "";
+    document.getElementById('buy-form').action = formAction || "";
 
-      $('#universalBuyModal').modal('show');
-  }
+    // Fetch and populate advisors/brokers
+    const data = await fetchAdvisorsBrokers();
+    populateSelect('buy-advisor', data.advisors, 'advisor_type', advisorId);
+    populateSelect('buy-broker', data.brokers, 'name', brokerId);
 
-  async function openSellModal(stockId, stockName, price, quantity, formAction) {
-      if (!isAuthenticated) {
-          redirectToLogin();
-          return;
-      }
+    // Show modal
+    try {
+        $('#universalBuyModal').modal('show');
+    } catch (error) {
+        console.error("Error opening Buy modal:", error);
+        alert("Failed to open Buy modal. Please try again.");
+    }
+}
 
-      document.getElementById('sell-stock-name').innerText = stockName;
-      document.getElementById('sell-stock-lot').innerText = `₹${price}`;
-      document.getElementById('sell-stock-id').value = stockId;
-      document.getElementById('sell-quantity').value = quantity;
-      document.getElementById('sell-form').action = formAction;
+async function openSellModal(stockId, stockName, price, quantity, formAction, advisorId = null, brokerId = null, availableQty = null) {
+    if (!isAuthenticated) {
+        redirectToLogin();
+        return;
+    }
 
-      const data = await fetchAdvisorsBrokers();
-      populateSelect('sell-advisor', data.advisors, 'advisor_type');
-      populateSelect('sell-broker', data.brokers, 'name');
+    console.log("openSellModal called with:", { stockId, stockName, price, quantity, formAction, advisorId, brokerId, availableQty }); // Debug
 
-      $('#universalSellModal').modal('show');
-  }
+    // Populate modal fields
+    document.getElementById('sell-stock-name').innerText = stockName || "Unknown Stock";
+    document.getElementById('sell-stock-lot').innerText = `₹${parseFloat(price || 0).toFixed(2)}`;
+    document.getElementById('sell-stock-id').value = stockId || "";
+    document.getElementById('sell-quantity').value = quantity || "";
+    const sellQtyInput = document.getElementById('sell-quantity');
+    sellQtyInput.max = availableQty || "";
+    document.getElementById('sell-available-qty').innerText = availableQty ? `Available: ${availableQty}` : "";
+    document.getElementById('sell-form').action = formAction || "";
 
-  function populateSelect(id, list, labelField) {
-      const select = document.getElementById(id);
-      select.innerHTML = '';
+    // Fetch and populate advisors/brokers
+    const data = await fetchAdvisorsBrokers();
+    populateSelect('sell-advisor', data.advisors, 'advisor_type', advisorId);
+    populateSelect('sell-broker', data.brokers, 'name', brokerId);
 
-      if (!list || list.length === 0) {
-          const option = document.createElement('option');
-          option.textContent = 'No options available';
-          option.disabled = true;
-          option.selected = true;
-          select.appendChild(option);
-          return;
-      }
+    // Show modal
+    try {
+        $('#universalSellModal').modal('show');
+    } catch (error) {
+        console.error("Error opening Sell modal:", error);
+        alert("Failed to open Sell modal. Please try again.");
+    }
+}
 
-      list.forEach(item => {
-          const option = document.createElement('option');
-          option.value = item.id;
-          option.textContent = item[labelField];
-          select.appendChild(option);
-      });
-  }
+function populateSelect(id, list, labelField, selectedId = null) {
+    const select = document.getElementById(id);
+    if (!select) {
+        console.error(`Select element with ID '${id}' not found.`);
+        return;
+    }
+    select.innerHTML = '';
+
+    if (!list || list.length === 0) {
+        const option = document.createElement('option');
+        option.textContent = 'No options available';
+        option.disabled = true;
+        option.selected = true;
+        select.appendChild(option);
+        return;
+    }
+
+    list.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item[labelField];
+        if (selectedId && String(item.id) === String(selectedId)) { // Ensure string comparison
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+
+    // If no valid selectedId, select first option
+    if (!select.value && list.length > 0) {
+        select.value = list[0].id;
+    }
+}
 </script>
 
 
@@ -1118,7 +1149,7 @@
 
 
 <!-- disable copy paste on website start -->
-<script>
+<!-- <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Disable right-click
         document.addEventListener('contextmenu', function (e) {
@@ -1138,7 +1169,7 @@
             }
         });
     });
-</script>
+</script> -->
 <!-- disable copy paste on website end -->
 
 

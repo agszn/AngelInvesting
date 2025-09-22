@@ -629,7 +629,8 @@
         }
 
         .nav-arrow.left {
-        left: -10px;
+            /* left: -10px; */
+            margin-left: -10px;
         }
 
         .nav-arrow.right {
@@ -781,8 +782,9 @@
                 </div>
                 <div class="Sec2_3_PG_col">
                     <span class="Sec2_3_PG_label">PE ratio</span>
-                    <span class="Sec2_3_PG_value">{{ stock.pe_ratio }}</span>
+                    <span class="Sec2_3_PG_value">{{ stock.pe_ratio|default:"NA" }}</span>
                 </div>
+
             </div>
             <div class="Sec2_3_PG_principlesRow">
                 <div class="Sec2_3_PG_col">
@@ -837,227 +839,277 @@
         </div>
     </div>
     <!-- RIGHT: Stock Performance -->
-    <div class="Sec2_3_PG_box">
-        <h2 class="Sec2_3_PG_heading">Stock <span>Performance</span></h2>
-        <div class="Sec2_3_PG_stockCard">
-            <div class="buttons">
-                <!-- <button class="filter-btn" data-range="7">1W</button> -->
-                <button class="filter-btn" data-range="30">1M</button>
-                <button class="filter-btn" data-range="90">3M</button>
-                <button class="filter-btn active" data-range="180">6M</button>
-                <button class="filter-btn" data-range="365">1Y</button>
-                <!-- <button class="filter-btn" data-range="730">2Y</button> -->
-                <!-- <button class="filter-btn" data-range="1095">3Y</button> -->
-                <!-- <button class="filter-btn" data-range="1825">5Y</button> -->
-                <button class="filter-btn" data-range="MAX">MAX</button>
-            </div>
-            <div class="chart">
-                <canvas id="stockPriceChart"></canvas>
-            </div>
-        </div>
+<!-- RIGHT: Stock Performance -->
+<div class="Sec2_3_PG_box">
+  <h2 class="Sec2_3_PG_heading">Stock <span>Performance</span></h2>
+  <div class="Sec2_3_PG_stockCard">
+    <div class="buttons">
+      <!-- <button class="filter-btn" data-range="7">1W</button> -->
+      <button class="filter-btn" data-range="30">1M</button>
+      <button class="filter-btn" data-range="90">3M</button>
+      <button class="filter-btn active" data-range="180">6M</button>
+      <button class="filter-btn" data-range="365">1Y</button>
+      <!-- <button class="filter-btn" data-range="730">2Y</button> -->
+      <!-- <button class="filter-btn" data-range="1095">3Y</button> -->
+      <!-- <button class="filter-btn" data-range="1825">5Y</button> -->
+      <button class="filter-btn" data-range="MAX">MAX</button>
     </div>
+
+    <div class="chart" style="position:relative; height:320px;">
+      <canvas id="stockPriceChart"></canvas>
+      <!-- Custom tooltip + error container -->
+      <div id="tooltip" style="
+        position:absolute;display:none;pointer-events:none;
+        padding:6px 8px;background:rgba(0,0,0,0.85);color:#fff;
+        font-size:12px;border-radius:6px;white-space:nowrap;
+        transform:translate(-50%,-120%);
+      "></div>
+      <div id="error-message" style="display:none;color:#ffb3b3;margin-top:8px;font-size:13px;"></div>
+    </div>
+  </div>
+</div>
+
 </section>
 <!-- Chart.js -->
+<!-- Chart.js -->
+
+<!-- Chart.js -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const stockDates = JSON.parse('{{ stock_dates|safe }}');
-    const stockPrices = JSON.parse('{{ stock_prices|safe }}').map(Number);
-    const parsedDates = stockDates.map(d => new Date(d));
+  try {
+    if (typeof Chart === 'undefined') throw new Error('Chart.js library failed to load.');
+    if (!Chart._adapters || !Chart._adapters._date) throw new Error('chartjs-adapter-date-fns failed to load.');
 
-    const ctx = document.getElementById('stockPriceChart').getContext('2d');
+    document.addEventListener("DOMContentLoaded", function () {
+      // ---- Data from Django (safe for JS parsing) ----
+      const stockDates  = JSON.parse('{{ stock_dates|escapejs }}' || '[]'); // ISO strings or epoch ms
+      const stockPrices = JSON.parse('{{ stock_prices|escapejs }}' || '[]').map(Number);
 
-    // ---------- Helpers anchored to LAST DATA POINT ----------
-    const lastIdx = Math.max(0, parsedDates.length - 1);
-    const anchorEnd = new Date(parsedDates[lastIdx]); // latest data point (end)
+      if (!Array.isArray(stockDates) || !Array.isArray(stockPrices) || !stockDates.length || !stockPrices.length) {
+        throw new Error('No stock data provided. Ensure stockDates and stockPrices are valid.');
+      }
+      if (stockDates.length !== stockPrices.length) {
+        throw new Error(`Dates/prices length mismatch (${stockDates.length} vs ${stockPrices.length}).`);
+      }
 
-    // Keep same day-of-month when adding/subtracting months; clamp to month-end when needed
-    function addMonthsSameDay(date, delta) {
-      const d = new Date(date);
-      const y = d.getFullYear();
-      const m = d.getMonth();
-      const day = d.getDate();
-      // go to the 1st of target month, then clamp day
-      const target = new Date(y, m + delta, 1);
-      const maxDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
-      target.setDate(Math.min(day, maxDay));
-      target.setHours(0, 0, 0, 0);
-      return target;
-    }
+      // Normalize to {x: ms, y: number}
+      const toMs = (v) => (typeof v === 'number' ? v : Date.parse(v));
+      const points = stockDates.map((d, i) => ({ x: toMs(d), y: Number(stockPrices[i]) }))
+                               .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+                               .sort((a, b) => a.x - b.x);
 
-    // Monday helpers: previous Monday (<= date) and next Monday (> date)
-    function prevMonday(d) {
-      const date = new Date(d);
-      const day = date.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
-      const diff = (day + 6) % 7; // days since Monday
-      date.setDate(date.getDate() - diff);
-      date.setHours(0, 0, 0, 0);
-      return date;
-    }
-    function nextMonday(d) {
-      const date = new Date(d);
-      const day = date.getDay();
-      const add = (8 - day) % 7 || 7; // at least +1..+7 to get strictly next Monday
-      date.setDate(date.getDate() + add);
-      date.setHours(23, 59, 59, 999);
-      return date;
-    }
+      if (!points.length) throw new Error('Parsed points are empty after normalization.');
 
-    // Filter in [start, end] inclusive
-    function filterBetween(start, end) {
-      const labels = [], data = [];
-      for (let i = 0; i < parsedDates.length; i++) {
-        const t = parsedDates[i];
-        if (t >= start && t <= end) {
-          labels.push(t);
-          data.push(stockPrices[i]);
+      // Anchor on latest point
+      const anchorEnd = points[points.length - 1].x;
+
+      // ---- Date helpers (all return epoch ms) ----
+      function addMonthsSameDay(ms, delta) {
+        const d = new Date(ms);
+        const target = new Date(d.getFullYear(), d.getMonth() + delta, 1);
+        const maxDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+        target.setDate(Math.min(d.getDate(), maxDay));
+        target.setHours(0, 0, 0, 0);
+        return target.getTime();
+      }
+      function prevMonday(ms) {
+        const d = new Date(ms);
+        const diff = (d.getDay() + 6) % 7; // Monday-align
+        d.setDate(d.getDate() - diff);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      }
+      function nextMonday(ms) {
+        const d = new Date(ms);
+        const add = (8 - d.getDay()) % 7 || 7; // always next Monday
+        d.setDate(d.getDate() + add);
+        d.setHours(23, 59, 59, 999);
+        return d.getTime();
+      }
+
+      // Compute the visible window for range buttons
+      function computeWindow(rangeAttr) {
+        if (rangeAttr === 'MAX') {
+          const min = points[0].x;
+          const max = anchorEnd;
+          return { min, max, tickMode: 'year' };
         }
-      }
-      return { labels, data, min: start, max: end };
-    }
+        const monthsMap = { '30': 1, '90': 3, '180': 6, '365': 12 };
+        const months = monthsMap[String(rangeAttr)] ?? 6;
 
-    function filterRangeByMonthsEndingAtAnchor(monthCount, { snapWeeks = false } = {}) {
-      const end = new Date(anchorEnd);
-      end.setHours(23, 59, 59, 999);
+        let min = addMonthsSameDay(anchorEnd, -months);
+        let max = anchorEnd;
 
-      const startAnchor = addMonthsSameDay(anchorEnd, -monthCount); // same day-of-month back
-      let start = new Date(startAnchor);
-      let max = new Date(end);
+        if (String(rangeAttr) === '30') { // make 1M look nice week-aligned
+          min = prevMonday(min);
+          max = nextMonday(max);
+        }
 
-      // For 1M, snap to full Monday→Monday windows for clean weekly ticks
-      if (snapWeeks) {
-        start = prevMonday(startAnchor);
-        max = nextMonday(anchorEnd);
-      }
+        let tickMode = 'month';
+        if (months <= 1) tickMode = 'week';
+        else if (months >= 24) tickMode = 'year';
 
-      return filterBetween(start, max);
-    }
-
-    function filterData(rangeAttr) {
-      if (rangeAttr === "MAX") {
-        const start = new Date(parsedDates[0]); start.setHours(0, 0, 0, 0);
-        const end = new Date(anchorEnd); end.setHours(23, 59, 59, 999);
-        return filterBetween(start, end);
-      }
-      const map = { "30": 1, "90": 3, "180": 6, "365": 12 };
-      const months = map[String(rangeAttr)] ?? 6;
-      const snapWeeks = rangeAttr === "30"; // only 1M snaps Monday→Monday
-      return filterRangeByMonthsEndingAtAnchor(months, { snapWeeks });
-    }
-
-    // ---------- Scales ----------
-    function scaleOptions(rangeAttr) {
-      if (rangeAttr === "30") {
-        // 1M → weekly ticks (we've snapped min/max to Monday→Monday)
-        return {
-          x: {
-            type: 'time',
-            bounds: 'ticks',
-            offset: false,
-            time: {
-              unit: 'week',
-              stepSize: 1,
-              displayFormats: { week: 'dd MMM' },
-              tooltipFormat: 'MMM dd, yyyy'
-            },
-            ticks: {
-              color: 'white',
-              autoSkip: false,
-              maxRotation: 45,
-              minRotation: 45
-            },
-            grid: { color: 'rgba(255,255,255,0.15)' }
-          },
-          y: {
-            ticks: { color: 'white' },
-            grid: { color: 'rgba(255,255,255,0.15)' }
-          }
-        };
+        return { min, max, tickMode };
       }
 
-      // Other ranges → monthly ticks
-      return {
-        x: {
-          type: 'time',
-          bounds: 'ticks',
-          offset: false,
-          time: {
-            unit: 'month',
-            stepSize: 1,
-            displayFormats: { month: 'MMM yyyy' },
-            tooltipFormat: 'MMM dd, yyyy'
-          },
-          ticks: {
-            color: 'white',
-            autoSkip: false,
-            maxRotation: 45,
-            minRotation: 45
-          },
-          grid: { color: 'rgba(255,255,255,0.15)' }
-        },
-        y: {
+      // Scales config based on tick granularity
+      function scaleOptions(tickMode) {
+        const yBase = {
           ticks: { color: 'white' },
           grid: { color: 'rgba(255,255,255,0.15)' }
+        };
+        const xCommon = {
+          type: 'time',
+          bounds: 'data',
+          ticks: { color: 'white', autoSkip: false, maxRotation: 45, minRotation: 45 },
+          grid: { color: 'rgba(255,255,255,0.15)' },
+          time: { tooltipFormat: 'MMM dd, yyyy' }
+        };
+        if (tickMode === 'week') {
+          xCommon.time.unit = 'week';
+          xCommon.time.stepSize = 1;
+          xCommon.time.displayFormats = { week: 'dd MMM' };
+        } else if (tickMode === 'year') {
+          xCommon.time.unit = 'year';
+          xCommon.time.stepSize = 1;
+          xCommon.ticks.maxRotation = 0;
+          xCommon.ticks.minRotation = 0;
+          xCommon.time.displayFormats = { year: 'yyyy' };
+        } else {
+          xCommon.time.unit = 'month';
+          xCommon.time.stepSize = 1;
+          xCommon.time.displayFormats = { month: 'MMM yyyy' };
+        }
+        return { x: xCommon, y: yBase };
+      }
+
+      // Crosshair + custom tooltip plugin
+      const crosshairPlugin = {
+        id: 'crosshair',
+        afterEvent(chart, args) {
+          const { chartArea } = chart;
+          const { x, y } = args.event;
+          if (x >= chartArea.left && x <= chartArea.right && y >= chartArea.top && y <= chartArea.bottom) {
+            chart.__cross = { x, y };
+          } else {
+            chart.__cross = null;
+          }
+          chart.draw();
+        },
+        afterDraw(chart) {
+          const tip = document.getElementById('tooltip');
+          if (!chart.__cross) { if (tip) tip.style.display = 'none'; return; }
+
+          const { ctx, chartArea, scales } = chart;
+          const { x, y } = chart.__cross;
+          const xScale = scales.x;
+          const yScale = scales.y;
+
+          // Draw crosshair lines
+          ctx.save();
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+          ctx.lineWidth = 1;
+          ctx.moveTo(x, chartArea.top);
+          ctx.lineTo(x, chartArea.bottom);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(chartArea.left, y);
+          ctx.lineTo(chartArea.right, y);
+          ctx.stroke();
+          ctx.restore();
+
+          // Custom tooltip values
+          const xValueMs = xScale.getValueForPixel(x);
+          const yValue   = yScale.getValueForPixel(y);
+          const dateStr  = new Date(xValueMs).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
+
+          if (tip) {
+            const rect = chart.canvas.getBoundingClientRect();
+            const parentRect = chart.canvas.parentElement.getBoundingClientRect();
+            tip.style.left = (x - (rect.left - parentRect.left)) + 'px';
+            tip.style.top  = (y - (rect.top  - parentRect.top )) + 'px';
+            tip.style.display = 'block';
+            tip.innerHTML = `Date: ${dateStr}<br>Price: ₹${Number(yValue).toFixed(2)}`;
+          }
         }
       };
-    }
+      Chart.register(crosshairPlugin);
 
-    // ---------- Build chart (default 6M) ----------
-    const defaultRange = "180";
-    const initial = filterData(defaultRange);
+      // Init chart
+      const defaultRange = '180'; // 6M default
+      const initial = computeWindow(defaultRange);
 
-    let stockChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: initial.labels,
-        datasets: [{
-          label: 'Stock Price',
-          data: initial.data,
-          borderColor: 'yellow',
-          backgroundColor: 'rgba(255, 255, 0, 0.2)',
-          borderWidth: 2,
-          pointRadius: 3,
-          pointBackgroundColor: 'yellow',
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        scales: scaleOptions(defaultRange),
-        plugins: {
-          legend: { labels: { color: 'white' } },
-          tooltip: { mode: 'index', intersect: false }
+      const canvas = document.getElementById('stockPriceChart');
+      if (!canvas) throw new Error('Canvas element with ID "stockPriceChart" not found.');
+
+      const chart = new Chart(canvas, {
+        type: 'line',
+        data: {
+          datasets: [{
+            // No label -> legend hidden anyway
+            data: points,          // {x, y}
+            parsing: false,        // x/y provided directly
+            borderColor: 'yellow',
+            backgroundColor: 'rgba(255,255,0,0.18)',
+            borderWidth: 2,
+            pointRadius: 0,        // <-- no dots
+            pointHoverRadius: 0,   // <-- no hover dot
+            pointHitRadius: 0,     // <-- no hit area on points
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'nearest', intersect: false },
+          scales: scaleOptions(initial.tickMode),
+          plugins: {
+            legend: { display: false },   // <-- hide legend/label
+            tooltip: { enabled: false }   // using custom tooltip + crosshair
+          }
         }
-      }
-    });
-
-    stockChart.options.scales.x.min = initial.min;
-    stockChart.options.scales.x.max = initial.max;
-    stockChart.update();
-
-    // ---------- Range buttons ----------
-    document.querySelectorAll(".filter-btn").forEach(btn => {
-      btn.addEventListener("click", function () {
-        const range = this.getAttribute("data-range");
-        const { labels, data, min, max } = filterData(range);
-
-        stockChart.options.scales = scaleOptions(range);
-        stockChart.data.labels = labels;
-        stockChart.data.datasets[0].data = data;
-        stockChart.options.scales.x.min = min;
-        stockChart.options.scales.x.max = max;
-
-        stockChart.update();
-
-        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-        this.classList.add("active");
       });
+
+      // Apply initial window (timestamps!)
+      chart.options.scales.x.min = initial.min;
+      chart.options.scales.x.max = initial.max;
+      chart.update();
+
+      // Filter buttons behavior
+      document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+          try {
+            const range = this.getAttribute("data-range");
+            const { min, max, tickMode } = computeWindow(range);
+
+            chart.options.scales = scaleOptions(tickMode);
+            chart.options.scales.x.min = min;
+            chart.options.scales.x.max = max;
+            chart.update();
+
+            document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+          } catch (e) {
+            console.error('Error applying filter:', e);
+            const em = document.getElementById('error-message');
+            if (em) { em.style.display = 'block'; em.innerText = `Error applying filter: ${e.message}`; }
+          }
+        });
+      });
+
+      console.log('Chart loaded successfully');
     });
-  });
+  } catch (error) {
+    console.error('Error loading chart:', error);
+    const em = document.getElementById('error-message');
+    if (em) { em.style.display = 'block'; em.innerText = `Error loading chart: ${error.message}`; }
+  }
 </script>
+
 <!-- principles and graph section 2 and 3 end -->
 <!-- Google Font -->
 
@@ -1152,9 +1204,9 @@
                 <table class="cs-table">
                   <thead>
                     <tr>
-                      <th>{{ data.particulars_header.title }}</th>
+                      <th style="white-space: nowrap;">{{ data.particulars_header.title }}</th>
                       {% for header in data.headers %}
-                        <th>{{ header.title }} (₹ Cr)</th>
+                        <th style="white-space: nowrap;">{{ header.title }} (₹ Cr)</th>
                       {% endfor %}
                     </tr>
                   </thead>
@@ -1185,9 +1237,9 @@
                 <table class="cs-table">
                   <thead>
                     <tr>
-                      <th>{{ data.particulars_header.title }}</th>
+                      <th style="white-space: nowrap;">{{ data.particulars_header.title }}</th>
                       {% for header in data.headers %}
-                        <th>{{ header.title }} (₹ Cr)</th>
+                        <th style="white-space: nowrap;">{{ header.title }} (₹ Cr)</th>
                       {% endfor %}
                     </tr>
                   </thead>
@@ -1218,9 +1270,9 @@
                 <table class="cs-table">
                   <thead>
                     <tr>
-                      <th>{{ data.particulars_header.title }}</th>
+                      <th style="white-space: nowrap;">{{ data.particulars_header.title }}</th>
                       {% for header in data.headers %}
-                        <th>{{ header.title }} (₹ Cr)</th>
+                        <th style="white-space: nowrap;">{{ header.title }} (₹ Cr)</th>
                       {% endfor %}
                     </tr>
                   </thead>
@@ -1251,9 +1303,9 @@
                 <table class="cs-table">
                   <thead>
                     <tr>
-                      <th>{{ data.particulars_header.title }}</th>
+                      <th style="white-space: nowrap;">{{ data.particulars_header.title }}</th>
                       {% for header in data.headers %}
-                        <th>{{ header.title }} (₹ Cr)</th>
+                        <th style="white-space: nowrap;">{{ header.title }} (₹ Cr)</th>
                       {% endfor %}
                     </tr>
                   </thead>
@@ -1284,9 +1336,9 @@
                 <table class="cs-table">
                   <thead>
                     <tr>
-                      <th>{{ data.particulars_header.title }}</th>
+                      <th style="white-space: nowrap;">{{ data.particulars_header.title }}</th>
                       {% for header in data.headers %}
-                        <th>{{ header.title }} (₹ Cr)</th>
+                        <th style="white-space: nowrap;">{{ header.title }} (₹ Cr)</th>
                       {% endfor %}
                     </tr>
                   </thead>
@@ -1373,7 +1425,7 @@
     if (activeBtn) activeBtn.classList.add('cs-active');
 
     // Smooth scroll
-    window.scrollTo({ top: 900, behavior: 'smooth' });
+    // window.scrollTo({ top: 900, behavior: 'smooth' });
   }
 
   // Default
@@ -1635,12 +1687,13 @@
         <div class="carousel-content">
             <div class="nav-arrow left" onclick="scrollLeftsroll()">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-arrow left" style="width: 40px; height: 40px; cursor: pointer">
-                    <path d="M19.9052 14.8528L17.3342 12.2818L9.61789 19.9964L17.3324 27.7109L19.9033 25.1382L16.5815 21.8146H30.2852V18.1782H16.5815L19.9052 14.8528Z" fill="black"></path>
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818ZM8.42909 8.42909C6.90958 9.9486 5.70424 11.7525 4.88188 13.7379C4.05952 15.7232 3.63626 17.8511 3.63626 20C3.63626 22.1489 4.05952 24.2768 4.88188 26.2621C5.70424 28.2475 6.90958 30.0514 8.42909 31.5709C9.9486 33.0904 11.7525 34.2958 13.7379 35.1181C15.7232 35.9405 17.8511 36.3637 20 36.3637C22.1489 36.3637 24.2768 35.9405 26.2621 35.1181C28.2475 34.2958 30.0514 33.0904 31.5709 31.5709C34.6397 28.5021 36.3637 24.3399 36.3637 20C36.3637 15.6601 34.6397 11.4979 31.5709 8.42909C28.5021 5.36029 24.3399 3.63626 20 3.63626C15.6601 3.63626 11.4979 5.36029 8.42909 8.42909Z" fill="black"></path>
+                    <path d="M19.9052 14.8528L17.3342 12.2818L9.61789 19.9964L17.3324 27.7109L19.9033 25.1382L16.5815 21.8146H30.2852V18.1782H16.5815L19.9052 14.8528Z" fill="#777"></path>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818ZM8.42909 8.42909C6.90958 9.9486 5.70424 11.7525 4.88188 13.7379C4.05952 15.7232 3.63626 17.8511 3.63626 20C3.63626 22.1489 4.05952 24.2768 4.88188 26.2621C5.70424 28.2475 6.90958 30.0514 8.42909 31.5709C9.9486 33.0904 11.7525 34.2958 13.7379 35.1181C15.7232 35.9405 17.8511 36.3637 20 36.3637C22.1489 36.3637 24.2768 35.9405 26.2621 35.1181C28.2475 34.2958 30.0514 33.0904 31.5709 31.5709C34.6397 28.5021 36.3637 24.3399 36.3637 20C36.3637 15.6601 34.6397 11.4979 31.5709 8.42909C28.5021 5.36029 24.3399 3.63626 20 3.63626C15.6601 3.63626 11.4979 5.36029 8.42909 8.42909Z" fill="#777"></path>
                 </svg>
             </div>
             <div class="scroll-container-main" id="scrollContainer1">
                 {% for stock in all_stocks %}
+                  {% if stock.company_overview and not stock.hide_company_overview %}
                     <div class="company-card-main">
                         <a href="{% url 'unlisted_stock_marketplace:stock_detail' stock.id %}" class="card-link">
                             <div class="logo-main">
@@ -1659,19 +1712,7 @@
 
                                       {% load humanize %}
 
-                                      {% if stock.profit > 0 %}
-                                        <p><span style="color: green;">
-                                          &#9650; ₹{{ stock.profit|floatformat:2|intcomma }} ({{ stock.profit_percentage|floatformat:2 }}%)
-                                        </span></p>
-                                      {% elif stock.profit < 0 %}
-                                        <p><span style="color: red;">
-                                          &#9660; ₹{{ stock.profit|floatformat:2|intcomma }} ({{ stock.profit_percentage|floatformat:2 }}%)
-                                        </span></p>
-                                      {% else %}
-                                        <p><span>
-                                          ₹{{ stock.profit|floatformat:2 }} ({{ stock.profit_percentage|floatformat:2 }}%)
-                                        </span></p>
-                                      {% endif %}
+                                       {% include "includes/percentage_diff.html" with text_color="black" %}
 
                                   {% else %}
                                       <span>No LTP data available</span>
@@ -1683,7 +1724,7 @@
                             <div class="market-cap-main"><span>Market Cap:</span>&nbsp;&nbsp;₹{{stock.market_capitalization}} Crore</div>
                             <div class="details-company-main">
                                 <div class="company-eps-div"><span>Face Value:</span>₹{{stock.face_value}}</div>
-                                <div class="company-eps-div"><span>PE Ratio:</span>{{stock.pe_ratio}}</div>
+                                <div class="company-eps-div"><span>PE Ratio:</span>{{stock.pe_ratio|default:"NA"}}</div>
                             </div>
                         </a>
                         <div class="details-cards-fourth-info">
@@ -1705,12 +1746,13 @@
 
                         </div>
                     </div>
+                  {% endif %}
                 {% endfor %}
             </div>
             <div class="nav-arrow right" onclick="scrollRightscroll()">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-arrow right" style="width: 40px; height: 40px; cursor: pointer">
-                    <path d="M20.0948 25.1472L22.6658 27.7182L30.3821 20.0036L22.6676 12.2891L20.0967 14.8618L23.4185 18.1854H9.71484V21.8218H23.4185L20.0948 25.1472Z" fill="black"></path>
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418ZM31.5709 31.5709C33.0904 30.0514 34.2958 28.2475 35.1181 26.2621C35.9405 24.2768 36.3637 22.1489 36.3637 20C36.3637 17.8511 35.9405 15.7232 35.1181 13.7379C34.2958 11.7525 33.0904 9.9486 31.5709 8.42909C30.0514 6.90958 28.2475 5.70423 26.2621 4.88188C24.2768 4.05952 22.1489 3.63626 20 3.63626C17.8511 3.63626 15.7232 4.05952 13.7379 4.88188C11.7525 5.70423 9.9486 6.90958 8.42909 8.42909C5.3603 11.4979 3.63626 15.6601 3.63626 20C3.63626 24.3399 5.3603 28.5021 8.42909 31.5709C11.4979 34.6397 15.6601 36.3637 20 36.3637C24.3399 36.3637 28.5021 34.6397 31.5709 31.5709Z" fill="black"></path>
+                    <path d="M20.0948 25.1472L22.6658 27.7182L30.3821 20.0036L22.6676 12.2891L20.0967 14.8618L23.4185 18.1854H9.71484V21.8218H23.4185L20.0948 25.1472Z" fill="#777"></path>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M34.1418 34.1418C41.9527 26.3309 41.9527 13.6691 34.1418 5.85818C26.3309 -1.95273 13.6691 -1.95273 5.85818 5.85818C-1.95273 13.6691 -1.95273 26.3309 5.85818 34.1418C13.6691 41.9527 26.3309 41.9527 34.1418 34.1418ZM31.5709 31.5709C33.0904 30.0514 34.2958 28.2475 35.1181 26.2621C35.9405 24.2768 36.3637 22.1489 36.3637 20C36.3637 17.8511 35.9405 15.7232 35.1181 13.7379C34.2958 11.7525 33.0904 9.9486 31.5709 8.42909C30.0514 6.90958 28.2475 5.70423 26.2621 4.88188C24.2768 4.05952 22.1489 3.63626 20 3.63626C17.8511 3.63626 15.7232 4.05952 13.7379 4.88188C11.7525 5.70423 9.9486 6.90958 8.42909 8.42909C5.3603 11.4979 3.63626 15.6601 3.63626 20C3.63626 24.3399 5.3603 28.5021 8.42909 31.5709C11.4979 34.6397 15.6601 36.3637 20 36.3637C24.3399 36.3637 28.5021 34.6397 31.5709 31.5709Z" fill="#777"></path>
                 </svg>
             </div>
         </div>
@@ -1728,16 +1770,20 @@
               return Math.floor(containerWidth / cardWidth);
           }
 
-          function scrollLeftsroll() {
-              const container = document.getElementById('scrollContainer1');
-              const cardsToScroll = getVisibleCards();
-              const card = document.querySelector('.company-card-main');
-              const scrollAmount = (card.offsetWidth + 15) * cardsToScroll;
+          function scrollLeftsroll() 
+          {
+                console.log('working')
+                const container = document.getElementById('scrollContainer1');
+                console.log(container);
+                const cardsToScroll = getVisibleCards();
+                console.log(cardsToScroll)
+                const card = document.querySelector('.company-card-main');
+                const scrollAmount = (card.offsetWidth + 15) * cardsToScroll;
               
-              container.scrollBy({
-                left: -scrollAmount,
-                behavior: 'smooth'
-              });
+                container.scrollBy({
+                    left: -scrollAmount,
+                    behavior: 'smooth'
+                });
           }
             
           function scrollRightscroll() {

@@ -27,6 +27,10 @@ urlpatterns = [
     path('view_deal_letters/', view_deal_letters, name='view_deal_letters'),
 
     path("ajax/filtered-stocks/", ajax_filtered_stocks, name="ajax_filtered_stocks"),
+    
+    path('portfolio/buy-orders/delete/',  delete_buy_order,  name='delete_buy_order'),
+    path('portfolio/sell-orders/delete/', delete_sell_order, name='delete_sell_order'),
+
 ]
 
 if settings.DEBUG:

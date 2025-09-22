@@ -1538,24 +1538,87 @@ def stockhistory_delete(request, pk):
 
 
 
-
-# CRUD Events 
+# views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import FileResponse, Http404
 from .models import Event
 from .forms import EventForm
 
-# List all visible events
+# List with filters (search/stock/show/mine/has_doc) + pagination
 def event_list(request):
-    events = Event.objects.filter(show=True).order_by("-date_time")
-    return render(request, "events/event_list.html", {"events": events})
+    qs = (
+        Event.objects
+        .select_related("stock", "user")
+        .order_by("-date_time", "-created_on")
+    )
 
-# Single event detail
+    # Filters
+    search = (request.GET.get("search") or "").strip()
+    stock_id = (request.GET.get("stock") or "").strip()
+    show_param = (request.GET.get("show") or "visible").lower()  # visible|hidden|all
+    mine = (request.GET.get("mine") or "").lower() == "1"
+    has_doc = (request.GET.get("has_doc") or "").lower() == "1"
+
+    if show_param == "visible":
+        qs = qs.filter(show=True)
+    elif show_param == "hidden":
+        qs = qs.filter(show=False)
+
+    if stock_id.isdigit():
+        qs = qs.filter(stock_id=int(stock_id))
+
+    if search:
+        qs = qs.filter(
+            Q(title__icontains=search) |
+            Q(subtitle__icontains=search) |
+            Q(paragraph__icontains=search) |
+            Q(stock__company_name__icontains=search)
+        )
+
+    if mine and request.user.is_authenticated:
+        qs = qs.filter(user=request.user)
+
+    if has_doc:
+        qs = qs.exclude(document="").exclude(document__isnull=True)
+
+    # Pagination
+    paginator = Paginator(qs, 12)  # 12 cards per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # Stock dropdown (only those that exist on events)
+    stock_choices = (
+        Event.objects
+        .select_related("stock")
+        .exclude(stock__isnull=True)
+        .values_list("stock_id", "stock__company_name")
+        .distinct()
+        .order_by("stock__company_name")
+    )
+
+    ctx = {
+        "events": page_obj.object_list,
+        "page_obj": page_obj,
+        "stock_choices": stock_choices,
+        "search": search,
+        "stock_selected": stock_id,
+        "show_param": show_param,
+        "mine": mine,
+        "has_doc": has_doc,
+    }
+    return render(request, "events/event_list.html", ctx)
+
+# Detail (allow viewing hidden only by owner/staff)
 def event_detail(request, pk):
-    event = get_object_or_404(Event, pk=pk, show=True)
+    event = get_object_or_404(Event.objects.select_related("stock", "user"), pk=pk)
+    if not event.show and not (request.user.is_authenticated and (request.user == event.user or request.user.is_staff)):
+        raise Http404("Event not available.")
     return render(request, "events/event_detail.html", {"event": event})
 
-# Create event
+# Create
 @login_required
 def event_create(request):
     if request.method == "POST":
@@ -1564,12 +1627,12 @@ def event_create(request):
             event = form.save(commit=False)
             event.user = request.user
             event.save()
-            return redirect("SM_User:event_list")
+            return redirect("SM_User:event_detail", pk=event.pk)
     else:
         form = EventForm()
     return render(request, "events/event_form.html", {"form": form, "title": "Create Event"})
 
-# Update event
+# Update (owner only)
 @login_required
 def event_update(request, pk):
     event = get_object_or_404(Event, pk=pk, user=request.user)
@@ -1582,7 +1645,7 @@ def event_update(request, pk):
         form = EventForm(instance=event)
     return render(request, "events/event_form.html", {"form": form, "title": "Update Event"})
 
-# Delete event
+# Delete (owner only)
 @login_required
 def event_delete(request, pk):
     event = get_object_or_404(Event, pk=pk, user=request.user)

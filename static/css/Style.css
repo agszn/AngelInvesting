@@ -1340,7 +1340,8 @@ a{
     }
   }
   
-  @media (max-width: 480px) {
+  @media (min-width: 320px) and (max-width: 767px) 
+  {
     .company-card-main {
       min-width: calc(100% - 15px);
     }
@@ -1555,18 +1556,22 @@ a{
 
   .steps-wrapper {
     flex-direction: column;
-    gap: 25px;
-    margin-top: 10px;
+    gap: 0;
+    margin-top: 0;
   }
 
   .step-arrow {
     transform: rotate(90deg);
   }
-
+  .bi-arrow-right::before
+  {
+      vertical-align: -0.300em;
+  }
   .why-trade-step {
     width: 100%;
     max-width: 300px;
-    margin: 0 auto;
+    margin: 0;
+    padding: 0;
   }
 
   /* faq home page*/
@@ -1577,6 +1582,7 @@ a{
   .faq-title {
     font-size: 26px;
     text-align: center;
+    margin-bottom: 20px;
   }
 
   .faq-heading {
@@ -1613,7 +1619,7 @@ a{
 
   .all-blogs {
     flex-direction: column;
-    gap: 30px;
+    gap: 15px;
   }
 
   .blog-container {
@@ -1754,7 +1760,7 @@ a{
   }
 
   .logo-wrapper {
-    width: 80px;
+    width: 150px;
     height: 80px;
     overflow: hidden;
     overflow: hidden;             
@@ -1866,7 +1872,7 @@ a{
  .banner-mobile {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100vh;
     object-fit: contain;
     object-position: center;
   }
@@ -1877,6 +1883,36 @@ a{
   .testimonial-content {
     margin-top: 10px;
     flex: 1;
+  }
+
+  .carousel-title-main
+  {
+    font-size: 24px;
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+
+  .scroll-container-main {
+      /* display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 20px;
+      scroll-behavior: smooth;
+      width: 100%;
+      padding: 10px 0;
+      -ms-overflow-style: none;
+      scrollbar-width: none; */
+      gap: 10px;
+      justify-content: center;
+  }
+
+  .search-popup
+  {
+    width: 100%;
+  }
+
+  .popup-box {
+    width: 100% !important;
   }
 }
 

@@ -738,9 +738,19 @@ from django.db.models import IntegerField
 #     }
 
 #     return render(request, 'accounts/profile.html', context)
-
-
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 from user_portfolio.utils import get_user_stock_context
+
+def _push_form_errors(request, form, prefix=None):
+    for field, errors in form.errors.items():
+        label = form.fields.get(field).label or field.replace('_',' ').title()
+        for e in errors:
+            messages.error(request, f"{prefix + ': ' if prefix else ''}{label}: {e}")
+    for e in form.non_field_errors():
+        messages.error(request, f"{prefix + ': ' if prefix else ''}{e}")
+
 @login_required
 def view_profile(request):
     user = request.user
@@ -748,15 +758,19 @@ def view_profile(request):
     brokers = Broker.objects.all()
     cmr_copies = CMRCopy.objects.filter(user_profile=profile)
 
-    # Add flags for PDF checks
-    profile.is_pan_pdf = profile.pan_card_photo and str(profile.pan_card_photo.url).lower().endswith('.pdf')
-    profile.is_aadhaar_pdf = profile.adhar_card_photo and str(profile.adhar_card_photo.url).lower().endswith('.pdf')
+    # Safer PDF flags
+    pan_name = (profile.pan_card_photo.name or "") if profile.pan_card_photo else ""
+    aadhaar_name = (profile.adhar_card_photo.name or "") if profile.adhar_card_photo else ""
+    profile.is_pan_pdf = pan_name.lower().endswith(".pdf")
+    profile.is_aadhaar_pdf = aadhaar_name.lower().endswith(".pdf")
 
     form = UserProfileForm(instance=profile)
     cmr_form = CMRForm()
+    last_form_type = ""
 
     if request.method == 'POST':
-        form_type = request.POST.get('form_type')
+        form_type = request.POST.get('form_type')  # 'personal' | 'identity' | 'cmr_form'
+        last_form_type = form_type or ""
 
         if form_type == 'cmr_form':
             cmr_id = request.POST.get('cmr_id')
@@ -774,30 +788,45 @@ def view_profile(request):
                 return redirect('profile')
             else:
                 messages.error(request, "Please correct the errors in the CMR form.")
+                _push_form_errors(request, cmr_form, prefix="CMR")
 
         else:
+            # Define sections
+            identity_fields = [
+                "pan_number","pan_card_photo","pan_doc_password",
+                "adhar_number","adhar_card_photo","adhar_doc_password"
+            ]
+            personal_fields = [
+                "first_name","middle_name","last_name","email",
+                "whatsapp_number","mobile_number","photo"
+            ]
+            allowed = personal_fields if form_type == 'personal' else identity_fields
+
+            # Build a form instance but keep ONLY the active section's fields
             form = UserProfileForm(request.POST, request.FILES, instance=profile)
+            for name in list(form.fields.keys()):
+                if name not in allowed:
+                    del form.fields[name]
+
             if form.is_valid():
-                form.save()
+                form.save()  # only allowed fields are saved; others remain untouched
                 messages.success(request, "Profile updated.")
                 return redirect('profile')
             else:
                 messages.error(request, "Please correct the errors in the profile form.")
+                _push_form_errors(request, form, prefix="Profile")
 
     stock_context = get_user_stock_context(user, request)
-
     context = {
         'form': form,
         'cmr_form': cmr_form,
         'brokers': brokers,
         'cmr_copies': cmr_copies,
         'profile': profile,
+        'last_form_type': last_form_type,
         **stock_context,
     }
-
     return render(request, 'accounts/profile.html', context)
-
-
 
 
 @login_required

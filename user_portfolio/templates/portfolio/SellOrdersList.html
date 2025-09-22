@@ -20,22 +20,22 @@
 
       <!-- Advisor Filter -->
       <div class="dropdown">
-        <button id="sellAdvisorBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          {{ selected_advisor.advisor_type|default:"Advisor" }}
+        <button id="sellAdvisorBtn"
+                class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ selected_advisor.advisor_type|default:"All Advisors" }}
         </button>
         <ul id="sellAdvisorMenu" class="dropdown-menu">
           <li>
             <a class="dropdown-item ajax-filter {% if not selected_advisor %}active{% endif %}"
-               data-filter="advisor" data-value=""
-               href="?{% if selected_broker %}broker={{ selected_broker.id }}{% endif %}{% if search_query %}{% if selected_broker %}&{% endif %}search={{ search_query|urlencode }}{% endif %}{% if sort %}{% if selected_broker or search_query %}&{% endif %}sort={{ sort }}{% endif %}">
+               data-filter="advisor" data-value="all" href="#">
               {% if not selected_advisor %}✓ {% endif %}All Advisors
             </a>
           </li>
           {% for adv in advisors %}
           <li>
             <a class="dropdown-item ajax-filter {% if selected_advisor and adv.id == selected_advisor.id %}active{% endif %}"
-               data-filter="advisor" data-value="{{ adv.id }}"
-               href="?advisor={{ adv.id }}{% if selected_broker %}&broker={{ selected_broker.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+               data-filter="advisor" data-value="{{ adv.id }}" href="#">
               {% if selected_advisor and adv.id == selected_advisor.id %}✓ {% endif %}{{ adv.advisor_type|upper }}
             </a>
           </li>
@@ -45,22 +45,22 @@
 
       <!-- Broker Filter -->
       <div class="dropdown">
-        <button id="sellBrokerBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          {{ selected_broker.name|default:"Broker" }}
+        <button id="sellBrokerBtn"
+                class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ selected_broker.name|default:"All Brokers" }}
         </button>
         <ul id="sellBrokerMenu" class="dropdown-menu">
           <li>
             <a class="dropdown-item ajax-filter {% if not selected_broker %}active{% endif %}"
-               data-filter="broker" data-value=""
-               href="?{% if selected_advisor %}advisor={{ selected_advisor.id }}{% endif %}{% if search_query %}{% if selected_advisor %}&{% endif %}search={{ search_query|urlencode }}{% endif %}{% if sort %}{% if selected_advisor or search_query %}&{% endif %}sort={{ sort }}{% endif %}">
+               data-filter="broker" data-value="all" href="#">
               {% if not selected_broker %}✓ {% endif %}All Brokers
             </a>
           </li>
           {% for bro in brokers %}
           <li>
             <a class="dropdown-item ajax-filter {% if selected_broker and bro.id == selected_broker.id %}active{% endif %}"
-               data-filter="broker" data-value="{{ bro.id }}"
-               href="?broker={{ bro.id }}{% if selected_advisor %}&advisor={{ selected_advisor.id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+               data-filter="broker" data-value="{{ bro.id }}" href="#">
               {% if selected_broker and bro.id == selected_broker.id %}✓ {% endif %}{{ bro.name }}
             </a>
           </li>
@@ -77,12 +77,28 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const input = document.getElementById('sell-search-input');
-  const container = document.getElementById('sell-orders-table-container');
-  const advBtn = document.getElementById('sellAdvisorBtn');
-  const broBtn = document.getElementById('sellBrokerBtn');
+  const input      = document.getElementById('sell-search-input');
+  const container  = document.getElementById('sell-orders-table-container');
+  const advBtn     = document.getElementById('sellAdvisorBtn');
+  const broBtn     = document.getElementById('sellBrokerBtn');
+  const DELETE_URL = "{% url 'user_portfolio:delete_sell_order' %}";
 
-  // Search (AJAX)
+  function getCookie(name) {
+    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  function loadIntoContainer(url) {
+    return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(r => r.text())
+      .then(html => {
+        container.innerHTML = html;
+        history.replaceState(null, '', url);
+      });
+  }
+
+  // Search
   let timer;
   input.addEventListener('input', function() {
     clearTimeout(timer);
@@ -90,54 +106,109 @@ document.addEventListener('DOMContentLoaded', function() {
       const p = new URLSearchParams(window.location.search);
       p.set('search', input.value);
       const url = window.location.pathname + '?' + p.toString();
-      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(r => r.text())
-        .then(html => {
-          container.innerHTML = html;
-          history.replaceState(null, '', url);
-        });
+      loadIntoContainer(url).catch(console.error);
     }, 300);
   });
 
-  // Advisor/Broker filters (AJAX)
+  // Build URL preserving advisor+broker
+  function buildUrl(filterType, value) {
+    const url = new URL(window.location.href);
+    const p = url.searchParams;
+    p.set(filterType, value);
+    if (!p.has('advisor')) p.set('advisor', 'all');
+    if (!p.has('broker'))  p.set('broker', 'all');
+    url.search = p.toString();
+    return url.toString();
+  }
+
+  // Advisor/Broker filters
   function wireFilterLinks() {
     document.querySelectorAll('.ajax-filter').forEach(a => {
       a.addEventListener('click', function(e) {
         e.preventDefault();
-        const url = a.getAttribute('href');
-        const filterType = a.dataset.filter; // 'advisor' or 'broker'
-        const labelText = a.textContent.trim().replace(/^✓\s*/, '');
+        const filterType = a.dataset.filter;
+        const value      = a.dataset.value;
+        const labelText  = a.textContent.trim().replace(/^✓\s*/, '');
+        const url = buildUrl(filterType, value);
 
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-          .then(r => r.text())
-          .then(html => {
-            container.innerHTML = html;
-            history.replaceState(null, '', url);
-
-            // Update dropdown button label
-            if (filterType === 'advisor') advBtn.textContent = labelText;
-            if (filterType === 'broker')  broBtn.textContent  = labelText;
-
-            // Update active state + check mark
-            const menuId = filterType === 'advisor' ? 'sellAdvisorMenu' : 'sellBrokerMenu';
-            const menu = document.getElementById(menuId);
-            if (menu) {
-              Array.from(menu.querySelectorAll('.dropdown-item')).forEach(item => {
-                item.classList.remove('active');
-                item.innerHTML = item.textContent.trim().replace(/^✓\s*/, '');
-              });
-              a.classList.add('active');
-              if (!a.textContent.trim().startsWith('✓')) {
-                a.innerHTML = '✓ ' + a.textContent.trim();
-              }
-            }
-          })
-          .catch(console.error);
+        loadIntoContainer(url).then(() => {
+          if (filterType === 'advisor') advBtn.textContent = labelText;
+          if (filterType === 'broker')  broBtn.textContent = labelText;
+          const menuId = filterType === 'advisor' ? 'sellAdvisorMenu' : 'sellBrokerMenu';
+          const menu = document.getElementById(menuId);
+          if (menu) {
+            Array.from(menu.querySelectorAll('.dropdown-item')).forEach(item => {
+              item.classList.remove('active');
+              item.innerHTML = item.textContent.trim().replace(/^✓\s*/, '');
+            });
+            a.classList.add('active');
+            a.innerHTML = '✓ ' + labelText;
+          }
+        }).catch(console.error);
       });
     });
   }
-
   wireFilterLinks();
+
+  // Pagination delegation
+  container.addEventListener('click', function(e) {
+    const link = e.target.closest('a.page-link');
+    if (link && link.getAttribute('href')) {
+      const href = link.getAttribute('href');
+      if (href.startsWith('?') || href.startsWith(window.location.pathname)) {
+        e.preventDefault();
+        const url = href.startsWith('?') ? (window.location.pathname + href) : href;
+        loadIntoContainer(url).catch(console.error);
+      }
+    }
+  });
+
+  // Remove (cancel) order
+  container.addEventListener('click', function(e) {
+    const btn = e.target.closest('.delete-order');
+    if (!btn) return;
+    const row = btn.closest('tr');
+    const orderId = row?.dataset?.orderId;
+    if (!orderId) return;
+
+    if (!confirm('Cancel this sell order? This cannot be undone.')) return;
+
+    fetch(DELETE_URL, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({ order_id: orderId })
+    })
+    .then(async (r) => {
+      let data = {};
+      try { data = await r.json(); } catch (_) {}
+      if (!r.ok || data.ok === false) {
+        if (data.reason === 'locked_status') {
+          throw new Error('Order is locked (RM_status is not "processing").');
+        }
+        if (data.reason === 'has_payment') {
+          throw new Error('Cannot cancel: payment record already exists.');
+        }
+        if (r.status === 403) {
+          throw new Error('Order not found or not yours.');
+        }
+        if (r.status === 400) {
+          throw new Error('Bad request (missing or invalid order_id).');
+        }
+        throw new Error('Failed to cancel this order.');
+      }
+      // Success – fade out then remove
+      row.style.transition = 'opacity .2s ease';
+      row.style.opacity = '0.4';
+      setTimeout(() => row.remove(), 200);
+    })
+    .catch((err) => {
+      alert(err.message || 'Could not cancel this order.');
+    });
+  });
 });
 </script>
 {% endblock %}

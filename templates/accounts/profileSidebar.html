@@ -5,7 +5,7 @@
 <!-- New Sidebar -->
 <div class="user-sidebar" id="userSidebar">
   <div class="user-sidebar-top-logo">
-    <a href="/"><img src="{% static 'Media/images/topthangivlogo.png' %}" alt="logo"></a>
+    <a href="/"><img src="{% static 'Media/images/thangivelogodashboard.png' %}" alt="logo"></a>
   </div>
 
   <div class="user-group-tap">
@@ -18,7 +18,7 @@
     </div>
     <div class="user-name-group">
       <div>
-        <a href="?unlisted=1" class="{% if unlisted_active %}active{% endif %}">Unlisted</a> |
+        <a href="?unlisted=1" class="{% if show_all_unlisted %}active{% endif %}">Unlisted</a> |
         <a href="?angel=1" class="{% if show_all_angel %}active{% endif %}">Angel Invest</a>
       </div>
     </div>
@@ -64,7 +64,8 @@
     return null;
   }
 
-  function toggleSidebar() {
+  function toggleSidebar() 
+  {
     const sidebar = document.getElementById('userSidebar');
     const mainContent = document.querySelector('.user-main-content');
     const isCollapsed = sidebar.classList.toggle('collapsed');
@@ -77,11 +78,13 @@
     const mainContent = document.querySelector('.user-main-content');
     const sidebarState = getCookie("sidebarState");
 
-    if (sidebarState) {
+    if (sidebarState) 
+    {
       const collapsed = sidebarState === "collapsed";
       sidebar.classList.toggle('collapsed', collapsed);
       if (mainContent) mainContent.classList.toggle('collapsed', collapsed);
-    } else {
+    } else 
+    {
       if (window.innerWidth < 768) {
         sidebar.classList.add('collapsed');
         if (mainContent) mainContent.classList.add('collapsed');

@@ -13,9 +13,7 @@
             style="background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 10px; top: 5px;">
             &times;
           </button>
-
         </div>
-
 
         <div style="background-color: #f1f6ff; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
           <input type="hidden" name="stock_id" id="buy-stock-id">
@@ -65,10 +63,10 @@
   </div>
 </div>
 
-<!-- Sell Modal (unchanged) -->
+<!-- Sell Modal -->
 <div class="modal fade" id="universalSellModal" tabindex="-1" role="dialog" aria-labelledby="universalSellModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
-    <div class="modal-content" style="background: white; border-radius: 10px; overflow: hidden;">
+    <div class="modal-content" style="border-radius: 10px; overflow: hidden;">
       <form method="POST" action="" id="sell-form">
         {% csrf_token %}
         <div style="background-color: #3a456d; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: relative;">
@@ -80,9 +78,7 @@
             style="background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 10px; top: 5px;">
             &times;
           </button>
-
         </div>
-
 
         <div style="background-color: #f1f6ff; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
           <input type="hidden" name="stock_id" id="sell-stock-id">
@@ -104,9 +100,35 @@
           <div>
             <label for="sell-quantity">Quantity</label>
             <input type="number" name="quantity" id="sell-quantity" required min="1" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+            <small id="sell-available-qty" style="color: gray; display: block; margin-top: 5px;"></small>
           </div>
+
+          <!-- Optional: Uncomment to enable limit orders for sell -->
+          <!--
+          <div>
+            <label for="sell-price-per-share">Selling Price</label>
+            <input type="number" step="0.01" name="selling_price" id="sell-price-per-share" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" data-default-price="0">
+          </div>
+
+          <div>
+            <label>Order Type</label>
+            <div style="margin-top: 5px; font-size: 12px;">
+              <label><input type="radio" name="order_type" value="market" checked> Market</label>
+              <label style="margin-left: 10px;"><input type="radio" name="order_type" value="limit"> Limit</label>
+            </div>
+          </div>
+          -->
         </div>
 
+        <!-- Total Display (optional, uncomment if needed) -->
+        <!--
+        <div style="background-color: #3a456d; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #fff; font-weight: bold;">Total: ₹<span id="sell-total">0.00</span></span>
+          <button type="submit" style="background-color: #f44336; color: white; padding: 10px 20px; border-radius: 20px; border: none; font-weight: bold;">
+            ✘ Place Sell Order
+          </button>
+        </div>
+        -->
         <div style="background-color: #3a456d; padding: 15px; text-align: right;">
           <button type="submit" style="background-color: #f44336; color: white; padding: 10px 20px; border-radius: 20px; border: none; font-weight: bold;">
             ✘ Place Sell Order
@@ -152,5 +174,39 @@
     // Initial state
     togglePriceInput();
     updateBuyTotal();
+
+    // Optional: Sell total calculation (uncomment if enabling limit orders and total display)
+    /*
+    const sellPriceInput = document.getElementById("sell-price-per-share");
+    const sellQtyInput = document.getElementById("sell-quantity");
+    const sellTotal = document.getElementById("sell-total");
+    const sellOrderTypeRadios = document.querySelectorAll("input[name='sell_order_type']");
+
+    function toggleSellPriceInput() {
+      const selectedOrderType = document.querySelector("input[name='sell_order_type']:checked")?.value;
+      const defaultPrice = sellPriceInput?.getAttribute("data-default-price") || "0.00";
+      if (selectedOrderType === "market") {
+        sellPriceInput.value = defaultPrice;
+        sellPriceInput.readOnly = true;
+      } else {
+        sellPriceInput.readOnly = false;
+      }
+      updateSellTotal();
+    }
+
+    function updateSellTotal() {
+      const qty = parseFloat(sellQtyInput.value) || 0;
+      const price = parseFloat(sellPriceInput.value) || 0;
+      sellTotal.textContent = (qty * price).toFixed(2);
+    }
+
+    if (sellPriceInput && sellOrderTypeRadios.length > 0) {
+      sellOrderTypeRadios.forEach(radio => radio.addEventListener("change", toggleSellPriceInput));
+      sellQtyInput.addEventListener("input", updateSellTotal);
+      sellPriceInput.addEventListener("input", updateSellTotal);
+      toggleSellPriceInput();
+      updateSellTotal();
+    }
+    */
   });
 </script>

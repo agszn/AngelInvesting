@@ -233,13 +233,81 @@ from django.db.models import Q
 from django.shortcuts import render
 from .models import UserStockInvestmentSummary, Advisor, Broker
 from .utils import update_user_holdings  # make sure this is in utils.py
+from io import BytesIO
+from decimal import Decimal
+from datetime import datetime
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font, Alignment, numbers
+
+from site_Manager.models import Advisor, Broker
+from .models import UserStockInvestmentSummary
+from .utils import update_user_holdings
+# If you have this helper in your codebase:
+# from .helpers import get_user_stock_context
+
+# views.py
+
+from io import BytesIO
+from decimal import Decimal
+from datetime import datetime
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font, Alignment, numbers
+
+from site_Manager.models import Advisor, Broker
+from .models import UserStockInvestmentSummary
+from .utils import update_user_holdings
+# If you have this helper in your codebase:
+# from .helpers import get_user_stock_context
+
+# views.py
+from datetime import datetime
+from decimal import Decimal
+from io import BytesIO
+
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import render
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import numbers
+
+from .models import UserStockInvestmentSummary, Advisor, Broker  # adjust paths if needed
+from .utils import update_user_holdings  # adjust import if defined elsewhere
+# from .somewhere import get_user_stock_context  # only if you have it; handled defensively below
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.core.paginator import Paginator
+from decimal import Decimal
+from datetime import datetime
+from io import BytesIO
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, numbers
+from openpyxl.utils import get_column_letter
+from .models import UserStockInvestmentSummary, Advisor, Broker
+from .utils import update_user_holdings, get_user_stock_context
 
 @login_required
 def portfolio_view(request):
-    from decimal import Decimal
-    from django.utils import timezone
-    from datetime import datetime
-
     user = request.user
     update_user_holdings(user)
 
@@ -249,35 +317,59 @@ def portfolio_view(request):
         .select_related('stock', 'advisor', 'broker')
     )
 
-    advisor_param = request.GET.get('advisor')        # could be None, 'all', or an id string
-    broker_id     = request.GET.get('broker')
-    search        = request.GET.get('search', '').strip()
-
-    # New: sort parameters
-    sort = (request.GET.get('sort') or '').lower()          # 'inv' or 'mkt'
-    dir_ = (request.GET.get('dir') or 'desc').lower()       # 'asc' or 'desc'
+    # ---- Filters & sorting from querystring ----
+    advisor_param = request.GET.get('advisor')  # None | 'all' | id | 'THANGIV'/'OTHER'/...
+    broker_param  = request.GET.get('broker')   # None | 'all' | id
+    search        = (request.GET.get('search') or '').strip()
+    sort          = (request.GET.get('sort') or '').lower()  # 'inv' | 'mkt' | ''
+    dir_          = (request.GET.get('dir') or 'desc').lower()
     if dir_ not in ('asc', 'desc'):
         dir_ = 'desc'
 
+    # Detect if 'advisor' key was present at all (important for defaulting logic)
+    advisor_key_present = 'advisor' in request.GET
+
     selected_advisor = None
+    selected_broker  = None
+    advisor_effective = None  # 'default' or 'forced' when we set it implicitly
 
-    # Default only when the advisor param is truly absent (first load)
-    if advisor_param is None:
-        default_adv = Advisor.objects.filter(advisor_type__iexact='Thangiv').first()
-        if default_adv:
-            qs = qs.filter(advisor=default_adv)
-            selected_advisor = default_adv
-    else:
-        # advisor explicitly provided
-        if advisor_param and advisor_param.lower() != 'all':
-            qs = qs.filter(advisor__id=advisor_param)
+    # ----- Advisor selection / defaulting -----
+    if advisor_param and str(advisor_param).lower() != 'all':
+        # Explicit advisor filter in query
+        if str(advisor_param).isdigit():
+            qs = qs.filter(advisor__id=int(advisor_param))
             selected_advisor = Advisor.objects.filter(id=advisor_param).first()
-        # else: advisor=all (or empty) -> no advisor filter
+        else:
+            qs = qs.filter(advisor__advisor_type__iexact=advisor_param)
+            selected_advisor = Advisor.objects.filter(advisor_type__iexact=advisor_param).first()
+    else:
+        # No explicit advisor (either not present OR 'all')
+        if not advisor_key_present and not broker_param and not search:
+            # Clean landing → default to Thangiv
+            default_adv = Advisor.objects.filter(advisor_type__iexact='Thangiv').first()
+            if default_adv:
+                qs = qs.filter(advisor=default_adv)
+                selected_advisor = default_adv
+                advisor_effective = 'default'
+        elif (  # Broker-only filter → force Thangiv so label matches data
+            (advisor_param is None or str(advisor_param).lower() == 'all')
+            and broker_param and str(broker_param).lower() != 'all'
+            and not search
+        ):
+            forced_adv = Advisor.objects.filter(advisor_type__iexact='Thangiv').first()
+            if forced_adv:
+                qs = qs.filter(advisor=forced_adv)
+                selected_advisor = forced_adv
+                advisor_effective = 'forced'
 
-    # Optional narrowing by broker (still supported), but UI will merge rows ignoring broker
-    if broker_id:
-        qs = qs.filter(broker__id=broker_id)
+    # ----- Broker filter (narrows qs). Merge ignores broker but filter must respect it. -----
+    if broker_param and str(broker_param).lower() != 'all':
+        if str(broker_param).isdigit():
+            qs = qs.filter(broker__id=int(broker_param))
+            selected_broker = Broker.objects.filter(id=broker_param).first()
+        # (extend for name-based filtering if needed)
 
+    # ----- Search -----
     if search:
         qs = qs.filter(
             Q(stock__company_name__icontains=search) |
@@ -287,17 +379,16 @@ def portfolio_view(request):
     # Hide zero-quantity rows
     qs = qs.exclude(quantity_held=0)
 
-    # Merge by (stock, advisor) for FRONTEND display (ignore broker)
-    buckets = {}  # key=(stock_id, advisor_id) -> aggregated dict
-
+    # ---- Merge rows by (stock, advisor), preserve broker from latest row ----
+    buckets = {}
     for row in qs:
-        key = (row.stock_id, row.advisor_id)
+        key = (row.stock_id, row.advisor_id)  # broker ignored in merge key
         agg = buckets.get(key)
         if not agg:
             agg = {
                 'stock': row.stock,
                 'advisor': row.advisor,
-                # sums
+                'broker': row.broker,  # Preserve broker (latest seen below)
                 'quantity_held': 0,
                 'investment_amount': Decimal('0'),
                 'market_value': Decimal('0'),
@@ -307,14 +398,12 @@ def portfolio_view(request):
                 'buy_order_total': Decimal('0'),
                 'sell_order_count': 0,
                 'sell_order_total': Decimal('0'),
-                # carry-forward / latest
                 'share_price': row.share_price,
                 'previous_day_price': row.previous_day_price,
                 'last_updated': row.last_updated,
             }
             buckets[key] = agg
 
-        # accumulate
         agg['quantity_held']     += int(row.quantity_held or 0)
         agg['investment_amount'] += row.investment_amount or Decimal('0')
         agg['market_value']      += row.market_value or Decimal('0')
@@ -325,71 +414,158 @@ def portfolio_view(request):
         agg['sell_order_count']  += int(row.sell_order_count or 0)
         agg['sell_order_total']  += row.sell_order_total or Decimal('0')
 
-        # keep freshest timestamp & latest non-null prices
+        # Update broker and prices based on latest row
         if row.last_updated and (not agg['last_updated'] or row.last_updated > agg['last_updated']):
             agg['last_updated'] = row.last_updated
+            agg['broker'] = row.broker  # Update to latest broker
             if row.share_price is not None:
                 agg['share_price'] = row.share_price
             if row.previous_day_price is not None:
                 agg['previous_day_price'] = row.previous_day_price
 
-    # Finalize merged rows (compute avg_price and percents)
+    class Row: ...
     merged = []
-    for (stock_id, advisor_id), a in buckets.items():
+    for a in buckets.values():
         qty = a['quantity_held']
         inv = a['investment_amount'] or Decimal('0')
         avg_price = (inv / qty) if qty else Decimal('0')
-
         overall_gain_percent = (a['overall_gain_loss'] / inv * 100) if inv > 0 else Decimal('0')
-        day_gain_percent     = (a['day_gain_loss'] / inv * 100)     if inv > 0 else Decimal('0')
+        day_gain_percent     = (a['day_gain_loss'] / inv * 100) if inv > 0 else Decimal('0')
 
-        class Row:
-            pass
+        r = Row()
+        r.stock                = a['stock']
+        r.advisor              = a['advisor']
+        r.broker               = a['broker']
+        r.quantity_held        = qty
+        r.avg_price            = avg_price
+        r.share_price          = a['share_price']
+        r.previous_day_price   = a['previous_day_price']
+        r.market_value         = a['market_value']
+        r.investment_amount    = inv
+        r.overall_gain_loss    = a['overall_gain_loss']
+        r.overall_gain_percent = overall_gain_percent
+        r.day_gain_loss        = a['day_gain_loss']
+        r.day_gain_percent     = day_gain_percent
+        r.last_updated         = a['last_updated']
+        merged.append(r)
 
-        h = Row()
-        h.stock                = a['stock']
-        h.advisor              = a['advisor']
-        h.quantity_held        = qty
-        h.avg_price            = avg_price
-        h.share_price          = a['share_price']
-        h.previous_day_price   = a['previous_day_price']
-        h.market_value         = a['market_value']
-        h.investment_amount    = inv
-        h.overall_gain_loss    = a['overall_gain_loss']
-        h.overall_gain_percent = overall_gain_percent
-        h.day_gain_loss        = a['day_gain_loss']
-        h.day_gain_percent     = day_gain_percent
-        h.last_updated         = a['last_updated']
-        h.broker               = None
-        merged.append(h)
-
-    # Default sort: newest first
-    merged.sort(
-        key=lambda x: (x.last_updated or datetime.min, x.stock.id if x.stock else 0),
-        reverse=True
-    )
-
-    # Apply requested sort (stable sort keeps newest-first within equal values)
+    # Apply sorting: user-specified sort takes precedence over default
     if sort in ('inv', 'mkt'):
         if sort == 'inv':
             merged.sort(key=lambda x: x.investment_amount or Decimal('0'), reverse=(dir_ == 'desc'))
         else:
             merged.sort(key=lambda x: x.market_value or Decimal('0'), reverse=(dir_ == 'desc'))
+    else:
+        merged.sort(
+            key=lambda x: (x.last_updated or datetime.min, x.stock.id if x.stock else 0),
+            reverse=True
+        )
 
-    # Pagination
+    # ---------- XLSX ----------
+    if (request.GET.get('download') or '').lower() == 'xlsx':
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Portfolio"
+        headers = [
+            "Stock Name", "Advisor", "Broker", "CMP", "Avg. Price", "Quantity",
+            "Investment Amount", "Market Value", "Overall P/L", "Overall P/L %",
+            "Day P/L", "Day P/L %", "Last Updated"
+        ]
+        ws.append(headers)
+        for r in merged:
+            overall_pct_fraction = float((r.overall_gain_percent or 0) / 100)
+            day_pct_fraction     = float((r.day_gain_percent or 0) / 100)
+            ws.append([
+                (r.stock.company_name if r.stock else "-"),
+                (r.advisor.advisor_type if r.advisor else "-"),
+                (r.broker.name if r.broker else "-"),
+                float(r.share_price or 0),
+                float(r.avg_price or 0),
+                int(r.quantity_held or 0),
+                float(r.investment_amount or 0),
+                float(r.market_value or 0),
+                float(r.overall_gain_loss or 0),
+                overall_pct_fraction,
+                float(r.day_gain_loss or 0),
+                day_pct_fraction,
+                r.last_updated.isoformat(sep=" ", timespec="seconds") if r.last_updated else ""
+            ])
+
+        # Bold header, freeze, filter
+        for c in ws[1]:
+            c.font = Font(bold=True)
+            c.alignment = Alignment(vertical="center")
+        ws.freeze_panes = "A2"
+        ws.auto_filter.ref = ws.dimensions
+
+        # Number formats (now that Broker column exists, numeric block starts at col 4)
+        for row_cells in ws.iter_rows(min_row=2, min_col=4, max_col=12):
+            row_cells[0].number_format = numbers.FORMAT_NUMBER_00   # CMP
+            row_cells[1].number_format = numbers.FORMAT_NUMBER_00   # Avg. Price
+            row_cells[2].number_format = numbers.FORMAT_NUMBER      # Quantity
+            row_cells[3].number_format = numbers.FORMAT_NUMBER_00   # Investment Amount
+            row_cells[4].number_format = numbers.FORMAT_NUMBER_00   # Market Value
+            row_cells[5].number_format = numbers.FORMAT_NUMBER_00   # Overall P/L
+            row_cells[6].number_format = "0.00%"                    # Overall P/L %
+            row_cells[7].number_format = numbers.FORMAT_NUMBER_00   # Day P/L
+            row_cells[8].number_format = "0.00%"                    # Day P/L %
+
+        # Column widths
+        for col_idx in range(1, len(headers) + 1):
+            col_letter = get_column_letter(col_idx)
+            max_len = max(len(str(c.value)) if c.value is not None else 0 for c in ws[col_letter])
+            ws.column_dimensions[col_letter].width = min(max(12, max_len + 2), 42)
+
+        bio = BytesIO()
+        wb.save(bio); bio.seek(0)
+        resp = HttpResponse(
+            bio.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        resp['Content-Disposition'] = 'attachment; filename="portfolio.xlsx"'
+        return resp
+    # ---------- /XLSX ----------
+
     paginator = Paginator(merged, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
-    stock_context = get_user_stock_context(user, request)
+    stock_context = {}
+    if 'get_user_stock_context' in globals():
+        stock_context = get_user_stock_context(user, request)
+
+    # ---- Labels & stable query values for template ----
+    if advisor_effective in ('default', 'forced') and selected_advisor:
+        advisor_label = (selected_advisor.advisor_type or "Advisor").upper()
+        advisor_query_value = str(selected_advisor.id)  # reflect the effective advisor we applied
+    else:
+        if advisor_param is None:
+            advisor_label = "ALL ADVISORS"
+            advisor_query_value = "all"
+        elif str(advisor_param).lower() == 'all':
+            advisor_label = "ALL ADVISORS"
+            advisor_query_value = "all"
+        elif selected_advisor:
+            advisor_label = (selected_advisor.advisor_type or "Advisor").upper()
+            advisor_query_value = str(selected_advisor.id) if str(advisor_param).isdigit() else (selected_advisor.advisor_type or "")
+        else:
+            advisor_label = "ADVISOR"
+            advisor_query_value = "all"
+
+    broker_label = selected_broker.name if selected_broker else "All Brokers"
+    broker_query_value = str(selected_broker.id) if selected_broker else "all"
+
     context = {
         'holdings': page_obj,
         'advisors': Advisor.objects.all(),
         'brokers': Broker.objects.all(),
         'selected_advisor': selected_advisor,
-        'selected_broker': Broker.objects.filter(id=broker_id).first() if broker_id else None,
+        'selected_broker': selected_broker,
+        'advisor_param': advisor_param,
+        'advisor_label': advisor_label,
+        'advisor_query_value': advisor_query_value,
+        'broker_query_value': broker_query_value,
         'search_query': search,
         'page_obj': page_obj,
-        # expose sort state to template
         'sort': sort,
         'dir': dir_,
         **stock_context,
@@ -419,49 +595,149 @@ from django.core.paginator import Paginator
 from itertools import chain
 from operator import attrgetter
 from .models import BuyTransaction, BuyTransactionOtherAdvisor, Advisor, Broker
+from RM_User.models import *
+
+# views.py
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+
+
+
+
+from itertools import chain
+from operator import attrgetter
+
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.shortcuts import render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+# import your helper if you have it
+# from .utils import _parse_sort
+# from .helpers import get_user_stock_context
+# If those live elsewhere, keep as-is.
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.db.models import Q
+from django.shortcuts import render
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from itertools import chain
+from operator import attrgetter
+
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render
+from django.utils import timezone
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+# imports you already have:
+# from .utils import get_user_stock_context, _parse_sort
+
 
 @login_required
 def buy_orders(request):
-    user = request.user
-    search = request.GET.get('search', '').strip()
+    user       = request.user
+    search     = (request.GET.get('search') or '').strip()
     advisor_id = request.GET.get('advisor')
-    broker_id = request.GET.get('broker')
-    ordering = _parse_sort(request, default='-timestamp')
+    broker_id  = request.GET.get('broker')
+    ordering   = _parse_sort(request, default='-timestamp')  # keep your helper
 
-    qs1 = BuyTransaction.objects.filter(user=user).select_related('stock','advisor','broker')
-    qs2 = BuyTransactionOtherAdvisor.objects.filter(user=user).select_related('stock','advisor','broker')
+    qs1 = BuyTransaction.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
+    qs2 = BuyTransactionOtherAdvisor.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
 
-    if advisor_id:
+    # ---- Filters ----
+    if advisor_id and advisor_id != 'all':
         qs1 = qs1.filter(advisor__id=advisor_id)
         qs2 = qs2.filter(advisor__id=advisor_id)
-    if broker_id:
+
+    if broker_id and broker_id != 'all':
         qs1 = qs1.filter(broker__id=broker_id)
         qs2 = qs2.filter(broker__id=broker_id)
+
     if search:
         for_q = Q(stock__company_name__icontains=search) | Q(stock__scrip_name__icontains=search)
         qs1 = qs1.filter(for_q)
         qs2 = qs2.filter(for_q)
 
-    orders = sorted(chain(qs1, qs2), key=attrgetter('timestamp'), reverse=(ordering.startswith('-')))
+    # ---- Merge + sort (Python-side because models differ) ----
+    # ordering is '-timestamp' or 'timestamp' (your helper guarantees)
+    reverse = ordering.startswith('-')
+    orders = sorted(chain(qs1, qs2), key=attrgetter('timestamp'), reverse=reverse)
 
+    # ---- Paginate ----
     paginator = Paginator(orders, 15)
-    page_obj = paginator.get_page(request.GET.get('page'))
+    page_obj  = paginator.get_page(request.GET.get('page'))
 
+    # ---- can_delete computation on visible page ----
+    page_ids = [o.order_id for o in page_obj if getattr(o, 'order_id', None)]
+    paid_ids = set(
+        RMPaymentRecord.objects.filter(rm_user_view__order_id__in=page_ids)
+        .values_list('rm_user_view__order_id', flat=True)
+    )
+    for o in page_obj:
+        o.can_delete = (getattr(o, 'RM_status', None) == 'processing') and (o.order_id not in paid_ids)
+
+    # ---- Additional context ----
     stock_context = get_user_stock_context(user, request)
+
     context = {
-        'orders': page_obj,
-        'advisors': Advisor.objects.all(),
-        'brokers': Broker.objects.all(),
-        'selected_advisor': Advisor.objects.filter(id=advisor_id).first() if advisor_id else None,
-        'selected_broker': Broker.objects.filter(id=broker_id).first() if broker_id else None,
-        'sort': ordering,
-        'search_query': search,
-        'page_obj': page_obj,
-        'now': timezone.localtime(),
+        'orders'          : page_obj,  # iterable page
+        'page_obj'        : page_obj,
+        'paginator'       : paginator,
+        'advisors'        : Advisor.objects.all().order_by('advisor_type'),
+        'brokers'         : Broker.objects.all().order_by('name'),
+        'selected_advisor': Advisor.objects.filter(id=advisor_id).first() if advisor_id and advisor_id != 'all' else None,
+        'selected_broker' : Broker.objects.filter(id=broker_id).first() if broker_id and broker_id != 'all' else None,
+        'sort'            : ordering,
+        'search_query'    : search,
+        'now'             : timezone.localtime(),
         **stock_context,
     }
-    tpl = 'portfolio/includes/buy_orders_table.html' if request.headers.get('X-Requested-With')=='XMLHttpRequest' else 'portfolio/BuyOrdersList.html'
+
+    tpl = (
+        'portfolio/includes/buy_orders_table.html'
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        else 'portfolio/BuyOrdersList.html'
+    )
     return render(request, tpl, context)
+
+@login_required
+@require_POST
+def delete_buy_order(request):
+    """
+    Deletes a buy order ONLY if:
+      - it belongs to the requesting user
+      - RM_status == 'processing'
+      - there are NO RMPaymentRecord rows linked to this order_id
+    Works for both BuyTransaction and BuyTransactionOtherAdvisor.
+    """
+    order_id = request.POST.get('order_id')
+    if not order_id:
+        return HttpResponseBadRequest('Missing order_id')
+
+    obj = (
+        BuyTransaction.objects.filter(order_id=order_id, user=request.user).first() or
+        BuyTransactionOtherAdvisor.objects.filter(order_id=order_id, user=request.user).first()
+    )
+    if not obj:
+        return HttpResponseForbidden('Order not found or not yours')
+
+    if getattr(obj, 'RM_status', None) != 'processing':
+        return JsonResponse({'ok': False, 'reason': 'locked_status'}, status=400)
+
+    if RMPaymentRecord.objects.filter(rm_user_view__order_id=order_id).exists():
+        return JsonResponse({'ok': False, 'reason': 'has_payment'}, status=400)
+
+    obj.delete()
+    return JsonResponse({'ok': True})
+
+
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
@@ -476,27 +752,78 @@ from django.shortcuts import render
 from .models import SellTransaction, SellTransactionOtherAdvisor, Advisor, Broker
 from .utils import get_user_stock_context
 
+from itertools import chain
+from operator import attrgetter
+
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.shortcuts import render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.db import transaction
+
+@login_required
+@require_POST
+def delete_sell_order(request):
+    """
+    Deletes a sell order ONLY if:
+      - it belongs to the requesting user
+      - RM_status == 'processing'
+      - there are NO RMPaymentRecord rows linked to this order_id
+    Works for both SellTransaction and SellTransactionOtherAdvisor.
+    """
+    order_id = request.POST.get('order_id')
+    if not order_id:
+        return HttpResponseBadRequest('Missing order_id')
+
+    obj = (
+        SellTransaction.objects.filter(order_id=order_id, user=request.user).first()
+        or SellTransactionOtherAdvisor.objects.filter(order_id=order_id, user=request.user).first()
+    )
+    if not obj:
+        return HttpResponseForbidden('Order not found or not yours')
+
+    # Normalize RM_status just in case
+    rm_status = (getattr(obj, "RM_status", "") or "").lower()
+    if rm_status != "processing":
+        return JsonResponse({"ok": False, "reason": "locked_status"}, status=400)
+
+    has_payment = RMPaymentRecord.objects.filter(
+        rm_user_view__order_id=order_id
+    ).exists()
+    if has_payment:
+        return JsonResponse({"ok": False, "reason": "has_payment"}, status=400)
+
+    with transaction.atomic():
+        obj.delete()
+
+    return JsonResponse({"ok": True})
 
 @login_required
 def sell_orders(request):
     user = request.user
-    search = request.GET.get('search', '').strip()
+    search     = (request.GET.get('search') or '').strip()
     advisor_id = request.GET.get('advisor')
-    broker_id = request.GET.get('broker')
-    ordering = _parse_sort(request, default='-timestamp')
-
-    qs1 = SellTransaction.objects.filter(user=user).select_related('stock','advisor','broker')
-    qs2 = SellTransactionOtherAdvisor.objects.filter(user=user).select_related('stock','advisor','broker')
-
+    broker_id  = request.GET.get('broker')
+    ordering   = _parse_sort(request, default='-timestamp')
     status_filter = request.GET.get('status')
+
+    qs1 = SellTransaction.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
+    qs2 = SellTransactionOtherAdvisor.objects.filter(user=user).select_related('stock', 'advisor', 'broker')
+
     if status_filter:
         qs1 = qs1.filter(status=status_filter)
         qs2 = qs2.filter(status=status_filter)
 
-    if advisor_id:
+    if advisor_id and advisor_id != 'all':
         qs1 = qs1.filter(advisor__id=advisor_id)
         qs2 = qs2.filter(advisor__id=advisor_id)
-    if broker_id:
+    if broker_id and broker_id != 'all':
         qs1 = qs1.filter(broker__id=broker_id)
         qs2 = qs2.filter(broker__id=broker_id)
     if search:
@@ -504,18 +831,28 @@ def sell_orders(request):
         qs1 = qs1.filter(for_q)
         qs2 = qs2.filter(for_q)
 
-    orders = sorted(chain(qs1, qs2), key=attrgetter('timestamp'), reverse=(ordering.startswith('-')))
+    orders = sorted(chain(qs1, qs2), key=attrgetter('timestamp'), reverse=ordering.startswith('-'))
 
     paginator = Paginator(orders, 15)
     page_obj = paginator.get_page(request.GET.get('page'))
+
+    # Mark deletable for rows on this page:
+    # can delete iff RM_status == 'processing' and NO RMPaymentRecord exists for this order_id
+    page_ids = [o.order_id for o in page_obj if getattr(o, "order_id", None)]
+    paid_ids = set(
+        RMPaymentRecord.objects.filter(rm_user_view__order_id__in=page_ids)
+        .values_list('rm_user_view__order_id', flat=True)
+    )
+    for o in page_obj:
+        o.can_delete = (getattr(o, "RM_status", None) == "processing") and (o.order_id not in paid_ids)
 
     stock_context = get_user_stock_context(user, request)
     context = {
         'orders': page_obj,
         'advisors': Advisor.objects.all(),
         'brokers': Broker.objects.all(),
-        'selected_advisor': Advisor.objects.filter(id=advisor_id).first() if advisor_id else None,
-        'selected_broker': Broker.objects.filter(id=broker_id).first() if broker_id else None,
+        'selected_advisor': Advisor.objects.filter(id=advisor_id).first() if advisor_id and advisor_id != 'all' else None,
+        'selected_broker': Broker.objects.filter(id=broker_id).first() if broker_id and broker_id != 'all' else None,
         'sort': ordering,
         'search_query': search,
         'page_obj': page_obj,
@@ -524,6 +861,7 @@ def sell_orders(request):
     }
     tpl = 'portfolio/includes/sell_orders_table.html' if request.headers.get('X-Requested-With')=='XMLHttpRequest' else 'portfolio/SellOrdersList.html'
     return render(request, tpl, context)
+
 
 # testing
 
@@ -638,6 +976,8 @@ from decimal import Decimal, InvalidOperation
 from .models import StockData, SellTransaction, Advisor, Broker, UserStockInvestmentSummary
 # at the imports near sell_stock
 from django.db.models import Sum  # add this
+
+
 @require_POST
 @login_required
 def sell_stock(request, stock_id):
@@ -708,7 +1048,7 @@ def sell_stock(request, stock_id):
                     (
                         f"{stock.company_name}: Requested {quantity} shares, but  {available} available "
                         f"under Thangiv Advisor (shortfall {shortfall}). "
-                        f"Please reduce to {available} or fewer and try again."
+                        f" Please modify the order."
                     )
                 )
                 return redirect(request.META.get('HTTP_REFERER', '/'))
