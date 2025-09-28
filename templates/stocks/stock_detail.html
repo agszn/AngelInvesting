@@ -1183,16 +1183,16 @@
                 <!-- Overview -->
                 <section id="overview" class="cs-overview-section">
                     <section class="cs-overview-box">
-                        <div class="cs-overview-text">
+                        <!-- <div class="cs-overview-text">
                           <h2>COMPANY SNAPSHOT</h2>
-                        </div>
+                        </div> -->
                         <div class="cs-overview-text">
                             {{ stock.company_overview|safe }}
                         </div>
-                        <hr/>                        
+                        <!-- <hr/>                        
                         <div class="cs-overview-text">
                           <h2>INDUSTRY OUTLOOK</h2>
-                        </div>
+                        </div> -->
                         {% if reports %}
                         <div class="cs-overview-text">
                             {% for report in reports %}
@@ -1202,8 +1202,8 @@
                         {% endif %}
                     
                     <!-- shareholder table start  -->
-                          <hr/>
-                          {% load humanize %}
+                          <!-- <hr/> -->
+                          <!-- {% load humanize %}
                           {% if shareholdings %}
                           <div class="cs-overview-text">
                             <h2>LATEST SHAREHOLDING</h2>
@@ -1240,13 +1240,13 @@
                               </tbody>
                             </table>
                           </div>
-                          {% endif %}
+                          {% endif %} -->
                           <!-- shareholding note -->
-                          {% if stock.shareholding_info and stock.shareholding_info.note %}
+                          <!-- {% if stock.shareholding_info and stock.shareholding_info.note %}
                             <div class="cs-overview-text">
                                 {{ stock.shareholding_info.note|safe }}
                             </div>
-                          {% endif %}
+                          {% endif %} -->
                     </section>
                     <!-- shareholder table end  -->
                 </section>
