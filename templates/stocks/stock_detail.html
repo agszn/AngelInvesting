@@ -757,12 +757,12 @@
             <div class="Sec2_3_PG_principlesRow">
                 <div class="Sec2_3_PG_col">
                     <span class="Sec2_3_PG_label">Company Name</span>
-                    <span class="Sec2_3_PG_value">{{ stock.company_name }}</span>
+                    <span class="Sec2_3_PG_value">{{ stock.scrip_name }}</span>
                 </div>
                 <div class="Sec2_3_PG_col">
                     <!-- <span class="Sec2_3_PG_label">Market Capitalization (in Cr)</span> -->
                     <span class="Sec2_3_PG_label">Market Cap</span>
-                    <span class="Sec2_3_PG_value">₹ {{ stock.market_capitalization }}</span>
+                    <span class="Sec2_3_PG_value">₹ {{ stock.market_capitalization }} </span>
                 </div>
             </div>
             <div class="Sec2_3_PG_principlesRow">
@@ -1184,7 +1184,14 @@
                 <section id="overview" class="cs-overview-section">
                     <section class="cs-overview-box">
                         <div class="cs-overview-text">
+                          <h2>COMPANY SNAPSHOT</h2>
+                        </div>
+                        <div class="cs-overview-text">
                             {{ stock.company_overview|safe }}
+                        </div>
+                        <hr/>                        
+                        <div class="cs-overview-text">
+                          <h2>INDUSTRY OUTLOOK</h2>
                         </div>
                         {% if reports %}
                         <div class="cs-overview-text">
@@ -1193,7 +1200,55 @@
                             {% endfor %}
                         </div>
                         {% endif %}
+                    
+                    <!-- shareholder table start  -->
+                          <hr/>
+                          {% load humanize %}
+                          {% if shareholdings %}
+                          <div class="cs-overview-text">
+                            <h2>LATEST SHAREHOLDING</h2>
+                          </div>
+                          <div class="cs-overview-text">
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>Shareholder Category</th>
+                                  <th>No. of Shares</th>
+                                  <th>Holding (%)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for holder in shareholdings %}
+                                  <tr>
+                                    <td>
+                                      {% if holder.shareholder_name %}
+                                        {{ holder.shareholder_name }}
+                                      {% endif %}
+                                    </td>
+                                    <td>
+                                      {% if holder.number_of_shares %}
+                                        {{ holder.number_of_shares|intcomma }}
+                                      {% endif %}
+                                    </td>
+                                    <td>
+                                      {% if holder.percentage_of_total %}
+                                        {{ holder.percentage_of_total|floatformat }}%
+                                      {% endif %}
+                                    </td>
+                                  </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                          {% endif %}
+                          <!-- shareholding note -->
+                          {% if stock.shareholding_info and stock.shareholding_info.note %}
+                            <div class="cs-overview-text">
+                                {{ stock.shareholding_info.note|safe }}
+                            </div>
+                          {% endif %}
                     </section>
+                    <!-- shareholder table end  -->
                 </section>
                 <!-- Balance Sheet -->
         <section id="balance-sheet" class="cs-content-section" style="display: none;">

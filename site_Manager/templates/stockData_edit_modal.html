@@ -1,94 +1,602 @@
 {% extends "baseStructureSM.html" %}
 {% load static %}
-{% block title %}Banner{% endblock %}
-{% block subtitle %}Homepage Banner{% endblock %}
+{% load humanize %}
+
+{% block title %}Edit Stock{% endblock %}
+{% block subtitle %}Stock Master – Modernized Interface{% endblock %}
 
 {% block SMprofile_content %}
-<h4>StockData Edit</h4>
+<style>
+  .ai-wrap { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
 
-<form method="post" enctype="multipart/form-data">
+  /* Title must be visible against your navy header */
+  .ai-page-title {
+    font-size: 1.75rem; font-weight: 700;
+    color: #eaf2ff;                 /* light */
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+    margin-bottom: 1.5rem;
+  }
+
+  .ai-card { background: #fff; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1); padding: 2rem; }
+  .ai-section { margin-top: 2rem; }
+  .ai-chip { display: inline-flex; align-items: center; background: #e5e7eb; color: #374151; font-weight: 500; padding: .25rem .75rem; border-radius: 1rem; font-size: .875rem; }
+  .ai-chip .dot { display:inline-block; width:8px; height:8px; background:#3b82f6; border-radius:50%; margin-right:.5rem; }
+  .ai-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; margin-top:1rem; }
+  .ai-field { display:flex; flex-direction:column; gap:.5rem; }
+  .ai-label { font-size:.875rem; font-weight:600; color:#374151; }
+  .ai-error { color:#dc2626; font-size:.75rem; margin-top:.25rem; }
+  .ai-help { color:#6b7280; font-size:.75rem; margin-top:.25rem; }
+  .ai-btn { background:#2563eb; color:#fff; border:none; border-radius:.5rem; padding:.5rem 1rem; font-size:.875rem; font-weight:600; transition:background .2s; }
+  .ai-btn:hover { background:#1d4ed8; }
+  .ai-btn-secondary { background:#6b7280; }
+  .ai-btn-secondary:hover { background:#4b5563; }
+  .ai-checkbox { display:flex; align-items:center; gap:.5rem; font-size:.9rem; color:#374151; }
+  .ai-fs-item { padding:1rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#f9fafb; }
+
+  /* Delete pill (visible label + checkbox) */
+  .ai-fs-actions{ display:flex; justify-content:flex-end; margin-top:.5rem; }
+  .ai-delete{
+    display:inline-flex; align-items:center; gap:.55rem;
+    background:#ffffff; border:1px solid #e5e7eb; border-radius:.5rem;
+    padding:.38rem .7rem; font-size:.9rem; font-weight:600; color:#374151;
+    cursor:pointer; user-select:none; box-shadow:0 1px 2px rgba(0,0,0,.05);
+  }
+  .ai-delete span{ color:#374151; line-height:1; }  /* ensure text shows */
+  .ai-delete input[type="checkbox"]{ width:16px; height:16px; accent-color:#dc2626; }
+
+  hr { border:none; border-top:1px solid #e5e7eb; margin:2rem 0; }
+  input, select, textarea { border:1px solid #d1d5db; border-radius:.375rem; padding:.5rem; font-size:.875rem; width:100%; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:#2563eb; box-shadow:0 0 0 2px rgba(37,99,235,.2); }
+  .ai-floating-actions { position:fixed; bottom:1.5rem; right:1.5rem; display:flex; gap:1rem; z-index:1000; }
+  @media (max-width:640px){
+    .ai-floating-actions{ flex-direction:column; right:1rem; }
+    .ai-wrap{ padding:1rem; }
+    .ai-card{ padding:1rem; }
+  }
+</style>
+
+<div class="ai-wrap">
+  <h4 class="ai-page-title">Edit {{ form.company_name.value|default:"Stock Data" }}</h4>
+
+  <form method="post" enctype="multipart/form-data" class="ai-card" id="form">
     {% csrf_token %}
 
-    <h4 class="mt-3">Main Stock Info</h4>
-    {% for field in form.visible_fields %}
-        <div class="mb-3">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-                <div class="text-danger small">{{ field.errors }}</div>
-            {% endif %}
-        </div>
-    {% endfor %}
+    <div class="ai-field">
+      <label class="ai-checkbox" for="{{ form.hide_company_overview.id_for_label }}">
+        {{ form.hide_company_overview }} Hide on Frontend
+      </label>
+    </div>
 
-    <h4 class="mt-4">Reports</h4>
-    {{ report_formset.management_form }}
-    {% for form in report_formset %}
-        {{ form.id }}  <!-- REQUIRED -->
-        <div class="border rounded p-3 mb-3">
-            {% for field in form.visible_fields %}
-                <div class="mb-2">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small">{{ field.errors }}</div>
-                    {% endif %}
-                </div>
+    <hr>
+    <!-- Prices -->
+    <div class="ai-section">
+      <span class="ai-chip">Prices</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.share_price.id_for_label }}">Yesterday Price</label>
+          {{ form.share_price }}
+          {% if form.share_price.errors %}<div class="ai-error">{{ form.share_price.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.ltp.id_for_label }}">Today Price</label>
+          {{ form.ltp }}
+          {% if form.ltp.errors %}<div class="ai-error">{{ form.ltp.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.partner_price.id_for_label }}">Partner Price</label>
+          {{ form.partner_price }}
+          {% if form.partner_price.errors %}<div class="ai-error">{{ form.partner_price.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <!-- Capitalization -->
+    <div class="ai-section">
+      <span class="ai-chip">Capitalization</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.outstanding_shares.id_for_label }}">No Outstanding Shares</label>
+          {{ form.outstanding_shares }}
+          {% if form.outstanding_shares.errors %}<div class="ai-error">{{ form.outstanding_shares.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.market_capitalization.id_for_label }}">Market Cap (Cr.)</label>
+          {{ form.market_capitalization }}
+          {% if form.market_capitalization.errors %}<div class="ai-error">{{ form.market_capitalization.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <!-- Ratios -->
+    <div class="ai-section">
+      <span class="ai-chip">Ratios</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.pe_ratio.id_for_label }}">PE</label>
+          {{ form.pe_ratio }}
+          {% if form.pe_ratio.errors %}<div class="ai-error">{{ form.pe_ratio.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.ps_ratio.id_for_label }}">P/S</label>
+          {{ form.ps_ratio }}
+          {% if form.ps_ratio.errors %}<div class="ai-error">{{ form.ps_ratio.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.pbv.id_for_label }}">P/BV</label>
+          {{ form.pbv }}
+          {% if form.pbv.errors %}<div class="ai-error">{{ form.pbv.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.eps.id_for_label }}">EPS</label>
+          {{ form.eps }}
+          {% if form.eps.errors %}<div class="ai-error">{{ form.eps.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <!-- Values -->
+    <div class="ai-section">
+      <span class="ai-chip">Values</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.face_value.id_for_label }}">Face Value</label>
+          {{ form.face_value }}
+          {% if form.face_value.errors %}<div class="ai-error">{{ form.face_value.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.book_value.id_for_label }}">Book Value</label>
+          {{ form.book_value }}
+          {% if form.book_value.errors %}<div class="ai-error">{{ form.book_value.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <!-- Brand & Logo -->
+    <div class="ai-section">
+      <span class="ai-chip">Brand & Identity</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.company_name.id_for_label }}">Brand Name</label>
+          {{ form.company_name }}
+          {% if form.company_name.errors %}<div class="ai-error">{{ form.company_name.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.scrip_name.id_for_label }}">Scrip Name</label>
+          {{ form.scrip_name }}
+          {% if form.scrip_name.errors %}<div class="ai-error">{{ form.scrip_name.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.logo.id_for_label }}">Logo</label>
+          {% if form.instance.logo %}
+            <div class="ai-help">Current:
+              <a href="{{ form.instance.logo.url }}" target="_blank" class="text-blue-600 hover:underline">{{ form.instance.logo.name }}</a>
+            </div>
+            <label class="ai-checkbox"><input type="checkbox" name="logo-clear"> Remove logo</label>
+          {% endif %}
+          {{ form.logo }}
+          {% if form.logo.errors %}<div class="ai-error">{{ form.logo.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <!-- Legal IDs -->
+    <div class="ai-section">
+      <span class="ai-chip">Legal IDs</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.pan_no.id_for_label }}">PAN No</label>
+          {{ form.pan_no }}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.isin_no.id_for_label }}">ISIN</label>
+          {{ form.isin_no }}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.cin.id_for_label }}">CIN</label>
+          {{ form.cin }}
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <!-- Sector & Category -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Sector & Category</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.sector.id_for_label }}">Sector</label>
+          {{ form.sector }}
+          <datalist id="sector-options">
+            {% for s in form.sector_datalist %}
+              <option value="{{ s }}"></option>
             {% endfor %}
+          </datalist>
+          <div class="ai-help">Start typing to search, or pick from the list.</div>
+          {% if form.sector.errors %}<div class="ai-error">{{ form.sector.errors }}</div>{% endif %}
         </div>
-    {% endfor %}
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.category.id_for_label }}">Category</label>
+          {{ form.category }}
+        </div>
+      </div>
+    </div>
 
-    <h4 class="mt-4">Shareholding Pattern</h4>
-    {{ shareholding_formset.management_form }}
-    {% for form in shareholding_formset %}
-        {{ form.id }}  <!-- REQUIRED -->
-        <div class="border rounded p-3 mb-3">
-            {% for field in form.visible_fields %}
-                <div class="mb-2">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small">{{ field.errors }}</div>
-                    {% endif %}
-                </div>
+    <hr>
+    <!-- Regulatory -->
+    <div class="ai-section">
+      <span class="ai-chip">Regulatory</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.drhp_filed.id_for_label }}">DRHP Filed</label>
+          {{ form.drhp_filed }}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.available_on.id_for_label }}">Available On</label>
+          {{ form.available_on }}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label" for="{{ form.registration_date.id_for_label }}">Registration Date</label>
+          {{ form.registration_date }}
+          {% if form.registration_date.errors %}<div class="ai-error">{{ form.registration_date.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    {# --- Company Overview (read-only) --- #}
+    <div class="ai-section">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="ai-chip">Company Overview</span>
+        <a class="ai-btn" href="{% url 'SM_User:edit_company_overview' form.instance.pk %}">Edit</a>
+      </div>
+
+      <div class="ai-card mt-2 p-3">
+        {% if form.instance.company_overview %}
+          <div class="readmore-container text-body" style="white-space:pre-wrap">
+            {{ form.instance.company_overview|escape }}
+          </div>
+          <span class="readmore-toggle">Read more</span>
+        {% else %}
+          <div class="text-muted">No overview yet.</div>
+        {% endif %}
+      </div>
+
+    </div>
+
+
+    <hr>
+    {# ---- Outlooks (read-only on main page) ---- #}
+    <div class="ai-section">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="ai-chip">Outlooks</span>
+        <a class="ai-btn" href="{% url 'SM_User:edit_outlooks' form.instance.pk %}">Edit</a>
+      </div>
+
+      <div class="ai-card mt-2 p-3">
+        {% if reports_qs %}
+          <ul class="list-unstyled mb-0">
+            {% for rep in reports_qs %}
+              {% if rep.summary %}
+                <li class="mb-2 text-body">
+                  <div class="readmore-container" style="white-space:pre-wrap; color:#374151;">
+                    {{ rep.summary|escape }}
+                  </div>
+                  <span class="readmore-toggle">Read more</span>
+                </li>
+              {% endif %}
+            {% empty %}
+              <li class="text-muted">No outlooks added yet.</li>
             {% endfor %}
-        </div>
-    {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">No outlooks added yet.</div>
+        {% endif %}
+      </div>
 
-    <h4 class="mt-4">Company Relations</h4>
-    {{ relation_formset.management_form }}
-    {% for form in relation_formset %}
-        {{ form.id }}  <!-- REQUIRED -->
-        <div class="border rounded p-3 mb-3">
-            {% for field in form.visible_fields %}
-                <div class="mb-2">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small">{{ field.errors }}</div>
-                    {% endif %}
+    </div>
+
+    <hr>
+    <!-- Shareholding Pattern -->
+    <div class="ai-section">
+      <span class="ai-chip">Shareholding Pattern</span>
+      {{ shareholding_formset.management_form }}
+      <div id="shareholding-forms">
+        {% for shform in shareholding_formset %}
+          {{ shform.id }}
+          <div class="ai-fs-item mt-3" data-form-index="{{ forloop.counter0 }}">
+            <div class="ai-grid">
+              {% for f in shform.visible_fields %}
+                {% if f.name != "DELETE" %}
+                  <div class="ai-field">
+                    <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                    {{ f }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="ai-fs-actions">
+              <label class="ai-delete" for="{{ shform.DELETE.id_for_label }}">
+                {{ shform.DELETE }} <span>Delete</span>
+              </label>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No holders yet. Click “Add more”.</div>
+        {% endfor %}
+      </div>
+
+      <template id="shareholding-empty-form">
+        <div class="ai-fs-item mt-3">
+          <div class="ai-grid">
+            {% for f in shareholding_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
                 </div>
+              {% endif %}
             {% endfor %}
+          </div>
+          <div class="ai-fs-actions">
+            <label class="ai-delete" for="{{ shareholding_formset.empty_form.DELETE.id_for_label }}">
+              {{ shareholding_formset.empty_form.DELETE }} <span>Delete</span>
+            </label>
+          </div>
         </div>
-    {% endfor %}
+      </template>
 
-    <h4 class="mt-4">Principal Business Activities</h4>
-    {{ business_formset.management_form }}
-    {% for form in business_formset %}
-        {{ form.id }}  <!-- REQUIRED -->
-        <div class="border rounded p-3 mb-3">
-            {% for field in form.visible_fields %}
-                <div class="mb-2">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small">{{ field.errors }}</div>
-                    {% endif %}
+      <div class="mt-3"><button type="button" class="ai-btn" id="shareholding-add-btn">Add more</button></div>
+    </div>
+      
+    {# --- Shareholding Note (read-only) --- #}
+    <div class="ai-section">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="ai-chip">Shareholding Note</span>
+        <a class="ai-btn" href="{% url 'SM_User:edit_shareholding_note' form.instance.pk %}">Edit</a>
+      </div>
+
+      <div class="ai-card mt-2 p-3">
+        {% if shinfo_obj and shinfo_obj.note %}
+          <div class="readmore-container" style="color:#374151; white-space:pre-wrap;">
+            {{ shinfo_obj.note|escape }}
+          </div>
+          <span class="readmore-toggle">Read more</span>
+        {% else %}
+          <div class="text-muted">No shareholding note yet.</div>
+        {% endif %}
+      </div>
+
+
+    </div>
+
+    <hr>
+    <!-- Company Relations -->
+    <div class="ai-section">
+      <span class="ai-chip">Company Relations</span>
+      {{ relation_formset.management_form }}
+      <div id="relation-forms">
+        {% for relform in relation_formset %}
+          {{ relform.id }}
+          <div class="ai-fs-item mt-3" data-form-index="{{ forloop.counter0 }}">
+            <div class="ai-grid">
+              {% for f in relform.visible_fields %}
+                {% if f.name != "DELETE" %}
+                  <div class="ai-field">
+                    <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                    {{ f }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="ai-fs-actions">
+              <label class="ai-delete" for="{{ relform.DELETE.id_for_label }}">
+                {{ relform.DELETE }} <span>Delete</span>
+              </label>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No relations yet. Click “Add more”.</div>
+        {% endfor %}
+      </div>
+
+      <template id="relation-empty-form">
+        <div class="ai-fs-item mt-3">
+          <div class="ai-grid">
+            {% for f in relation_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
                 </div>
+              {% endif %}
             {% endfor %}
+          </div>
+          <div class="ai-fs-actions">
+            <label class="ai-delete" for="{{ relation_formset.empty_form.DELETE.id_for_label }}">
+              {{ relation_formset.empty_form.DELETE }} <span>Delete</span>
+            </label>
+          </div>
         </div>
-    {% endfor %}
+      </template>
 
-    <button type="submit" class="btn btn-primary mt-3">Save</button>
-</form>
+      <div class="mt-3"><button type="button" class="ai-btn" id="relation-add-btn">Add more</button></div>
+    </div>
 
+    <hr>
+    <!-- Principal Business Activities -->
+    <div class="ai-section">
+      <span class="ai-chip">Principal Business Activities</span>
+      {{ business_formset.management_form }}
+      <div id="business-forms">
+        {% for bform in business_formset %}
+          {{ bform.id }}
+          <div class="ai-fs-item mt-3" data-form-index="{{ forloop.counter0 }}">
+            <div class="ai-grid">
+              {% for f in bform.visible_fields %}
+                {% if f.name != "DELETE" %}
+                  <div class="ai-field">
+                    <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                    {{ f }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="ai-fs-actions">
+              <label class="ai-delete" for="{{ bform.DELETE.id_for_label }}">
+                {{ bform.DELETE }} <span>Delete</span>
+              </label>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No activities yet. Click “Add more”.</div>
+        {% endfor %}
+      </div>
+
+      <template id="business-empty-form">
+        <div class="ai-fs-item mt-3">
+          <div class="ai-grid">
+            {% for f in business_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="ai-fs-actions">
+            <label class="ai-delete" for="{{ business_formset.empty_form.DELETE.id_for_label }}">
+              {{ business_formset.empty_form.DELETE }} <span>Delete</span>
+            </label>
+          </div>
+        </div>
+      </template>
+
+      <div class="mt-3"><button type="button" class="ai-btn" id="business-add-btn">Add more</button></div>
+    </div>
+  </form>
+
+  <!-- Floating Save and Cancel Buttons -->
+  <div class="ai-floating-actions">
+    <button type="button" class="ai-btn ai-btn-secondary" onclick="window.history.back()">Cancel</button>
+    <button type="submit" form="form" class="ai-btn">Save</button>
+  </div>
+</div>
+
+
+
+<!-- read more start -->
+<style>
+  .readmore-container {
+    position: relative;
+    max-height: 150px;   /* collapsed height */
+    overflow: hidden;
+  }
+  .readmore-container.expanded {
+    max-height: none;    /* expand fully */
+  }
+  .readmore-toggle {
+    display: inline-block;
+    margin-top: 8px;
+    color: #0d47a1;
+    font-weight: 500;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".readmore-toggle").forEach(btn => {
+      btn.addEventListener("click", function() {
+        let container = this.previousElementSibling;
+        container.classList.toggle("expanded");
+        this.textContent = container.classList.contains("expanded") 
+          ? "Read less" 
+          : "Read more";
+      });
+    });
+  });
+</script>
+
+<!-- read more end -->
+<!-- Enhanced Formset Logic -->
+<script>
+  function setupFormsetAdd(prefix) {
+    const container = document.getElementById(`${prefix}-forms`);
+    const template = document.getElementById(`${prefix}-empty-form`);
+    const button = document.getElementById(`${prefix}-add-btn`);
+    const totalForms = document.querySelector(`input[name="${prefix}-TOTAL_FORMS"]`);
+    if (!container || !template || !button || !totalForms) return;
+
+    button.addEventListener('click', () => {
+      const index = parseInt(totalForms.value, 10);
+      const html = template.innerHTML.replaceAll('__prefix__', index).replaceAll('__num__', index + 1);
+      const wrap = document.createElement('div');
+      wrap.innerHTML = html.trim();
+      const newForm = wrap.firstElementChild;
+      newForm.style.opacity = '0';
+      container.appendChild(newForm);
+      totalForms.value = index + 1;
+      setTimeout(() => {
+        newForm.style.transition = 'opacity .3s ease';
+        newForm.style.opacity = '1';
+      }, 10);
+    });
+  }
+
+  // Confirm when any DELETE checkbox is toggled (works for dynamically added rows too)
+  function attachDeleteConfirm(prefix){
+    const container = document.getElementById(`${prefix}-forms`);
+    if(!container) return;
+    container.addEventListener('change', (e) => {
+      const el = e.target;
+      if(el.matches(`input[type="checkbox"][name^="${prefix}-"][name$="-DELETE"]`)){
+        if(el.checked){
+          const ok = window.confirm("Delete this item from the form?");
+          if(!ok) el.checked = false;
+        }
+      }
+    });
+  }
+
+  // Optional: final confirm on submit if any deletes are checked
+  function attachSubmitConfirm(){
+    const form = document.getElementById('form');
+    if(!form) return;
+    form.addEventListener('submit', (e) => {
+      const anyDelete = form.querySelector('input[type="checkbox"][name$="-DELETE"]:checked');
+      if(anyDelete){
+        const ok = confirm("You marked one or more rows for deletion. Proceed?");
+        if(!ok) e.preventDefault();
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    ['report','shareholding','relation','business'].forEach(setupFormsetAdd);
+    ['report','shareholding','relation','business'].forEach(attachDeleteConfirm);
+    attachSubmitConfirm();
+  });
+</script>
+
+<!-- Sector "Other" Toggle -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('id_sector_choice');
+    const wrap = document.getElementById('sector-new-wrap');
+    const OTHER = "{{ OTHER_SENTINEL|default:'__OTHER__' }}";
+    function toggle(){
+      if(!select || !wrap) return;
+      wrap.style.transition = 'opacity .3s ease';
+      wrap.style.opacity = select.value === OTHER ? '1' : '0';
+      wrap.style.display = select.value === OTHER ? '' : 'none';
+    }
+    if(select){ toggle(); select.addEventListener('change', toggle); }
+  });
+</script>
 {% endblock %}

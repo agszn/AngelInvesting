@@ -892,55 +892,237 @@ from .forms import (
     CompanyRelationFormSet,
     PrincipalBusinessActivityFormSet
 )
+# views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from .forms import (
+    StockDataForm,
+    ReportFormSet,
+    ShareholdingPatternFormSet,
+    CompanyRelationFormSet,
+    PrincipalBusinessActivityFormSet
+)
+from .models import StockData
+# views.py
+from django.shortcuts import render, get_object_or_404, redirect
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
+from .models import StockData
+from .forms import (
+    StockDataForm, ReportFormSet, ShareholdingPatternFormSet, ShareholdingInfoFormSet,
+    CompanyRelationFormSet, PrincipalBusinessActivityFormSet,
+    CompanyOverviewForm, ReportEditFormSet, ShareholdingInfoEditFormSet
+)
+from django.db.models import Prefetch
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import (
+    StockDataForm, ReportFormSet, ShareholdingPatternFormSet, ShareholdingInfoFormSet,
+    CompanyRelationFormSet, PrincipalBusinessActivityFormSet,
+    CompanyOverviewForm, ReportEditFormSet, ShareholdingInfoEditFormSet
+)
+
+@login_required
 def edit_stockdata(request, pk):
-    stock = get_object_or_404(StockData, pk=pk)
+    stock = get_object_or_404(
+        StockData.objects
+        .select_related('shareholding_info')
+        .prefetch_related(Prefetch('reports', queryset=Report.objects.order_by('-id'))),
+        pk=pk
+    )
 
     if request.method == 'POST':
         form = StockDataForm(request.POST, request.FILES, instance=stock)
-        report_formset = ReportFormSet(request.POST, instance=stock, prefix='report')
+        # these are editable on this page
         shareholding_formset = ShareholdingPatternFormSet(request.POST, instance=stock, prefix='shareholding')
         relation_formset = CompanyRelationFormSet(request.POST, instance=stock, prefix='relation')
         business_formset = PrincipalBusinessActivityFormSet(request.POST, instance=stock, prefix='business')
 
+        # read-only here; bind only if POST actually contains them (it won’t)
+        report_formset = ReportFormSet(instance=stock, prefix='report')
+        shinfo_formset = ShareholdingInfoFormSet(instance=stock, prefix='shinfo')
+
         if all([
             form.is_valid(),
-            report_formset.is_valid(),
             shareholding_formset.is_valid(),
             relation_formset.is_valid(),
-            business_formset.is_valid()
+            business_formset.is_valid(),
         ]):
             form.save()
-            report_formset.save()
             shareholding_formset.save()
             relation_formset.save()
             business_formset.save()
+            messages.success(request, "Stock saved.")
             return redirect('SM_User:stockdata_crud')
-        else:
-            # Debug output (you can remove these in production)
-            print("Form valid?", form.is_valid(), form.errors)
-            print("Report formset valid?", report_formset.is_valid(), report_formset.errors)
-            print("Shareholding formset valid?", shareholding_formset.is_valid(), shareholding_formset.errors)
-            print("Relation formset valid?", relation_formset.is_valid(), relation_formset.errors)
-            print("Business formset valid?", business_formset.is_valid(), business_formset.errors)
-
     else:
         form = StockDataForm(instance=stock)
-        report_formset = ReportFormSet(instance=stock, prefix='report')
         shareholding_formset = ShareholdingPatternFormSet(instance=stock, prefix='shareholding')
         relation_formset = CompanyRelationFormSet(instance=stock, prefix='relation')
         business_formset = PrincipalBusinessActivityFormSet(instance=stock, prefix='business')
+        report_formset = ReportFormSet(instance=stock, prefix='report')        # not used for display
+        shinfo_formset = ShareholdingInfoFormSet(instance=stock, prefix='shinfo')  # not used for display
+
+    # plain objects for read-only display
+    reports_qs = stock.reports.all()            # already ordered via Prefetch
+    shinfo_obj = getattr(stock, 'shareholding_info', None)
 
     return render(request, 'stockData_edit_modal.html', {
         'form': form,
-        'report_formset': report_formset,
         'shareholding_formset': shareholding_formset,
         'relation_formset': relation_formset,
         'business_formset': business_formset,
+
+        # read-only data
+        'reports_qs': reports_qs,
+        'shinfo_obj': shinfo_obj,
+
+        # keep around if template references them elsewhere
+        'report_formset': report_formset,
+        'shinfo_formset': shinfo_formset,
+
+        'stock': stock,
         'title': 'Edit Stock',
     })
 
+@login_required
+def edit_company_overview(request, pk):
+    stock = get_object_or_404(StockData, pk=pk)
+    if request.method == "POST":
+        form = CompanyOverviewForm(request.POST, instance=stock)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Company overview updated.")
+            return redirect("SM_User:stockdata_crud")
+    else:
+        form = CompanyOverviewForm(instance=stock)
+    return render(request, "stockData/company_overview_edit.html", {"form": form, "stock": stock, "title": "Edit Company Overview"})
 
+@login_required
+def edit_outlooks(request, pk):
+    stock = get_object_or_404(StockData, pk=pk)
+    if request.method == "POST":
+        formset = ReportEditFormSet(request.POST, instance=stock, prefix="report")
+        if formset.is_valid():
+            formset.save()
+            messages.success(request, "Outlooks updated.")
+            return redirect("SM_User:stockdata_crud")
+    else:
+        formset = ReportEditFormSet(instance=stock, prefix="report")
+    return render(request, "stockData/outlooks_edit.html", {"formset": formset, "stock": stock, "title": "Edit Outlooks"})
+
+@login_required
+def edit_shareholding_note(request, pk):
+    stock = get_object_or_404(StockData, pk=pk)
+    if request.method == "POST":
+        formset = ShareholdingInfoEditFormSet(request.POST, instance=stock, prefix="shinfo")
+        if formset.is_valid():
+            formset.save()
+            messages.success(request, "Shareholding note updated.")
+            return redirect("SM_User:stockdata_crud")
+    else:
+        formset = ShareholdingInfoEditFormSet(instance=stock, prefix="shinfo")
+    return render(request, "stockData/shareholding_note_edit.html", {"formset": formset, "stock": stock, "title": "Edit Shareholding Note"})
+
+# views.py
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods
+from django.db.models import Count
+
+from django.db.models import Count
+
+@login_required
+@permission_required("site_Manager.delete_stockdata", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+def delete_stockdata(request, pk):
+    stock = get_object_or_404(StockData.objects.all(), pk=pk)
+
+    related_counts = StockData.objects.filter(pk=pk).aggregate(
+        reports=Count("reports", distinct=True),
+        shareholdings=Count("shareholdings", distinct=True),
+        relations=Count("related_companies", distinct=True),
+        businesses=Count("business_activities", distinct=True),
+        buy_tx=Count("buytransaction", distinct=True),
+        sell_tx=Count("selltransaction", distinct=True),
+        buy_tx_other=Count("buytransactionotheradvisor", distinct=True),
+        sell_tx_other=Count("selltransactionotheradvisor", distinct=True),
+    )
+
+    if request.method == "POST":
+        # Optional safety: block deletes if there are transactions
+        # if related_counts["buy_tx"] or related_counts["sell_tx"] or related_counts["buy_tx_other"] or related_counts["sell_tx_other"]:
+        #     messages.error(request, "Cannot delete: transactions are linked to this stock.")
+        #     return redirect("SM_User:stockdata_crud")
+
+        stock.delete()
+        messages.success(request, "Stock deleted successfully.")
+        return redirect("SM_User:stockdata_crud")
+
+    return render(
+        request,
+        "stockData_delete_confirm.html",
+        {"stock": stock, "related_counts": related_counts, "title": "Delete Stock"},
+    )
+
+from django.db import transaction
+from django.contrib import messages
+
+@login_required
+@permission_required("site_Manager.add_stockdata", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@transaction.atomic
+def create_stockdata(request):
+    if request.method == "POST":
+        form = StockDataForm(request.POST, request.FILES)
+        if form.is_valid():
+            stock = form.save()  # need instance first
+            report_formset = ReportFormSet(request.POST, instance=stock, prefix="report")
+            shareholding_formset = ShareholdingPatternFormSet(request.POST, instance=stock, prefix="shareholding")
+            relation_formset = CompanyRelationFormSet(request.POST, instance=stock, prefix="relation")
+            business_formset = PrincipalBusinessActivityFormSet(request.POST, instance=stock, prefix="business")
+
+            if all([
+                report_formset.is_valid(),
+                shareholding_formset.is_valid(),
+                relation_formset.is_valid(),
+                business_formset.is_valid()
+            ]):
+                report_formset.save()
+                shareholding_formset.save()
+                relation_formset.save()
+                business_formset.save()
+                messages.success(request, "Stock created successfully.")
+                return redirect("SM_User:stockdata_crud")
+            else:
+                # If a formset fails, roll back the stock if you prefer strict atomicity
+                # raise transaction.TransactionManagementError("Formset invalid")  # or handle gently
+                pass
+        else:
+            # re-bind empty formsets so errors show correctly
+            stock = None
+            report_formset = ReportFormSet(prefix="report")
+            shareholding_formset = ShareholdingPatternFormSet(prefix="shareholding")
+            relation_formset = CompanyRelationFormSet(prefix="relation")
+            business_formset = PrincipalBusinessActivityFormSet(prefix="business")
+    else:
+        form = StockDataForm()
+        report_formset = ReportFormSet(prefix="report")
+        shareholding_formset = ShareholdingPatternFormSet(prefix="shareholding")
+        relation_formset = CompanyRelationFormSet(prefix="relation")
+        business_formset = PrincipalBusinessActivityFormSet(prefix="business")
+
+    return render(request, "stockData_create.html", {
+        "form": form,
+        "report_formset": report_formset,
+        "shareholding_formset": shareholding_formset,
+        "relation_formset": relation_formset,
+        "business_formset": business_formset,
+        "title": "Create Stock",
+    })
 
 # from django.shortcuts import render
 # from django.views.decorators.csrf import csrf_exempt

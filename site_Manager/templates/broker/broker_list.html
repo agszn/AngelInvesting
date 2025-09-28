@@ -18,7 +18,7 @@
           <div class="card shadow-sm h-100">
             <div class="card-body">
               <h5 class="card-title text-dark">{{ broker.name }}</h5>
-              <p class="card-text mb-1"><strong>PAN:</strong> {{ broker.pan }}</p>
+              <!-- <p class="card-text mb-1"><strong>PAN:</strong> {{ broker.pan }}</p> -->
               <p class="card-text mb-1"><strong>Email:</strong> {{ broker.email }}</p>
               <p class="card-text mb-3"><strong>Contact:</strong> {{ broker.contact }}</p>
               <a href="{% url 'SM_User:broker-edit' broker.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>

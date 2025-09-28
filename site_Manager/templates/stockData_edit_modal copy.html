@@ -1,26 +1,319 @@
 {% extends "baseStructureSM.html" %}
 {% load static %}
-{% block title %}Banner{% endblock %}
-{% block subtitle %}Homepage Banner{% endblock %}
+{% load humanize %}
+
+{% block title %}Edit Stock{% endblock %}
+{% block subtitle %}Stock master – aligned to your column layout{% endblock %}
 
 {% block SMprofile_content %}
-    <h4>StockDate Edit</h4>
 
-<form method="POST" enctype="multipart/form-data">
+<style>
+  :root{
+    --ai-bg:#f6f8fc; --ai-card:#fff; --ai-primary:#0d47a1; --ai-primary-600:#0b3c8a;
+    --ai-muted:#6b7280; --ai-border:#e5e7eb; --ai-accent:#e8f1ff; --ai-danger:#dc2626; --ai-radius:16px;
+  }
+  .ai-wrap{background:var(--ai-bg);border-radius:18px;padding:18px}
+  .ai-card{background:var(--ai-card);border:1px solid var(--ai-border);border-radius:var(--ai-radius);box-shadow:0 10px 30px rgba(13,71,161,.06);padding:18px}
+  .ai-card:hover{box-shadow:0 14px 36px rgba(13,71,161,.09)}
+  .ai-chip{display:inline-flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px;padding:10px 14px;border-radius:999px;background:linear-gradient(180deg,#eef5ff,#e7f0ff);border:1px solid var(--ai-border);color:var(--ai-primary);box-shadow:0 6px 20px rgba(13,71,161,.07)}
+  .ai-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--ai-primary);box-shadow:0 0 0 4px rgba(13,71,161,.12)}
+  .ai-page-title{font-weight:800;letter-spacing:.2px;background:linear-gradient(90deg,#0d47a1,#42a5f5);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
+  .ai-section{margin-top:26px}
+  .ai-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 18px;margin-top:12px}
+  .ai-field{display:flex;flex-direction:column;gap:8px}
+  .ai-label{font-weight:600;color:#111827;font-size:.95rem}
+  .ai-help{color:var(--ai-muted);font-size:.82rem}
+  .ai-error{color:var(--ai-danger);font-size:.85rem}
+  .ai-field input[type="text"], .ai-field input[type="number"], .ai-field input[type="date"],
+  .ai-field input[type="file"], .ai-field select, .ai-field textarea{
+    display:block;width:100%;border:1px solid var(--ai-border);border-radius:10px;padding:10px 12px;background:#fff;
+    transition:box-shadow .2s,border-color .2s,transform .02s
+  }
+  .ai-field input[readonly]{background:#f8fafc;cursor:not-allowed}
+  .ai-field textarea{min-height:110px}
+  .ai-field input:focus,.ai-field select:focus,.ai-field textarea:focus{outline:none;border-color:#bcd5ff;box-shadow:0 0 0 4px rgba(13,71,161,.12)}
+  .ai-fs-item{border:1px solid var(--ai-border);border-radius:14px;padding:16px;background:linear-gradient(180deg,#fff,#fbfdff);position:relative}
+  .ai-fs-tag{position:absolute;top:-10px;left:12px;background:var(--ai-accent);color:var(--ai-primary);border:1px solid #dbe7ff;font-weight:700;font-size:.78rem;padding:4px 10px;border-radius:999px;box-shadow:0 6px 14px rgba(13,71,161,.08)}
+  .ai-fs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 16px}
+  .ai-savebar{position:sticky;bottom:0;z-index:5;backdrop-filter:blur(8px);background:rgba(246,248,252,.9);border:1px solid var(--ai-border);padding:12px 16px;border-radius:14px;margin-top:18px;display:flex;justify-content:flex-end}
+  .ai-btn{background:var(--ai-primary);color:#fff;font-weight:600;border:none;border-radius:12px;padding:10px 16px;transition:transform .05s ease,background .2s ease,box-shadow .2s ease;box-shadow:0 10px 22px rgba(13,71,161,.18)}
+  .ai-btn:hover{background:var(--ai-primary-600)}
+  .ai-btn:active{transform:translateY(1px)}
+  .note{color:#374151;font-size:.9rem}
+</style>
+
+<div class="ai-wrap">
+  <h4 class="ai-page-title">StockData Edit</h4>
+
+  <form method="post" enctype="multipart/form-data" class="ai-card">
     {% csrf_token %}
-    <div class="row">
-    {% for field in form %}
-        <div class="col-md-6 mb-3">
-            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-                <div class="text-danger small">{{ field.errors }}</div>
-            {% endif %}
+
+    <!-- Column 1: Prices (all read-only via form widgets) -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Column 1 — Prices</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">Yesterday Price</label>
+          {{ form.share_price }}
+          {% if form.share_price.errors %}<div class="ai-error">{{ form.share_price.errors }}</div>{% endif %}
         </div>
-    {% endfor %}
+        <div class="ai-field">
+          <label class="ai-label">Today Price</label>
+          {{ form.ltp }}
+          {% if form.ltp.errors %}<div class="ai-error">{{ form.ltp.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Partner Price</label>
+          {{ form.partner_price }}
+          {% if form.partner_price.errors %}<div class="ai-error">{{ form.partner_price.errors }}</div>{% endif %}
+        </div>
+      </div>
     </div>
-    <button type="submit" class="btn btn-success">Save</button>
-    <a href="{% url 'SM_User:stockdata_crud' %}" class="btn btn-secondary">Cancel</a>
-</form>
+
+    <!-- Column 2: Capitalization (read-only) -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Column 2 — Capitalization</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">No Outstanding Shares</label>
+          {{ form.outstanding_shares }}
+          {% if form.outstanding_shares.errors %}<div class="ai-error">{{ form.outstanding_shares.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Market Cap (Cr.)</label>
+          {{ form.market_capitalization }}
+          {% if form.market_capitalization.errors %}<div class="ai-error">{{ form.market_capitalization.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Ratios (read-only) -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Column 3 — Ratios</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">PE</label>
+          {{ form.pe_ratio }}
+          {% if form.pe_ratio.errors %}<div class="ai-error">{{ form.pe_ratio.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">P/S</label>
+          {{ form.ps_ratio }}
+          {% if form.ps_ratio.errors %}<div class="ai-error">{{ form.ps_ratio.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">P/BV</label>
+          {{ form.pbv }}
+          {% if form.pbv.errors %}<div class="ai-error">{{ form.pbv.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">EPS</label>
+          {{ form.eps }}
+          {% if form.eps.errors %}<div class="ai-error">{{ form.eps.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 4: Values -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Column 4 — Values</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">Face Value</label>
+          {{ form.face_value }}
+          {% if form.face_value.errors %}<div class="ai-error">{{ form.face_value.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Book Value</label>
+          {{ form.book_value }}
+          {% if form.book_value.errors %}<div class="ai-error">{{ form.book_value.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 5: Brand + Logo -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Column 5 — Brand & Identity</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">Brand Name</label>
+          {{ form.company_name }}
+          {% if form.company_name.errors %}<div class="ai-error">{{ form.company_name.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Scrip Name</label>
+          {{ form.scrip_name }}
+          {% if form.scrip_name.errors %}<div class="ai-error">{{ form.scrip_name.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Logo</label>
+          {{ form.logo }}
+          {% if form.logo.errors %}<div class="ai-error">{{ form.logo.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 6: Legal IDs -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Column 6 — Legal IDs</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">PAN No</label>
+          {{ form.pan_no }}
+          {% if form.pan_no.errors %}<div class="ai-error">{{ form.pan_no.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">ISIN</label>
+          {{ form.isin_no }}
+          {% if form.isin_no.errors %}<div class="ai-error">{{ form.isin_no.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">CIN</label>
+          {{ form.cin }}
+          {% if form.cin.errors %}<div class="ai-error">{{ form.cin.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 7: Sector + Category (dropdown from form) -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Column 7 — Sector & Category</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">Sector</label>
+          {{ form.sector }}
+          {% if form.sector.errors %}<div class="ai-error">{{ form.sector.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Category</label>
+          {{ form.category }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 8: DRHP (dropdown), Available On (dropdown), Registration Date -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Column 8 — Regulatory</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">DRHP Filed</label>
+          {{ form.drhp_filed }}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Available On</label>
+          {{ form.available_on }}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Registration Date</label>
+          {{ form.registration_date }}
+          {% if form.registration_date.errors %}<div class="ai-error">{{ form.registration_date.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Optional: Company Overview -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Company Overview</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          {{ form.company_overview }}
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Reports ===== -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Reports</span>
+      {{ report_formset.management_form }}
+      {% for rform in report_formset %}
+        {{ rform.id }}
+        <div class="ai-fs-item mt-3">
+          <span class="ai-fs-tag">Report {{ forloop.counter }}</span>
+          <div class="ai-fs-grid">
+            {% for f in rform.visible_fields %}
+              <div class="ai-field">
+                <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                {{ f }}
+                {% if f.help_text %}<div class="ai-help">{{ f.help_text }}</div>{% endif %}
+                {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- ===== Shareholding Pattern ===== -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Shareholding Pattern</span>
+      {{ shareholding_formset.management_form }}
+      {% for shform in shareholding_formset %}
+        {{ shform.id }}
+        <div class="ai-fs-item mt-3">
+          <span class="ai-fs-tag">Holder {{ forloop.counter }}</span>
+          <div class="ai-fs-grid">
+            {% for f in shform.visible_fields %}
+              <div class="ai-field">
+                <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                {{ f }}
+                {% if f.help_text %}<div class="ai-help">{{ f.help_text }}</div>{% endif %}
+                {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- ===== Company Relations ===== -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Company Relations</span>
+      {{ relation_formset.management_form }}
+      {% for relform in relation_formset %}
+        {{ relform.id }}
+        <div class="ai-fs-item mt-3">
+          <span class="ai-fs-tag">Relation {{ forloop.counter }}</span>
+          <div class="ai-fs-grid">
+            {% for f in relform.visible_fields %}
+              <div class="ai-field">
+                <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                {{ f }}
+                {% if f.help_text %}<div class="ai-help">{{ f.help_text }}</div>{% endif %}
+                {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- ===== Principal Business Activities ===== -->
+    <div class="ai-section">
+      <span class="ai-chip"><span class="dot"></span> Principal Business Activities</span>
+      {{ business_formset.management_form }}
+      {% for bform in business_formset %}
+        {{ bform.id }}
+        <div class="ai-fs-item mt-3">
+          <span class="ai-fs-tag">Activity {{ forloop.counter }}</span>
+          <div class="ai-fs-grid">
+            {% for f in bform.visible_fields %}
+              <div class="ai-field">
+                <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                {{ f }}
+                {% if f.help_text %}<div class="ai-help">{{ f.help_text }}</div>{% endif %}
+                {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Save -->
+    <div class="ai-savebar">
+      <button type="submit" class="ai-btn">Save</button>
+    </div>
+  </form>
+</div>
 
 {% endblock %}

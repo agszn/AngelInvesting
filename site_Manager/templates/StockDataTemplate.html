@@ -5,102 +5,398 @@
 
 {% block SMprofile_content %}
 <style>
-  .user-portfolio-toptable1 td {
-        padding: 8px;
-        border: 1px solid #ddd;
-        vertical-align: top;
-        word-wrap: break-word;
-        overflow-wrap: anywhere;
-        white-space: normal;
+  /* ===== Global Styles ===== */
+  body {
+    background-color: #1A2A44;
+    font-family: 'Roboto', 'Helvetica', Arial, sans-serif;
+    color: #2D3B55;
+  }
+
+  /* ===== Layout & Cards ===== */
+  .ui-card {
+    background: #FFFFFF;
+    border: 1px solid #E0E7F0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+  }
+  .ui-card-header {
+    padding: 20px;
+    border-bottom: 1px solid #E0E7F0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #F9FAFB;
+    border-radius: 12px 12px 0 0;
+  }
+  .ui-card-body { padding: 20px; }
+
+  /* ===== Filter Row ===== */
+  .filter-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #F1F5F9;
+    color: #2E5EAA;
+    border: 1px solid #D1DDE8;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  /* ===== Table ===== */
+  .SMtable-scroll-container {
+    overflow: auto;
+    border-radius: 12px;
+    border: 1px solid #E0E7F0;
+    background: #FFFFFF;
+    margin-bottom: 20px;
+  }
+  .user-portfolio-toptable1 {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 1rem;
+  }
+  .user-portfolio-toptable1 thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #F9FAFB;
+    color: #1A2A44;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 16px;
+    border-bottom: 2px solid #E0E7F0;
+  }
+  .user-portfolio-toptable1 tbody td {
+    padding: 16px;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  .user-portfolio-toptable1 tbody tr:hover {
+    background: #F1F5F9;
+    transition: background 0.2s;
+  }
+  .col-company { min-width: 280px; }
+  .col-scrip   { min-width: 160px; }
+  .col-sector  { min-width: 180px; }
+  .col-conv    { min-width: 150px; }
+  .col-price   { min-width: 140px; text-align: right; }
+  .col-actions { min-width: 130px; text-align: right; }
+
+  /* ===== Badges ===== */
+  .badge-scrip {
+    background: linear-gradient(90deg, #E6F0FA 0%, #D1DDE8 100%);
+    color: #2E5EAA;
+    border: 1px solid #B3C9E0;
+    padding: 6px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  .badge-sector {
+    background: #F9FAFB;
+    color: #425466;
+    border: 1px solid #E0E7F0;
+    padding: 6px 10px;
+    border-radius: 12px;
+  }
+  .conv-badge {
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+    display: inline-block;
+  }
+  .conv-high  { background: linear-gradient(90deg, #FFE4E0 0%, #FFD1CC 100%); color: #9A2B1F; border-color: #FFB3A9; }
+  .conv-medium{ background: linear-gradient(90deg, #FFF9E0 0%, #FFE8A3 100%); color: #7A5D00; border-color: #FFD166; }
+  .conv-low   { background: linear-gradient(90deg, #E0F7EC 0%, #C9F0D8 100%); color: #1A5E3A; border-color: #A3E4C1; }
+
+  /* ===== Utilities ===== */
+  .muted { color: #6B7280; }
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+  }
+  .btn-warning {
+    background-color: #FBBF24;
+    border-color: #FBBF24;
+    color: #1A2A44;
+  }
+  .btn-warning:hover {
+    background-color: #F59E0B;
+    border-color: #F59E0B;
+  }
+
+  /* ===== Header Styling ===== */
+  .user-dashboard-heading {
+    padding: 20px;
+    background: #2E5EAA;
+    color: #FFFFFF;
+    border-radius: 12px 12px 0 0;
+  }
+  .user-dashboard-heading h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  /* ===== Filter Inputs ===== */
+  .form-select, .form-control {
+    border: 1px solid #E0E7F0;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+  .form-select:focus, .form-control:focus {
+    border-color: #2E5EAA;
+    box-shadow: 0 0 0 2px rgba(46, 94, 170, 0.2);
+    outline: none;
+  }
+
+  /* ===== Pagination ===== */
+  .pagination .page-link {
+    color: #2E5EAA;
+    border: 1px solid #E0E7F0;
+    border-radius: 8px;
+    margin: 0 4px;
+  }
+  .pagination .page-link:hover {
+    background: #F1F5F9;
+  }
+  .pagination .page-item.disabled .page-link {
+    color: #6B7280;
+    background: #F9FAFB;
+  }
+
+  /* ===== Responsive Tweaks ===== */
+  @media (max-width: 768px) {
+    .filter-actions { flex-direction: column; justify-content: center; }
+    .user-portfolio-toptable1 thead th,
+    .user-portfolio-toptable1 tbody td {
+      padding: 12px;
+      font-size: 0.9rem;
     }
-    .user-portfolio-toptable1 td:nth-child(1) { width: 30%; }
-    .user-portfolio-toptable1 td:nth-child(2) { width: 20%; } 
-    .user-portfolio-toptable1 td:nth-child(3) { width: 20%; } 
-    .user-portfolio-toptable1 td:nth-child(4) { width: 10%; } 
-    .user-portfolio-toptable1 td:nth-child(5) { width: 10%; }
-    .user-portfolio-toptable1 td:nth-child(5) { width: 10%; }
+  }
 </style>
-<div class="user-portfolio-top">
-  <div class="user-dashboard-heading"><h3>StockDate</h3></div>
+
+<div class="user-portfolio-top mb-3">
+  <div class="user-dashboard-heading d-flex align-items-center justify-content-between">
+    <h3 class="mb-0">StockData - 
+    <span class="mb-0">Total: {{ stocks|length }}</span> </h3>
+  </div>
 </div>
-<div class="user-portfolio-top">
-<form method="get" class="row g-3 mb-3" style="padding:0 10px;">
-  <div class="col-md-3">
-    <input type="text" name="search" class="form-control" placeholder="Search by Company / Scrip / ISIN" value="{{ filters.search_query }}">
-  </div>
 
-  <div class="col-md-2">
-    <select name="sector" class="form-select">
-      <option value="">All Sectors</option>
-      {% for sector in sectors %}
-        <option value="{{ sector }}" {% if filters.sector == sector %}selected{% endif %}>{{ sector }}</option>
-      {% endfor %}
-    </select>
+<!-- ===== Filters Card ===== -->
+<div class="ui-card mb-3">
+  <div class="ui-card-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-funnel"></i>
+      <strong style="color: black;">Filters</strong>
+    </div>
   </div>
+  <div class="ui-card-body">
+    <form id="filters-form" method="get" action="" class="row g-2">
+      <div class="col-md-4">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" name="search" class="form-control" placeholder="Company / Scrip / ISIN" value="{{ filters.search_query }}">
+        </div>
+      </div>
 
-  <div class="col-md-2">
-    <select name="category" class="form-select">
-      <option value="">All Categories</option>
-      {% for category in categories %}
-        <option value="{{ category }}" {% if filters.category == category %}selected{% endif %}>{{ category }}</option>
-      {% endfor %}
-    </select>
-  </div>
+      <div class="col-md-2">
+        <select name="sector" class="form-select">
+          <option value=""> Sectors</option>
+          {% for sector in sectors %}
+            <option value="{{ sector }}" {% if filters.sector == sector %}selected{% endif %}>{{ sector }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-  <div class="col-md-2">
-    <select name="conviction_level" class="form-select">
-      <option value="">All Conviction Levels</option>
-      {% for cl in conviction_levels %}
-        <option value="{{ cl }}" {% if filters.conviction_level == cl %}selected{% endif %}>{{ cl }}</option>
-      {% endfor %}
-    </select>
-  </div>
+      <div class="col-md-2">
+        <select name="conviction_level" class="form-select">
+          <option value=""> Conviction Levels</option>
+          {% for cl in conviction_levels %}
+            <option value="{{ cl }}" {% if filters.conviction_level == cl %}selected{% endif %}>{{ cl }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-  <div class="col-md-2">
-    <select name="stock_type" class="form-select">
-      <option value="">All Stock Types</option>
-      {% for st in stock_types %}
-        <option value="{{ st }}" {% if filters.stock_type == st %}selected{% endif %}>{{ st }}</option>
-      {% endfor %}
-    </select>
+      <div class="col-md-2">
+        <select name="stock_type" class="form-select">
+          <option value=""> Stock Types</option>
+          {% for st in stock_types %}
+            <option value="{{ st }}" {% if filters.stock_type == st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
   </div>
-
-  <div class="col-md-1">
-    <button type="submit" class="btn btn-primary w-100">Filter</button>
-  </div>
-</form>
 </div>
+
+<!-- ===== Table ===== -->
 <div class="SMtable-head">
-<div class="SMtable-scroll-container">
-  <table class="user-portfolio-toptable1">
-    <thead class="user-portfolio-head-admin">
-      <tr>
-          <th>Company</th>
-          <th>Scrip</th>
-          <th>Sector</th>
-          <th>Conviction</th>
-          <th>Share Price</th>
-          <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="SMtable-scroll-container">
+    <table class="user-portfolio-toptable1">
+      <thead class="user-portfolio-head-admin">
+        <tr>
+          <th class="col-company">Company</th>
+          <th class="col-scrip">Scrip</th>
+          <th class="col-sector">Sector</th>
+          <th class="col-conv">Conviction</th>
+          <th class="col-price">Share Price</th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
         {% for stock in stocks %}
-            <tr>
-                <td>{{ stock.company_name }}</td>
-                <td>{{ stock.scrip_name }}</td>
-                <td>{{ stock.sector }}</td>
-                <td>{{ stock.conviction_level }}</td>
-                <td>{{ stock.share_price }}</td>
-                <td>
-                    <a href="{% url 'SM_User:edit_stockdata' stock.pk %}" class="btn btn-sm btn-warning">Edit</a>
-                    <!-- <a href="#" class="btn btn-sm btn-danger">Delete</a> -->
-                </td>
-            </tr>
+          <tr>
+            <td class="col-company">
+              <div class="fw-semibold">{{ stock.company_name }}</div>
+              {% if stock.isin %}<div class="muted small">ISIN: {{ stock.isin }}</div>{% endif %}
+            </td>
+            <td class="col-scrip">
+              {% if stock.scrip_name %}
+                <span class="badge-scrip">{{ stock.scrip_name }}</span>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="col-sector">
+              {% if stock.sector %}
+                <span class="badge-sector">{{ stock.sector }}</span>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="col-conv">
+              {% with cl=stock.conviction_level|default:"" %}
+                {% if cl|lower == "high" %}
+                  <span class="conv-badge conv-high">High</span>
+                {% elif cl|lower == "medium" %}
+                  <span class="conv-badge conv-medium">Medium</span>
+                {% elif cl|lower == "low" %}
+                  <span class="conv-badge conv-low">Low</span>
+                {% elif cl %}
+                  <span class="conv-badge" style="background:#f3f6f9;color:#3a5169;border-color:#e2e8f0;">{{ cl }}</span>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              {% endwith %}
+            </td>
+            <td class="col-price">
+              {% if stock.share_price %}
+                ₹ {{ stock.share_price|floatformat:2 }}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="col-actions">
+              <div class="btn-group">
+                <a href="{% url 'SM_User:edit_stockdata' stock.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span class="visually-hidden">More</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="{% url 'SM_User:edit_stockdata' stock.pk %}"><i class="bi bi-pencil-square me-2"></i>Edit details</a></li>
+                  <li><a class="dropdown-item" href="{% url 'SM_User:stockdata_delete' pk=stock.pk %}"><i class="bi bi-trash"></i> Delete Stock</a></li>
+                  {% if stock.get_absolute_url %}
+                  <li><a class="dropdown-item" href="{{ stock.get_absolute_url }}"><i class="bi bi-eye me-2"></i>View page</a></li>
+                  {% endif %}
+                </ul>
+              </div>
+            </td>
+          </tr>
         {% empty %}
-            <tr><td colspan="6" class="text-center">No matching stocks found.</td></tr>
+          <tr>
+            <td colspan="6" class="text-center py-5">
+              <div class="muted mb-2" style="font-size:2rem;">🧐</div>
+              <div class="fw-semibold mb-1">No matching stocks found</div>
+              <div class="muted mb-3">Try adjusting your filters or clearing them.</div>
+              <a href="?" class="btn btn-outline-secondary btn-sm">Reset Filters</a>
+            </td>
+          </tr>
         {% endfor %}
-    </tbody>
-</table>
+      </tbody>
+    </table>
+  </div>
 </div>
-</div>
+
+<!-- Optional: pagination controls if you pass page_obj -->
+{% if page_obj %}
+<nav class="mt-3 d-flex justify-content-between align-items-center">
+  <span class="muted small">
+    Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+  </span>
+  <ul class="pagination mb-0">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<script>
+(function(){
+  const form = document.getElementById('filters-form');
+  if(!form) return;
+
+  const searchInput = form.querySelector('input[name="search"]');
+  const selects = form.querySelectorAll('select');
+  let timer;
+
+  function submitSoon(delay){
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const pageField = form.querySelector('input[name="page"]');
+      if (pageField) pageField.remove();
+      if (form.requestSubmit) form.requestSubmit();
+      else form.submit();
+    }, delay);
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => submitSoon(500));
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitSoon(0);
+      }
+    });
+  }
+
+  selects.forEach(sel => {
+    sel.addEventListener('change', () => submitSoon(0));
+  });
+})();
+</script>
+
 {% endblock %}

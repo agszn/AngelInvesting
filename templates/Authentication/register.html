@@ -29,8 +29,9 @@
   }
 
   .ai-register-logo img {
-    width: 540px;
+    width: auto;
     margin-bottom: 15px;
+    height: 180px;
   }
 
   .ai-register-title {
@@ -103,6 +104,7 @@
   @media (max-width: 768px) {
     .ai-register-container {
       flex-direction: column;
+      max-width: 90%;
     }
 
     .ai-register-left,
@@ -130,7 +132,7 @@
   <!-- Left Section -->
   <div class="ai-register-left">
     <div class="ai-register-logo">
-      <img src="{% static 'Media/images/Thangivlogofooter.png' %}" alt="Logo" style="height: 220px; width: 220px;" />
+      <img src="{% static 'Media/images/Thangivlogofooter.png' %}" alt="Logo"/>
     </div>
   </div>
 
@@ -205,6 +207,35 @@
                   /* min-height: 100px; */
                   height: auto;
               }
+              @media (min-width: 320px) and (max-width: 767px) 
+              {
+                .residency-container {
+                    display: block;
+                    flex-direction: row;
+                    justify-content: flex-start;
+                    align-items: stretch;
+                    gap: 2%;
+                    width: 100%;
+                    flex-wrap: nowrap; 
+                    margin-bottom: 20px; 
+                }
+                .residency-card
+                {
+                  width: 90%;
+                  padding: 14px;
+                  margin-bottom: 5px;
+                  gap:3px;
+                }
+                .residency-card li
+                {
+                  font-size: 10px;
+                }
+                .ai-register-logo img
+                {
+                  margin: auto;
+                  height: 120px;
+                }
+              }
 
               .residency-card:hover { transform: translateY(-2px); }
 
@@ -269,7 +300,7 @@
 
               /* mobile tweaks */
               @media (max-width:520px){
-                  .residency-card { padding: 14px; }
+                  /* .residency-card { padding: 14px; } */
                   .residency-card h4 { font-size: 16px; }
               }
           </style>

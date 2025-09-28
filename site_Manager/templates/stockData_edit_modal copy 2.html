@@ -1,0 +1,407 @@
+{% extends "baseStructureSM.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Edit Stock{% endblock %}
+{% block subtitle %}Stock master – aligned to your column layout{% endblock %}
+
+{% block SMprofile_content %}
+<style>
+  /* keep your CSS or simplify */
+  .ai-section{margin-top:26px}
+  .ai-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 18px;margin-top:12px}
+  .ai-field{display:flex;flex-direction:column;gap:8px}
+  .ai-label{font-weight:600}
+  .ai-error{color:#dc2626;font-size:.9rem}
+  .ai-help{color:#6b7280;font-size:.85rem}
+  .ai-btn{background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:8px 14px}
+</style>
+
+<div class="ai-wrap">
+  <h4 class="ai-page-title">StockData Edit {{ form.company_name }}</h4>
+
+  <form method="post" enctype="multipart/form-data" class="ai-card">
+    {% csrf_token %}
+
+    <div class="ai-field">
+      <label class="ai-checkbox" for="{{ form.hide_company_overview.id_for_label }}">
+        {{ form.hide_company_overview }} Hide on Frontend
+      </label>
+    </div>
+
+    <!-- Prices -->
+    <div class="ai-section">
+      <span class="ai-chip">Prices</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">Yesterday Price</label>
+          {{ form.share_price }} {% if form.share_price.errors %}<div class="ai-error">{{ form.share_price.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Today Price</label>
+          {{ form.ltp }} {% if form.ltp.errors %}<div class="ai-error">{{ form.ltp.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Partner Price</label>
+          {{ form.partner_price }} {% if form.partner_price.errors %}<div class="ai-error">{{ form.partner_price.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Capitalization -->
+    <div class="ai-section">
+      <span class="ai-chip">Capitalization</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">No Outstanding Shares</label>
+          {{ form.outstanding_shares }} {% if form.outstanding_shares.errors %}<div class="ai-error">{{ form.outstanding_shares.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Market Cap (Cr.)</label>
+          {{ form.market_capitalization }} {% if form.market_capitalization.errors %}<div class="ai-error">{{ form.market_capitalization.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Ratios -->
+    <div class="ai-section">
+      <span class="ai-chip">Ratios</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">PE</label>
+          {{ form.pe_ratio }} {% if form.pe_ratio.errors %}<div class="ai-error">{{ form.pe_ratio.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">P/S</label>
+          {{ form.ps_ratio }} {% if form.ps_ratio.errors %}<div class="ai-error">{{ form.ps_ratio.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">P/BV</label>
+          {{ form.pbv }} {% if form.pbv.errors %}<div class="ai-error">{{ form.pbv.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">EPS</label>
+          {{ form.eps }} {% if form.eps.errors %}<div class="ai-error">{{ form.eps.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Values -->
+    <div class="ai-section">
+      <span class="ai-chip">Values</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">Face Value</label>
+          {{ form.face_value }} {% if form.face_value.errors %}<div class="ai-error">{{ form.face_value.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Book Value</label>
+          {{ form.book_value }} {% if form.book_value.errors %}<div class="ai-error">{{ form.book_value.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Brand & Logo -->
+    <div class="ai-section">
+      <span class="ai-chip">Brand & Identity</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label">Brand Name</label>
+          {{ form.company_name }} {% if form.company_name.errors %}<div class="ai-error">{{ form.company_name.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Scrip Name</label>
+          {{ form.scrip_name }} {% if form.scrip_name.errors %}<div class="ai-error">{{ form.scrip_name.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Logo</label>
+          {% if form.instance.logo %}
+            <div class="ai-help">Current: <a href="{{ form.instance.logo.url }}" target="_blank">{{ form.instance.logo.name }}</a></div>
+            <label><input type="checkbox" name="logo-clear"> Remove logo</label>
+          {% endif %}
+          {{ form.logo }} {% if form.logo.errors %}<div class="ai-error">{{ form.logo.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Legal IDs -->
+    <div class="ai-section">
+      <span class="ai-chip">Legal IDs</span>
+      <div class="ai-grid">
+        <div class="ai-field"><label class="ai-label">PAN No</label>{{ form.pan_no }}</div>
+        <div class="ai-field"><label class="ai-label">ISIN</label>{{ form.isin_no }}</div>
+        <div class="ai-field"><label class="ai-label">CIN</label>{{ form.cin }}</div>
+      </div>
+    </div>
+
+    <!-- Sector & Category -->
+    <div class="ai-section">
+      <span class="ai-chip">Sector & Category</span>
+      <div class="ai-grid">
+        <div class="ai-field">
+          <label class="ai-label" for="id_sector_choice">Sector</label>
+          {{ form.sector_choice }}
+          <div id="sector-new-wrap" class="mt-2" style="display:none;">
+            <label class="ai-label" for="id_sector_new">Add new sector</label>
+            {{ form.sector_new }}
+            <div class="ai-help">Type only if not listed above.</div>
+          </div>
+          {% if form.sector_choice.errors %}<div class="ai-error">{{ form.sector_choice.errors }}</div>{% endif %}
+          {% if form.sector_new.errors %}<div class="ai-error">{{ form.sector_new.errors }}</div>{% endif %}
+        </div>
+        <div class="ai-field">
+          <label class="ai-label">Category</label>
+          {{ form.category }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Regulatory -->
+    <div class="ai-section">
+      <span class="ai-chip">Regulatory</span>
+      <div class="ai-grid">
+        <div class="ai-field"><label class="ai-label">DRHP Filed</label>{{ form.drhp_filed }}</div>
+        <div class="ai-field"><label class="ai-label">Available On</label>{{ form.available_on }}</div>
+        <div class="ai-field">
+          <label class="ai-label">Registration Date</label>
+          {{ form.registration_date }} {% if form.registration_date.errors %}<div class="ai-error">{{ form.registration_date.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Overview -->
+    <div class="ai-section">
+      <span class="ai-chip">Company Overview</span>
+      <div class="ai-grid"><div class="ai-field">{{ form.company_overview }}</div></div>
+    </div>
+
+    <!-- Reports -->
+    <div class="ai-section">
+      <span class="ai-chip">Outlooks</span>
+      {{ report_formset.management_form }}
+      <div id="report-forms">
+        {% for rform in report_formset %}
+          {{ rform.id }}
+          <div class="ai-fs-item mt-2" data-form-index="{{ forloop.counter0 }}">
+            <div class="ai-grid">
+              <div class="ai-field">
+                <label class="ai-label" for="{{ rform.summary.id_for_label }}">{{ rform.summary.label }}</label>
+                {{ rform.summary }}
+              </div>
+            </div>
+            <div class="mt-2">
+              <label><span>Delete</span> {{ rform.DELETE }}</label>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No reports yet. Click “Add more”.</div>
+        {% endfor %}
+      </div>
+      <template id="report-empty-form">
+        <div class="ai-fs-item mt-3">
+          <div class="ai-grid">
+            {% for f in report_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="mt-2">
+            <label>Delete {{ report_formset.empty_form.DELETE }}</label>
+          </div>
+        </div>
+      </template>
+      <div class="mt-3"><button type="button" class="ai-btn" id="report-add-btn">Add more</button></div>
+    </div>
+
+    <!-- Shareholding Pattern -->
+    <div class="ai-section">
+      <span class="ai-chip">Shareholding Pattern</span>
+      {{ shareholding_formset.management_form }}
+      <div id="shareholding-forms">
+        {% for shform in shareholding_formset %}
+          {{ shform.id }}
+          <div class="ai-fs-item mt-3" data-form-index="{{ forloop.counter0 }}">
+            <div class="ai-grid">
+              {% for f in shform.visible_fields %}
+                {% if f.name != "DELETE" %}
+                  <div class="ai-field">
+                    <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                    {{ f }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="mt-2">
+              <label>Delete {{ shform.DELETE }}</label>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No holders yet. Click “Add more”.</div>
+        {% endfor %}
+      </div>
+      <template id="shareholding-empty-form">
+        <div class="ai-fs-item mt-3">
+          <div class="ai-grid">
+            {% for f in shareholding_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="mt-2">
+            <label>Delete {{ shareholding_formset.empty_form.DELETE }}</label>
+          </div>
+        </div>
+      </template>
+      <div class="mt-3"><button type="button" class="ai-btn" id="shareholding-add-btn">Add more</button></div>
+    </div>
+
+    <!-- Company Relations -->
+    <div class="ai-section">
+      <span class="ai-chip">Company Relations</span>
+      {{ relation_formset.management_form }}
+      <div id="relation-forms">
+        {% for relform in relation_formset %}
+          {{ relform.id }}
+          <div class="ai-fs-item mt-3" data-form-index="{{ forloop.counter0 }}">
+            <div class="ai-grid">
+              {% for f in relform.visible_fields %}
+                {% if f.name != "DELETE" %}
+                  <div class="ai-field">
+                    <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                    {{ f }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="mt-2">
+              <label>Delete {{ relform.DELETE }}</label>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No relations yet. Click “Add more”.</div>
+        {% endfor %}
+      </div>
+      <template id="relation-empty-form">
+        <div class="ai-fs-item mt-3">
+          <div class="ai-grid">
+            {% for f in relation_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="mt-2">
+            <label>Delete {{ relation_formset.empty_form.DELETE }}</label>
+          </div>
+        </div>
+      </template>
+      <div class="mt-3"><button type="button" class="ai-btn" id="relation-add-btn">Add more</button></div>
+    </div>
+
+    <!-- Principal Business Activities -->
+    <div class="ai-section">
+      <span class="ai-chip">Principal Business Activities</span>
+      {{ business_formset.management_form }}
+      <div id="business-forms">
+        {% for bform in business_formset %}
+          {{ bform.id }}
+          <div class="ai-fs-item mt-3" data-form-index="{{ forloop.counter0 }}">
+            <div class="ai-grid">
+              {% for f in bform.visible_fields %}
+                {% if f.name != "DELETE" %}
+                  <div class="ai-field">
+                    <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                    {{ f }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="mt-2">
+              <label>Delete {{ bform.DELETE }}</label>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No activities yet. Click “Add more”.</div>
+        {% endfor %}
+      </div>
+      <template id="business-empty-form">
+        <div class="ai-fs-item mt-3">
+          <div class="ai-grid">
+            {% for f in business_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="mt-2">
+            <label>Delete {{ business_formset.empty_form.DELETE }}</label>
+          </div>
+        </div>
+      </template>
+      <div class="mt-3"><button type="button" class="ai-btn" id="business-add-btn">Add more</button></div>
+    </div>
+
+    <!-- Save -->
+    <div class="ai-section" style="display:flex;justify-content:flex-end;">
+      <button type="submit" class="ai-btn">Save</button>
+    </div>
+  </form>
+</div>
+
+<!-- Add-more logic for all inline formsets -->
+<script>
+function setupFormsetAdd(prefix){
+  const container = document.getElementById(`${prefix}-forms`);
+  const tpl = document.getElementById(`${prefix}-empty-form`);
+  const btn = document.getElementById(`${prefix}-add-btn`);
+  const total = document.querySelector(`input[name="${prefix}-TOTAL_FORMS"]`);
+  if(!container || !tpl || !btn || !total) return;
+
+  btn.addEventListener('click', () => {
+    const index = parseInt(total.value, 10);
+    const html = tpl.innerHTML.replaceAll('__prefix__', index).replaceAll('__num__', index + 1);
+    const wrap = document.createElement('div');
+    wrap.innerHTML = html.trim();
+    container.appendChild(wrap.firstElementChild);
+    total.value = index + 1;
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  setupFormsetAdd('report');
+  setupFormsetAdd('shareholding');
+  setupFormsetAdd('relation');
+  setupFormsetAdd('business');
+});
+</script>
+
+<!-- Sector “Other” toggle -->
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const select = document.getElementById('id_sector_choice');
+  const wrap   = document.getElementById('sector-new-wrap');
+  const OTHER  = "{{ OTHER_SENTINEL|default:'__OTHER__' }}";
+
+  function toggle(){
+    if(!select) return;
+    wrap.style.display = (select.value === OTHER) ? '' : 'none';
+  }
+  toggle();
+  if(select) select.addEventListener('change', toggle);
+});
+</script>
+
+{% endblock %}

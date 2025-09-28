@@ -25,7 +25,7 @@ from .models import Broker
 class BrokerForm(forms.ModelForm):
     class Meta:
         model = Broker
-        fields = ['broker_id', 'name', 'pan', 'email', 'contact']
+        fields = ['broker_id', 'name', 'email', 'contact']
         widgets = {
             'broker_id': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -35,10 +35,10 @@ class BrokerForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Enter broker name'
             }),
-            'pan': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter PAN number (optional)'
-            }),
+            # 'pan': forms.TextInput(attrs={
+            #     'class': 'form-control',
+            #     'placeholder': 'Enter PAN number (optional)'
+            # }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter email address'
@@ -66,118 +66,246 @@ class AdvisorForm(forms.ModelForm):
 from django import forms
 from django.forms import inlineformset_factory
 
+# import your models
+# from .models import StockData, Report, ShareholdingPattern, CompanyRelation, PrincipalBusinessActivity
+# forms.py
+# forms.py
+from django import forms
+from django.forms import inlineformset_factory
+
+
+CATEGORY_CHOICES = [
+    ("Unlisted", "Unlisted"),
+    ("Pre-IPO", "Pre-IPO"),
+    ("Delisted", "Delisted"),
+]
+
+DEPOSITORY_CHOICES = [
+    ("NSDL", "NSDL"),
+    ("CDSL", "CDSL"),
+    ("NSDL/CDSL", "NSDL/CDSL"),
+]
+
+
 class StockDataForm(forms.ModelForm):
+    drhp_filed = forms.ChoiceField(
+        choices=(("True", "Yes"), ("False", "No")),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    category = forms.ChoiceField(
+        choices=[("", "---------")] + CATEGORY_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    available_on = forms.ChoiceField(
+        choices=[("", "---------")] + DEPOSITORY_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    # ✅ Editable + suggestive field via <datalist>
+    sector = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "list": "sector-options",          # the datalist id rendered in template
+            "placeholder": "Type or choose…",
+            "autocomplete": "off",
+            "id": "id_sector",                 # stable id
+        })
+    )
+
     class Meta:
         model = StockData
-        fields = '__all__'
+        fields = "__all__"
         widgets = {
-            'company_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'scrip_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'isin_no': forms.TextInput(attrs={'class': 'form-control'}),
-            'cin': forms.TextInput(attrs={'class': 'form-control'}),
-            'sector': forms.TextInput(attrs={'class': 'form-control'}),
-            'category': forms.TextInput(attrs={'class': 'form-control'}),
+            "company_name": forms.TextInput(attrs={"class": "form-control"}),
+            "scrip_name": forms.TextInput(attrs={"class": "form-control"}),
+            "logo": forms.ClearableFileInput(attrs={"class": "form-control"}),
 
-            'registration_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
-            'drhp_filed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'available_on': forms.TextInput(attrs={'class': 'form-control'}),
-            'rofr_require': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            "pan_no": forms.TextInput(attrs={"class": "form-control"}),
+            "isin_no": forms.TextInput(attrs={"class": "form-control"}),
+            "cin": forms.TextInput(attrs={"class": "form-control"}),
 
-            'outstanding_shares': forms.NumberInput(attrs={'class': 'form-control'}),
-            'face_value': forms.NumberInput(attrs={'class': 'form-control'}),
-            'book_value': forms.NumberInput(attrs={'class': 'form-control'}),
-            'market_capitalization': forms.NumberInput(attrs={'class': 'form-control'}),
-            'profit': forms.NumberInput(attrs={'class': 'form-control'}),
-            'profit_percentage': forms.NumberInput(attrs={'class': 'form-control'}),
+            "registration_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"
+            ),
 
-            'eps': forms.NumberInput(attrs={'class': 'form-control'}),
-            'pe_ratio': forms.NumberInput(attrs={'class': 'form-control'}),
-            'ps_ratio': forms.NumberInput(attrs={'class': 'form-control'}),
-            'pbv': forms.NumberInput(attrs={'class': 'form-control'}),
+            # read-only
+            "share_price": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
+            "ltp": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
+            "partner_price": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
+            "outstanding_shares": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
+            "market_capitalization": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
+            "pe_ratio": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
+            "ps_ratio": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
+            "pbv": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
+            "eps": forms.NumberInput(attrs={"class": "form-control", "readonly": "readonly"}),
 
-            'share_price': forms.NumberInput(attrs={'class': 'form-control'}),
-            'partner_price': forms.NumberInput(attrs={'class': 'form-control'}),
-            'ltp': forms.NumberInput(attrs={'class': 'form-control'}),
-            'week_52_high': forms.NumberInput(attrs={'class': 'form-control'}),
-            'week_52_low': forms.NumberInput(attrs={'class': 'form-control'}),
-            'lifetime_high': forms.NumberInput(attrs={'class': 'form-control'}),
-            'lifetime_high_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
-            'lifetime_low': forms.NumberInput(attrs={'class': 'form-control'}),
-            'lifetime_low_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
-            'day_high': forms.NumberInput(attrs={'class': 'form-control'}),
-            'day_low': forms.NumberInput(attrs={'class': 'form-control'}),
+            # editable numeric/text
+            "face_value": forms.NumberInput(attrs={"class": "form-control"}),
+            "book_value": forms.NumberInput(attrs={"class": "form-control"}),
 
-            'lot': forms.NumberInput(attrs={'class': 'form-control'}),
-            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
-            'conviction_level': forms.Select(attrs={'class': 'form-select'}),
+            "profit": forms.NumberInput(attrs={"class": "form-control"}),
+            "profit_percentage": forms.NumberInput(attrs={"class": "form-control"}),
+            "week_52_high": forms.NumberInput(attrs={"class": "form-control"}),
+            "week_52_low": forms.NumberInput(attrs={"class": "form-control"}),
+            "lifetime_high": forms.NumberInput(attrs={"class": "form-control"}),
+            "lifetime_high_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"),
+            "lifetime_low": forms.NumberInput(attrs={"class": "form-control"}),
+            "lifetime_low_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"),
+            "day_high": forms.NumberInput(attrs={"class": "form-control"}),
+            "day_low": forms.NumberInput(attrs={"class": "form-control"}),
+            "lot": forms.NumberInput(attrs={"class": "form-control"}),
+            "quantity": forms.NumberInput(attrs={"class": "form-control"}),
+            "conviction_level": forms.Select(attrs={"class": "form-select"}),
+            "number_of_times_searched": forms.NumberInput(attrs={"class": "form-control"}),
+            "gst_no": forms.TextInput(attrs={"class": "form-control"}),
 
-            'number_of_times_searched': forms.NumberInput(attrs={'class': 'form-control'}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+            "company_overview": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+            "registered_office_address": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+            "transfer_agent_address": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
 
-            'pan_no': forms.TextInput(attrs={'class': 'form-control'}),
-            'gst_no': forms.TextInput(attrs={'class': 'form-control'}),
-
-            'logo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'company_overview': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'registered_office_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'transfer_agent_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-
-            'stock_type': forms.Select(attrs={'class': 'form-select'}),
-            'youtube_video_link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://youtube.com/...'}),
+            "stock_type": forms.Select(attrs={"class": "form-select"}),
+            "youtube_video_link": forms.URLInput(attrs={"class": "form-control", "placeholder": "https://youtube.com/..."}),
+            "hide_company_overview": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
-# ===================== Inline Formsets =====================
+    # Normalize
+    def clean_drhp_filed(self):
+        return self.cleaned_data.get("drhp_filed") == "True"
 
+    def clean_sector(self):
+        val = (self.cleaned_data.get("sector") or "").strip()
+        return val.title() if val else val
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Render file input plainly
+        if isinstance(self.fields["logo"].widget, forms.ClearableFileInput):
+            self.fields["logo"].widget.template_name = "django/forms/widgets/file.html"
+
+        if self.instance and self.instance.pk:
+            self.fields["drhp_filed"].initial = "True" if bool(self.instance.drhp_filed) else "False"
+
+        # Build distinct sector suggestions for datalist
+        raw = (
+            StockData.objects
+            .exclude(sector__isnull=True)
+            .exclude(sector__exact="")
+            .values_list("sector", flat=True)
+        )
+        seen, unique = set(), []
+        for s in raw:
+            v = (s or "").strip()
+            k = v.casefold()
+            if v and k not in seen:
+                seen.add(k)
+                unique.append(v)
+        unique.sort(key=lambda x: x.casefold())
+
+        # expose to template
+        self.sector_datalist = unique
+
+
+# -- formsets (unchanged) --
 ReportFormSet = inlineformset_factory(
-    StockData,
-    Report,
-    fields=('title', 'summary'),
-    extra=1,
+    StockData, Report,
+    fields=("title", "summary"),
+    extra=0,
     can_delete=True,
     widgets={
-        'title': forms.TextInput(attrs={'class': 'form-control'}),
-        'summary': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        "title": forms.TextInput(attrs={"class": "form-control"}),
+        "summary": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
     }
 )
 
 ShareholdingPatternFormSet = inlineformset_factory(
-    StockData,
-    ShareholdingPattern,
-    fields=('shareholder_name', 'number_of_shares', 'percentage_of_total'),
+    StockData, ShareholdingPattern,
+    fields=("shareholder_name", "number_of_shares", "percentage_of_total"),
     extra=1,
     can_delete=True,
     widgets={
-        'shareholder_name': forms.TextInput(attrs={'class': 'form-control'}),
-        'number_of_shares': forms.NumberInput(attrs={'class': 'form-control'}),
-        'percentage_of_total': forms.NumberInput(attrs={'class': 'form-control'}),
+        "shareholder_name": forms.TextInput(attrs={"class": "form-control"}),
+        "number_of_shares": forms.NumberInput(attrs={"class": "form-control"}),
+        "percentage_of_total": forms.NumberInput(attrs={"class": "form-control"}),
+    }
+)
+
+ShareholdingInfoFormSet = inlineformset_factory(
+    StockData, ShareholdingInfo,
+    fields=("note",),
+    extra=1,              # creates one if missing
+    max_num=1,            # enforce single row
+    validate_max=True,
+    can_delete=False,
+    widgets={
+        "note": forms.Textarea(attrs={
+            "class": "form-control",
+            "rows": 3,
+            "placeholder": "Add overall shareholding note (optional)"
+        }),
     }
 )
 
 CompanyRelationFormSet = inlineformset_factory(
-    StockData,
-    CompanyRelation,
-    fields=('company_name', 'relation_type', 'percentage_shares_held'),
+    StockData, CompanyRelation,
+    fields=("company_name", "relation_type", "percentage_shares_held"),
     extra=1,
     can_delete=True,
     widgets={
-        'company_name': forms.TextInput(attrs={'class': 'form-control'}),
-        'relation_type': forms.Select(attrs={'class': 'form-select'}),
-        'percentage_shares_held': forms.NumberInput(attrs={'class': 'form-control'}),
+        "company_name": forms.TextInput(attrs={"class": "form-control"}),
+        "relation_type": forms.Select(attrs={"class": "form-select"}),
+        "percentage_shares_held": forms.NumberInput(attrs={"class": "form-control"}),
     }
 )
 
 PrincipalBusinessActivityFormSet = inlineformset_factory(
-    StockData,
-    PrincipalBusinessActivity,
-    fields=('product_service_name', 'nic_code', 'turnover_percentage'),
+    StockData, PrincipalBusinessActivity,
+    fields=("product_service_name", "nic_code", "turnover_percentage"),
     extra=1,
     can_delete=True,
     widgets={
-        'product_service_name': forms.TextInput(attrs={'class': 'form-control'}),
-        'nic_code': forms.TextInput(attrs={'class': 'form-control'}),
-        'turnover_percentage': forms.NumberInput(attrs={'class': 'form-control'}),
+        "product_service_name": forms.TextInput(attrs={"class": "form-control"}),
+        "nic_code": forms.TextInput(attrs={"class": "form-control"}),
+        "turnover_percentage": forms.NumberInput(attrs={"class": "form-control"}),
     }
+)
+
+# forms.py
+from django import forms
+from django.forms import inlineformset_factory
+
+class CompanyOverviewForm(forms.ModelForm):
+    class Meta:
+        model = StockData
+        fields = ["company_overview"]
+        widgets = {"company_overview": forms.Textarea(attrs={"class": "form-control", "rows": 6})}
+
+ReportEditFormSet = inlineformset_factory(
+    StockData, Report,
+    fields=("title", "summary"),
+    extra=0,
+    can_delete=True,
+    widgets={
+        "title": forms.HiddenInput(),   # 👈 hides title in the form
+        "summary": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+    }
+)
+
+ShareholdingInfoEditFormSet = inlineformset_factory(
+    StockData, ShareholdingInfo,
+    fields=("note",),
+    extra=1,
+    max_num=1,
+    validate_max=True,
+    can_delete=False,
+    widgets={"note": forms.Textarea(attrs={"class": "form-control", "rows": 5})}
 )
 
 from django import forms
@@ -229,6 +357,42 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import Event
+# forms.py
+from django import forms
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+
+from .models import Event
+
+# Accept common PDF MIME variants (some browsers use octet-stream)
+PDF_MIME_TYPES = {
+    "application/pdf",
+    "application/x-pdf",
+    "application/acrobat",
+    "applications/vnd.pdf",
+    "text/pdf",
+    "text/x-pdf",
+}
+
+
+def _looks_like_pdf(f) -> bool:
+    """
+    Peek at the first bytes to verify PDF signature %PDF-
+    """
+    try:
+        pos = f.tell()
+    except Exception:
+        pos = None
+    try:
+        head = f.read(5)
+        return head == b"%PDF-"
+    finally:
+        try:
+            if pos is not None:
+                f.seek(pos)
+        except Exception:
+            pass
+
 
 class EventForm(forms.ModelForm):
     class Meta:
@@ -258,17 +422,25 @@ class EventForm(forms.ModelForm):
         doc = self.cleaned_data.get("document")
         if not doc:
             return doc
-        # Basic validations
-        if hasattr(doc, "content_type") and doc.content_type != "application/pdf":
+
+        # Content-type check (be permissive with variants and octet-stream)
+        ctype = getattr(doc, "content_type", None)
+        if ctype and ctype not in PDF_MIME_TYPES and ctype != "application/octet-stream":
             raise ValidationError("Only PDF files are allowed.")
-        max_mb = 10
-        if doc.size > max_mb * 1024 * 1024:
-            raise ValidationError(f"File too large. Max size: {max_mb} MB.")
+
+        # Magic header check (reliable verification)
+        try:
+            if not _looks_like_pdf(doc.file):
+                raise ValidationError("The uploaded file is not a valid PDF.")
+        except Exception:
+            # Storage wrappers can vary; if we can't read, treat as invalid for safety
+            raise ValidationError("The uploaded file is not a valid PDF.")
+
         return doc
 
     def clean_date_time(self):
         dt = self.cleaned_data.get("date_time")
-        # Optional sanity check: allow past/future, but ensure timezone aware
+        # Ensure timezone-aware datetime
         if dt and timezone.is_naive(dt):
             dt = timezone.make_aware(dt, timezone.get_current_timezone())
         return dt

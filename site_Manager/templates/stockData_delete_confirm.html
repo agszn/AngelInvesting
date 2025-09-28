@@ -1,0 +1,25 @@
+{# templates/stockData_delete_confirm.html #}
+{% extends "baseStructureSM.html" %}
+{% block title %}Delete {{ stock.company_name }}{% endblock %}
+
+{% block SMprofile_content %}
+<div class="card p-4">
+  <h5 class="mb-3">Delete stock: {{ stock.company_name }} ({{ stock.scrip_name }})</h5>
+  <p class="text-danger">This action cannot be undone.</p>
+
+  {% if related_counts %}
+    <ul class="small text-muted">
+      <li>Reports: {{ related_counts.reports }}</li>
+      <li>Shareholding entries: {{ related_counts.shareholdings }}</li>
+      <li>Relations: {{ related_counts.relations }}</li>
+      <li>Business activities: {{ related_counts.businesses }}</li>
+    </ul>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <a href="{% url 'SM_User:stockdata_crud' %}" class="btn btn-outline-secondary">Cancel</a>
+    <button class="btn btn-danger" type="submit">Delete</button>
+  </form>
+</div>
+{% endblock %}

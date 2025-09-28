@@ -1,0 +1,300 @@
+{% extends "baseStructureSM.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block SMprofile_content %}
+
+<style>
+  :root{
+    --ai-bg:#0b1f3a;          /* dark blue page background */
+    --ai-surface:#ffffff;     /* card/control surface */
+    --ai-text:#111827;        /* main readable text */
+    --ai-muted:#6b7280;       /* secondary text */
+    --ai-border:#e5e7eb;
+    --ai-primary:#0d47a1;
+    --ai-primary-600:#0b3c8a;
+  }
+
+  /* Page */
+  body{ background: var(--ai-bg) !important; }
+
+  .ai-wrap{ max-width: 980px; margin: 0 auto; padding: 22px 18px; }
+
+  /* Cards = light surface + dark text (force it) */
+  .ai-card{
+    background: var(--ai-surface) !important;
+    border: 1px solid var(--ai-border);
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(2,6,23,.12);
+    padding: 18px;
+    color: var(--ai-text) !important;
+  }
+  /* Ensure EVERYTHING inside card is readable even if base has body {color:#fff} */
+  .ai-card *:not(.btn):not(.badge):not([class*="text-"]){
+    color: var(--ai-text) !important;
+  }
+  .ai-label{ font-weight: 600; color: var(--ai-text) !important; }
+  small, .text-muted{ color: var(--ai-muted) !important; }
+  a{ color: var(--ai-primary); }
+  a:hover{ color: var(--ai-primary-600); }
+
+  /* Form controls: force white bg + dark text */
+  .ai-card input[type="text"],
+  .ai-card input[type="number"],
+  .ai-card input[type="url"],
+  .ai-card input[type="email"],
+  .ai-card input[type="date"],
+  .ai-card input[type="time"],
+  .ai-card input[type="search"],
+  .ai-card select,
+  .ai-card textarea,
+  .ai-card .form-control{
+    background: var(--ai-surface) !important;
+    color: var(--ai-text) !important;
+    border: 1px solid var(--ai-border) !important;
+    border-radius: 10px !important;
+  }
+  .ai-card .form-control:disabled,
+  .ai-card .form-control[readonly]{
+    background: #f9fafb !important;
+    color: var(--ai-text) !important;
+  }
+  .ai-card ::placeholder{ color:#9ca3af !important; }
+
+  /* Buttons */
+  .ai-btn{
+    background: var(--ai-primary) !important;
+    border: none; color: #fff !important;
+    padding: 8px 14px; border-radius: 10px;
+  }
+  .ai-btn:hover{ background: var(--ai-primary-600) !important; }
+
+  /* Floating formatter toolbar */
+  .tf-toolbar{
+    position: fixed;
+    right: 20px;
+    top: 100px;
+    width: 260px;
+    z-index: 1000;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(2,6,23,.18);
+    background: #f8f9fa;
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+    color: var(--ai-text);
+  }
+  .tf-content-area{ margin-right: 300px; }
+
+  .tf-preview{
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    padding: 10px;
+    min-height: 80px;
+    border-radius: 8px;
+    color: var(--ai-text);
+  }
+
+  /* Better textarea base (extra safety) */
+  textarea{
+    width: 100%;
+    min-height: 140px;
+    border-radius: 10px;
+    border: 1px solid var(--ai-border);
+    padding: 10px 12px;
+    line-height: 1.5;
+    background: var(--ai-surface) !important;
+    color: var(--ai-text) !important;
+  }
+
+  /* Mobile */
+  @media (max-width: 1024px){
+    .tf-content-area{ margin-right: 0; }
+    .tf-toolbar{
+      position: fixed;
+      right: 12px; left: 12px;
+      bottom: 14px; top: auto;
+      width: auto;
+      max-height: 62vh;
+      border-radius: 14px;
+    }
+  }
+  .tf-toggle{
+    display:none;
+    position: fixed; right: 18px; bottom: 18px; z-index: 1001;
+  }
+  @media (max-width: 1024px){ .tf-toggle{ display:inline-block; } }
+</style>
+
+<button class="btn btn-dark tf-toggle" type="button" onclick="tfToggleToolbar()">
+  Formatter
+</button>
+
+<div class="ai-wrap tf-content-area">
+  <div class="ai-card">
+    <h4 class="mb-3">{{ title }} – {{ stock.company_name }}</h4>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ formset.management_form }}
+
+      {% for form in formset %}
+        {{ form.id }}
+        <div class="mb-3">
+          <label class="ai-label d-flex align-items-center justify-content-between" for="{{ form.note.id_for_label }}">
+            <span>Note</span>
+            <small class="text-muted ms-2">Click inside a note to target it</small>
+          </label>
+          {{ form.note }}
+          {{ form.note.errors }}
+        </div>
+      {% endfor %}
+
+      <div class="d-flex gap-2">
+        <button class="ai-btn" type="submit">Save</button>
+        <a class="btn btn-outline-secondary" href="{% url 'SM_User:stockdata_crud' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Text Formatter Toolbar -->
+<nav id="tf-toolbar" class="tf-toolbar p-3">
+  <div class="fw-semibold mb-2">Text Formatter</div>
+  <div class="d-grid gap-2">
+    <button type="button" class="btn btn-primary" onclick="tfFormat('bold')">Bold</button>
+    <button type="button" class="btn btn-primary" onclick="tfFormat('title')">Title (H2)</button>
+    <button type="button" class="btn btn-primary" onclick="tfFormat('para')">Normal Paragraph</button>
+    <button type="button" class="btn btn-primary" onclick="tfFormat('list')">List</button>
+
+    <!-- <div class="form-check mt-1">
+      <input class="form-check-input" type="checkbox" id="tf-append-mode" checked>
+      <label class="form-check-label" for="tf-append-mode">Append if no selection</label>
+    </div> -->
+
+    <hr class="my-2">
+    <div class="small text-muted">Preview (last formatted)</div>
+    <div id="tf-preview" class="tf-preview"></div>
+
+    <button type="button" class="btn btn-outline-secondary" onclick="tfCopyLast()">Copy Last Snippet</button>
+  </div>
+</nav>
+
+<!-- Bootstrap (if not already in base) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- DOMPurify for safe preview -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+
+<script>
+  // Track focused Note textarea
+  let tfActiveTA = null;
+  let tfLastSnippet = '';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const allNotes = document.querySelectorAll('textarea[name$="-note"]');
+    allNotes.forEach(ta => ta.addEventListener('focus', () => { tfActiveTA = ta; }));
+    if (!tfActiveTA && allNotes.length) tfActiveTA = allNotes[0];
+  });
+
+  function tfToggleToolbar(){
+    const el = document.getElementById('tf-toolbar');
+    if(!el) return;
+    el.style.display = (el.style.display === 'none' ? '' : 'none');
+  }
+
+  // Utils
+  function tfEscape(text){ return text.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function tfSetPreview(html){
+    const el = document.getElementById('tf-preview');
+    el.innerHTML = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['h2','p','ul','li','span','b','strong','em'],
+      ALLOWED_ATTR: ['style']
+    });
+  }
+  function tfCopyLast(){
+    if (!tfLastSnippet) { alert('Nothing to copy yet.'); return; }
+    navigator.clipboard.writeText(tfLastSnippet).then(
+      () => alert('Copied!'),
+      () => alert('Copy failed')
+    );
+  }
+
+  // Selection helpers
+  function tfGetSelectedOrLine(ta){
+    const value = ta.value;
+    let start = ta.selectionStart ?? 0;
+    let end = ta.selectionEnd ?? 0;
+    if (start !== end) return { start, end, text: value.slice(start, end), hadSelection: true };
+
+    let lineStart = value.lastIndexOf('\n', start - 1);
+    if (lineStart === -1) lineStart = 0; else lineStart += 1;
+    let lineEnd = value.indexOf('\n', start);
+    if (lineEnd === -1) lineEnd = value.length;
+    return { start: lineStart, end: lineEnd, text: value.slice(lineStart, lineEnd), hadSelection: false };
+  }
+
+  // Replace while preserving scroll
+  function tfReplaceRange(ta, start, end, replacement){
+    const prevScroll = ta.scrollTop;
+    const before = ta.value.slice(0, start);
+    const after  = ta.value.slice(end);
+    ta.value = before + replacement + after;
+
+    const pos = before.length + replacement.length;
+    ta.focus();
+    ta.setSelectionRange(pos, pos);
+
+    ta.scrollTop = prevScroll;
+    requestAnimationFrame(() => { ta.scrollTop = prevScroll; });
+  }
+
+  // Formatter
+  function tfFormat(type){
+    if (!tfActiveTA) { alert('Click inside a Note field first.'); return; }
+
+    const appendIfNoSelection = document.getElementById('tf-append-mode').checked;
+    const selStart = tfActiveTA.selectionStart ?? 0;
+    const selEnd   = tfActiveTA.selectionEnd ?? 0;
+    const hadSelection = (selStart !== selEnd);
+
+    const { start, end, text } = tfGetSelectedOrLine(tfActiveTA);
+    const safeText = tfEscape(text.trim());
+    let html = '';
+
+    if (type === 'bold'){
+      html = `<span>${safeText}</span>`;
+      if (hadSelection){
+        tfReplaceRange(tfActiveTA, selStart, selEnd, html);
+      } else {
+        const insertAt = appendIfNoSelection ? end : selStart;
+        tfReplaceRange(tfActiveTA, insertAt, insertAt, appendIfNoSelection ? html : `<p>${safeText || '&nbsp;'}</p>`);
+      }
+    } else if (type === 'title'){
+      html = `<h2>${safeText || '&nbsp;'}</h2>`;
+      tfReplaceRange(tfActiveTA, start, end, html);
+    } else if (type === 'para'){
+      html = `<p>${safeText || '&nbsp;'}</p>`;
+      tfReplaceRange(tfActiveTA, start, end, html);
+    } else if (type === 'list'){
+      const lines = (safeText || '').split('\n').map(s => s.trim()).filter(Boolean);
+      const items = lines.length ? lines.map(l => `  <li>${l}</li>`).join('\n') : '  <li>&nbsp;</li>';
+      html = `<ul>\n${items}\n</ul>`;
+      tfReplaceRange(tfActiveTA, start, end, html);
+    }
+
+    tfLastSnippet = html;
+    tfSetPreview(html);
+  }
+
+  // Shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (!tfActiveTA) return;
+    if (e.ctrlKey || e.metaKey) {
+      const k = e.key.toLowerCase();
+      if (k === 'b') { e.preventDefault(); tfFormat('bold'); }
+      if (k === 'l') { e.preventDefault(); tfFormat('list'); }
+      if (k === '2') { e.preventDefault(); tfFormat('title'); }
+      if (k === 'p') { e.preventDefault(); tfFormat('para'); }
+    }
+  });
+</script>
+
+{% endblock %}

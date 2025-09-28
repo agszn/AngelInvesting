@@ -43,7 +43,14 @@ urlpatterns = [
         path('advisor-types/delete/<int:pk>/', AdvisorTypeDeleteView.as_view(), name='advisor-type-delete'),
         
         path('stockdata/', stockdata_crud, name='stockdata_crud'),
+        path("stock/new/", create_stockdata, name="create_stockdata"),
         path('<int:pk>/edit/', edit_stockdata, name='edit_stockdata'),
+        path("stock/<int:pk>/delete/", delete_stockdata, name="stockdata_delete"),
+        
+        path("stock/<int:pk>/edit-overview/", edit_company_overview, name="edit_company_overview"),
+        path("stock/<int:pk>/edit-outlooks/", edit_outlooks, name="edit_outlooks"),
+        path("stock/<int:pk>/edit-shareholding-note/", edit_shareholding_note, name="edit_shareholding_note"),
+        
         # site_Manager/urls.py
         path('convert/', convert_docx_to_html, name='convert_docx_to_html'),
         

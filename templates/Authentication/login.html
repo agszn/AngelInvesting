@@ -30,9 +30,9 @@
   }
 
   .ai-login-logo img {
-    width: 540px;
+    width: auto;
     margin-bottom: 15px;
-    height: auto;
+    height: 180px;
   }
 
   .ai-login-title {
@@ -115,13 +115,20 @@
       text-align: center;
     }
   }
+  @media (min-width: 320px) and (max-width: 767px) 
+  {
+      .ai-login-logo img {
+        height: 120px;
+        margin: auto;
+      }
+  }
 </style>
 
 <div class="ai-login-container">
   <!-- Left Section -->
   <div class="ai-login-left">
     <div class="ai-login-logo">
-      <img src="{% static 'Media/images/Thangivlogofooter.png' %}" alt="Logo" style="height: 175px; width: 175px;">
+      <img src="{% static 'Media/images/Thangivlogofooter.png' %}" alt="Logo">
       <!-- <div class="ai-login-title">
         THE <span class="ai-login-green">ANGEL</span><br />INVESTING
       </div> -->

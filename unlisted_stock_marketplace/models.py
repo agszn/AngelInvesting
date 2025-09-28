@@ -68,7 +68,7 @@ class StockData(models.Model):
     quantity = models.PositiveIntegerField(default=0, blank=True, null=True)
     conviction_level = models.CharField(max_length=50, choices=CONVICTION_CHOICES, default='Very High', blank=True, null=True)
 
-    number_of_times_searched = models.PositiveIntegerField(default=0)
+    number_of_times_searched = models.PositiveIntegerField(default=0, blank=True, null=True)
     
     pan_no = models.CharField(max_length=10, unique=True, blank=True, null=True)
     gst_no = models.CharField(max_length=15, unique=True, blank=True, null=True)
@@ -751,17 +751,33 @@ class CompanyRelation(models.Model):
     def __str__(self):
         return f"{self.company_name} - {self.get_relation_type_display()} ({self.percentage_shares_held}%)"
 
-# stock
+# ShareholdingInfo
 class ShareholdingPattern(models.Model):
     stock = models.ForeignKey('StockData', on_delete=models.CASCADE, related_name='shareholdings')
     shareholder_name = models.CharField(max_length=775,blank=True, null=True)
-    number_of_shares = models.BigIntegerField(blank=True, null=True)
-    percentage_of_total = models.DecimalField(max_digits=7, decimal_places=4,blank=True, null=True)  # Now manually editable
+    number_of_shares = models.CharField(max_length=255, blank=True, null=True)
+    percentage_of_total = models.CharField(max_length=255, blank=True, null=True) # Now manually editable
     
     def __str__(self):
         return f"{self.shareholder_name} - {self.percentage_of_total:.2f}% of {self.stock.company_name}"
 
-# Report
+# Shareholding Note
+from django.db import models
+
+class ShareholdingInfo(models.Model):
+    """Single, stock-wide note (separate table)."""
+    stock = models.OneToOneField(
+        'StockData',
+        on_delete=models.CASCADE,
+        related_name='shareholding_info'
+    )
+    note = models.TextField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Shareholding note for {self.stock.company_name}"
+
+# Report Outlook
 class Report(models.Model):
     title = models.CharField(max_length=775,blank=True, null=True)
     summary = models.TextField(blank=True, null=True)

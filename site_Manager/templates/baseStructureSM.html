@@ -93,6 +93,10 @@
                     <div class="sitemange-lists-sidebar">
                         <a href="{% url 'SM_User:stockdata_crud' %}">Stock Data</a>
                     </div>
+                        <div class="sitemange-lists-sidebar">
+                            <a href="{% url 'SM_User:event_list' %}">Event List </a>
+                        </div>
+
                     {% if user.is_superuser %}
                         <div class="sitemange-lists-sidebar">
                             <a href="{% url 'manage_user_types' %}">Users</a>
@@ -103,22 +107,23 @@
                         <div class="sitemange-lists-sidebar">
                             <a href="{% url 'SM_User:advisor-type-list' %}">Advisors</a>
                         </div>
-                        <div class="sitemange-lists-sidebar">
-                            <a href="{% url 'SM_User:stockdata_crud' %}">stockData_crud</a>
+                        <!-- <div class="sitemange-lists-sidebar"> -->
+                            <!-- <a href="{% url 'SM_User:stockdata_crud' %}">stockData_crud</a> -->
                             <!-- <a class="nav-link" href="{% url 'SM_User:custom_field_list' %}">Custom Field</a> -->
+                        <!-- </div> -->
+
+                        <div class="sitemange-lists-sidebar">
+                            <a href="{% url 'SM_User:event_list' %}">Event List </a>
                         </div>
                         <div class="sitemange-lists-sidebar">
-                            <a href="{% url 'SM_User:convert_docx_to_html' %}">Docx to html</a>
-                        </div>
-                        <div class="sitemange-lists-sidebar">
-                            <a href="{% url 'SM_User:Historylist' %}">History Values</a>
+                            <a href="{% url 'SM_User:Historylist' %}">Financial Reports </a>
                         </div>
                         <div class="sitemange-lists-sidebar">
                             <a href="{% url 'SM_User:custom_value_list' %}">Custom Values</a>
                         </div>
-                          <div class="sitemange-lists-sidebar">
-                            <a href="{% url 'SM_User:event_list' %}">Event List </a>
-                        </div>
+                        <!-- <div class="sitemange-lists-sidebar">
+                            <a href="{% url 'SM_User:convert_docx_to_html' %}">Docx to html</a>
+                        </div> -->
 
                     {% endif %}
                 </div>

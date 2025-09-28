@@ -1,0 +1,405 @@
+{% extends "baseStructureSM.html" %}
+{% load static %}
+{% block title %}Create Stock{% endblock %}
+{% block subtitle %}Stock Master – Create{% endblock %}
+
+{% block SMprofile_content %}
+<style>
+  .ui-card{background:#fff;border:1px solid rgba(13,71,161,.08);border-radius:16px;box-shadow:0 10px 30px rgba(13,71,161,.06)}
+  .ui-card-header{padding:16px 18px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between}
+  .ui-card-body{padding:18px}
+  .ai-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 18px}
+  .ai-field{display:flex;flex-direction:column;gap:6px}
+  .ai-label{font-weight:600}
+  .ai-help{color:#6b7280;font-size:.85rem}
+  .ai-error{color:#dc2626;font-size:.9rem}
+  .ai-chip{display:inline-flex;align-items:center;gap:8px;background:#eef5ff;color:#0d47a1;border:1px solid #d7e7ff;border-radius:999px;padding:6px 10px;font-weight:700}
+  .fs-row{border:1px dashed #e5e7eb;border-radius:12px;padding:12px;margin-top:10px}
+  .fs-tools{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+  .btn-icon{display:inline-flex;align-items:center;gap:8px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#0d47a1;display:inline-block}
+</style>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Create Stock</h3>
+  <a href="{% url 'SM_User:stockdata_crud' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+
+  <!-- ===== Core Stock Fields ===== -->
+  <div class="ui-card mb-3">
+    <div class="ui-card-header">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-building"></i>
+        <strong>Stock Details</strong>
+      </div>
+    </div>
+    <div class="ui-card-body">
+      <!-- show non-field errors -->
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="ai-grid">
+        {% for f in form.visible_fields %}
+          <div class="ai-field">
+            <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+            {{ f }}
+            {% if f.help_text %}<div class="ai-help">{{ f.help_text }}</div>{% endif %}
+            {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Reports ===== -->
+  <div class="ui-card mb-3" id="reports-card">
+    <div class="ui-card-header">
+      <span class="ai-chip"><span class="dot"></span> Reports</span>
+      <div class="fs-tools">
+        <button type="button" class="btn btn-sm btn-primary btn-icon" data-add-form="report">
+          <i class="bi bi-plus-circle"></i> Add Report
+        </button>
+      </div>
+    </div>
+    <div class="ui-card-body">
+      {{ report_formset.management_form }}
+      {% if report_formset.non_form_errors %}
+        <div class="alert alert-danger">{{ report_formset.non_form_errors }}</div>
+      {% endif %}
+
+      <div id="report-forms">
+        {% for rform in report_formset %}
+          <div class="fs-row" data-form-index="{{ forloop.counter0 }}">
+            {{ rform.id }}
+            <div class="ai-grid">
+              {% for f in rform.visible_fields %}
+                {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                  {% if f.help_text %}<div class="ai-help">{{ f.help_text }}</div>{% endif %}
+                  {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="fs-tools">
+              {% if rform.DELETE %}
+                <label class="btn btn-outline-danger btn-sm">
+                  {{ rform.DELETE }} <i class="bi bi-trash"></i> Remove
+                </label>
+              {% else %}
+                <button type="button" class="btn btn-outline-danger btn-sm" data-remove-this>Remove</button>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No reports added yet.</div>
+        {% endfor %}
+      </div>
+
+      <!-- Hidden empty form template -->
+      <template id="report-empty-form">
+        <div class="fs-row" data-form-index="__prefix__">
+          {{ report_formset.empty_form.id }}
+          <div class="ai-grid">
+            {% for f in report_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+              <div class="ai-field">
+                <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                {{ f }}
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="fs-tools">
+            {% if report_formset.empty_form.DELETE %}
+              <label class="btn btn-outline-danger btn-sm">
+                {{ report_formset.empty_form.DELETE }} <i class="bi bi-trash"></i> Remove
+              </label>
+            {% else %}
+              <button type="button" class="btn btn-outline-danger btn-sm" data-remove-this>Remove</button>
+            {% endif %}
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ===== Shareholding Pattern ===== -->
+  <div class="ui-card mb-3" id="shareholding-card">
+    <div class="ui-card-header">
+      <span class="ai-chip"><span class="dot"></span> Shareholding Pattern</span>
+      <div class="fs-tools">
+        <button type="button" class="btn btn-sm btn-primary btn-icon" data-add-form="shareholding">
+          <i class="bi bi-plus-circle"></i> Add Entry
+        </button>
+      </div>
+    </div>
+    <div class="ui-card-body">
+      {{ shareholding_formset.management_form }}
+      {% if shareholding_formset.non_form_errors %}
+        <div class="alert alert-danger">{{ shareholding_formset.non_form_errors }}</div>
+      {% endif %}
+
+      <div id="shareholding-forms">
+        {% for sform in shareholding_formset %}
+          <div class="fs-row" data-form-index="{{ forloop.counter0 }}">
+            {{ sform.id }}
+            <div class="ai-grid">
+              {% for f in sform.visible_fields %}
+                {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                  {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="fs-tools">
+              {% if sform.DELETE %}
+                <label class="btn btn-outline-danger btn-sm">
+                  {{ sform.DELETE }} <i class="bi bi-trash"></i> Remove
+                </label>
+              {% else %}
+                <button type="button" class="btn btn-outline-danger btn-sm" data-remove-this>Remove</button>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No shareholding rows added yet.</div>
+        {% endfor %}
+      </div>
+
+      <template id="shareholding-empty-form">
+        <div class="fs-row" data-form-index="__prefix__">
+          {{ shareholding_formset.empty_form.id }}
+          <div class="ai-grid">
+            {% for f in shareholding_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+              <div class="ai-field">
+                <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                {{ f }}
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="fs-tools">
+            {% if shareholding_formset.empty_form.DELETE %}
+              <label class="btn btn-outline-danger btn-sm">
+                {{ shareholding_formset.empty_form.DELETE }} <i class="bi bi-trash"></i> Remove
+              </label>
+            {% else %}
+              <button type="button" class="btn btn-outline-danger btn-sm" data-remove-this>Remove</button>
+            {% endif %}
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ===== Company Relations ===== -->
+  <div class="ui-card mb-3" id="relations-card">
+    <div class="ui-card-header">
+      <span class="ai-chip"><span class="dot"></span> Company Relations</span>
+      <div class="fs-tools">
+        <button type="button" class="btn btn-sm btn-primary btn-icon" data-add-form="relation">
+          <i class="bi bi-plus-circle"></i> Add Relation
+        </button>
+      </div>
+    </div>
+    <div class="ui-card-body">
+      {{ relation_formset.management_form }}
+      {% if relation_formset.non_form_errors %}
+        <div class="alert alert-danger">{{ relation_formset.non_form_errors }}</div>
+      {% endif %}
+      <div id="relation-forms">
+        {% for rlf in relation_formset %}
+          <div class="fs-row" data-form-index="{{ forloop.counter0 }}">
+            {{ rlf.id }}
+            <div class="ai-grid">
+              {% for f in rlf.visible_fields %}
+                {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                  {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="fs-tools">
+              {% if rlf.DELETE %}
+                <label class="btn btn-outline-danger btn-sm">
+                  {{ rlf.DELETE }} <i class="bi bi-trash"></i> Remove
+                </label>
+              {% else %}
+                <button type="button" class="btn btn-outline-danger btn-sm" data-remove-this>Remove</button>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No relations added yet.</div>
+        {% endfor %}
+      </div>
+
+      <template id="relation-empty-form">
+        <div class="fs-row" data-form-index="__prefix__">
+          {{ relation_formset.empty_form.id }}
+          <div class="ai-grid">
+            {% for f in relation_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+              <div class="ai-field">
+                <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                {{ f }}
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="fs-tools">
+            {% if relation_formset.empty_form.DELETE %}
+              <label class="btn btn-outline-danger btn-sm">
+                {{ relation_formset.empty_form.DELETE }} <i class="bi bi-trash"></i> Remove
+              </label>
+            {% else %}
+              <button type="button" class="btn btn-outline-danger btn-sm" data-remove-this>Remove</button>
+            {% endif %}
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ===== Principal Business Activity ===== -->
+  <div class="ui-card mb-3" id="business-card">
+    <div class="ui-card-header">
+      <span class="ai-chip"><span class="dot"></span> Principal Business Activities</span>
+      <div class="fs-tools">
+        <button type="button" class="btn btn-sm btn-primary btn-icon" data-add-form="business">
+          <i class="bi bi-plus-circle"></i> Add Activity
+        </button>
+      </div>
+    </div>
+    <div class="ui-card-body">
+      {{ business_formset.management_form }}
+      {% if business_formset.non_form_errors %}
+        <div class="alert alert-danger">{{ business_formset.non_form_errors }}</div>
+      {% endif %}
+      <div id="business-forms">
+        {% for bf in business_formset %}
+          <div class="fs-row" data-form-index="{{ forloop.counter0 }}">
+            {{ bf.id }}
+            <div class="ai-grid">
+              {% for f in bf.visible_fields %}
+                {% if f.name != "DELETE" %}
+                <div class="ai-field">
+                  <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                  {{ f }}
+                  {% if f.errors %}<div class="ai-error">{{ f.errors }}</div>{% endif %}
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="fs-tools">
+              {% if bf.DELETE %}
+                <label class="btn btn-outline-danger btn-sm">
+                  {{ bf.DELETE }} <i class="bi bi-trash"></i> Remove
+                </label>
+              {% else %}
+                <button type="button" class="btn btn-outline-danger btn-sm" data-remove-this>Remove</button>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-muted">No activities added yet.</div>
+        {% endfor %}
+      </div>
+
+      <template id="business-empty-form">
+        <div class="fs-row" data-form-index="__prefix__">
+          {{ business_formset.empty_form.id }}
+          <div class="ai-grid">
+            {% for f in business_formset.empty_form.visible_fields %}
+              {% if f.name != "DELETE" %}
+              <div class="ai-field">
+                <label class="ai-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
+                {{ f }}
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="fs-tools">
+            {% if business_formset.empty_form.DELETE %}
+              <label class="btn btn-outline-danger btn-sm">
+                {{ business_formset.empty_form.DELETE }} <i class="bi bi-trash"></i> Remove
+              </label>
+            {% else %}
+              <button type="button" class="btn btn-outline-danger btn-sm" data-remove-this>Remove</button>
+            {% endif %}
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ===== Footer actions ===== -->
+  <div class="d-flex justify-content-end gap-2">
+    <a href="{% url 'SM_User:stockdata_crud' %}" class="btn btn-light">Cancel</a>
+    <button type="submit" class="btn btn-primary btn-icon">
+      <i class="bi bi-check2-circle"></i> Create
+    </button>
+  </div>
+</form>
+
+<script>
+(function(){
+  // Utility to wire a formset: add button, remove buttons, TOTAL_FORMS handling
+  function wireFormset(prefix){
+    const container = document.getElementById(prefix + '-forms');
+    const tmpl = document.getElementById(prefix + '-empty-form');
+    if(!container || !tmpl) return;
+    const mgmtTotal = document.querySelector(`input[name="${prefix}-TOTAL_FORMS"]`);
+
+    // Add new form on click
+    document.querySelectorAll(`[data-add-form="${prefix}"]`).forEach(btn=>{
+      btn.addEventListener('click', () => {
+        const idx = parseInt(mgmtTotal.value, 10);
+        const html = tmpl.innerHTML.replaceAll('__prefix__', idx);
+        container.insertAdjacentHTML('beforeend', html);
+        mgmtTotal.value = idx + 1;
+        attachRemoveHandlers(container); // re-bind
+      });
+    });
+
+    // Remove handler (marks DELETE checkbox if present, else removes node)
+    function attachRemoveHandlers(scope){
+      scope.querySelectorAll('[data-remove-this]').forEach(btn=>{
+        btn.onclick = (e) => {
+          const row = e.target.closest('.fs-row');
+          const del = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+          if(del){
+            del.checked = true;            // mark for deletion
+            row.style.opacity = .5;
+          }else{
+            row.remove();                  // for extra forms with no DELETE
+          }
+        };
+      });
+    }
+    attachRemoveHandlers(container);
+  }
+
+  wireFormset('report');
+  wireFormset('shareholding');
+  wireFormset('relation');
+  wireFormset('business');
+})();
+</script>
+{% endblock %}
