@@ -220,7 +220,7 @@ from .utils import update_user_holdings
 
 from django.core.paginator import Paginator
 from django.db.models import Q
-from site_Manager.models import Advisor, Broker
+from site_Manager.models import *
 from django.utils.timezone import make_aware
 from datetime import datetime, timezone
 from user_portfolio.models import UserStockInvestmentSummary

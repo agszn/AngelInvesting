@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cmrcopy',
             name='broker',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='site_Manager.broker'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='site_Manager.Broker'),
         ),
     ]

@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ('selling_price', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
                 ('sell_status', models.CharField(blank=True, max_length=15, null=True)),
                 ('assigned_rm', models.ForeignKey(limit_choices_to={'user_type': 'RM'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='rm_viewed_users', to=settings.AUTH_USER_MODEL)),
-                ('broker', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='site_Manager.broker')),
+                ('broker', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='site_Manager.Broker')),
                 ('stock', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='unlisted_stock_marketplace.stockdata')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rm_user_views', to=settings.AUTH_USER_MODEL)),
             ],

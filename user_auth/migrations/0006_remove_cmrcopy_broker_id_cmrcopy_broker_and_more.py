@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cmrcopy',
             name='broker',
-            field=models.ForeignKey(blank=True, help_text='Select a broker from the list', null=True, on_delete=django.db.models.deletion.SET_NULL, to='site_Manager.broker'),
+            field=models.ForeignKey(blank=True, help_text='Select a broker from the list', null=True, on_delete=django.db.models.deletion.SET_NULL, to='site_Manager.Broker'),
         ),
         migrations.AlterField(
             model_name='cmrcopy',

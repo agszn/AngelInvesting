@@ -6,17 +6,25 @@ from user_auth.models import *
 from user_portfolio.models import *
 from unlisted_stock_marketplace.models import *
 from site_Manager.models import *
-
 from RM_User.models import RMUserView, RMPaymentRecord
-
 
 import csv
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
+
+from django.db.models import Sum
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+
+from user_portfolio.forms import *
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+
 
 User = get_user_model()
 
+@login_required
 def dashboardAcc(request):
     rms = User.objects.filter(user_type='RM')
     selected_rm_id = request.GET.get('filter_rm')
@@ -37,7 +45,7 @@ def dashboardAcc(request):
         except User.DoesNotExist:
             pass
 
-        return redirect('Acc_User:dashboardAcc')  # Adjust if your URL name is different
+        return redirect('Acc_User:dashboardAcc')  
 
     context = {
         'rms': rms,
@@ -46,10 +54,7 @@ def dashboardAcc(request):
     }
     return render(request, 'dashboardAcc.html', context)
 
-
-from django.shortcuts import render
-from user_portfolio.models import BuyTransaction, SellTransaction, SellTransactionOtherAdvisor
-
+@login_required
 def ordersAcc(request):
     buy_orders = BuyTransaction.objects.filter(RM_status='completed')
     sell_orders = SellTransaction.objects.filter(RM_status='completed')
@@ -99,39 +104,20 @@ def ordersAcc(request):
     return render(request, 'ordersAcc.html', {'orders': all_orders})
 
 
-
-
-
-
 @login_required
 def buyorderAcc(request):
     # Fetch BuyTransactions of those users
     buy_ordersAcc = BuyTransaction.objects.exclude(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
     return render(request, 'buyorderAcc.html', {'buy_orders': buy_ordersAcc})
 
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from django.db.models import Sum
-from django.shortcuts import render, get_object_or_404
-
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from django.db.models import Sum
-from django.shortcuts import render, get_object_or_404
-from user_portfolio.models import BuyTransaction
-from user_auth.models import UserProfile, CMRCopy, BankAccount
-from django.contrib import messages
 
 @login_required
 def buyOrderSummaryAcc(request, order_id):
     order = get_object_or_404(BuyTransaction, order_id=order_id)
     user_profile = order.user.profile
-    user_type = request.user.user_type  # Or from profile if needed
-
-    # ✅ Access Control Logic
+    user_type = request.user.user_type  
     if user_type == 'RM':
-        pass  # RM always has access
-
+        pass  
     elif user_type == 'AC':
         if order.RM_status != 'completed':
             messages.warning(request, "This order has not been approved by the Relationship Manager yet.")
@@ -171,39 +157,6 @@ def buyOrderSummaryAcc(request, order_id):
 
 
 
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseBadRequest
-from RM_User.models import RMPaymentRecord
-
-# 
-from django.views.decorators.http import require_POST
-from django.shortcuts import redirect, get_object_or_404
-from django.contrib import messages
-
-# @require_POST
-# @login_required
-# def edit_payment_ac_status(request, payment_id):
-#     payment = get_object_or_404(RMPaymentRecord, id=payment_id)
-
-#     # Ensure only AC or superuser can edit
-#     if request.user.user_type != 'AC' and not request.user.is_superuser:
-#         messages.error(request, "You do not have permission to update this.")
-#         return redirect(request.META.get('HTTP_REFERER', '/'))
-
-#     # Get values from form
-#     payment.AC_Payment_Status = request.POST.get('AC_Payment_Status')
-#     payment.payment_transaction_date = request.POST.get('payment_transaction_date') or None
-#     payment.payment_transaction_id = request.POST.get('payment_transaction_id') or ''
-
-#     payment.save()
-
-#     messages.success(request, "Payment status and transaction details updated.")
-#     return redirect(request.META.get('HTTP_REFERER', '/'))
-
-from django.views.decorators.http import require_POST
-from django.shortcuts import redirect, get_object_or_404
-from django.contrib import messages
 # this is main start
 @require_POST
 @login_required
@@ -252,11 +205,6 @@ def edit_transaction_ac_status(request, transaction_id):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-
 @csrf_exempt
 @login_required
 def edit_sell_transaction_ac_status(request, transaction_id):
@@ -276,28 +224,6 @@ def edit_sell_transaction_ac_status(request, transaction_id):
             messages.error(request, "Unauthorized access.")
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
-
-
-from django.shortcuts import render, get_object_or_404, redirect
-from user_portfolio.models import *
-from user_portfolio.forms import *
-from django.contrib.auth.decorators import login_required
-
-# @login_required
-# def edit_buy_transaction(request, pk):
-#     transaction = get_object_or_404(BuyTransaction, pk=pk)
-#     order_id = transaction.order_id
-
-#     if request.method == 'POST':
-#         form = BuyTransactionEditForm(request.POST, instance=transaction, user=request.user)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('Acc_User:buyOrderSummaryAcc', order_id=order_id)
-#     else:
-#         form = BuyTransactionEditForm(instance=transaction, user=request.user)
-
-#     return render(request, 'transaction/edit_transaction.html', {'form': form})
-
 
 
 @login_required
@@ -391,7 +317,6 @@ def ShareListAcc(request):
 def clientAcc(request):
     return render(request, 'clientAcc.html')
 
-from django.core.paginator import Paginator
 def reportsAcc(request):
     buy_orders_qs = BuyTransaction.objects.filter(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
     sell_orders_qs = SellTransaction.objects.filter(AC_status__in=['completed', 'cancelled']).order_by('-timestamp')
@@ -441,11 +366,6 @@ def reportsAcc(request):
         'order_id': order_id,
         'username': username,
     })
-
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseForbidden
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
 
 
 @login_required

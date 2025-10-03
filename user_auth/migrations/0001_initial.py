@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
                 ('cmr_file', models.FileField(blank=True, help_text='Upload a scanned copy or PDF', null=True, upload_to='cmr_files/', validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png'])])),
                 ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
                 ('updated_at', models.DateTimeField(auto_now=True, null=True)),
-                ('broker', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cmr_copies', to='site_Manager.broker')),
+                ('broker', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cmr_copies', to='site_Manager.Broker')),
                 ('client', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='cmr_copies', to='user_auth.userprofile')),
             ],
         ),

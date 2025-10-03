@@ -171,7 +171,7 @@ class Migration(migrations.Migration):
                 ('days_gain_loss', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
                 ('transaction_type', models.CharField(choices=[('Purchase', 'Purchase'), ('Sale', 'Sale')], default='Purchase', max_length=10)),
                 ('quantity', models.PositiveIntegerField(default=1)),
-                ('broker', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='site_Manager.broker')),
+                ('broker', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='site_Manager.Broker')),
                 ('stock', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='unlisted_stock_marketplace.stockdata')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

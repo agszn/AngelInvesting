@@ -11,6 +11,55 @@ from RM_User.models import RMUserView, RMPaymentRecord
 
 from django.contrib import messages
 
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.utils.dateparse import parse_date
+from django.contrib.auth.decorators import login_required
+from datetime import datetime
+from RM_User.models import BuyTransaction, SellTransaction
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+from django.db.models import Sum
+from django.shortcuts import render, get_object_or_404
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+from django.db.models import Sum
+from django.shortcuts import render, get_object_or_404
+from user_portfolio.models import BuyTransaction
+from user_auth.models import UserProfile, CMRCopy, BankAccount
+
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
+from django.shortcuts import render, get_object_or_404, redirect
+from user_portfolio.models import *
+from user_portfolio.forms import *
+from django.contrib.auth.decorators import login_required
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+import base64
+import os
+import tempfile
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.contrib import messages
+from django.conf import settings
+from weasyprint import HTML
+
+from .models import DealLetterRecord  # Import
+
+
 @login_required
 def dashboardST(request):
     all_deals = DealLetterRecord.objects.all()
@@ -50,16 +99,6 @@ def dashboardST(request):
     })
 
 
-
-from django.core.paginator import Paginator
-from django.shortcuts import render
-from django.utils.dateparse import parse_date
-from django.contrib.auth.decorators import login_required
-from datetime import datetime
-from RM_User.models import BuyTransaction, SellTransaction
-from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 
 @login_required
 def ReportsST(request):
@@ -114,18 +153,6 @@ def buyorderST(request):
     
     return render(request, 'buyorderST.html', {'buy_orders': buy_orders})
 
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from django.db.models import Sum
-from django.shortcuts import render, get_object_or_404
-
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from django.db.models import Sum
-from django.shortcuts import render, get_object_or_404
-from user_portfolio.models import BuyTransaction
-from user_auth.models import UserProfile, CMRCopy, BankAccount
-
 
 @login_required
 def buyOrderSummaryST(request, order_id):
@@ -172,19 +199,6 @@ def buyOrderSummaryST(request, order_id):
 
     return render(request, 'buyOrderSummaryST.html', context)
 
-
-# @login_required
-# def edit_transaction_st_status(request, transaction_id):
-#     if request.method == 'POST':
-#         transaction = get_object_or_404(BuyTransaction, id=transaction_id)
-#         if request.user.user_type == 'ST':
-#             transaction.status = request.POST.get('status')
-#             transaction.save()
-#             messages.success(request, "Share Transfer Status updated successfully.")
-#         else:
-#             messages.error(request, "Unauthorized access.")
-#     return redirect(request.META.get('HTTP_REFERER', '/'))
-# ST buy
 @login_required
 def edit_transaction_st_status(request, transaction_id):
     if request.method == 'POST':
@@ -206,11 +220,6 @@ def edit_transaction_st_status(request, transaction_id):
 
 
 # ST sell
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-
 @csrf_exempt
 @login_required
 def edit_sell_transaction_st_status(request, transaction_id):
@@ -231,26 +240,6 @@ def edit_sell_transaction_st_status(request, transaction_id):
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
-
-from django.shortcuts import render, get_object_or_404, redirect
-from user_portfolio.models import *
-from user_portfolio.forms import *
-from django.contrib.auth.decorators import login_required
-
-# @login_required
-# def edit_buy_transaction(request, pk):
-#     transaction = get_object_or_404(BuyTransaction, pk=pk)
-#     order_id = transaction.order_id
-
-#     if request.method == 'POST':
-#         form = BuyTransactionEditForm(request.POST, instance=transaction, user=request.user)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('ST_User:buyOrderSummaryST', order_id=order_id)
-#     else:
-#         form = BuyTransactionEditForm(instance=transaction, user=request.user)
-
-#     return render(request, 'transaction/edit_transaction.html', {'form': form})
 
 
 @login_required
@@ -285,11 +274,6 @@ def edit_buy_transactionST(request, pk):
     return render(request, 'transactionST/edit_transactionST.html', {'form': form})
 
 
-
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 
 @login_required
 def sellorderST(request):
@@ -413,16 +397,6 @@ def buyDealLetterrST(request):
     return render(request, 'buyDealLetterrST.html')
 
 # views.py
-import base64
-import os
-import tempfile
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
-from django.contrib import messages
-from django.conf import settings
-from weasyprint import HTML
-
 def generate_invoice_no(prefix, order_id):
     return f"INV-{prefix}-{order_id[-6:]}"
 
@@ -458,82 +432,6 @@ def get_logo_base64():
             return base64.b64encode(image_file.read()).decode('utf-8')
     return ""
 
-
-# @login_required
-# def buyDealLetterrST(request):
-#     order_id = request.GET.get('order_id')
-#     if not order_id:
-#         messages.error(request, "Order ID is missing.")
-#         return redirect("ST_User:dashboard")
-
-#     transaction = get_object_or_404(BuyTransaction, order_id=order_id)
-#     invoice_no = generate_invoice_no("BUY", order_id)
-
-#     buyer = get_client_details(transaction.user)
-#     seller = {
-#         'full_name': 'AngelInvesting.com',
-#         'pan_number': 'NA',
-#         'email': 'support@angelinvesting.com',
-#         'phone': '+91-XXXXXXXXXX',
-#         'client_id': 'NA',
-#     }
-
-#     context = {
-#         'invoice_no': invoice_no,
-#         'transaction_date': transaction.timestamp,
-#         'to_user': transaction.user.get_full_name(),
-#         'transaction': transaction,
-#         'stock': transaction.stock,
-#         'buyer': buyer,
-#         'seller': seller,
-#         'mode_of_delivery': 'Demat',
-#         'logo_base64': get_logo_base64(),
-#     }
-
-#     if request.GET.get('download') == 'pdf':
-#         return render_to_pdf(request, 'buyDealLetterrST.html', context, f'{invoice_no}.pdf')
-
-#     return render(request, 'buyDealLetterrST.html', context)
-
-
-# @login_required
-# def sellDealLetterrST(request):
-#     order_id = request.GET.get("order_id")
-#     if not order_id:
-#         messages.error(request, "Order ID is missing.")
-#         return redirect("ST_User:dashboard")
-
-#     transaction = get_object_or_404(SellTransaction, order_id=order_id)
-#     stock = transaction.stock
-
-#     seller = get_client_details(transaction.user)
-
-#     # Simulate AngelInvesting.com as buyer
-#     buyer = {
-#         'full_name': 'AngelInvesting.com',
-#         'pan_number': 'NA',
-#         'email': 'support@angelinvesting.com',
-#         'phone': '+91-XXXXXXXXXX',
-#         'client_id': 'NA',
-#     }
-
-#     context = {
-#         'invoice_no': generate_invoice_no("SELL", order_id),
-#         'transaction_date': transaction.timestamp,
-#         'transaction': transaction,
-#         'stock': stock,
-#         'buyer': buyer,
-#         'seller': seller,
-#         'mode_of_delivery': "Demat",
-#         'logo_base64': get_logo_base64(),
-#     }
-
-#     if request.GET.get("download") == "pdf":
-#         return render_to_pdf(request, "sellDealLetterST.html", context, f"{context['invoice_no']}.pdf")
-
-#     return render(request, "sellDealLetterST.html", context)
-
-from .models import DealLetterRecord  # Import
 
 @login_required
 def buyDealLetterrST(request):

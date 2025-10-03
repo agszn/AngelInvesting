@@ -98,6 +98,7 @@ WSGI_APPLICATION = 'angel_investor.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# sqlite #
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -105,6 +106,26 @@ DATABASES = {
     }
 }
 
+# MySQL #
+# DATABASES = {
+#     "default": {  # MySQL (target)
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "angelinvesting",
+#         "USER": "ai_user",
+#         "PASSWORD": "#Angel@Investing123..",
+#         "HOST": "127.0.0.1",
+#         "PORT": "3306",
+#         "OPTIONS": {"init_command": "SET sql_mode='STRICT_ALL_TABLES'"},
+#     },
+#     "sqlite_old": {  # SQLite (source)
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     },
+# }
+# CONN_MAX_AGE = 300
+
+
+# Postgres #
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',

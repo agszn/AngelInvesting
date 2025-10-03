@@ -2,13 +2,31 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db import models
 
-from user_auth.models import *
-from user_portfolio.models import *
-from unlisted_stock_marketplace.models import *
-from site_Manager.models import *
-
 import csv
-from django.http import HttpResponse
+from decimal import Decimal
+from django.db.models import Sum
+
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.core.paginator import Paginator
+from django.contrib.auth import get_user_model
+
+from django.views.decorators.csrf import csrf_exempt
+
+from datetime import timedelta
+from django.utils import timezone
+from datetime import datetime
+
+from .models import *
+from user_portfolio.models import *
+from user_auth.models import *
+from site_Manager.models import *
+from unlisted_stock_marketplace.models import *
+
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
+
+CustomUser = get_user_model()
 
 def baseStructure(request):
     return render(request, 'baseStructureRM.html')
@@ -45,19 +63,7 @@ def unlistedSharesRM(request):
         return response
 
     return render(request, 'unlistedSharesRM.html', {'stocks': stocks, 'query': query})
-from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import BuyTransaction, SellTransaction
 
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.shortcuts import render
-from django.utils import timezone
-from django.contrib.auth import get_user_model
-
-
-CustomUser = get_user_model()
 
 
 def _attach_activity_and_payments(orders_qs):
@@ -205,32 +211,13 @@ def ReportRM(request):
     })
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.db.models import Sum, Max
-from user_auth.models import CustomUser
-from user_portfolio.models import BuyTransaction
-from .models import RMPaymentRecord  # adjust import path to where RMPaymentRecord lives
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.utils import timezone
-from datetime import datetime
-from user_auth.models import CustomUser
-from user_portfolio.models import BuyTransaction
-from .models import RMPaymentRecord  # adjust import
-
 def _combine_aware(d, t):
     """Combine date + time and make timezone-aware if needed."""
     dt = datetime.combine(d, t)
     if timezone.is_naive(dt):
         dt = timezone.make_aware(dt, timezone.get_current_timezone())
     return dt
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.utils import timezone
-from user_auth.models import CustomUser
-from user_portfolio.models import BuyTransaction
-from .models import RMPaymentRecord  # adjust import
+
 
 @login_required
 def buyorderRM(request):
@@ -303,39 +290,6 @@ def buyorderRM(request):
     }
     return render(request, 'buyorderRM.html', context)
 
-from .models import *
-
-from .models import RMUserView, RMPaymentRecord
-
-# app: RM_User
-# models.py
-from django.db.models import Sum
-
-# @login_required
-# def buyordersummeryRM(request, order_id):
-#     order = BuyTransaction.objects.filter(order_id=order_id).first()
-#     user_profile = order.user.profile
-#     cmr = CMRCopy.objects.filter(user_profile=user_profile).first()
-#     bank_accounts = BankAccount.objects.filter(user_profile=user_profile)
-
-#     rm_view = RMUserView.objects.filter(order_id=order_id).first()
-#     TransactionDetails = BuyTransaction.objects.all()
-
-#     # ✅ Calculate total paid
-#     total_paid = rm_view.payment_records.aggregate(Sum('amount'))['amount__sum'] or 0
-#     remaining_amount = order.total_amount - total_paid
-
-#     context = {
-#         'order': order,
-#         'cmr': cmr,
-#         'bank_accounts': bank_accounts,
-#         'rm_view': rm_view,
-#         'TransactionDetails': TransactionDetails,
-#         'remaining_amount': remaining_amount,
-#     }
-#     return render(request, 'buyordersummeryRM.html', context)
-
-
 @login_required
 def buyordersummeryRM(request, order_id):
     # Get the BuyTransaction
@@ -362,68 +316,6 @@ def buyordersummeryRM(request, order_id):
         'remaining_amount': remaining_amount,
     }
     return render(request, 'buyordersummeryRM.html', context)
-
-# displays of all users
-# def AllbuyTransactionSummary(request):
-#     transactions = BuyTransaction.objects.all()
-
-#     # Filter: Only show users assigned to this RM
-#     if request.user.user_type == 'RM':
-#         users = User.objects.filter(assigned_rm=request.user)
-#     else:
-#         users = User.objects.all()
-
-#     # Filters from request
-#     user_id = request.GET.get('user')
-#     company_name = request.GET.get('company_name')
-#     advisor_id = request.GET.get('advisor')
-#     broker_id = request.GET.get('broker')
-#     order_type = request.GET.get('order_type')
-#     status = request.GET.get('status')
-#     order_id = request.GET.get('order_id')
-#     timestamp = request.GET.get('timestamp')
-
-#     # Apply filters
-#     if user_id:
-#         transactions = transactions.filter(user__id=user_id)
-#     if company_name:
-#         transactions = transactions.filter(stock__company_name__icontains=company_name)
-#     if advisor_id:
-#         transactions = transactions.filter(advisor__id=advisor_id)
-#     if broker_id:
-#         transactions = transactions.filter(broker__id=broker_id)
-#     if order_type:
-#         transactions = transactions.filter(order_type=order_type)
-#     if status:
-#         transactions = transactions.filter(status=status)
-#     if order_id:
-#         transactions = transactions.filter(order_id__icontains=order_id)
-#     if timestamp:
-#         transactions = transactions.filter(timestamp__date=timestamp)
-
-#     # Distinct dropdown lists
-#     company_names = BuyTransaction.objects.values_list('stock__company_name', flat=True).distinct()
-#     order_ids = BuyTransaction.objects.values_list('order_id', flat=True).distinct()
-
-#     context = {
-#         'TransactionDetails': transactions,
-#         'users': users,
-#         'advisors': Advisor.objects.all(),
-#         'brokers': Broker.objects.all(),
-#         'company_names': company_names,
-#         'order_ids': order_ids,
-#     }
-#     return render(request, 'AllbuyTransactionSummary.html', context)
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.db.models import Prefetch
-from user_portfolio.models import BuyTransaction
-from user_auth.models import CustomUser
-from site_Manager.models import Advisor, Broker
-from .models import RMPaymentRecord  # Import your payment model
-
 
 @login_required
 def AllbuyTransactionSummary(request):
@@ -498,14 +390,6 @@ def AllbuyTransactionSummary(request):
 
     return render(request, template, context)
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.utils import timezone
-from django.db.models import Prefetch
-from user_auth.models import CustomUser
-from user_portfolio.models import SellTransaction
-from site_Manager.models import Advisor, Broker
-from .models import RMPaymentRecord  # <-- import payment model
 
 
 @login_required
@@ -587,91 +471,6 @@ def AllsellTransactionSummary(request):
 
     return render(request, template, context)
 
-from django.views.decorators.csrf import csrf_exempt
-from .models import RMPaymentRecord
-
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from django.shortcuts import redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import RMUserView, RMPaymentRecord
-from user_portfolio.models import BuyTransaction  # adjust if import differs
-
-from django.utils import timezone
-from django.http import HttpResponseBadRequest
-
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from django.shortcuts import redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest
-from user_portfolio.models import BuyTransaction  # Adjust import if needed
-from decimal import Decimal
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseBadRequest
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from .models import RMPaymentRecord, BuyTransaction, RMUserView
-
-# @csrf_exempt
-# @login_required
-# def add_or_edit_payment(request, order_id=None, payment_id=None):
-#     if request.method == 'POST':
-#         if payment_id:  # Edit flow
-#             payment = get_object_or_404(RMPaymentRecord, id=payment_id)
-#         else:  # Add flow
-#             order = get_object_or_404(BuyTransaction, order_id=order_id)
-#             rm_view = get_object_or_404(RMUserView, order_id=order_id)
-#             payment = RMPaymentRecord(
-#                 rm_user_view=rm_view,
-#                 date=timezone.now().date(),
-#                 time=timezone.now().time()
-#             )
-
-#         # Process form fields safely
-#         payment.bank_name = request.POST.get('bank_name')
-#         payment.amount = Decimal(request.POST.get('amount') or '0')
-#         payment.remaining_amount = Decimal(request.POST.get('remaining_amount') or '0')
-#         payment.remark = request.POST.get('remark')
-#         payment.payment_status = request.POST.get('payment_status', 'pending')
-
-#         if request.FILES.get('screenshot'):
-#             payment.screenshot = request.FILES['screenshot']
-
-#         payment.save()
-#         return redirect('RM_User:buyordersummery', order_id=payment.rm_user_view.order_id)
-
-#     return HttpResponseBadRequest("Invalid request method")
-
-
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseBadRequest
-from decimal import Decimal
-
-from .models import RMPaymentRecord, RMUserView, BuyTransaction
-from decimal import Decimal
-from django.db.models import Sum
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseBadRequest
-from RM_User.models import RMPaymentRecord, RMUserView, BuyTransaction
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest
-from django.db.models import Sum
-from decimal import Decimal
-from django.utils import timezone
-
-from .models import RMPaymentRecord, BuyTransaction, RMUserView
 
 @csrf_exempt
 @login_required
@@ -803,78 +602,6 @@ def clientRM(request):
     return render(request, 'clientRM.html', context)
 
 
-
-
-# 
-# 
-# ---------------------------------------------------------------------
-# ------------------ Dashboard -------------
-# ------------------------------------------------------------------
-# 
-# 
-# views.py
-
-from django.utils import timezone
-from django.db.models import Sum, Count
-from django.shortcuts import render
-from datetime import timedelta
-from .models import RMUserView, RMPaymentRecord
-
-# @login_required
-# def dashboardRM(request):
-#     today = timezone.now().date()
-#     ten_days_ago = today - timedelta(days=10)
-#     start_of_month = today.replace(day=1)
-
-#     # Transaction Metrics
-#     total_transactions = RMUserView.objects.count()
-#     total_buys = RMUserView.objects.filter(transaction_type='buy').count()
-#     total_sells = RMUserView.objects.filter(transaction_type='sell').count()
-
-#     # Total invested amount (sum of all buy total_amounts)
-#     total_invested = RMUserView.objects.filter(transaction_type='buy').aggregate(
-#         total=Sum('total_amount'))['total'] or 0
-
-#     # Payment Aggregates
-#     total_collected_today = RMPaymentRecord.objects.filter(date=today).aggregate(
-#         total=Sum('amount'))['total'] or 0
-#     total_collected_10_days = RMPaymentRecord.objects.filter(date__gte=ten_days_ago).aggregate(
-#         total=Sum('amount'))['total'] or 0
-#     total_collected_month = RMPaymentRecord.objects.filter(date__gte=start_of_month).aggregate(
-#         total=Sum('amount'))['total'] or 0
-
-#     # Graph Data (date vs amount)
-#     payments_by_day = RMPaymentRecord.objects.filter(
-#         date__gte=ten_days_ago
-#     ).values('date').annotate(
-#         total_amount=Sum('amount')
-#     ).order_by('date')
-
-#     chart_labels = [entry['date'].strftime('%d-%b') for entry in payments_by_day]
-#     chart_data = [float(entry['total_amount']) for entry in payments_by_day]
-
-#     context = {
-#         'total_transactions': total_transactions,
-#         'total_buys': total_buys,
-#         'total_sells': total_sells,
-#         'total_invested': total_invested,
-#         'total_collected_today': total_collected_today,
-#         'total_collected_10_days': total_collected_10_days,
-#         'total_collected_month': total_collected_month,
-#         'chart_labels': chart_labels,
-#         'chart_data': chart_data,
-#     }
-
-#     return render(request, 'dashboardRM.html', context)
-
-
-from django.db.models import Sum
-from django.utils import timezone
-from datetime import timedelta
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from RM_User.models import RMUserView, RMPaymentRecord
-
 @login_required
 def dashboardRM(request):
     user = request.user
@@ -932,29 +659,6 @@ def dashboardRM(request):
 def ordersRM(request):
     return render(request, 'ordersRM.html')
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from itertools import chain
-from operator import attrgetter
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.utils import timezone
-from user_auth.models import CustomUser
-from user_portfolio.models import SellTransaction
-from .models import RMPaymentRecord  # adjust import if needed
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.utils import timezone
-from itertools import chain
-from decimal import Decimal
-
-from user_auth.models import CustomUser
-from user_portfolio.models import SellTransaction
-# from user_portfolio.models import SellTransactionOtherAdvisor  # uncomment if you want to include it
-from .models import RMPaymentRecord  # adjust import if needed
-
 
 @login_required
 def sellorderRM(request):
@@ -969,14 +673,6 @@ def sellorderRM(request):
         .select_related('user', 'stock', 'advisor', 'broker')
     )
 
-    # If you also want other-advisor sells, uncomment:
-    # sell_other_qs = (
-    #     SellTransactionOtherAdvisor.objects
-    #     .filter(user__in=assigned_users)
-    #     .exclude(RM_status__in=['completed', 'cancelled'])
-    #     .select_related('user', 'stock', 'advisor', 'broker')
-    # )
-
     # Build list we’ll sort
     sell_qs = list(sell_main_qs)
     # sell_qs = list(chain(sell_main_qs, sell_other_qs))
@@ -989,10 +685,9 @@ def sellorderRM(request):
         RMPaymentRecord.objects
         .filter(rm_user_view__order_id__in=order_ids)
         .select_related('rm_user_view')
-        .order_by('-modified_at')   # 👈 key: edits push the order up
+        .order_by('-modified_at')   
     )
 
-    # Group payments + compute latest per order (by modified_at)
     payments_by_order = {}
     payment_stats_by_order = {}
     latest_payment_at_by_order = {}
@@ -1001,9 +696,8 @@ def sellorderRM(request):
         oid = p.rm_user_view.order_id
         payments_by_order.setdefault(oid, []).append(p)
         if oid not in latest_payment_at_by_order:
-            latest_payment_at_by_order[oid] = p.modified_at  # 👈 use modified_at (edit/add)
-
-    # Stats for display (date/time kept for readability)
+            latest_payment_at_by_order[oid] = p.modified_at  
+            
     for oid, plist in payments_by_order.items():
         latest = plist[0] if plist else None
         payment_stats_by_order[oid] = {
@@ -1014,11 +708,10 @@ def sellorderRM(request):
             'count': len(plist),
         }
 
-    # Attach latest_payment_at + compute last_activity for sorting
     sell_orders = []
     for s in sell_qs:
         latest_payment_at = latest_payment_at_by_order.get(s.order_id)
-        s.latest_payment_at = latest_payment_at  # for template (optional column)
+        s.latest_payment_at = latest_payment_at  
 
         updated_at = s.updated_at
         if timezone.is_naive(updated_at):
@@ -1028,7 +721,6 @@ def sellorderRM(request):
         s._last_activity = last_activity
         sell_orders.append(s)
 
-    # Sort: most recently active first
     sell_orders.sort(key=lambda o: (o._last_activity, o.updated_at, o.timestamp), reverse=True)
 
     return render(request, 'sellorderRM.html', {
@@ -1040,118 +732,6 @@ def sellorderRM(request):
 @login_required
 def ShareListRM(request):
     return render(request, 'ShareListRM.html')
-
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from user_portfolio.models import SellTransaction
-from user_auth.models import UserProfile, CMRCopy, BankAccount
-
-# @login_required
-# def selldersummeryRM(request):
-#     order_id = request.GET.get('order_id')
-
-#     if not order_id:
-#         return render(request, 'selldersummeryRM.html', {'order': None})
-
-#     # Get the sell transaction
-#     order = get_object_or_404(SellTransaction, order_id=order_id)
-
-#     # Get the user's profile
-#     try:
-#         profile = order.user.profile
-#     except UserProfile.DoesNotExist:
-#         profile = None
-
-#     # Get the CMR copy for this user (assuming latest or first)
-#     cmr = CMRCopy.objects.filter(user_profile=profile).first() if profile else None
-
-#     # Get all bank accounts for this user
-#     bank_accounts = BankAccount.objects.filter(user_profile=profile) if profile else None
-
-#     context = {
-#         'order': order,
-#         'cmr': cmr,
-#         'bank_accounts': bank_accounts,
-#     }
-
-#     return render(request, 'selldersummeryRM.html', context)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @login_required
-# def selldersummeryRM(request, order_id):
-#     # Get the base transaction from either model
-#     base_transaction = (
-#         SellTransaction.objects.filter(order_id=order_id).first() or
-#         SellTransactionOtherAdvisor.objects.filter(order_id=order_id).first()
-#     )
-#     if not base_transaction:
-#         return render(request, "not_found.html", {"message": "Sell order not found."})
-
-#     user_profile = base_transaction.user.profile
-
-#     cmr = CMRCopy.objects.filter(user_profile=user_profile).first()
-#     bank_accounts = BankAccount.objects.filter(user_profile=user_profile)
-#     rm_view = RMUserView.objects.filter(order_id=order_id).first()
-
-#     # Get matching transactions from both models
-#     sell_txns_main = SellTransaction.objects.filter(order_id=order_id)
-#     sell_txns_other = SellTransactionOtherAdvisor.objects.filter(order_id=order_id)
-
-#     # Merge and annotate with model_name for template logic
-#     all_transactions = []
-#     for txn in chain(sell_txns_main, sell_txns_other):
-#         txn.model_name = txn.__class__.__name__
-#         all_transactions.append(txn)
-
-#     # Payment calculation
-#     total_paid = rm_view.payment_records.aggregate(Sum('amount'))['amount__sum'] if rm_view and rm_view.payment_records.exists() else 0
-#     total_order_value = sum([txn.total_value or 0 for txn in all_transactions])
-#     remaining_amount = total_order_value - total_paid
-
-#     context = {
-#         'order': base_transaction,
-#         'cmr': cmr,
-#         'bank_accounts': bank_accounts,
-#         'rm_view': rm_view,
-#         'TransactionDetails': all_transactions,
-#         'remaining_amount': remaining_amount,
-#     }
-
-#     return render(request, 'selldersummeryRM.html', context)
-
-
-
-
-
-
-
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
-from django.db.models import Sum
-from itertools import chain  # Optional now, but can be removed
-from .models import SellTransaction, CMRCopy, BankAccount, RMUserView
 
 @login_required
 def selldersummeryRM(request, order_id):
@@ -1165,10 +745,8 @@ def selldersummeryRM(request, order_id):
     bank_accounts = BankAccount.objects.filter(user_profile=user_profile)
     rm_view = RMUserView.objects.filter(order_id=order_id).first()
 
-    # Get all transactions with this order_id (if multiples exist)
     sell_txns = SellTransaction.objects.filter(order_id=order_id)
 
-    # Annotate each with model name (optional, if used in template logic)
     for txn in sell_txns:
         txn.model_name = "SellTransaction"
 
@@ -1189,18 +767,6 @@ def selldersummeryRM(request, order_id):
     return render(request, 'selldersummeryRM.html', context)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 @login_required
 def angelInvestRM(request):
     return render(request, 'angelInvestRM.html')
@@ -1214,27 +780,7 @@ def angelInvestRM(request):
 # ------------------------------------------------------------------
 # 
 # 
-# views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from user_portfolio.models import *
-from user_portfolio.forms import *
-from django.contrib.auth.decorators import login_required
 
-# @login_required
-# def edit_buy_transaction(request, pk):
-#     transaction = get_object_or_404(BuyTransaction, pk=pk)
-#     order_id = transaction.order_id
-
-#     if request.method == 'POST':
-#         form = BuyTransactionEditForm(request.POST, instance=transaction, user=request.user)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('RM_User:buyordersummery', order_id=order_id)
-#     else:
-#         form = BuyTransactionEditForm(instance=transaction, user=request.user)
-
-#     return render(request, 'transaction/edit_transaction.html', {'form': form})
-# RM_User/views.py
 @login_required
 def edit_buy_transaction(request, pk):
     transaction = get_object_or_404(BuyTransaction, pk=pk)
@@ -1267,9 +813,6 @@ def edit_buy_transaction(request, pk):
     return render(request, 'transaction/edit_transaction.html', {'form': form})
 
 
-
-from django.http import JsonResponse
-from django.template.loader import render_to_string
 @login_required
 @csrf_exempt
 def ajax_transaction_handler(request, pk):
@@ -1363,9 +906,6 @@ def ajax_sell_transaction_handler(request, pk):
             return JsonResponse({'success': False, 'html': html})
 
 
-# views.py
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
 
 @login_required
 def delete_buy_transaction(request, pk):

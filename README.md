@@ -114,8 +114,19 @@ sudo chown -R www-data:www-data /var/www/AngelInvesting/media
 
 
 
+sudo apt update
+sudo apt install mysql-server mysql-client -y
+sudo mysql_secure_installation : #Angel@Investing123..
+sudo mysql -u root -p
 
+-- inside MySQL:
+CREATE DATABASE angelinvesting CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'ai_user'@'localhost' IDENTIFIED BY 'STRONG_PASSWORD';
+GRANT ALL PRIVILEGES ON angelinvesting.* TO 'ai_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
 
+sudo systemctl restart mysql
 
 
 
